@@ -1,0 +1,211 @@
+<template>
+<div class="pagebox"
+    :class="{dragging: isDragging, open: isOpen, closed: !isOpen, floating: floating}"
+    :style="{top: y + ddData.dy + 'px', left: x + ddData.dx + 'px'}"
+    >
+  <div name="buttonBox" class="flexrow">
+    <m-button
+      name="info"
+      :title="helpText"
+      :style="{ display: helpText ? 'default' : 'none' }"
+      icon="help_outline"
+      />
+    <m-button
+      name="close"
+      :title="openHelpText"
+      @click.native="toggleOpen"
+      :icon="closeBtnIcon"
+      />
+    <m-button
+      name="dragHandle"
+      title="Drag up/down to reposition."
+      icon="drag_indicator"
+      draggable="true"
+      @dragstart="dragStart($event)"
+      @drag="drag"
+      @dragend="dragEnd($event)"
+      />
+  </div>
+  <div name="label">
+    {{label}}
+    <i
+      v-if="message"
+      class="material-icons message"
+      :title="message"
+      >warning</i>
+  </div>
+  <div name="content" v-show="isOpen || childHandlesOpenClose">
+    <slot></slot>
+  </div>
+  <canvas ref="canvas" width=1 height=1 style="opacity: 0;" />
+  <busy-indicator v-if="busyCount > 0" />
+</div>
+</template>
+
+<script>
+import MComponent from '@/components/MComponent'
+import MButton from '@/components/MButton'
+import Vue from 'vue'
+import BusyIndicator from '@/components/BusyIndicator'
+export default MComponent({
+  name: 'PageBox',
+  components: { MButton, BusyIndicator },
+  props: {
+    label: String,
+    message: String,
+    floating: Boolean,
+    initialX: {
+      type: Number,
+      default: 0
+    },
+    initialY: {
+      type: Number,
+      default: 0
+    },
+    initiallyOpen: {
+      type: Boolean,
+      default: true
+    }
+  },
+  data () {
+    return {
+      isOpen: this.initiallyOpen,
+      isDragging: false,
+      x: this.initialX,
+      y: this.initialY,
+      ddData: {
+        xStart: 0, // clientX of drag start
+        yStart: 0, // clientY of drag end
+        dx: 0, // current drag translation X amount
+        dy: 0 // current drag translation Y amount
+      },
+      childHandlesOpenClose: false,
+      helpText: 'Heeeeelp!!',
+      busyCount: 0
+    }
+  },
+  methods: {
+    toggleOpen: function () {
+      this.isOpen = !this.isOpen
+      this.$root.$emit('pagebox-' + (this.isOpen ? 'open' : 'close'), this)
+      if (this.childHandlesOpenClose) {
+        this.$refs.content.setDisplay(this.isOpen)
+      }
+    },
+    open: function () {
+      if (!this.isOpen) this.toggleOpen()
+      this.x = Math.max(this.x, 0)
+      this.y = Math.max(this.y, 0)
+    },
+    close: function () {
+      if (this.isOpen) this.toggleOpen()
+    },
+    dragStart: function (ev) {
+      let dt = ev.dataTransfer
+      dt.setData('text', this.label)
+      dt.effectAllowed = 'move'
+      dt.dropEffect = 'move'
+      //
+      this.isDragging = true
+      let d = this.ddData
+      d.xStart = ev.clientX
+      d.yStart = ev.clientY
+      d.dx = 0
+      d.dy = 0
+      dt.setDragImage(this.$refs.canvas, 0, 0)
+      //
+    },
+    drag: function (ev) {
+      let d = this.ddData
+      if (this.floating) d.dx = ev.clientX - d.xStart
+      d.dy = ev.clientY - d.yStart
+    },
+    dragEnd: function () {
+      this.isDragging = false
+      let d = this.ddData
+      if (this.floating) {
+        this.x = Math.max(0, this.x + d.dx)
+        this.y = Math.max(0, this.y + d.dy)
+      }
+      d.dx = d.dy = 0
+    }
+  },
+  computed: {
+    closeBtnIcon: function () {
+      return this.isOpen ? this.cfg.iconClose : this.cfg.iconOpen
+    },
+    openHelpText: function () {
+      return `Click to ${this.isOpen ? 'close' : 'open'}.`
+    }
+  },
+  mounted: function () {
+    Vue.nextTick(() => {
+      // At mount time, contained components have already been rendered.
+      // Find the content component, which is the last.
+      let lc = this.$refs.content = this.$children[3]
+      let htext = lc ? lc.$el.title : ''
+      // move help text from component to this box's info button
+      this.helpText = htext
+      lc.$el.title = ''
+      // if the child has a setDisplay
+      this.childHandlesOpenClose = typeof lc.setDisplay === 'function'
+      //
+      this.$parent.$refs[this.label] = this
+    })
+  }
+})
+</script>
+
+<style scoped>
+.pagebox {
+  position: relative;
+  padding: 6px;
+  margin: 3px;
+  background-color: #e1e1e1;
+  border-radius: 2px;
+}
+.pagebox.floating {
+  position: absolute;
+  outline: thin solid black;
+  z-index: 100;
+  min-width: 250px;
+}
+.pagebox.floating.closed {
+  display: none;
+}
+.pagebox > [name="label"] {
+  font-weight: bold;
+  text-align: start;
+}
+.pagebox:hover {
+  outline: thin solid black;
+}
+.pagebox [name="buttonBox"] {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+}
+.pagebox canvas {
+  position: absolute;
+}
+.pagebox .button[name="dragHandle"] {
+  cursor: grab !important;
+  cursor: -webkit-grab !important;
+}
+.pagebox.dragging {
+    z-index: 100;
+}
+.pagebox.dragging .button[name="dragHandle"] {
+  cursor: grabbing !important;
+  cursor: -webkit-grabbing !important;
+}
+.pagebox.closed > [name="content"] {
+}
+.pagebox i.message {
+  font-size: 16px;
+  color: #ff9800;
+  cursor: pointer;
+  position: relative;
+  top: 2px;
+}
+</style>

@@ -1,0 +1,156 @@
+/*
+ * GenomeView.vue
+ */
+<template>
+  <div>
+  <svg class="genome-view" :height="isOpen ? height : closedHeight">
+  <text x=12 y=20 fill="black" stroke="none">{{genomeName}} {{currChr.name}}:{{this.context.coords.start}}..{{this.context.coords.end}} {{context.currentList ? context.currentList.name : ''}} </text>
+  <g :transform="`translate(0,${titleHeight})`">
+      <genome-view-chromosome
+         v-for="(c,i) in context.rGenome.chromosomes"
+        :transform="transformChr(c,i)"
+        :key="c.name"
+        :genome="context.rGenome"
+        :chromosome="c"
+        :orientation="orientation"
+        :ppb="ppb"
+        :coords="context.coords"
+        :width="chrWidth"
+        :currentList="currentListGenologs"
+        :currentListColor="context.currentList ? context.currentList.color : 'gray'"
+        />
+    </g>
+  </svg>
+  <div
+    class="flexrow"
+    style="justify-content: flex-start; "
+    v-show="!isOpen"
+    >
+    <m-button
+      title="Scroll chromosomes down."
+      icon="keyboard_arrow_down"
+      @click="scrollChromosomes(-1)"
+      />
+    <m-button
+      title="Scroll chromosomes up."
+      icon="keyboard_arrow_up"
+      @click="scrollChromosomes(+1)"
+      />
+  </div>
+  </div>
+</template>
+
+<script>
+import Vue from 'vue'
+import MComponent from '@/components/MComponent'
+import GenomeViewChromosome from '@/components/GenomeViewChromosome'
+import MButton from '@/components/MButton'
+export default MComponent({
+  name: 'GenomeView',
+  components: { GenomeViewChromosome, MButton },
+  props: ['context'],
+  data: function () {
+    return {
+      isOpen: true,
+      width: 600,
+      titleHeight: 50,
+      chrWidth: 20,
+      padding: 10,
+      openHeight: 250,
+      closedHeight: 100,
+      scrollDelta: 0
+    }
+  },
+  computed: {
+    cString: function () {
+      return `${this.genomeName}:${this.currChr.name}:${this.currStart}:${this.currEnd}`
+    },
+    genomeName: function () {
+      return this.context.rGenome.name
+    },
+    currChr: function () {
+      return this.context.coords.chr
+    },
+    currStart: function () {
+      return this.context.coords.start
+    },
+    currEnd: function () {
+      return this.context.coords.end
+    },
+    height: function () {
+      return this.isOpen ? this.openHeight : this.closedHeight
+    },
+    orientation: function () {
+      return this.isOpen ? 'v' : 'h'
+    },
+    maxChrLen: function () {
+      return Math.max.apply(null, this.context.rGenome.chromosomes.map(c => c.length))
+    },
+    innerHeight: function () {
+      return this.height - this.titleHeight - this.padding
+    },
+    innerWidth: function () {
+      return this.width - 5 * this.padding
+    },
+    ppb: function () {
+      return (this.isOpen ? this.innerHeight : this.innerWidth) / this.maxChrLen
+    },
+    currentListGenologs: function () {
+      if (!this.context.currentList) return []
+      return this.context.currentList.items.map(id => {
+        return this.dataManager.getGenolog(id, this.context.rGenome)
+      }).filter(x => x)
+    }
+  },
+  methods: {
+    resize: function () {
+      this.width = this.$el.getBoundingClientRect().width
+      this.openHeight = this.cfg.openHeight
+    },
+    setDisplay: function (v) {
+      this.isOpen = v
+    },
+    scrollChromosomes (inc) {
+      let v = this.scrollDelta + inc
+      let currI = this.context.rGenome.chromosomes.indexOf(this.currChr)
+      this.scrollDelta = Math.max(-currI, Math.min(v, this.context.rGenome.chromosomes.length - currI - 1))
+    },
+    transformChr: function (c, i) {
+      if (this.orientation === 'v') {
+        let dx = (this.width - 2 * this.padding) / this.context.rGenome.chromosomes.length
+        return `translate(${this.padding + (i + 0.5) * dx},0)`
+      } else {
+        let currI = this.context.rGenome.chromosomes.indexOf(this.currChr)
+        let dy = (currI - i + this.scrollDelta) * this.chrWidth * 4
+        return `translate(${this.padding},${dy})`
+      }
+    }
+  },
+  watch: {
+    genomeName: function (oldc, newc) {
+      this.resize()
+    },
+    isOpen: function (v0, v1) {
+      this.scrollDelta = 0
+    },
+    cString: function (v0, v1) {
+      this.scrollDelta = 0
+    }
+  },
+  mounted: function () {
+    this.$root.$on('resize', () => this.resize())
+    Vue.nextTick(() => {
+      this.resize()
+    })
+  }
+})
+</script>
+
+<style scoped>
+.genome-view-chromosome {
+    -webkit-transition: transform 0.5s;
+    -moz-transition: transform 0.5s;
+    -o-transition: transform 0.5s;
+    transition: transform 0.5s;
+}
+</style>
