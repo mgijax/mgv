@@ -5,6 +5,8 @@
  * Uses the 'name' attribute in the passed config to identify the class. If no name is present,
  * only the global settings are applied.
  */
+const DATACACHE_PREFIX = 'mgv2-datacache-'
+//
 export default {
   //
   // global config settings, applied to every class
@@ -107,13 +109,13 @@ export default {
   GenomeSelector: {
   },
   CachedDataSource: {
-    dbName: 'mgv-datacache-features'
+    dbName: DATACACHE_PREFIX + 'features'
   },
   ListManager: {
-    dbName: 'mgv-datacache-user-lists'
+    dbName: DATACACHE_PREFIX + 'user-lists'
   },
   SyntenyBlockManager: {
-    dbName: 'mgv-datacache-blocks'
+    dbName: DATACACHE_PREFIX + 'blocks'
   },
   DataManager: {
     // when loading transcripts+exons from DataSource, the size block to chop the chromosome into
@@ -122,6 +124,6 @@ export default {
     featureSizeLimit: 10000000
   },
   PreferencesManager: {
-    dbName: 'mgv-datacache-user-prefs'
+    dbName: DATACACHE_PREFIX + 'user-prefs'
   }
 }
