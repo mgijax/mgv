@@ -10,7 +10,6 @@
           name="leftColumn"
           class="flexcolumn"
           :class="{ open: drawerOpen, closed: !drawerOpen}"
-          fixed="true"
           >
           <!--
           ============ Genomes ==============
@@ -94,6 +93,17 @@
               />
           </page-box>
           <!--
+          ============ Feature Details ==========
+          -->
+          <page-box label="FeatureDetails">
+            <feature-details
+              ref="featureDetails"
+              title="Shows details of a feature you click on. When open, shows details for genologs in all currently displayed genomes. When closed, shows only the feature in the genome that was clicked."
+              :features="detailFeatures"
+              :currentMouseover="currentMouseover"
+              />
+          </page-box>
+          <!--
           ============== Zoom View ==============
           -->
           <page-box
@@ -103,17 +113,6 @@
               :context="$data"
               ref="zoomView"
               title="The main view. Shows features in the current region of the reference genome and all selected comparison genomes. Highlights features in the view that are currently selected. Many controls for panning, zooming, selecting, etc. Most anything can be undone by hitting the browser's Back button."
-              />
-          </page-box>
-          <!--
-          ============ Feature Details ==========
-          -->
-          <page-box label="FeatureDetails">
-            <feature-details
-              ref="featureDetails"
-              title="Shows details of a feature you click on. When open, shows details for genologs in all currently displayed genomes. When closed, shows only the feature in the genome that was clicked."
-              :features="detailFeatures"
-              :currentMouseover="currentMouseover"
               />
           </page-box>
         </page-box-container>
