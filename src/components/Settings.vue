@@ -11,12 +11,10 @@
         />
   </div>
   <div class="flexrow">
-    <label>Lane gap</label>
+    <label>Feature labels</label>
     <input
-        type="range"
-        v-model="ZoomRegion.laneGap"
-        min="1"
-        max="24"
+        type="checkbox"
+        v-model="ZoomRegion.showFeatureLabels"
         />
   </div>
   <div class="flexrow">
@@ -26,6 +24,22 @@
         v-model="ZoomRegion.featureFontSize"
         min="1"
         max="24"
+        />
+  </div>
+  <div class="flexrow">
+    <label>Lane gap</label>
+    <input
+        type="range"
+        v-model="ZoomRegion.laneGap"
+        min="1"
+        max="24"
+        />
+  </div>
+  <div class="flexrow">
+    <label>Transcript labels</label>
+    <input
+        type="checkbox"
+        v-model="ZoomRegion.showTranscriptLabels"
         />
   </div>
   <div class="flexrow">
@@ -61,20 +75,6 @@
     <input
         type="checkbox"
         v-model="ZoomRegion.spreadTranscripts"
-        />
-  </div>
-  <div class="flexrow">
-    <label>Show feature labels</label>
-    <input
-        type="checkbox"
-        v-model="ZoomRegion.showFeatureLabels"
-        />
-  </div>
-  <div class="flexrow">
-    <label>Show transcript labels</label>
-    <input
-        type="checkbox"
-        v-model="ZoomRegion.showTranscriptLabels"
         />
   </div>
   <div class="flexrow">
