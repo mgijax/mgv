@@ -3,28 +3,34 @@
      class="facets"
      :class="{ someoneActive: someoneActive }"
      >
-     <facet
+     <page-box
        v-for="fd in facetData"
        :key="fd.name"
-       :name="fd.name"
-       :values="fd.values"
-       :initialSelection="fd.initialSelection"
-       :colors="fd.colors"
-       :multi="fd.multi"
-       :disabled="fd.disabled"
-       :mapper="fd.mapper"
-       ref="facets"
-       @facet-change="facetStateChanged"
-       />
+       :initiallyOpen="fd.initiallyOpen"
+       :label="fd.name"
+       :draggable="false"
+       >
+       <facet
+         :name="fd.name"
+         :values="fd.values"
+         :initialSelection="fd.initialSelection"
+         :colors="fd.colors"
+         :multi="fd.multi"
+         :mapper="fd.mapper"
+         ref="facets"
+         @facet-change="facetStateChanged"
+         />
+     </page-box>
   </div>
 </template>
 
 <script>
 import MComponent from '@/components/MComponent'
 import Facet from '@/components/Facet'
+import PageBox from '@/components/PageBox'
 export default MComponent({
   name: 'Facets',
-  components: { Facet },
+  components: { Facet, PageBox },
   inject: ['featureColorMap'],
   data: function () {
     return {
@@ -35,7 +41,7 @@ export default MComponent({
         initialSelection: this.featureColorMap.getTypes(),
         colors: this.featureColorMap.getColors(),
         multi: true,
-        disabled: true,
+        initiallyOpen: true,
         mapper: function (f) {
           return this.featureColorMap.getMungedType(f.sotype)
         }.bind(this)
@@ -44,18 +50,19 @@ export default MComponent({
         values: ['< 1kb', '1-10kb', '10-100kb', '100kb - 1Mb', '> 1Mb'],
         initialSelection: ['< 1kb', '1-10kb', '10-100kb', '100kb - 1Mb', '> 1Mb'],
         multi: true,
-        disabled: true,
+        initiallyOpen: false,
         mapper: function (f) {
           let n = f.end - f.start + 1
           return n < 1000 ? '< 1kb' : n <= 10000 ? '1-10kb' : n <= 100000 ? '10-100kb' : n <= 1000000 ? '100kb - 1Mb' : '> 1Mb'
         }
       }, {
         name: 'Has canonical ID',
-        values: [true, false],
-        initialSelection: true,
+        values: [true, false, 'dont care'],
+        initialSelection: 'dont care',
         multi: false,
-        disabled: true,
+        initiallyOpen: false,
         mapper: function (f) {
+          if (this.selectedSet.has('dont care')) return 'dont care'
           return f.cID !== null
         }
       }]

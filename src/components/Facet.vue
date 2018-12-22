@@ -1,15 +1,6 @@
 <template>
- <table class="facet" :class="{ disabled : !enabled }" >
-   <tr>
-     <th>
-       <input type="checkbox" v-model="enabled" />
-     </th>
-     <th colspan="2">
-       {{name}}
-     </th>
-   </tr>
+ <table class="facet" >
    <tr
-     v-if="enabled"
      v-for="(v, i) in values"
      :key="v"
      >
@@ -38,7 +29,6 @@
            >done</i>
          <input
            ref="inputs"
-           :disabled="!enabled"
            v-model="selected"
            :name="name"
            :value="v"
@@ -51,12 +41,12 @@
      <td>{{v}}</td>
    </tr>
    <tr
-     v-if="enabled && multi"
+     v-if="multi"
      >
      <td></td>
      <td colspan=2>
-       <button @click="check('all')" :disabled="!enabled" type="button" value="Check all">Check all</button>
-       <button @click="check('none')" :disabled="!enabled" type="button">Uncheck all</button>
+       <button @click="check('all')" type="button" value="Check all">Check all</button>
+       <button @click="check('none')" type="button">Uncheck all</button>
      </td>
    </tr>
  </table>
@@ -72,12 +62,10 @@ export default MComponent({
     colors: Array, // list of string color values
     initialSelection: [Array, Boolean, String, Number], // initially selected values
     multi: Boolean, // multi (true) or single (false) selection
-    disabled: Boolean, // initially disabled?
     mapper: Function // Maps an input object to a facet value
   },
   data: function () {
     return {
-      enabled: !this.disabled, // initialize my enabled state
       selected: this.initialSelection ? this.initialSelection : this.multi ? [] : null // current selection
     }
   },
@@ -87,19 +75,15 @@ export default MComponent({
     }
   },
   watch: {
-    enabled: function (e) {
-      this.$emit('facet-change', this)
-    },
     selected: function (e) {
       this.$emit('facet-change', this)
     }
   },
   methods: {
-    // If facet is disabled, returns true. Otherwise, returns true iff the given object is
-    // is in a currently selected facet.
+    // Returns true iff the given object is in a currently selected facet.
     test: function (f) {
       let ffacet = this.mapper(f)
-      return !this.enabled || this.selectedSet.has(ffacet)
+      return this.selectedSet.has(ffacet)
     },
     check: function (allOrNone) {
       if (allOrNone === 'all') {
@@ -115,8 +99,5 @@ export default MComponent({
 <style scoped>
 .facet {
   text-align: left;
-}
-.facet.disabled td {
-  color: gray;
 }
 </style>

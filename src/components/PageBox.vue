@@ -17,6 +17,7 @@
       :icon="closeBtnIcon"
       />
     <m-button
+      v-show="draggable"
       name="dragHandle"
       title="Drag up/down to reposition."
       icon="drag_indicator"
@@ -63,6 +64,10 @@ export default MComponent({
       default: 0
     },
     initiallyOpen: {
+      type: Boolean,
+      default: true
+    },
+    draggable: {
       type: Boolean,
       default: true
     }
@@ -143,6 +148,7 @@ export default MComponent({
       // At mount time, contained components have already been rendered.
       // Find the content component, which is the last.
       let lc = this.$refs.content = this.$children[3]
+      if (!lc) console.log ('lc is null', this)
       let htext = lc ? lc.$el.title : ''
       // move help text from component to this box's info button
       this.helpText = htext
