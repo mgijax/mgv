@@ -30,11 +30,20 @@
             </div>
           </td>
           <td>
-            <textarea ref="textarea" name="items" rows=10 v-model="itemsText" />
+            <textarea 
+               v-model="itemsText"
+               ref="textarea"
+               name="items"
+               rows=10
+               @dragover="dragover"
+               @dragleave="dragleave"
+               @drop="drop"
+               />
           </td>
         </tr>
         <tr>
-         <td colspan="2">
+         <td></td>
+         <td>
            <div class="flexrow dropzone">
              <div
                name="union"
@@ -42,21 +51,30 @@
                @dragover="dragover"
                @dragleave="dragleave"
                @drop="drop"
-               >∪</div>
+               >
+                 <div class="circle c1"></div>
+                 <div class="circle c2"></div>
+               </div>
              <div
                name="intersection"
                title="Drag a list here to INTERSECT its items with the current list."
                @dragover="dragover"
                @dragleave="dragleave"
                @drop="drop"
-               >∪</div>
+               >
+                 <div class="circle c1"></div>
+                 <div class="circle c2"></div>
+               </div>
              <div
                name="difference"
                title="Drag a list here to REMOVE its items from the current list."
                @dragover="dragover"
                @dragleave="dragleave"
                @drop="drop"
-               >—</div>
+               >
+                 <div class="circle c1"></div>
+                 <div class="circle c2"></div>
+               </div>
            </div>
          </td>
         </tr>
@@ -117,10 +135,11 @@ export default MComponent({
     }
   },
   watch: {
-    list: function () { this.reset() },
+    list: function () {
+      this.reset()
+    },
     pickerColor: function (c) {
-      console.log('Color changed.', c)
-      this.color = c.hex
+      this.color = c.hex || c
     }
   },
   mounted: function () {
@@ -131,10 +150,27 @@ export default MComponent({
     })
   },
   methods: {
+    open: function () {
+      this.closePicker()
+      this.$parent.open()
+      this.reset()
+    },
+    close: function () {
+      this.$parent.close()
+    },
+    openPicker: function () {
+      this.pickerOpen = true
+    },
+    closePicker: function () {
+      this.pickerOpen = false
+    },
     togglePicker: function () {
       this.pickerOpen = !this.pickerOpen
     },
     getDropTarget: function (evt) {
+      if (evt.target.tagName.toLowerCase() === 'textarea') {
+        return evt.target
+      }
       return evt.target.closest('.dropzone > div')
     },
     dragover: function (evt) {
@@ -146,33 +182,34 @@ export default MComponent({
     },
     drop: function (evt) {
       evt.preventDefault()
+      this.dragleave(evt)
       let dt = evt.dataTransfer
       let listName = dt.getData('text')
       let list = this.listManager().getList(listName)
       let dtgt = this.getDropTarget(evt)
-      dtgt.className = ''
       let op = dtgt.getAttribute('name')
+      if (op === 'items') op = 'union'
       this[op](list)
-    },
-    open: function () {
-      this.$parent.open()
-      this.reset()
-    },
-    close: function () {
-      this.$parent.close()
     },
     reset: function () {
       if (this.list) {
+        let l = this.list
+        this.name = l.name
+        this.color = l.color
+        this.created = l.created
+        this.modified = l.modified
+        this.items = JSON.parse(JSON.stringify(l.items))
+        this.pickerOpen = false
+        this.pickerColor = this.color
         this.$parent.open()
-        Object.assign(this.$data, JSON.parse(JSON.stringify(this.list)))
       } else {
-        Object.assign(this.$data, {
-          name: '',
-          created: '',
-          modified: '',
-          color: '#000000',
-          items: []
-        })
+        this.name = ''
+        this.color = '#000000'
+        this.created = ''
+        this.modified = ''
+        this.items = []
+        this.pickerOpen = false
+        this.pickerColor = this.color
       }
     },
     save: function () {
@@ -236,13 +273,33 @@ textarea {
   font-size: 48px;
 }
 .dropzone > div {
-  flex-grow: 1;
-  border: thin solid gray;
+  position: relative;
+  border: thin solid #aaa;
+  height: 60px;
+  width: 60px;
 }
-.dropzone > div[name="intersection"] {
-  transform: rotate(180deg);
-}
-.dropzone > div.candrop {
+.candrop {
   background-color: green;
+}
+.circle {
+  height: 20px !important;
+  width: 20px !important;
+  border-radius: 10px;
+  background-color: blue;
+  position: absolute;
+  top: 22px;
+  left: 18px;
+}
+.circle.c2 {
+  left: 28px;
+}
+[name="union"] .circle {
+  opacity: 0.9;
+}
+[name="intersection"] .circle {
+  opacity: 0.5;
+}
+[name="difference"] .circle.c2 {
+  background-color: #cccccceb;
 }
 </style>
