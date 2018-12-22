@@ -1,27 +1,28 @@
 <template>
   <div class="settings flexcolumn">
   <form>
+  <label>Features</label>
   <div class="flexrow">
-    <label>Feature height</label>
-    <input
-        type="range"
-        v-model="ZoomRegion.featureHeight"
-        min="1"
-        max="24"
-        />
-  </div>
-  <div class="flexrow">
-    <label>Feature labels</label>
+    <label>Show labels</label>
     <input
         type="checkbox"
         v-model="ZoomRegion.showFeatureLabels"
         />
   </div>
   <div class="flexrow">
-    <label>Feature font size</label>
+    <label>Font size</label>
     <input
         type="range"
         v-model="ZoomRegion.featureFontSize"
+        min="1"
+        max="24"
+        />
+  </div>
+  <div class="flexrow">
+    <label>Height</label>
+    <input
+        type="range"
+        v-model="ZoomRegion.featureHeight"
         min="1"
         max="24"
         />
@@ -35,15 +36,16 @@
         max="24"
         />
   </div>
+  <label>Transcripts</label>
   <div class="flexrow">
-    <label>Transcript labels</label>
+    <label>Show labels</label>
     <input
         type="checkbox"
         v-model="ZoomRegion.showTranscriptLabels"
         />
   </div>
   <div class="flexrow">
-    <label>Transcript font size</label>
+    <label>Font size</label>
     <input
         type="range"
         v-model="ZoomRegion.transcriptFontSize"
@@ -77,6 +79,7 @@
         v-model="ZoomRegion.spreadTranscripts"
         />
   </div>
+  <label>Misc</label>
   <div class="flexrow">
     <label>Track mouse</label>
     <input
