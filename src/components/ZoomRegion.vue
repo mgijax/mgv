@@ -255,7 +255,10 @@ export default MComponent({
   },
   computed: {
     detailThreshold: function () {
-      return this.cfg.detailThreshold
+      return Math.min(this.cfg.detailThreshold, this.cfg.detailThresholdLimit)
+    },
+    sequenceThreshold: function () {
+      return Math.min(this.cfg.sequenceThreshold, this.cfg.sequenceThresholdLimit)
     },
     trackMouse: function () {
       return this.cfg.trackMouse
@@ -268,9 +271,6 @@ export default MComponent({
     },
     showTranscriptLabels: function () {
       return this.cfg.showTranscriptLabels
-    },
-    sequenceThreshold: function () {
-      return this.cfg.sequenceThreshold
     },
     showDetails: function () {
       return (this.context.coords.end - this.context.coords.start + 1) < this.detailThreshold

@@ -2,14 +2,20 @@
   <div class="settings flexcolumn">
   <form>
   <label>Features</label>
-  <div class="flexrow">
+  <div
+    title="Display all feature labels when view width is below threshold (3 Mb)."
+    class="flexrow"
+    >
     <label>Show labels</label>
     <input
         type="checkbox"
         v-model="ZoomRegion.showFeatureLabels"
         />
   </div>
-  <div class="flexrow">
+  <div
+    title="Sets the font size of displayed feature labels."
+    class="flexrow"
+    >
     <label>Font size</label>
     <input
         type="range"
@@ -18,7 +24,10 @@
         max="24"
         />
   </div>
-  <div class="flexrow">
+  <div
+    title="Sets the thickness of rectangles used to represent features."
+    class="flexrow"
+    >
     <label>Height</label>
     <input
         type="range"
@@ -27,7 +36,10 @@
         max="24"
         />
   </div>
-  <div class="flexrow">
+  <div
+    title="Sets the amount of space separating swim lanes."
+    class="flexrow"
+    >
     <label>Lane gap</label>
     <input
         type="range"
@@ -37,14 +49,20 @@
         />
   </div>
   <label>Transcripts</label>
-  <div class="flexrow">
+  <div
+    class="flexrow"
+    title="Display all feature labels when view width is below threshold (3 Mb)."
+    >
     <label>Show labels</label>
     <input
         type="checkbox"
         v-model="ZoomRegion.showTranscriptLabels"
         />
   </div>
-  <div class="flexrow">
+  <div
+    class="flexrow"
+    title="Sets the font size of displayed transcript labels."
+    >
     <label>Font size</label>
     <input
         type="range"
@@ -53,13 +71,27 @@
         max="24"
         />
   </div>
+  <div
+    title="If checked, spreads transcripts so you can see them all. If unchecked, piles them on top of one another for a compact view. In spread view, strand is indicated by arrows. In the collapsed view, strand is indicated by position above (+) or below (-) the axis line."
+    class="flexrow"
+    >
+    <label>Spread transcripts</label>
+    <input
+        type="checkbox"
+        v-model="ZoomRegion.spreadTranscripts"
+        />
+  </div>
+  <label>Misc</label>
   <!--
     WARNING: Making these threshold values editable gives the unwary user a VERY EASY way to
-    crash their brower! Probably best to keep these hidden.
-
+    crash their brower! Need to place appropriate restrictions/safeguards.
+  -->
   <div class="flexrow">
     <label>Details threshold</label>
     <input
+        min=0
+        max=10000000
+        step=1000000
         type="number"
         v-model="ZoomRegion.detailThreshold"
         />
@@ -71,16 +103,10 @@
         v-model="ZoomRegion.sequenceThreshold"
         />
   </div>
-  -->
-  <div class="flexrow">
-    <label>Spread transcripts</label>
-    <input
-        type="checkbox"
-        v-model="ZoomRegion.spreadTranscripts"
-        />
-  </div>
-  <label>Misc</label>
-  <div class="flexrow">
+  <div
+    title="When checked, shows a vertical reference line indicating the base position that follows the mouse around. When unchecked, only shows during drag operations."
+    class="flexrow"
+    >
     <label>Track mouse</label>
     <input
         type="checkbox"
