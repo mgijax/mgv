@@ -120,7 +120,7 @@ export default MComponent({
       color: '#000000',
       items: [],
       pickerOpen: false,
-      pickerColor: '#000000'
+      pickerColor: { hex8: '#000000ff' }
     }
   },
   computed: {
@@ -139,7 +139,7 @@ export default MComponent({
       this.reset()
     },
     pickerColor: function (c) {
-      this.color = c.hex || c
+      this.color = c.hex8 || c
     }
   },
   mounted: function () {
