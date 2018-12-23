@@ -31,7 +31,7 @@
         >
         <line
           v-if="f.chr === chromosome"
-          :x1="(width/2 + 3) * (f.strand === '-' ? -1 : 1)"
+          :x1="(width/2 - 1) * (f.strand === '-' ? -1 : 1)"
           :y1="ppb * f.start"
           :x2="0"
           :y2="ppb * f.start"
