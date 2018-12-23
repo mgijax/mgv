@@ -1,5 +1,5 @@
 <template>
- <table class="facet" >
+ <table class="facet">
    <tr
      v-for="(v, i) in values"
      :key="v"
@@ -72,6 +72,10 @@ export default MComponent({
   computed: {
     selectedSet: function () {
       return new Set(this.multi ? this.selected : [this.selected])
+    },
+    active: function () {
+      let s = this.selectedSet
+      return s.size < this.values.length && !(s.size === 1 && s.has('dont care'))
     }
   },
   watch: {

@@ -73,7 +73,7 @@ export default MComponent({
       return this.$refs.facets.every(facet => facet.test(f))
     },
     getFacetState: function () {
-      let active = this.$refs.facets.filter(f => f.enabled)
+      let active = this.$refs.facets.filter(f => f.active)
       return active.map(f => {
         return { facet: f.name, values: f.selected }
       })
