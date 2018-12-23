@@ -531,6 +531,7 @@ export default MComponent({
       this.currRange = [px, px]
     },
     mouseleave: function (e) {
+      if (this.dragging) return
       this.currRange = null
     },
     mouseover: function (e) {
@@ -611,8 +612,8 @@ export default MComponent({
               nc = {
                 ref: this.genome.name,
                 chr: this.chr,
-                start: this.context.coords.start + this.deltaB,
-                end: this.context.coords.end + this.deltaB
+                start: this.start + this.deltaB,
+                end: this.end + this.deltaB
               }
             }
             let cr = this.currRange
