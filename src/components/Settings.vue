@@ -99,6 +99,9 @@
   <div class="flexrow">
     <label>Sequence threshold</label>
     <input
+        min=0
+        max=10000
+        step=100
         type="number"
         v-model="ZoomRegion.sequenceThreshold"
         />
