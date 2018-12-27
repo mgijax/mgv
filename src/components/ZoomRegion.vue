@@ -333,7 +333,7 @@ export default MComponent({
       return h
     },
     zeroOffset: function () {
-      return this.allMaxLaneP * (this.featureHeight + this.laneGap) + this.laneGap
+      return this.allMaxLaneP * (this.featureHeight + this.laneGap) + Math.max(this.laneGap, 10)
     }
   },
   watch: {
