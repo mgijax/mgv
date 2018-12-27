@@ -70,6 +70,14 @@ export default MComponent({
     draggable: {
       type: Boolean,
       default: true
+    },
+    iconOpen: {
+      type: String,
+      default: 'arrow_right'
+    },
+    iconClose: {
+      type: String,
+      default: 'arrow_drop_down'
     }
   },
   data () {
@@ -137,7 +145,7 @@ export default MComponent({
   },
   computed: {
     closeBtnIcon: function () {
-      return this.isOpen ? this.cfg.iconClose : this.cfg.iconOpen
+      return this.isOpen ? this.iconClose : this.iconOpen
     },
     openHelpText: function () {
       return `Click to ${this.isOpen ? 'close' : 'open'}.`

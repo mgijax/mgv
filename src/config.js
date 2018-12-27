@@ -16,8 +16,6 @@ export default {
     animDur: 0.5 // default animation duration in sec
   },
   PageBox: {
-    iconOpen: 'add',
-    iconClose: 'close'
   },
   MGV: {
     genomeSets: [{

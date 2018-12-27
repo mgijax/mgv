@@ -51,6 +51,7 @@
             :initialX="250"
             :initialY="337"
             :initiallyOpen="false"
+            iconClose="close"
             ><list-editor
               title="Examine/modify the contents of a list. Create a new list. Combine lists with intersection, union, and difference."
               :list="currentEditList"
