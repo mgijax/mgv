@@ -7,6 +7,7 @@
         stroke="none"
         fill="black"
         text-anchor="middle"
+        :transform="labelTransform"
         >{{chromosome.name}}</text>
       <line
           x1=0
@@ -103,6 +104,10 @@ export default MComponent({
     transform: function () {
       if (this.orientation === 'v') return 'rotate(0)'
       return `rotate(-90)translate(0,10)`
+    },
+    labelTransform: function () {
+      if (this.orientation === 'v') return 'rotate(0)'
+      return `rotate(90)translate(-10,8)`
     }
   },
   methods: {
