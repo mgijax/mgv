@@ -54,6 +54,7 @@
                >
                  <div class="circle c1"></div>
                  <div class="circle c2"></div>
+                 <label>union</label>
                </div>
              <div
                name="intersection"
@@ -64,6 +65,7 @@
                >
                  <div class="circle c1"></div>
                  <div class="circle c2"></div>
+                 <label>intersection</label>
                </div>
              <div
                name="difference"
@@ -74,6 +76,7 @@
                >
                  <div class="circle c1"></div>
                  <div class="circle c2"></div>
+                 <label>difference</label>
                </div>
            </div>
          </td>
@@ -277,6 +280,9 @@ textarea {
   border: thin solid #aaa;
   height: 60px;
   width: 60px;
+}
+.dropzone label {
+  font-size: 10px;
 }
 .candrop {
   background-color: green;
