@@ -39,7 +39,6 @@
     <slot></slot>
   </div>
   <canvas ref="canvas" width=1 height=1 style="opacity: 0;" />
-  <busy-indicator v-if="busyCount > 0" />
 </div>
 </template>
 
@@ -47,10 +46,9 @@
 import MComponent from '@/components/MComponent'
 import MButton from '@/components/MButton'
 import Vue from 'vue'
-import BusyIndicator from '@/components/BusyIndicator'
 export default MComponent({
   name: 'PageBox',
-  components: { MButton, BusyIndicator },
+  components: { MButton },
   props: {
     label: String,
     message: String,
@@ -94,7 +92,6 @@ export default MComponent({
       },
       childHandlesOpenClose: false,
       helpText: 'Heeeeelp!!',
-      busyCount: 0
     }
   },
   methods: {

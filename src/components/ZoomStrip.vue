@@ -25,6 +25,8 @@
       :transform="`translate(${zr.deltaX}, 0)`"
       :regionScrollDelta="regionScrollDelta"
       @region-draw="setHeight"
+      @busy-start="busyStart"
+      @busy-end="busyEnd"
       />
     <!-- end cap -->
     <rect name="endcap"
@@ -44,6 +46,23 @@
       style="font-size: 20px;"
       fill="gray"
       >drag_indicator<title>Drag up/down to reposition.</title></text>
+    <!-- busy indicator -->
+    <g
+      v-show="busyCount > 0"
+      >
+      <rect 
+        x=0
+        y=0
+        :height="height"
+        :width="width"
+        :style="{ fillOpacity: 0.3 }"
+        />
+      <text
+        :x="width / 2"
+        :y="height / 2"
+        fill="white"
+        >{{busyMessage}}</text>
+    </g>
   </g>
 </template>
 
@@ -69,7 +88,9 @@ export default MComponent({
       dragging: false,
       featureHeight: 14,
       laneGap: 8,
-      regions: []
+      regions: [],
+      busyCount: 0,
+      busyMessage: 'Busy...'
     }
   },
   computed: {
@@ -90,6 +111,12 @@ export default MComponent({
     }
   },
   methods: {
+    busyStart () {
+      this.busyCount += 1
+    },
+    busyEnd () {
+      this.busyCount -= 1
+    },
     setHeight () {
       this.height = Math.max.apply(null, this.$children.map(r => r.height))
       this.allMaxLaneP = Math.max.apply(null, this.$children.map(r => r.maxLaneP))

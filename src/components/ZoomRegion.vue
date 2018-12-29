@@ -1,11 +1,5 @@
 <template>
   <g transform="translate(0,0)" class="zoom-region">
-  <!--
-  <busy-indicator
-    svg="true"
-    v-if="busy"
-    />
-  -->
   <svg
     @mouseover.stop="mouseover"
     @mouseout.stop="mouseout"
@@ -167,7 +161,6 @@ import MComponent from '@/components/MComponent'
 import MBrush from '@/components/MBrush'
 import u from '@/lib/utils'
 import { TextSpreader } from '@/lib/Layout'
-import BusyIndicator from '@/components/BusyIndicator'
 //
 document.body.addEventListener('keydown', function (e) {
   if (e.code === 'Tab') {
@@ -182,7 +175,7 @@ document.body.addEventListener('keyup', function (e) {
 //
 export default MComponent({
   name: 'ZoomRegion',
-  components: { MBrush, BusyIndicator },
+  components: { MBrush },
   inject: ['featureColorMap', 'getFacets'],
   props: {
     // the app context
@@ -490,6 +483,7 @@ export default MComponent({
       let delta = Math.round((this.end - this.start + 1) / 2)
       this.seqStart = this.start
       this.busy = true
+      this.$emit('busy-start')
       this.dataManager.getFeatures(this.genome, this.chr, this.start - delta, this.end + delta).then(feats => {
         this.busy = false
         if (this.showDetails) {
@@ -502,15 +496,19 @@ export default MComponent({
             })
             this.features = feats
             this.nextTick(() => this.$emit('region-draw', this))
+            this.$emit('busy-end')
           })
         } else {
           this.features = feats
           this.nextTick(() => this.$emit('region-draw', this))
+          this.$emit('busy-end')
         }
         if (this.showSequence) {
+          this.$emit('busy-start')
           this.dataManager.getSequence(this.genome, this.chr, this.start, this.end).then(data => {
             this.seqStart = data.start
             this.sequence = data.seq
+            this.$emit('busy-end')
           })
         } else {
           this.sequence = ''
