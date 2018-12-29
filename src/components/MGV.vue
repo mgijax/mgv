@@ -59,15 +59,6 @@
               />
           </page-box>
           <!--
-          ============ Settings ==============
-          -->
-          <page-box label="Settings">
-            <settings
-              title="Settings."
-              ref="settings"
-              />
-          </page-box>
-          <!--
           ============ Facets (aka Filters) ==============
           -->
           <page-box
@@ -76,6 +67,15 @@
             <facets
               title="Limit what feature are displayed by different criteria."
               ref="facets"
+              />
+          </page-box>
+          <!--
+          ============ Settings ==============
+          -->
+          <page-box label="Settings">
+            <settings
+              title="Settings."
+              ref="settings"
               />
           </page-box>
         </page-box-container>
