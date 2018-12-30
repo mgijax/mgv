@@ -59,7 +59,7 @@
       <!-- ======= label ======= -->
       <text
         x="50%"
-        :y="height - zeroOffset"
+        :y="height - zeroOffset + 10"
         text-align="center"
         alignment-baseline="hanging"
         fill="black"

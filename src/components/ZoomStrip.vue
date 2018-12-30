@@ -4,7 +4,7 @@
     <text
       name="label"
       :x="cfg.endCapWidth"
-      :y="height"
+      :y="height + 10"
       alignment-baseline="hanging"
       stroke="none"
       fill="black">{{ genome.name }}</text>

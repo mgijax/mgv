@@ -61,7 +61,7 @@ export default MComponent({
       let dy = 0
       this.context.vGenomes.forEach(vg => {
         vg.zoomY = dy
-        dy += vg.height + 24
+        dy += vg.height + 34
       })
       this.height = dy
     },
