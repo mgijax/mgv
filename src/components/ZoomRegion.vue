@@ -91,6 +91,15 @@
         :transform="featureTransform(f)"
         v-show="featureVisible(f)"
         >
+        <rect
+          class="outline"
+          :x="featureX(f)"
+          :y="0"
+          :height="featureH(f)"
+          :width="featureW(f)"
+          :style="featureStyle(f)"
+          :fill-opacity="showDetails ? 0.3 : 1"
+          />
         <!-- ======= Transcripts ======= -->
         <g
           v-if="showDetails"
@@ -118,26 +127,16 @@
           <!-- transcript label -->
           <text
             v-if="spreadTranscripts && showDetails && showTranscriptLabels"
-            :x="featureX(t.exons[0])"
+            :x="transcriptTextX(t)"
             :y="featureHeight"
             :font-size="transcriptFontSize"
             alignment-baseline="hanging"
             >{{t.tID}}</text>
         </g>
-        <!-- put the feature's rect on top of the transcripts -->
-        <rect
-          class="outline"
-          :x="featureX(f)"
-          :y="0"
-          :height="featureH(f)"
-          :width="featureW(f)"
-          :style="featureStyle(f)"
-          :fill-opacity="showDetails ? 0.3 : 1"
-          />
         <text
           class="symbol"
           v-if="(showDetails && showFeatureLabels) || featureSelected(f) || featureHighlighted(f)"
-          :x="b2p(f.start + f.length / 2)"
+          :x="featureTextX(f)"
           :y="0"
           :font-size="featureFontSize"
           :style="{
@@ -426,6 +425,11 @@ export default MComponent({
       let overlaps = f.start <= (this.end + this.deltaB) && f.end >= (this.start + this.deltaB)
       return overlaps && this.getFacets().test(f)
     },
+    featureTextX: function (f) {
+      let s = Math.max(f.start, this.start + this.deltaB)
+      let e = Math.min(f.end, this.end + this.deltaB)
+      return this.b2p((s + e) / 2)
+    },
     featureStyle (f) {
       let fill = this.featureColor(f)
       let stroke = 'none'
@@ -446,6 +450,10 @@ export default MComponent({
     },
     transcriptX2 (t) {
       return this.b2p(Math.max.apply(null, t.exons.map(e => e.end)))
+    },
+    transcriptTextX: function (t) {
+      let s = Math.max(t.exons[0].start, this.start + this.deltaB)
+      return this.b2p(s)
     },
     transcriptTransform (f, t, ti) {
       let y = this.spreadTranscripts ? ti * (this.featureHeight + this.laneGap) : 0
@@ -627,6 +635,7 @@ export default MComponent({
           this.absorbNextClick = true
           this.dragData = null
           this.dragging = false
+          this.currRange = null
         }
       }, this.$root.$el, this)
     }
