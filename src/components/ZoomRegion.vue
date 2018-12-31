@@ -575,7 +575,8 @@ export default MComponent({
           this.dragging = true
           this.dragData = d
           d.dragged = false
-          d.bb = this.$el.getBoundingClientRect()
+          // d.bb = this.$el.getBoundingClientRect()
+          d.bb = this.$refs.underlay.getBoundingClientRect()
           d.shiftDrag = e.shiftKey
         },
         drag: function (e, d) {
