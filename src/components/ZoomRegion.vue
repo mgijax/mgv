@@ -589,6 +589,7 @@ export default MComponent({
           }
         },
         dragend: function (e, d) {
+          this.$root.$emit('region-dragend')
           if (!d.dragged) {
             // this was actually just a click
             this.$root.$emit('context', { currentSelection: [] })
@@ -622,16 +623,14 @@ export default MComponent({
                 end: this.end + this.deltaB
               }
             }
-            let cr = this.currRange
-            this.currRange = [ cr[0] + this.deltaB, cr[1] + this.deltaB ]
           }
           //
           this.$root.$emit('context', nc)
-          this.$root.$emit('region-dragend', 0)
           //
           // for some reason, a click event is fired at mouseup, even though dragify handlers call
           // stopPropagation and preventDefault. So here we just set a little flag for ourselves to ignore
           // the next click event (see method clicked() above).
+          //
           this.absorbNextClick = true
           this.dragData = null
           this.dragging = false
