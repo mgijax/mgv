@@ -309,15 +309,15 @@ export default MComponent({
       if (this.showDetails && this.spreadTranscripts) {
         return 0
       } else {
-        let x = this.features.filter(f => f.strand === '+').reduce((v, f) => Math.max(v, f.lane), 0)
+        let x = this.features.filter(f => f.strand === '+' && this.featureVisible(f)).reduce((v, f) => Math.max(v, f.lane), 0)
         return x
       }
     },
     maxLaneM: function () {
       if (this.showDetails && this.spreadTranscripts) {
-        return this.features.reduce((v, f) => Math.max(v, f.lane2 + f.tCount), 0)
+        return this.features.filter(f => this.featureVisible(f)).reduce((v, f) => Math.max(v, f.lane2 + f.tCount), 0)
       } else {
-        return this.features.filter(f => f.strand === '-').reduce((v, f) => Math.max(v, f.lane), 0)
+        return this.features.filter(f => f.strand === '-' && this.featureVisible(f)).reduce((v, f) => Math.max(v, f.lane), 0)
       }
     },
     height: function () {
