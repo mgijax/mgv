@@ -31,7 +31,7 @@
               title="Stop aligning on this feature."
               style="font-size: 14px;"
               />
-            Aligned on {{landmarkSymbol}}
+            {{alignedText}}
           </span>
         </div>
       </div>
@@ -100,6 +100,7 @@ import MButton from '@/components/MButton'
 import MMenuItem from '@/components/MMenuItem'
 import ToolbarMenu from '@/components/ToolbarMenu'
 import gc from '@/lib/GenomeCoordinates'
+import u from '@/lib/utils'
 export default MComponent({
   name: 'ZoomControls',
   components: { MButton, MMenuItem, ToolbarMenu },
@@ -125,6 +126,11 @@ export default MComponent({
         return `${this.my.chr.name}:${this.my.start}..${this.my.end}`
       },
       set: function (v) {}
+    },
+    alignedText: function () {
+        if (!this.my.landmark) return ''
+        let dtext = this.my.delta ? ` (${u.prettyPrintBases(this.my.delta)})` : ''
+        return `Aligned on ${this.landmarkSymbol}${dtext}`
     },
     width: function () {
       return this.my.end - this.my.start + 1
