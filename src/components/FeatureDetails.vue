@@ -41,6 +41,7 @@ export default MComponent({
   },
   methods: {
     isCurrent: function (f) {
+      if (!f) return false
       let cmo = this.currentMouseover
       return cmo && cmo.ID === f.ID
     },
