@@ -129,7 +129,7 @@ export default MComponent({
     },
     alignedText: function () {
         if (!this.my.landmark) return ''
-        let dtext = this.my.delta ? ` (${u.prettyPrintBases(this.my.delta)})` : ''
+        let dtext = this.my.delta ? ` (${this.my.delta > 0 ? '+' : ''}${u.prettyPrintBases(this.my.delta)})` : ''
         return `Aligned on ${this.landmarkSymbol}${dtext}`
     },
     width: function () {
