@@ -76,8 +76,9 @@
         <tspan
           v-for="(b,i) in sequence"
           :key="i"
-          :x="b2p(seqStart + i)"
+          :x="b2p(seqStart + i + 1.5)"
           :fill="baseColor(b)"
+          text-anchor="middle"
           >{{b}}</tspan>
       </text>
       <!-- ======= Features ======= -->
@@ -330,7 +331,7 @@ export default MComponent({
       }
     },
     height: function () {
-      let h = (this.allMaxLaneP + this.allMaxLaneM) * (this.featureHeight + this.laneGap) + this.laneGap
+      let h = (this.allMaxLaneP + this.allMaxLaneM) * (this.featureHeight + this.laneGap) + this.laneGap + 4
       return h
     },
     zeroOffset: function () {
