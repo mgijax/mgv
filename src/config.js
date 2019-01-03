@@ -26,7 +26,7 @@ export default {
     }, {
       label: 'B6 vs non-musculus',
       ref: 'C57BL/6J',
-      genomes: 'C57BL/6J,CAROLI/EiJ,PAHARI/EiJ,SPRET/EiJ ',
+      genomes: 'C57BL/6J,CAROLI/EiJ,PAHARI/EiJ,SPRET/EiJ',
       description: 'View C57BL/6J     versus the non-musculus strains.'
     }, {
       label: 'All',
