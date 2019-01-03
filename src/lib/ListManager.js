@@ -39,7 +39,7 @@ class ListManager {
     this.lists.push(list)
     this.listByName[uname] = list
     this.saveToStore()
-    this.app.$nextTick(() => this.app.$root.$emit('list-click', list))
+    this.app.$nextTick(() => this.app.$root.$emit('list-click', { list: list, event: { shiftKey: true }}))
     return list
   }
   updateList (list, updates) {

@@ -445,9 +445,10 @@ export default MComponent({
     //
     this.$root.$on('list-click', data => {
       let lst = data.list || data
-      let evt = data.event
+      let shift = data.event ? data.event.shiftKey : false
       if (lst === this.currentList) {
-        if (evt.shiftKey) {
+        if (shift) {
+          // shift-click repeatedly on a list to step through its members
           this.currentListItem = (this.currentListItem + 1) % lst.items.length
         } else {
           this.currentList = null
@@ -459,6 +460,7 @@ export default MComponent({
         this.currentList = lst
         this.currentListSet = new Set(lst.items)
         this.currentListItem = 0
+        if (!shift) return
       }
       let lm = lst.items[this.currentListItem]
       this.setContext({ landmark: lm, delta: 0, currentSelection: [lm] })

@@ -119,6 +119,7 @@ export default MComponent({
   methods: {
     showContextMenu: function (evt) {
       let fnode = evt.target.closest('.feature')
+      if (!fnode) return
       this.contextMenu = fnode ? this.featureMenu : this.backgroundMenu
       this.contextFeature = fnode ? this.dataManager.getFeatureById(fnode.getAttribute('name')) : null
       let cm = this.$refs.contextMenu

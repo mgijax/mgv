@@ -177,6 +177,7 @@ class MouseMineDataSource extends DataSource {
       return mods
     })
   }
+  // Get the genomic sequence from chromosome c of genome g from start=s to end=e.
   // { g, c, s, e, sequence }
   getSequence (g, c, s, e) {
     if (!g.name || !c.name || !s || !e) u.fail('Bad arguments')

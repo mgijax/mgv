@@ -535,7 +535,7 @@ export default MComponent({
         } else {
           this.sequence = ''
         }
-      })
+      }).catch(() => this.$emit('busy-end'))
     },
     getEventFeature (e) {
       let f = e.target.closest('.feature')

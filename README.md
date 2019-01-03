@@ -1,5 +1,7 @@
 # mgv
 
+The Multiple Genome Viewer (MGV) is a genome browser that lets you explore multiple genomes simultaneously and comparatively.
+
 ## Project setup
 ```
 npm install
