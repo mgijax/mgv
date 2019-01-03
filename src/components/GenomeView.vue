@@ -13,7 +13,7 @@
         :genome="context.rGenome"
         :chromosome="c"
         :orientation="orientation"
-        :ppb="ppb"
+        :height="chrLen(c)"
         :coords="context.coords"
         :width="chrWidth"
         :currentList="currentListGenologs"
@@ -24,17 +24,32 @@
   <div
     class="flexrow"
     style="justify-content: flex-start; "
-    v-show="!isOpen"
     >
+    <m-button
+      title="Showing chromosomes with fixed length. Click to show proportional."
+      icon="sort"
+      v-show="fixedHeight"
+      @click="toggleHeight"
+      class="rotate90"
+      />
+    <m-button
+      title="Showing chromosomes with proportional lengths. Click to show fixed."
+      icon="dehaze"
+      v-show="!fixedHeight"
+      @click="toggleHeight"
+      class="rotate90"
+      />
     <m-button
       title="Scroll chromosomes down."
       icon="keyboard_arrow_down"
       @click="scrollChromosomes(-1)"
+      v-show="!isOpen"
       />
     <m-button
       title="Scroll chromosomes up."
       icon="keyboard_arrow_up"
       @click="scrollChromosomes(+1)"
+      v-show="!isOpen"
       />
   </div>
   </div>
@@ -58,7 +73,8 @@ export default MComponent({
       padding: 10,
       openHeight: 250,
       closedHeight: 100,
-      scrollDelta: 0
+      scrollDelta: 0,
+      fixedHeight: false
     }
   },
   computed: {
@@ -103,6 +119,11 @@ export default MComponent({
     }
   },
   methods: {
+    // Returns the length in pixels to draw chromosome c
+    chrLen: function (c) {
+      let l = this.isOpen ? this.innerHeight : this.innerWidth
+      return l * (this.fixedHeight ? 1 : c.length / this.maxChrLen)
+    },
     resize: function () {
       this.width = this.$el.getBoundingClientRect().width
       this.openHeight = this.cfg.openHeight
@@ -124,6 +145,9 @@ export default MComponent({
         let dy = (currI - i + this.scrollDelta) * this.chrWidth * 4
         return `translate(${this.padding},${dy})`
       }
+    },
+    toggleHeight: function () {
+      this.fixedHeight = !this.fixedHeight
     }
   },
   watch: {
@@ -152,5 +176,8 @@ export default MComponent({
     -moz-transition: transform 0.5s;
     -o-transition: transform 0.5s;
     transition: transform 0.5s;
+}
+.rotate90 {
+  transform: rotate(90deg)scale(1,-1);
 }
 </style>

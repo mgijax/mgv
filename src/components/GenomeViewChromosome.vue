@@ -79,7 +79,7 @@ export default MComponent({
     'genome',
     'chromosome',
     'orientation',
-    'ppb',
+    'height',
     'font-size',
     'font-family',
     'font-color',
@@ -89,6 +89,9 @@ export default MComponent({
     'currentListColor'
   ],
   computed: {
+    ppb: function () {
+      return this.height / this.chromosome.length
+    },
     rstart: function () {
       return this.coords.start * this.ppb
     },
@@ -130,5 +133,8 @@ export default MComponent({
 <style scoped>
 .glyph {
   cursor: pointer;
+}
+.genome-view-chromosome * {
+  transition: height 0.5s;
 }
 </style>
