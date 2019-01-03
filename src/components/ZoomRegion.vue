@@ -17,10 +17,10 @@
         v-if="(dragging || trackMouse) && currRange"
         >
         <text
-          :x="(currRange[0] + currRange[1]) / 2"
-          :y="-zeroOffset + Math.max(height, 10) + 12"
+          :x="currRangeTextX"
+          :y="-zeroOffset + Math.max(height, 10) + 10"
           font-size="10"
-          text-anchor="middle"
+          :text-anchor="currRangeAnchor"
           >
           {{chr.name}}:{{p2b(currRange[0])}}{{currRange[0] !== currRange[1] ? '..' + p2b(currRange[1]) : ''}}
           </text>
@@ -87,7 +87,7 @@
         :name="f.ID"
         :canonical="f.cID"
         class="feature"
-        :class="{ highlight: featureHighlighted(f) || featureSelected(f) }"
+        :class="{ highlight: featureHighlighted(f) || featureSelected(f) || featureInList(f) }"
         :transform="featureTransform(f)"
         v-show="featureVisible(f)"
         >
@@ -135,7 +135,7 @@
         </g>
         <text
           class="symbol"
-          v-if="(showDetails && showFeatureLabels) || featureSelected(f) || featureHighlighted(f)"
+          v-if="(showDetails && showFeatureLabels) || featureSelected(f) || featureHighlighted(f) || featureInList(f)"
           :x="featureTextX(f)"
           :y="0"
           :font-size="featureFontSize"
@@ -254,6 +254,15 @@ export default MComponent({
     },
     trackMouse: function () {
       return this.cfg.trackMouse
+    },
+    currRangeAnchor: function () {
+      if (this.currRangeTextX < 25) return 'start'
+      else if (this.width - this.currRangeTextX < 25) return 'end'
+      else return 'middle'
+    },
+    currRangeTextX: function () {
+      if (!this.currRange) return 0
+      return (this.currRange[0] + this.currRange[1]) / 2
     },
     spreadTranscripts: function () {
       return this.cfg.spreadTranscripts
@@ -420,6 +429,10 @@ export default MComponent({
     },
     featureSelected: function (f) {
       return this.selectedSet.has(f.cID) || this.selectedSet.has(f.ID)
+    },
+    featureInList: function (f) {
+      let s = this.context.currentListSet
+      return s && (s.has(f.cID) || s.has(f.ID))
     },
     featureVisible: function (f) {
       let overlaps = f.start <= (this.end + this.deltaB) && f.end >= (this.start + this.deltaB)
@@ -652,5 +665,13 @@ export default MComponent({
 }
 .feature .transcript {
   transition: transform 0.5s;
+}
+.feature.pulse {
+  outline-color: yellow;
+  outline-width: 6px;
+  animation: blinker 1s linear infinite;
+}
+@keyframes blinker {
+  50% { outline-width: 0px; }
 }
 </style>
