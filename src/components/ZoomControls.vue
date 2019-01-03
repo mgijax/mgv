@@ -280,5 +280,6 @@ export default MComponent({
   position: absolute;
   top: -16px;
   font-size: 12px;
+  white-space: nowrap;
 }
 </style>

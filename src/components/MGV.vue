@@ -225,6 +225,8 @@ export default MComponent({
       currentList: null,
       // index into currently diaplayed list (for cycling through the features)
       currentListItem: 0,
+      // current list as a Set for fast membership testing
+      currentListSet: null,
       // list currently being edited
       currentEditList: null,
       // flag to indicate when there are currently enabled facets
@@ -449,11 +451,13 @@ export default MComponent({
           this.currentListItem = (this.currentListItem + 1) % lst.items.length
         } else {
           this.currentList = null
+          this.currentListSet = null
           this.currentListItem = 0
           return
         }
       } else {
         this.currentList = lst
+        this.currentListSet = new Set(lst.items)
         this.currentListItem = 0
       }
       let lm = lst.items[this.currentListItem]
