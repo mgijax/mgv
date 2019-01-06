@@ -512,7 +512,8 @@ export default MComponent({
           this.dataManager.getModels(this.genome, this.chr, this.start, this.end).then(models => {
             let ix = u.index(models, 'gID')
             feats.forEach(f => {
-              if (f.tCount === f.transcripts.length) return
+              // only load them the 1st time
+              if (f.transcripts.length) return
               let ts = ix[f.ID]
               ts && ts.transcripts.forEach(t => f.transcripts.push(t))
             })
