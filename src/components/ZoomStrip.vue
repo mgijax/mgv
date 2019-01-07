@@ -112,7 +112,7 @@ export default MComponent({
   },
   methods: {
     busyStart () {
-      this.busyCount += 1
+      window.setTimeout(() => { this.busyCount += 1 }, 1000)
     },
     busyEnd () {
       this.busyCount -= 1
