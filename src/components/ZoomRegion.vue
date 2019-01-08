@@ -55,6 +55,7 @@
         :y2="0"
         stroke="black"
         :transform="`translate(${-regionScrollDelta},0)`"
+        v-show="!spreadTranscripts || !showDetails"
         />
       <!-- ======= label ======= -->
       <text
@@ -134,6 +135,7 @@
             alignment-baseline="hanging"
             >{{t.tID}}</text>
         </g>
+        <!-- feature label -->
         <text
           class="symbol"
           v-if="(showDetails && showFeatureLabels) || featureSelected(f) || featureHighlighted(f) || featureInList(f)"
@@ -586,7 +588,6 @@ export default MComponent({
       u.dragify(this.$el, {
         dragstart: function (e, d) {
           // if here because user clicked on a feature, cancel the drag
-          if (e.target.closest('.feature')) return false
           this.dragging = true
           this.dragData = d
           d.dragged = false
