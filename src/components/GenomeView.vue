@@ -2,56 +2,64 @@
  * GenomeView.vue
  */
 <template>
-  <div>
-  <svg class="genome-view" :height="isOpen ? height : closedHeight">
-  <text x=12 y=20 fill="black" stroke="none">{{genomeName}} {{currChr.name}}:{{this.context.coords.start}}..{{this.context.coords.end}} {{context.currentList ? context.currentList.name : ''}} </text>
-  <g :transform="`translate(0,${titleHeight})`">
-      <genome-view-chromosome
-         v-for="(c,i) in context.rGenome.chromosomes"
-        :transform="transformChr(c,i)"
-        :key="c.name"
-        :genome="context.rGenome"
-        :chromosome="c"
-        :orientation="orientation"
-        :height="chrLen(c)"
-        :coords="context.coords"
-        :width="chrWidth"
-        :currentList="currentListGenologs"
-        :currentListColor="context.currentList ? context.currentList.color : 'gray'"
-        />
-    </g>
-  </svg>
-  <div
-    class="flexrow"
-    style="justify-content: flex-start; "
-    >
-    <m-button
-      title="Showing chromosomes with fixed length. Click to show proportional."
-      icon="sort"
-      v-show="fixedHeight"
-      @click="toggleHeight"
-      class="rotate90"
-      />
-    <m-button
-      title="Showing chromosomes with proportional lengths. Click to show fixed."
-      icon="dehaze"
-      v-show="!fixedHeight"
-      @click="toggleHeight"
-      class="rotate90"
-      />
-    <m-button
-      title="Scroll chromosomes down."
-      icon="keyboard_arrow_down"
-      @click="scrollChromosomes(-1)"
-      v-show="!isOpen"
-      />
-    <m-button
-      title="Scroll chromosomes up."
-      icon="keyboard_arrow_up"
-      @click="scrollChromosomes(+1)"
-      v-show="!isOpen"
-      />
-  </div>
+  <div class="flexcolumn">
+    <div>{{genomeName}}</div>
+    <svg class="genome-view" :height="isOpen ? height : closedHeight">
+      <g :transform="`translate(0,${titleHeight})`">
+        <genome-view-chromosome
+           v-for="(c,i) in context.rGenome.chromosomes"
+          :transform="transformChr(c,i)"
+          :key="c.name"
+          :genome="context.rGenome"
+          :chromosome="c"
+          :orientation="orientation"
+          :height="chrLen(c)"
+          :coords="context.coords"
+          :width="chrWidth"
+          :currentList="currentListGenologs"
+          :currentListColor="context.currentList ? context.currentList.color : 'gray'"
+          />
+        </g>
+    </svg>
+    <div class="flexrow" style="justify-content: space-between;">
+      <div
+        class="flexrow" 
+        style="justify-content: flex-start; flex-grow: unset;"
+        >
+        <m-button
+          title="Showing chromosomes with fixed length. Click to show proportional."
+          icon="sort"
+            v-show="fixedHeight"
+          @click="toggleHeight"
+          class="rotate90"
+          />
+        <m-button
+          title="Showing chromosomes with proportional lengths. Click to show fixed."
+          icon="dehaze"
+          v-show="!fixedHeight"
+          @click="toggleHeight"
+          class="rotate90"
+          />
+        <m-button
+          title="Scroll chromosomes down."
+          icon="keyboard_arrow_down"
+          @click="scrollChromosomes(-1)"
+          v-show="!isOpen"
+          />
+        <m-button
+          title="Scroll chromosomes up."
+          icon="keyboard_arrow_up"
+          @click="scrollChromosomes(+1)"
+          v-show="!isOpen"
+          />
+      </div>
+      <div>
+        {{currChr.name}}:{{this.context.coords.start}}..{{this.context.coords.end}}
+      </div>
+      <div>
+        <span v-if="context.currentList" class="listGlyph" :style="{ backgroundColor: context.currentList.color }"/>{{context.currentList ? ' ' + context.currentList.name : ''}}
+      </div>
+    </div>
   </div>
 </template>
 
@@ -179,5 +187,12 @@ export default MComponent({
 }
 .rotate90 {
   transform: rotate(90deg)scale(1,-1);
+}
+.listGlyph {
+  width: 10px;
+  height: 10px;
+  border-radius: 5px;
+  border: thin solid black;
+  display: inline-block;
 }
 </style>
