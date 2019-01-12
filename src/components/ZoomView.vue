@@ -24,6 +24,7 @@ import MComponent from '@/components/MComponent'
 import ZoomControls from '@/components/ZoomControls'
 import ZoomMain from '@/components/ZoomMain'
 import MMenu from '@/components/MMenu'
+import svg2png from '@/lib/Svg2Png'
 export default MComponent({
   name: 'ZoomView',
   props: ['context'],

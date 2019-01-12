@@ -54,20 +54,20 @@
           icon="zoom_in"
           @click="zoom(2 * cfg.defaultZoom)"
           style="font-weight:bold;"
-          help="Zoom in more."/>
+          title="Zoom in more."/>
         <m-button
           icon="zoom_in"
           @click="zoom(cfg.defaultZoom)"
-          help="Zoom in."/>
+          title="Zoom in."/>
         <m-button
           icon="zoom_out"
           @click="zoom(1 / cfg.defaultZoom)"
-          help="Zoom out."/>
+          title="Zoom out."/>
         <m-button
           icon="zoom_out"
           @click="zoom(1 / (2 * cfg.defaultZoom))"
           style="font-weight:bold;"
-          help="Zoom out more."/>
+          title="Zoom out more."/>
       </div>
       <!-- pan buttons -->
       <div class="flexrow">
@@ -76,21 +76,25 @@
           icon="chevron_left"
           @click="pan(-5 * cfg.defaultPan)"
           style="font-weight:bold;"
-          help="Pan left more."/>
+          title="Pan left more."/>
         <m-button
           icon="chevron_left"
           @click="pan(-cfg.defaultPan)"
-          help="Pan left."/>
+          title="Pan left."/>
         <m-button
           icon="chevron_right"
           @click="pan(cfg.defaultPan)"
-          help="Pan right."/>
+          title="Pan right."/>
         <m-button
           icon="chevron_right"
           @click="pan(5 * cfg.defaultPan)"
           style="font-weight:bold;"
-          help="Pan right more."/>
+          title="Pan right more."/>
       </div>
+      <m-button
+        icon="camera_alt"
+        @click="$root.$emit('camera-click')"
+        title="Download image."/>
     </div>
 </template>
 
