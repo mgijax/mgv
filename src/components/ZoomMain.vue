@@ -2,6 +2,7 @@
   <svg
     class="zoom-main"
     :height="height"
+    :width="width"
     @click="backgroundClick"
     >
     <zoom-fiducials
@@ -32,6 +33,7 @@
 import MComponent from '@/components/MComponent'
 import ZoomStrip from '@/components/ZoomStrip'
 import ZoomFiducials from '@/components/ZoomFiducials'
+import svg2png from '@/lib/Svg2Png'
 export default MComponent({
   name: 'ZoomMain',
   props: ['context'],
@@ -54,6 +56,9 @@ export default MComponent({
     }
   },
   methods: {
+    downloadImage: function () {
+      svg2png(this.$el, this.width, this.height)
+    },
     resize: function () {
       this.width = this.$el.parentNode.getBoundingClientRect().width
     },
@@ -98,6 +103,7 @@ export default MComponent({
       this.regionScrollDelta = 0
     })
     window.setTimeout(() => this.resize(), 1000)
+    this.$root.$on('camera-click', () => this.downloadImage())
   }
 })
 </script>

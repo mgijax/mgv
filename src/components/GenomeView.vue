@@ -4,7 +4,7 @@
 <template>
   <div class="flexcolumn">
     <div>{{genomeName}}</div>
-    <svg class="genome-view" :height="isOpen ? height : closedHeight">
+    <svg class="genome-view" :height="isOpen ? height : closedHeight" :width="width">
       <g :transform="`translate(0,${titleHeight})`">
         <genome-view-chromosome
            v-for="(c,i) in context.rGenome.chromosomes"
