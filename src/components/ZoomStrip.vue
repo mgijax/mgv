@@ -42,10 +42,9 @@
       :x="cfg.endCapWidth / 2"
       :y="height / 2 + 10"
       text-anchor="middle"
-      class="material-icons"
-      style="font-size: 20px;"
+      style="font-size: 20px; font-weight: bold;"
       fill="gray"
-      >drag_indicator<title>Drag up/down to reposition.</title></text>
+      >::<title>Drag up/down to reposition.</title></text>
     <!-- busy indicator -->
     <g
       v-show="busyCount > 0"
