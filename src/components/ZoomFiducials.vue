@@ -16,8 +16,11 @@
       :key="i"
       v-if="i > 0"
       :points="points(s.rects[i - 1].rect, s.rects[i].rect)"
+      fill="black"
+      fill-opacity="0.15"
+      stroke="black"
+      stroke-opacity="0.3"
       />
-
     </g>
   </g>
 </template>
@@ -88,10 +91,4 @@ export default MComponent({
 </script>
 
 <style scoped>
-.fiducial {
-  fill: black;
-  fill-opacity: 0.15;
-  stroke: black;
-  stroke-opacity: 0.3;
-}
 </style>
