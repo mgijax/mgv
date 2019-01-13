@@ -3,8 +3,46 @@
  */
 <template>
   <div class="flexcolumn">
-    <div>{{genomeName}}</div>
-    <svg class="genome-view" :height="isOpen ? height : closedHeight" :width="width">
+    <div class="flexrow" >
+      <div>{{genomeName}}</div>
+      <div
+        class="flexrow" 
+        style="justify-content: flex-start; flex-grow: unset;"
+        >
+        <m-button
+          title="Scroll chromosomes down."
+          icon="keyboard_arrow_down"
+          @click="scrollChromosomes(-1)"
+          v-show="!isOpen"
+          />
+        <m-button
+          title="Scroll chromosomes up."
+          icon="keyboard_arrow_up"
+          @click="scrollChromosomes(+1)"
+          v-show="!isOpen"
+          />
+        <m-button
+          title="Showing chromosomes with fixed length. Click to show proportional."
+          icon="sort"
+            v-show="fixedHeight"
+          @click="toggleHeight"
+          class="rotate90"
+          />
+        <m-button
+          title="Showing chromosomes with proportional lengths. Click to show fixed."
+          icon="dehaze"
+          v-show="!fixedHeight"
+          @click="toggleHeight"
+          class="rotate90"
+          />
+        <m-button
+          title="Download image."
+          @click="downloadImage"
+          icon="camera_alt"
+          />
+      </div>
+    </div>
+    <svg class="genome-view" ref="svg" :height="isOpen ? height : closedHeight" :width="width">
       <g :transform="`translate(0,${titleHeight})`">
         <genome-view-chromosome
            v-for="(c,i) in context.rGenome.chromosomes"
@@ -22,37 +60,6 @@
         </g>
     </svg>
     <div class="flexrow" style="justify-content: space-between;">
-      <div
-        class="flexrow" 
-        style="justify-content: flex-start; flex-grow: unset;"
-        >
-        <m-button
-          title="Showing chromosomes with fixed length. Click to show proportional."
-          icon="sort"
-            v-show="fixedHeight"
-          @click="toggleHeight"
-          class="rotate90"
-          />
-        <m-button
-          title="Showing chromosomes with proportional lengths. Click to show fixed."
-          icon="dehaze"
-          v-show="!fixedHeight"
-          @click="toggleHeight"
-          class="rotate90"
-          />
-        <m-button
-          title="Scroll chromosomes down."
-          icon="keyboard_arrow_down"
-          @click="scrollChromosomes(-1)"
-          v-show="!isOpen"
-          />
-        <m-button
-          title="Scroll chromosomes up."
-          icon="keyboard_arrow_up"
-          @click="scrollChromosomes(+1)"
-          v-show="!isOpen"
-          />
-      </div>
       <div>
         {{currChr.name}}:{{this.context.coords.start}}..{{this.context.coords.end}}
       </div>
@@ -68,6 +75,7 @@ import Vue from 'vue'
 import MComponent from '@/components/MComponent'
 import GenomeViewChromosome from '@/components/GenomeViewChromosome'
 import MButton from '@/components/MButton'
+import svg2png from '@/lib/Svg2Png'
 export default MComponent({
   name: 'GenomeView',
   components: { GenomeViewChromosome, MButton },
@@ -127,6 +135,9 @@ export default MComponent({
     }
   },
   methods: {
+    downloadImage: function () {
+      svg2png(this.$refs.svg, 'mgv.genomeview.png')
+    },
     // Returns the length in pixels to draw chromosome c
     chrLen: function (c) {
       let l = this.isOpen ? this.innerHeight : this.innerWidth
@@ -174,6 +185,7 @@ export default MComponent({
     Vue.nextTick(() => {
       this.resize()
     })
+    this.$root.$on('camera-click', (v) => v === 'genomeview' && this.downloadImage())
   }
 })
 </script>

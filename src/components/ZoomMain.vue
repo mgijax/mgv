@@ -57,7 +57,8 @@ export default MComponent({
   },
   methods: {
     downloadImage: function () {
-      svg2png(this.$el, this.width, this.height)
+      const fname = `mgv.zoomview.png`
+      svg2png(this.$el, fname)
     },
     resize: function () {
       this.width = this.$el.parentNode.getBoundingClientRect().width
@@ -103,7 +104,7 @@ export default MComponent({
       this.regionScrollDelta = 0
     })
     window.setTimeout(() => this.resize(), 1000)
-    this.$root.$on('camera-click', () => this.downloadImage())
+    this.$root.$on('camera-click', (v) => v === 'zoomview' && this.downloadImage())
   }
 })
 </script>

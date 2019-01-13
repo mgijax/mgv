@@ -93,7 +93,7 @@
       </div>
       <m-button
         icon="camera_alt"
-        @click="$root.$emit('camera-click')"
+        @click="$root.$emit('camera-click','zoomview')"
         title="Download image."/>
     </div>
 </template>
