@@ -43,6 +43,13 @@
       </div>
     </div>
     <svg class="genome-view" ref="svg" :height="isOpen ? height : closedHeight" :width="width">
+      <rect
+        x=0
+        y=0
+        :width="width"
+        :height="height"
+        fill="#e1e1e1"
+        />
       <g :transform="`translate(0,${titleHeight})`">
         <genome-view-chromosome
            v-for="(c,i) in context.rGenome.chromosomes"

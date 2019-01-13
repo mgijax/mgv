@@ -5,6 +5,13 @@
     :width="width"
     @click="backgroundClick"
     >
+    <rect
+      x=0
+      y=0
+      :width="width"
+      :height="height"
+      fill="#e1e1e1"
+      />
     <zoom-fiducials
       :features="context.currentSelection"
       :currentMouseover="context.currentMouseover"
