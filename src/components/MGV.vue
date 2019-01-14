@@ -477,8 +477,8 @@ export default MComponent({
         this.currentEditList = this.listManager.newList(data.name, data.items, data.color)
       } else {
         this.currentEditList = null
+        this.$refs.listEditor.open()
       }
-      this.$refs.listEditor.open()
     })
     //
     this.$root.$on('list-edit-open', data => {

@@ -219,11 +219,13 @@ export default MComponent({
       let tv = this.$refs.textarea.value
       this.items = tv.split(/\s+/).filter(x => x)
       this.$root.$emit('list-edit-save', this.$data)
+      this.$parent.close()
     },
     create: function () {
       let tv = this.$refs.textarea.value
       this.items = tv.split(/\s+/).filter(x => x)
       this.$root.$emit('list-edit-new', this.$data)
+      this.$parent.close()
     },
     clear: function () {
       this.$root.$emit('list-edit-cancel')

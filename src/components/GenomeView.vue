@@ -22,18 +22,17 @@
           v-show="!isOpen"
           />
         <m-button
-          title="Showing chromosomes with fixed length. Click to show proportional."
+          :title="fixedHeight ?
+            'Showing chromosomes with fixed length. Click to show proportional.'
+           :'Showing chromosomes with proportional lengths. Click to show fixed.'"
           icon="sort"
-            v-show="fixedHeight"
           @click="toggleHeight"
           class="rotate90"
           />
         <m-button
-          title="Showing chromosomes with proportional lengths. Click to show fixed."
-          icon="dehaze"
-          v-show="!fixedHeight"
-          @click="toggleHeight"
-          class="rotate90"
+          :title="showLabels ? 'Hide labels' : 'Show labels'"
+          icon="title"
+          @click="showLabels = !showLabels"
           />
         <m-button
           title="Download image."
@@ -42,7 +41,13 @@
           />
       </div>
     </div>
-    <svg class="genome-view" ref="svg" :height="isOpen ? height : closedHeight" :width="width">
+    <svg
+      class="genome-view"
+      ref="svg"
+      :height="isOpen ? height : closedHeight"
+      :width="width"
+      style="font-family: sans-serif;"
+      >
       <rect
         x=0
         y=0
@@ -63,6 +68,8 @@
           :width="chrWidth"
           :currentList="currentListGenologs"
           :currentListColor="context.currentList ? context.currentList.color : 'gray'"
+          :showLabels="showLabels"
+          :glyphRadius="5"
           />
         </g>
     </svg>
@@ -97,7 +104,8 @@ export default MComponent({
       openHeight: 250,
       closedHeight: 100,
       scrollDelta: 0,
-      fixedHeight: false
+      fixedHeight: false,
+      showLabels: true
     }
   },
   computed: {
@@ -168,7 +176,7 @@ export default MComponent({
         return `translate(${this.padding + (i + 0.5) * dx},0)`
       } else {
         let currI = this.context.rGenome.chromosomes.indexOf(this.currChr)
-        let dy = (currI - i + this.scrollDelta) * this.chrWidth * 4
+        let dy = (currI - i + this.scrollDelta) * this.chrWidth * 5
         return `translate(${this.padding},${dy})`
       }
     },
