@@ -131,7 +131,7 @@ export default MComponent({
         let prev = nrs[nrs.length - 1]
         if (prev && prev.index === r.index) return nrs
         totalLength += (r.end - r.start + 1)
-        if (!prev || prev.index + 1 !== r.index) {
+        if (!prev || prev.index + 1 !== r.index || prev.ori !== r.ori) {
           nrs.push(r)
         } else {
           prev.end = r.end
