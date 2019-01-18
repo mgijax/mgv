@@ -51,19 +51,11 @@
             :initialX="250"
             :initialY="337"
             :initiallyOpen="false"
+            iconClose="close"
             ><list-editor
               title="Examine/modify the contents of a list. Create a new list. Combine lists with intersection, union, and difference."
               :list="currentEditList"
               ref="listEditor"
-              />
-          </page-box>
-          <!--
-          ============ Settings ==============
-          -->
-          <page-box label="Settings">
-            <settings
-              title="Settings."
-              ref="settings"
               />
           </page-box>
           <!--
@@ -75,6 +67,15 @@
             <facets
               title="Limit what feature are displayed by different criteria."
               ref="facets"
+              />
+          </page-box>
+          <!--
+          ============ Settings ==============
+          -->
+          <page-box label="Settings">
+            <settings
+              title="Settings."
+              ref="settings"
               />
           </page-box>
         </page-box-container>
@@ -224,6 +225,8 @@ export default MComponent({
       currentList: null,
       // index into currently diaplayed list (for cycling through the features)
       currentListItem: 0,
+      // current list as a Set for fast membership testing
+      currentListSet: null,
       // list currently being edited
       currentEditList: null,
       // flag to indicate when there are currently enabled facets
@@ -442,18 +445,22 @@ export default MComponent({
     //
     this.$root.$on('list-click', data => {
       let lst = data.list || data
-      let evt = data.event
+      let shift = data.event ? data.event.shiftKey : false
       if (lst === this.currentList) {
-        if (evt.shiftKey) {
+        if (shift) {
+          // shift-click repeatedly on a list to step through its members
           this.currentListItem = (this.currentListItem + 1) % lst.items.length
         } else {
           this.currentList = null
+          this.currentListSet = null
           this.currentListItem = 0
           return
         }
       } else {
         this.currentList = lst
+        this.currentListSet = new Set(lst.items)
         this.currentListItem = 0
+        if (!shift) return
       }
       let lm = lst.items[this.currentListItem]
       this.setContext({ landmark: lm, delta: 0, currentSelection: [lm] })
@@ -470,8 +477,8 @@ export default MComponent({
         this.currentEditList = this.listManager.newList(data.name, data.items, data.color)
       } else {
         this.currentEditList = null
+        this.$refs.listEditor.open()
       }
-      this.$refs.listEditor.open()
     })
     //
     this.$root.$on('list-edit-open', data => {

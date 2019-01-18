@@ -1,11 +1,5 @@
 <template>
   <g transform="translate(0,0)" class="zoom-region">
-  <!--
-  <busy-indicator
-    svg="true"
-    v-if="busy"
-    />
-  -->
   <svg
     @mouseover.stop="mouseover"
     @mouseout.stop="mouseout"
@@ -23,10 +17,10 @@
         v-if="(dragging || trackMouse) && currRange"
         >
         <text
-          :x="(currRange[0] + currRange[1]) / 2"
-          :y="-zeroOffset + Math.max(height, 10) + 12"
+          :x="currRangeTextX"
+          :y="-zeroOffset + Math.max(height, 10) + 10"
           font-size="10"
-          text-anchor="middle"
+          :text-anchor="currRangeAnchor"
           >
           {{chr.name}}:{{p2b(currRange[0])}}{{currRange[0] !== currRange[1] ? '..' + p2b(currRange[1]) : ''}}
           </text>
@@ -61,11 +55,12 @@
         :y2="0"
         stroke="black"
         :transform="`translate(${-regionScrollDelta},0)`"
+        v-show="!spreadTranscripts || !showDetails"
         />
       <!-- ======= label ======= -->
       <text
         x="50%"
-        :y="height - zeroOffset"
+        :y="height - zeroOffset + 10"
         text-align="center"
         alignment-baseline="hanging"
         fill="black"
@@ -82,8 +77,9 @@
         <tspan
           v-for="(b,i) in sequence"
           :key="i"
-          :x="b2p(seqStart + i)"
+          :x="b2p(seqStart + i + 1.5)"
           :fill="baseColor(b)"
+          text-anchor="middle"
           >{{b}}</tspan>
       </text>
       <!-- ======= Features ======= -->
@@ -93,10 +89,19 @@
         :name="f.ID"
         :canonical="f.cID"
         class="feature"
-        :class="{ highlight: featureHighlighted(f) || featureSelected(f) }"
+        :class="{ highlight: featureHighlighted(f) || featureSelected(f) || featureInList(f) }"
         :transform="featureTransform(f)"
         v-show="featureVisible(f)"
         >
+        <rect
+          class="outline"
+          :x="featureX(f)"
+          :y="0"
+          :height="featureH(f)"
+          :width="featureW(f)"
+          :style="featureStyle(f)"
+          :fill-opacity="showDetails ? 0.3 : 1"
+          />
         <!-- ======= Transcripts ======= -->
         <g
           v-if="showDetails"
@@ -124,26 +129,17 @@
           <!-- transcript label -->
           <text
             v-if="spreadTranscripts && showDetails && showTranscriptLabels"
-            :x="featureX(t.exons[0])"
+            :x="transcriptTextX(t)"
             :y="featureHeight"
             :font-size="transcriptFontSize"
             alignment-baseline="hanging"
             >{{t.tID}}</text>
         </g>
-        <!-- put the feature's rect on top of the transcripts -->
-        <rect
-          class="outline"
-          :x="featureX(f)"
-          :y="0"
-          :height="featureH(f)"
-          :width="featureW(f)"
-          :style="featureStyle(f)"
-          :fill-opacity="showDetails ? 0.3 : 1"
-          />
+        <!-- feature label -->
         <text
           class="symbol"
-          v-if="(showDetails && showFeatureLabels) || featureSelected(f) || featureHighlighted(f)"
-          :x="b2p(f.start + f.length / 2)"
+          v-if="(showDetails && showFeatureLabels) || featureSelected(f) || featureHighlighted(f) || featureInList(f)"
+          :x="featureTextX(f)"
           :y="0"
           :font-size="featureFontSize"
           :style="{
@@ -167,7 +163,6 @@ import MComponent from '@/components/MComponent'
 import MBrush from '@/components/MBrush'
 import u from '@/lib/utils'
 import { TextSpreader } from '@/lib/Layout'
-import BusyIndicator from '@/components/BusyIndicator'
 //
 document.body.addEventListener('keydown', function (e) {
   if (e.code === 'Tab') {
@@ -182,7 +177,7 @@ document.body.addEventListener('keyup', function (e) {
 //
 export default MComponent({
   name: 'ZoomRegion',
-  components: { MBrush, BusyIndicator },
+  components: { MBrush },
   inject: ['featureColorMap', 'getFacets'],
   props: {
     // the app context
@@ -263,6 +258,15 @@ export default MComponent({
     trackMouse: function () {
       return this.cfg.trackMouse
     },
+    currRangeAnchor: function () {
+      if (this.currRangeTextX < 25) return 'start'
+      else if (this.width - this.currRangeTextX < 25) return 'end'
+      else return 'middle'
+    },
+    currRangeTextX: function () {
+      if (!this.currRange) return 0
+      return (this.currRange[0] + this.currRange[1]) / 2
+    },
     spreadTranscripts: function () {
       return this.cfg.spreadTranscripts
     },
@@ -317,23 +321,23 @@ export default MComponent({
       if (this.showDetails && this.spreadTranscripts) {
         return 0
       } else {
-        let x = this.features.filter(f => f.strand === '+').reduce((v, f) => Math.max(v, f.lane), 0)
+        let x = this.features.filter(f => f.strand === '+' && this.featureVisible(f)).reduce((v, f) => Math.max(v, f.lane), 0)
         return x
       }
     },
     maxLaneM: function () {
       if (this.showDetails && this.spreadTranscripts) {
-        return this.features.reduce((v, f) => Math.max(v, f.lane2 + f.tCount), 0)
+        return this.features.filter(f => this.featureVisible(f)).reduce((v, f) => Math.max(v, f.lane2 + f.tCount), 0)
       } else {
-        return this.features.filter(f => f.strand === '-').reduce((v, f) => Math.max(v, f.lane), 0)
+        return this.features.filter(f => f.strand === '-' && this.featureVisible(f)).reduce((v, f) => Math.max(v, f.lane), 0)
       }
     },
     height: function () {
-      let h = (this.allMaxLaneP + this.allMaxLaneM) * (this.featureHeight + this.laneGap) + this.laneGap
+      let h = (this.allMaxLaneP + this.allMaxLaneM) * (this.featureHeight + this.laneGap) + this.laneGap + 4
       return h
     },
     zeroOffset: function () {
-      return this.allMaxLaneP * (this.featureHeight + this.laneGap) + this.laneGap
+      return this.allMaxLaneP * (this.featureHeight + this.laneGap) + Math.max(this.laneGap, 10)
     }
   },
   watch: {
@@ -429,9 +433,18 @@ export default MComponent({
     featureSelected: function (f) {
       return this.selectedSet.has(f.cID) || this.selectedSet.has(f.ID)
     },
+    featureInList: function (f) {
+      let s = this.context.currentListSet
+      return s && (s.has(f.cID) || s.has(f.ID))
+    },
     featureVisible: function (f) {
       let overlaps = f.start <= (this.end + this.deltaB) && f.end >= (this.start + this.deltaB)
       return overlaps && this.getFacets().test(f)
+    },
+    featureTextX: function (f) {
+      let s = Math.max(f.start, this.start + this.deltaB)
+      let e = Math.min(f.end, this.end + this.deltaB)
+      return this.b2p((s + e) / 2)
     },
     featureStyle (f) {
       let fill = this.featureColor(f)
@@ -453,6 +466,10 @@ export default MComponent({
     },
     transcriptX2 (t) {
       return this.b2p(Math.max.apply(null, t.exons.map(e => e.end)))
+    },
+    transcriptTextX: function (t) {
+      let s = Math.max(t.exons[0].start, this.start + this.deltaB)
+      return this.b2p(s)
     },
     transcriptTransform (f, t, ti) {
       let y = this.spreadTranscripts ? ti * (this.featureHeight + this.laneGap) : 0
@@ -490,32 +507,38 @@ export default MComponent({
       let delta = Math.round((this.end - this.start + 1) / 2)
       this.seqStart = this.start
       this.busy = true
+      this.$emit('busy-start')
       this.dataManager.getFeatures(this.genome, this.chr, this.start - delta, this.end + delta).then(feats => {
         this.busy = false
         if (this.showDetails) {
           this.dataManager.getModels(this.genome, this.chr, this.start, this.end).then(models => {
             let ix = u.index(models, 'gID')
             feats.forEach(f => {
-              if (f.tCount === f.transcripts.length) return
+              // only load them the 1st time
+              if (f.transcripts.length) return
               let ts = ix[f.ID]
               ts && ts.transcripts.forEach(t => f.transcripts.push(t))
             })
             this.features = feats
             this.nextTick(() => this.$emit('region-draw', this))
+            this.$emit('busy-end')
           })
         } else {
           this.features = feats
           this.nextTick(() => this.$emit('region-draw', this))
+          this.$emit('busy-end')
         }
         if (this.showSequence) {
+          this.$emit('busy-start')
           this.dataManager.getSequence(this.genome, this.chr, this.start, this.end).then(data => {
             this.seqStart = data.start
             this.sequence = data.seq
+            this.$emit('busy-end')
           })
         } else {
           this.sequence = ''
         }
-      })
+      }).catch(() => this.$emit('busy-end'))
     },
     getEventFeature (e) {
       let f = e.target.closest('.feature')
@@ -565,11 +588,11 @@ export default MComponent({
       u.dragify(this.$el, {
         dragstart: function (e, d) {
           // if here because user clicked on a feature, cancel the drag
-          if (e.target.closest('.feature')) return false
           this.dragging = true
           this.dragData = d
           d.dragged = false
-          d.bb = this.$el.getBoundingClientRect()
+          // d.bb = this.$el.getBoundingClientRect()
+          d.bb = this.$refs.underlay.getBoundingClientRect()
           d.shiftDrag = e.shiftKey
         },
         drag: function (e, d) {
@@ -583,6 +606,7 @@ export default MComponent({
           }
         },
         dragend: function (e, d) {
+          this.$root.$emit('region-dragend')
           if (!d.dragged) {
             // this was actually just a click
             this.$root.$emit('context', { currentSelection: [] })
@@ -616,19 +640,18 @@ export default MComponent({
                 end: this.end + this.deltaB
               }
             }
-            let cr = this.currRange
-            this.currRange = [ cr[0] + this.deltaB, cr[1] + this.deltaB ]
           }
           //
           this.$root.$emit('context', nc)
-          this.$root.$emit('region-dragend', 0)
           //
           // for some reason, a click event is fired at mouseup, even though dragify handlers call
           // stopPropagation and preventDefault. So here we just set a little flag for ourselves to ignore
           // the next click event (see method clicked() above).
+          //
           this.absorbNextClick = true
           this.dragData = null
           this.dragging = false
+          this.currRange = null
         }
       }, this.$root.$el, this)
     }
@@ -645,5 +668,13 @@ export default MComponent({
 }
 .feature .transcript {
   transition: transform 0.5s;
+}
+.feature.pulse {
+  outline-color: yellow;
+  outline-width: 6px;
+  animation: blinker 1s linear infinite;
+}
+@keyframes blinker {
+  50% { outline-width: 0px; }
 }
 </style>

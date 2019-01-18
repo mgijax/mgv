@@ -105,9 +105,9 @@ class DataManager extends DataSource {
     // transcript block size
     let tbs = config.DataManager.transcriptBlockSize
     // start of first block
-    let s2 = Math.floor(s / tbs) * tbs
+    let s2 = Math.floor(s / tbs) * tbs + 1
     // end of last block
-    let e2 = Math.floor(e / tbs) * tbs + tbs - 1
+    let e2 = Math.floor(e / tbs) * tbs + tbs
     //
     return this.proxy.getModels(g, c, s2, e2)
   }

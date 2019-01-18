@@ -16,8 +16,11 @@
       :key="i"
       v-if="i > 0"
       :points="points(s.rects[i - 1].rect, s.rects[i].rect)"
+      fill="black"
+      fill-opacity="0.15"
+      stroke="black"
+      stroke-opacity="0.3"
       />
-
     </g>
   </g>
 </template>
@@ -73,30 +76,19 @@ export default MComponent({
       }
       return stacks
     },
-    update () {
-      this.stacks = this.getStacks()
+    update (n) {
+      u.afterTicks(n || 0, function () { this.stacks = this.getStacks() }, this)
     }
   },
   mounted: function () {
     this.$root.$on('region-drag', dx => { this.deltaX = dx })
     this.$root.$on('region-dragend', () => { this.deltaX = 0 })
-    this.$root.$on('facet-state', () => {
-      this.$nextTick(() => {
-        this.stacks = this.getStacks()
-      })
-    })
-    this.$watch('$props', function () {
-      u.afterTicks(3, this.update, this)
-    }, { deep: true })
+    this.$root.$on('facet-state', () => this.update(1))
+    this.$root.$on('list-click', () => this.update(4))
+    this.$watch('$props', () => this.update(3), { deep: true })
   }
 })
 </script>
 
 <style scoped>
-.fiducial {
-  fill: black;
-  fill-opacity: 0.15;
-  stroke: black;
-  stroke-opacity: 0.3;
-}
 </style>

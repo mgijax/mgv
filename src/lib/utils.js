@@ -157,6 +157,24 @@ function eachTick (nTicks, fcn, thisObj, ...args) {
   }
 }
 //
+// ---------------------------------------------
+// Returns the given basepair amount "pretty printed" to an apporpriate scale, precision, and units.
+// Eg,
+//    127 => '127 bp'
+//    123456789 => '123.5 Mb'
+function prettyPrintBases (n) {
+  let absn = Math.abs(n)
+  if (absn < 1000) {
+    return `${n} bp`
+  }
+  if (absn >= 1000 && absn < 1000000) {
+    return `${(n/1000).toFixed(2)} kb`
+  }
+  else {
+    return `${(n/1000000).toFixed(2)} Mb`
+  }
+}
+
 export default {
   fail,
   assert,
@@ -165,5 +183,6 @@ export default {
   removeDups,
   randomColor,
   afterTicks,
-  eachTick
+  eachTick,
+  prettyPrintBases
 }

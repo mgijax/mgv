@@ -2,8 +2,16 @@
   <svg
     class="zoom-main"
     :height="height"
+    :width="width"
     @click="backgroundClick"
     >
+    <rect
+      x=0
+      y=0
+      :width="width"
+      :height="height"
+      fill="#e1e1e1"
+      />
     <zoom-fiducials
       :features="context.currentSelection"
       :currentMouseover="context.currentMouseover"
@@ -32,6 +40,7 @@
 import MComponent from '@/components/MComponent'
 import ZoomStrip from '@/components/ZoomStrip'
 import ZoomFiducials from '@/components/ZoomFiducials'
+import svg2png from '@/lib/Svg2Png'
 export default MComponent({
   name: 'ZoomMain',
   props: ['context'],
@@ -54,6 +63,10 @@ export default MComponent({
     }
   },
   methods: {
+    downloadImage: function () {
+      const fname = `mgv.zoomview.png`
+      svg2png(this.$el, fname)
+    },
     resize: function () {
       this.width = this.$el.parentNode.getBoundingClientRect().width
     },
@@ -61,7 +74,7 @@ export default MComponent({
       let dy = 0
       this.context.vGenomes.forEach(vg => {
         vg.zoomY = dy
-        dy += vg.height + 24
+        dy += vg.height + 34
       })
       this.height = dy
     },
@@ -98,6 +111,7 @@ export default MComponent({
       this.regionScrollDelta = 0
     })
     window.setTimeout(() => this.resize(), 1000)
+    this.$root.$on('camera-click', (v) => v === 'zoomview' && this.downloadImage())
   }
 })
 </script>

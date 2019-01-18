@@ -2,41 +2,85 @@
  * GenomeView.vue
  */
 <template>
-  <div>
-  <svg class="genome-view" :height="isOpen ? height : closedHeight">
-  <text x=12 y=20 fill="black" stroke="none">{{genomeName}} {{currChr.name}}:{{this.context.coords.start}}..{{this.context.coords.end}} {{context.currentList ? context.currentList.name : ''}} </text>
-  <g :transform="`translate(0,${titleHeight})`">
-      <genome-view-chromosome
-         v-for="(c,i) in context.rGenome.chromosomes"
-        :transform="transformChr(c,i)"
-        :key="c.name"
-        :genome="context.rGenome"
-        :chromosome="c"
-        :orientation="orientation"
-        :ppb="ppb"
-        :coords="context.coords"
-        :width="chrWidth"
-        :currentList="currentListGenologs"
-        :currentListColor="context.currentList ? context.currentList.color : 'gray'"
+  <div class="flexcolumn">
+    <div class="flexrow" >
+      <div>{{genomeName}}</div>
+      <div
+        class="flexrow" 
+        style="justify-content: flex-start; flex-grow: unset;"
+        >
+        <m-button
+          title="Scroll chromosomes down."
+          icon="keyboard_arrow_down"
+          @click="scrollChromosomes(-1)"
+          v-show="!isOpen"
+          />
+        <m-button
+          title="Scroll chromosomes up."
+          icon="keyboard_arrow_up"
+          @click="scrollChromosomes(+1)"
+          v-show="!isOpen"
+          />
+        <m-button
+          :title="fixedHeight ?
+            'Showing chromosomes with fixed length. Click to show proportional.'
+           :'Showing chromosomes with proportional lengths. Click to show fixed.'"
+          icon="sort"
+          @click="toggleHeight"
+          class="rotate90"
+          />
+        <m-button
+          :title="showLabels ? 'Hide labels' : 'Show labels'"
+          icon="title"
+          @click="showLabels = !showLabels"
+          />
+        <m-button
+          title="Download image."
+          @click="downloadImage"
+          icon="camera_alt"
+          />
+      </div>
+    </div>
+    <svg
+      class="genome-view"
+      ref="svg"
+      :height="isOpen ? height : closedHeight"
+      :width="width"
+      style="font-family: sans-serif;"
+      >
+      <rect
+        x=0
+        y=0
+        :width="width"
+        :height="height"
+        fill="#e1e1e1"
         />
-    </g>
-  </svg>
-  <div
-    class="flexrow"
-    style="justify-content: flex-start; "
-    v-show="!isOpen"
-    >
-    <m-button
-      title="Scroll chromosomes down."
-      icon="keyboard_arrow_down"
-      @click="scrollChromosomes(-1)"
-      />
-    <m-button
-      title="Scroll chromosomes up."
-      icon="keyboard_arrow_up"
-      @click="scrollChromosomes(+1)"
-      />
-  </div>
+      <g :transform="`translate(0,${titleHeight})`">
+        <genome-view-chromosome
+           v-for="(c,i) in context.rGenome.chromosomes"
+          :transform="transformChr(c,i)"
+          :key="c.name"
+          :genome="context.rGenome"
+          :chromosome="c"
+          :orientation="orientation"
+          :height="chrLen(c)"
+          :coords="context.coords"
+          :width="chrWidth"
+          :currentList="currentListGenologs"
+          :currentListColor="context.currentList ? context.currentList.color : 'gray'"
+          :showLabels="showLabels"
+          :glyphRadius="5"
+          />
+        </g>
+    </svg>
+    <div class="flexrow" style="justify-content: space-between;">
+      <div>
+        {{currChr.name}}:{{this.context.coords.start}}..{{this.context.coords.end}}
+      </div>
+      <div>
+        <span v-if="context.currentList" class="listGlyph" :style="{ backgroundColor: context.currentList.color }"/>{{context.currentList ? ' ' + context.currentList.name : ''}}
+      </div>
+    </div>
   </div>
 </template>
 
@@ -45,6 +89,7 @@ import Vue from 'vue'
 import MComponent from '@/components/MComponent'
 import GenomeViewChromosome from '@/components/GenomeViewChromosome'
 import MButton from '@/components/MButton'
+import svg2png from '@/lib/Svg2Png'
 export default MComponent({
   name: 'GenomeView',
   components: { GenomeViewChromosome, MButton },
@@ -58,7 +103,9 @@ export default MComponent({
       padding: 10,
       openHeight: 250,
       closedHeight: 100,
-      scrollDelta: 0
+      scrollDelta: 0,
+      fixedHeight: false,
+      showLabels: true
     }
   },
   computed: {
@@ -103,6 +150,14 @@ export default MComponent({
     }
   },
   methods: {
+    downloadImage: function () {
+      svg2png(this.$refs.svg, 'mgv.genomeview.png')
+    },
+    // Returns the length in pixels to draw chromosome c
+    chrLen: function (c) {
+      let l = this.isOpen ? this.innerHeight : this.innerWidth
+      return l * (this.fixedHeight ? 1 : c.length / this.maxChrLen)
+    },
     resize: function () {
       this.width = this.$el.getBoundingClientRect().width
       this.openHeight = this.cfg.openHeight
@@ -121,9 +176,12 @@ export default MComponent({
         return `translate(${this.padding + (i + 0.5) * dx},0)`
       } else {
         let currI = this.context.rGenome.chromosomes.indexOf(this.currChr)
-        let dy = (currI - i + this.scrollDelta) * this.chrWidth * 4
+        let dy = (currI - i + this.scrollDelta) * this.chrWidth * 5
         return `translate(${this.padding},${dy})`
       }
+    },
+    toggleHeight: function () {
+      this.fixedHeight = !this.fixedHeight
     }
   },
   watch: {
@@ -142,6 +200,7 @@ export default MComponent({
     Vue.nextTick(() => {
       this.resize()
     })
+    this.$root.$on('camera-click', (v) => v === 'genomeview' && this.downloadImage())
   }
 })
 </script>
@@ -152,5 +211,15 @@ export default MComponent({
     -moz-transition: transform 0.5s;
     -o-transition: transform 0.5s;
     transition: transform 0.5s;
+}
+.rotate90 {
+  transform: rotate(90deg)scale(1,-1);
+}
+.listGlyph {
+  width: 10px;
+  height: 10px;
+  border-radius: 5px;
+  border: thin solid black;
+  display: inline-block;
 }
 </style>
