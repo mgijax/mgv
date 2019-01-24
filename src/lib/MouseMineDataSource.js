@@ -39,7 +39,7 @@ class MouseMineDataSource extends DataSource {
     let q = `
       <query
         model="genomic"
-        view="Strain.primaryIdentifier Strain.name Strain.organism.name Strain.attributeString"
+        view="Strain.primaryIdentifier Strain.name Strain.organism.taxonId Strain.attributeString"
         sortOrder="Strain.name ASC"
         >
         <constraint path="Strain" op="IN" value="Annotated strains" code="A" />
@@ -48,7 +48,7 @@ class MouseMineDataSource extends DataSource {
       return {
         ID: r[0],
         name: r[1],
-        organism: r[2],
+        taxonid: r[2],
         attrString: r[3]
       }
     }
@@ -189,7 +189,6 @@ class MouseMineDataSource extends DataSource {
       </query>`
     let query = encodeURIComponent(q)
     let url = this.seqSliceUrl + `start=${s - 1}&end=${e}&query=${query}`
-    console.log(url)
     return this.fetch(url).then(data => data.features[0])
   }
   //

@@ -14,6 +14,7 @@ import gc from '@/lib/GenomeCoordinates'
 import u from '@/lib/utils'
 import { SwimLaneAssigner, FeaturePacker, ContigAssigner } from '@/lib/Layout'
 import config from '@/config'
+import { GenomeRegistrar, InterMineSequenceReader, MouseMineSequenceReader, ChunkedGff3FileReader } from '@/lib/GenomeDataFetcher'
 
 class DataManager extends DataSource {
   constructor (proxy) {
@@ -24,6 +25,8 @@ class DataManager extends DataSource {
     this.cid2feats = {} // cID -> [ features ]
     this.symbol2feats = {} // symbol -> [ features ]
     this.proxy = proxy // actual data source
+    this.greg = new GenomeRegistrar()
+    this.genomes = this.greg.register('.')
   }
   getFeatureById (id) {
     return this.id2feat[id]
@@ -39,24 +42,17 @@ class DataManager extends DataSource {
     if (f) return [f]
     return this.getFeaturesByCid(val) || this.getFeaturesBySymbol(val) || []
   }
-  // Returns a promise for all the genomes we know about
+  // Returns a promise for all the genomes we know about.
   getGenomes () {
-    return this.proxy.getGenomes().then(genomes => {
+    // return this.proxy.getGenomes().then(genomes => {
+    return this.genomes.then(genomes => {
       genomes.forEach((g, i) => {
         g.height = 60
         g.zoomY = i * g.height
         g.dragY = 0
-        g.chromosomes = []
+        // g.chromosomes = []
       })
       return genomes
-    })
-  }
-  // Returns a promise for all the chromosomes of genome g
-  getChromosomes (g) {
-    return this.proxy.getChromosomes(g).then(chrs => {
-      g.chromosomes = chrs
-      chrs.forEach(c => { c.genome = g })
-      return chrs
     })
   }
   // Returns a promise that resolves when all features of genome g have been loaded and registered.
@@ -120,6 +116,7 @@ class DataManager extends DataSource {
     return this.proxy.getSequence(g, c, s, e)
   }
   // Returns the genologs of feature f from the specified genomes in the specified order.
+  // If a genolog does not exist in a given genome, that entry in the returned list === undefined.
   getGenologs (f, genomes) {
     let feats
     if (typeof f === 'string') {

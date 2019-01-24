@@ -1,4 +1,5 @@
 import Vue from 'vue'
+import gff from '@/lib/gff3lite'
 
 //
 function fail (e) {
@@ -174,9 +175,33 @@ function prettyPrintBases (n) {
     return `${(n/1000000).toFixed(2)} Mb`
   }
 }
-
+// ---------------------------------------------
+//
+function fetch (url, type) {
+  const types = ['text', 'json', 'gff3']
+  if (!type) type = 'text'
+  if (types.indexOf(type) === -1) return Promise.reject('Unknown type: ' + type)
+  return self.fetch(url).then(r => {
+    switch (type) {
+    case 'text':
+      return r.text()
+    case 'json':
+      return r.json()
+    case 'gff3':
+      return r.text().then(t => gff.parseFile(t))
+    default:
+      u.fail('Unknown type: ' + type)
+    }
+  })
+}
+// ---------------------------------------------
+function concatAll (listOfLists) {
+  return [].concat.apply([], listOfLists)
+}
+// ---------------------------------------------
 export default {
   fail,
+  concatAll,
   assert,
   index,
   dragify,
@@ -184,5 +209,6 @@ export default {
   randomColor,
   afterTicks,
   eachTick,
-  prettyPrintBases
+  prettyPrintBases,
+  fetch
 }

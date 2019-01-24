@@ -18,6 +18,9 @@ export default {
   PageBox: {
   },
   MGV: {
+    defaultUrls: [
+      'http://localhost:5000'
+    ],
     genomeSets: [{
       label: 'DO/CC founders',
       ref: 'C57BL/6J',

@@ -239,6 +239,9 @@ export default MComponent({
     }
   },
   methods: {
+    // Returns a promise for the list of genome info objects
+    initializeData: function () {
+    },
     resize: function () {
       this.$root.$emit('resize')
     },
@@ -501,16 +504,11 @@ export default MComponent({
     // Kick things off by getting all the genomes we know about and all their chomosomes (names and lengths)
     //
     this.dataManager.getGenomes().then(genomes => {
-      let promises = genomes.map(g => this.dataManager.getChromosomes(g).then(chrs => {
-        g.chromosomes = chrs
-      }))
-      Promise.all(promises).then(() => {
-        console.log('MGV: setting initial context', this.historyManager.initialHash)
-        this.allGenomes = genomes // all the genomes (at least one)
-        this.rGenome = genomes[0] // current reference genome (always set)
-        this.vGenomes = [genomes[0]] // currently visible genomes (always contains reference)
-        this.setContext(this.historyManager.initialHash, true)
-      })
+      console.log('MGV: setting initial context', this.historyManager.initialHash)
+      this.allGenomes = genomes // all the genomes (at least one)
+      this.rGenome = genomes[0] // current reference genome (always set)
+      this.vGenomes = [genomes[0]] // currently visible genomes (always contains reference)
+      this.setContext(this.historyManager.initialHash, true)
     })
   }
 })
