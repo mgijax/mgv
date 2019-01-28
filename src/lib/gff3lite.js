@@ -60,10 +60,11 @@ function parseLine (s, returnObjects) {
   return returnObjects ? record2object(r) : r
 }
 function parseFile (s, returnObjects) {
-  return s.split(NL).map(l => parseLine(l, returnObjects))
+  return s.split(NL).filter(l => l).map(l => parseLine(l, returnObjects))
 }
 export default {
   parseFile,
   parseLine,
-  parseAttributes
+  parseAttributes,
+  record2object
 }

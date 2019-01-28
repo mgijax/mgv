@@ -190,13 +190,26 @@ function fetch (url, type) {
     case 'gff3':
       return r.text().then(t => gff.parseFile(t))
     default:
-      u.fail('Unknown type: ' + type)
+      fail('Unknown type: ' + type)
     }
   })
 }
 // ---------------------------------------------
 function concatAll (listOfLists) {
   return [].concat.apply([], listOfLists)
+}
+// ---------------------------------------------
+// Returns the unique items from list, based on the provided key function.
+// Items are returns in order of ther first appearance in the list.
+function uniqueItems (list, key) {
+  key = key || (x => x)
+  const seen = new Set
+  return list.map(item => {
+    const k = key(item)
+    if (seen.has(k)) return null
+    seen.add(k)
+    return item
+  }).filter(x => x)
 }
 // ---------------------------------------------
 export default {
@@ -210,5 +223,6 @@ export default {
   afterTicks,
   eachTick,
   prettyPrintBases,
-  fetch
+  fetch,
+  uniqueItems
 }

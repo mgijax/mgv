@@ -28,10 +28,9 @@ class InterMineConnection {
   }
 }
 // ---------------------------------------------------------------------
-//
 // Abstract superclass for anything that reads track data.
 // Each reader is associated with a single genome.
-// The fundamental call is to fetch data within a chromosomal range
+// The fundamental call is to fetch data within a chromosomal range.
 class TrackReader {
   // Args:
   //   name - track name
@@ -78,7 +77,7 @@ class ChunkedGff3FileReader extends FeatureTrackReader {
   readChromosome (c) {
     return this.readRange(c, 1, c.length)
   }
-  readRange (c, s, e) {
+  readChunks (c, s, e) {
     let url
     let p
     if (this.cfg.chunkSize === 0) {
@@ -95,17 +94,16 @@ class ChunkedGff3FileReader extends FeatureTrackReader {
         url = `${this.url}/${this.name}/${c.name}/${i}`
         ps.push(u.fetch(url, 'gff3'))
       }
-      p = Promise.all(ps).then(u.concatAll)
+      p = Promise.all(ps).then(u.concatAll).then(recs => {
+        // File chunking duplicates items that span chunk boundaries.
+        // Here is where we deal with that.
+        return u.uniqueItems(recs, r => r[8]['ID'])
+      })
     }
-    return p.then(data => data.filter(f => f[3] <= e && f[4] >= s))
+    return p
   }
-}
-// ---------------------------------------------------------------------
-// Abstract superclass of gff3 readers that read from an Intermine instance.
-class IntermineFeatureReader extends FeatureTrackReader {
-  constructor(name, cgf, genome) {
-    super(name, cfg, genome)
-    this.mine = new InterMineConnection(this.url)
+  readRange (c, s, e) {
+    return this.readChunks(c, s, e).then(data => data.filter(f => f[3] <= e && f[4] >= s))
   }
 }
 // ---------------------------------------------------------------------
@@ -147,6 +145,7 @@ class MouseMineSequenceReader extends InterMineSequenceReader {
 // -------------------------------------------------------------------------------
 const RegisteredReaderClasses = {
   ChunkedGff3FileReader,
+  InterMineSequenceReader,
   MouseMineSequenceReader
 }
 // -------------------------------------------------------------------------------
@@ -180,6 +179,9 @@ class GenomeRegistrar {
     this.name2reader = {}
     this.indexName = '/index.json'
   }
+  getReader (g, n) {
+    return this.name2reader[g.name].readers[n]
+  }
   register (url) {
     let p = this.url2promise[url]
     if (p) return p
@@ -194,19 +196,25 @@ class GenomeRegistrar {
   }
   _register (url, data) {
     if (Array.isArray(data)) {
+      // array. process each element and return a promise for the concatenated results.
       return Promise.all(data.map(d => this._register(url, d))).then(u.concatAll)
     } else if (typeof(data) === 'string') {
+      // string. ie, a URL.
       let uu = data
       if (!data.startsWith('http://')){
+        // relative URL
         uu = url.replace(this.indexName, '/' + data)
       }
       return this.register(uu)
     } else {
+      // object, ie, a genome descriptor. Register the genome and return
+      // it, wrapped in a promise
       return Promise.resolve(this.registerGenome(url, data))
     }
   }
   registerGenome (url, info) {
     info.url = info.url || url
+    info.name2chr = info.chromosomes.reduce((a,c) => { a[c.name] = c; return a }, {})
     this.name2genome[info.name] = info
     this.name2reader[info.name] = new GenomeReader(info)
     return info

@@ -59,9 +59,6 @@ export default {
       color: 'rgb(140, 86, 75)'
     }]
   },
-  //
-  // config settings per class
-  //
   ZoomView: {
   },
   ZoomControls: {

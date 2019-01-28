@@ -6,13 +6,11 @@
  */
 import config from '@/config'
 import MouseMineDataSource from '@/lib/MouseMineDataSource'
-import CachedDataSource from '@/lib/CachedDataSource'
 import DataManager from '@/lib/DataManager'
 import Vue from 'vue'
 
 let mm = new MouseMineDataSource('http://www.mousemine.org/mousemine/service')
-let cmm = new CachedDataSource(mm)
-let dm = new DataManager(cmm)
+let dm = new DataManager(mm)
 
 export default function (cfg) {
   cfg.computed = cfg.computed || {}

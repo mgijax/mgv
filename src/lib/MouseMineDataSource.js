@@ -1,9 +1,7 @@
 //
-import DataSource from '@/lib/DataSource'
 import u from '@/lib/utils'
-class MouseMineDataSource extends DataSource {
+class MouseMineDataSource {
   constructor (wsUrl) {
-    super()
     this.wsUrl = wsUrl
     this.qUrl = this.wsUrl + '/query/results?'
     this.seqSliceUrl = this.wsUrl + '/sequence?'

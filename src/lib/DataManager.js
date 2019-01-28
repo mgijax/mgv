@@ -9,18 +9,16 @@
  * Should adopt a naming convention so that caller knows which, eg, getFoo vs getFooP
  * or getPfFoo (get promise for foo)
  */
-import DataSource from '@/lib/DataSource'
 import gc from '@/lib/GenomeCoordinates'
 import u from '@/lib/utils'
 import { SwimLaneAssigner, FeaturePacker, ContigAssigner } from '@/lib/Layout'
 import config from '@/config'
-import { GenomeRegistrar, InterMineSequenceReader, MouseMineSequenceReader, ChunkedGff3FileReader } from '@/lib/GenomeDataFetcher'
+import { GenomeRegistrar } from '@/lib/GenomeDataFetcher'
+import gff3 from '@/lib/gff3lite'
 
-class DataManager extends DataSource {
+class DataManager {
   constructor (proxy) {
-    super()
     this.cache = {} // { genome.name -> { chr.name -> P([ feats ]) } }
-    this.fcache = {} // { genome.name -> { chr.name -> [ feats ] }}
     this.id2feat = {} // ID -> feature
     this.cid2feats = {} // cID -> [ features ]
     this.symbol2feats = {} // symbol -> [ features ]
@@ -44,13 +42,11 @@ class DataManager extends DataSource {
   }
   // Returns a promise for all the genomes we know about.
   getGenomes () {
-    // return this.proxy.getGenomes().then(genomes => {
     return this.genomes.then(genomes => {
       genomes.forEach((g, i) => {
         g.height = 60
         g.zoomY = i * g.height
         g.dragY = 0
-        // g.chromosomes = []
       })
       return genomes
     })
@@ -62,58 +58,83 @@ class DataManager extends DataSource {
     if (this.cache[g.name]) return Promise.resolve(true)
     //
     this.cache[g.name] = {}
-    this.fcache[g.name] = {}
-    return Promise.all(g.chromosomes.map(c => {
-      let freg = new FeatureRegistrar(g, c, this.id2feat, this.cid2feats, this.symbol2feats)
-      let cp = this.proxy.getFeatures(g, c).then(feats => {
-        let cfeats = feats.map(f => freg.register(f)).filter(x => x)
-        this.fcache[g.name][c.name] = cfeats
-        return cfeats
+    return this.greg.getReader(g, 'genes').readAll().then(recs => {
+      let prevChr = null
+      let feats = []
+      let allFeats = []
+      recs.forEach(r => {
+        if (!prevChr || r[0] !== prevChr.name) {
+          if (feats.length) {
+            allFeats.push(this._registerChr(g, prevChr, feats))
+          }
+          prevChr = g.name2chr[r[0]]
+          if (!prevChr) u.fail("Could not find chromosome " + r[0])
+          feats = [r]
+        }
+        else {
+          feats.push(r)
+        }
       })
-      this.cache[g.name][c.name] = cp
-      return cp
-    }))
+      if (feats.length) allFeats.push(this._registerChr(g, prevChr, feats))
+      return allFeats
+    })
+  }
+  //
+  _registerChr (g, c, feats) {
+    console.log('Registering', feats.length, 'features for', g.name, c.name)
+    let freg = new FeatureRegistrar(g, c, this.id2feat, this.cid2feats, this.symbol2feats)
+    let cfeats = feats.map(f => freg.register(f)).filter(x => x)
+    this.cache[g.name][c.name] = cfeats
+    return cfeats
   }
   // Returns a promise for all the feature of the specified genome, as a list, sorted by
   // chr and start position.
   getAllFeatures (g) {
-    return this.ensureFeatures(g).then(() => {
-      let cmap = this.cache[g.name]
-      let ps = g.chromosomes.map(c => cmap[c.name])
-      return Promise.all(ps).then(data => {
-        return [].concat.apply([], data)
-      })
-    })
+    return this.ensureFeatures(g).then(() => this.getAllFeaturesNow(g))
   }
   // Immediate version of getAllFeatures. Returns whatever is in the cache
   getAllFeaturesNow (g) {
-    return [].concat.apply([], g.chromosomes.map(c => this.fcache[g.name][c.name]))
-  }
-  // Returns a promise for the features in the specified range of the specified genome
-  getFeatures (g, c, s, e) {
-    return this.ensureFeatures(g).then(() => {
-      let pf = this.cache[g.name][c.name]
-      return pf.then(feats => feats.filter(f => gc.overlaps(f, { chr: c, start: s, end: e })))
-    })
-  }
-  //
-  ensureModels (g, c, s, e) {
-    // transcript block size
-    let tbs = config.DataManager.transcriptBlockSize
-    // start of first block
-    let s2 = Math.floor(s / tbs) * tbs + 1
-    // end of last block
-    let e2 = Math.floor(e / tbs) * tbs + tbs
-    //
-    return this.proxy.getModels(g, c, s2, e2)
+    return u.concatAll(g.chromosomes.map(c => this.cache[g.name][c.name]))
   }
   // Returns a promise for the transcripts and exons of features that overlap the specified range of the specified genome.
+  _unpackExons (t) {
+    const exonsAttr = t[8]['exons']
+    const ecoords = exonsAttr.split(',').map(s => s.split('_').map(s => parseInt(s)))
+    return ecoords.map(ec => { return { start: t[3] + ec[0], end: t[3] + ec[0] + ec[1] - 1 } })
+  }
+  // Returns a promise for the features in the specified range of the specified genome
+  getGenes (g, c, s, e, includeTranscripts) {
+    return this.ensureFeatures(g).then(() => {
+      let feats = this.cache[g.name][c.name]
+      feats = feats.filter(f => gc.overlaps(f, { chr: c, start: s, end: e }))
+      if (includeTranscripts) {
+        return this.getModels(g, c, s, e).then(tps => {
+          const gid2tps = u.index(tps, t => t.gID, false)
+          feats.forEach(f => {
+            if (f.transcripts.length) return
+            const ftps = gid2tps[f.ID] || []
+            ftps.forEach(t => f.transcripts.push(t))
+          })
+          return feats
+        })
+      }
+      return feats
+    })
+  }
   getModels (g, c, s, e) {
-    return this.ensureModels(g, c, s, e)
+    return this.greg.getReader(g, 'transcripts').readRange(c, s, e).then(ts => {
+      return ts.map(t => {
+        return {
+          gID: t[8]['Parent'],
+          tID: t[8]['ID'],
+          exons: this._unpackExons(t)
+        }
+      })
+    })
   }
   // Returns a promise for the genomic sequence of the specified range for the specified genome
   getSequence (g, c, s, e) {
-    return this.proxy.getSequence(g, c, s, e)
+    return this.greg.getReader(g, 'sequences').readRange(c, s, e)
   }
   // Returns the genologs of feature f from the specified genomes in the specified order.
   // If a genolog does not exist in a given genome, that entry in the returned list === undefined.
@@ -151,6 +172,7 @@ class DataManager extends DataSource {
 // Registers features for one chromsome of a genome
 class FeatureRegistrar {
   constructor (g, c, id2f, cid2f, sym2f) {
+    console.log('FeatureRegistrar', g.name, c.name)
     // each chromosome of each genome has its own registrar
     this.genome = g
     this.chr = c
@@ -169,7 +191,16 @@ class FeatureRegistrar {
     // map feature.symbol => [ features ]
     this.symbol2feats = sym2f
   }
-  register (f) {
+  // Args:
+  //   r - a parsed GFF3 record
+  register (r) {
+    const f = gff3.record2object(r)
+    f.tCount = parseInt(f.tCount)
+    f.transcripts = []
+    f.sotype = f.type
+    delete f.score
+    delete f.phase
+    delete f.type
     let sla = f.strand === '+' ? this.slap : this.slam
     f.genome = this.genome
     f.chr = this.chr

@@ -240,8 +240,8 @@ export default MComponent({
   },
   data: function () {
     return {
-      features: [],
-      sequence: '',
+      features: [], // the features to draw
+      sequence: '', // the sequence to display
       seqStart: 0,
       dragging: false,
       currRange: null,
@@ -508,26 +508,11 @@ export default MComponent({
       this.seqStart = this.start
       this.busy = true
       this.$emit('busy-start')
-      this.dataManager.getFeatures(this.genome, this.chr, this.start - delta, this.end + delta).then(feats => {
+      this.dataManager.getGenes(this.genome, this.chr, this.start - delta, this.end + delta, this.showDetails).then(feats => {
         this.busy = false
-        if (this.showDetails) {
-          this.dataManager.getModels(this.genome, this.chr, this.start, this.end).then(models => {
-            let ix = u.index(models, 'gID')
-            feats.forEach(f => {
-              // only load them the 1st time
-              if (f.transcripts.length) return
-              let ts = ix[f.ID]
-              ts && ts.transcripts.forEach(t => f.transcripts.push(t))
-            })
-            this.features = feats
-            this.nextTick(() => this.$emit('region-draw', this))
-            this.$emit('busy-end')
-          })
-        } else {
-          this.features = feats
-          this.nextTick(() => this.$emit('region-draw', this))
-          this.$emit('busy-end')
-        }
+        this.features = feats
+        this.nextTick(() => this.$emit('region-draw', this))
+        this.$emit('busy-end')
         if (this.showSequence) {
           this.$emit('busy-start')
           this.dataManager.getSequence(this.genome, this.chr, this.start, this.end).then(data => {
