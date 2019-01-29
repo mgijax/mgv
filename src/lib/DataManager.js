@@ -13,7 +13,7 @@ import gc from '@/lib/GenomeCoordinates'
 import u from '@/lib/utils'
 import { SwimLaneAssigner, FeaturePacker, ContigAssigner } from '@/lib/Layout'
 import config from '@/config'
-import { GenomeRegistrar } from '@/lib/GenomeDataFetcher'
+import { GenomeRegistrar } from '@/lib/GenomeRegistrar'
 import gff3 from '@/lib/gff3lite'
 
 class DataManager {
@@ -24,7 +24,7 @@ class DataManager {
     this.symbol2feats = {} // symbol -> [ features ]
     this.proxy = proxy // actual data source
     this.greg = new GenomeRegistrar()
-    this.genomes = this.greg.register('.')
+    this.genomes = this.greg.register('./index.json')
   }
   getFeatureById (id) {
     return this.id2feat[id]
