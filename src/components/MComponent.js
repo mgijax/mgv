@@ -5,12 +5,10 @@
  *    new Vue(MComponent({ options })
  */
 import config from '@/config'
-import MouseMineDataSource from '@/lib/MouseMineDataSource'
 import DataManager from '@/lib/DataManager'
 import Vue from 'vue'
 
-let mm = new MouseMineDataSource(config.InterMineConnection.urls.MouseMine)
-let dm = new DataManager(mm)
+let dm = new DataManager()
 
 export default function (cfg) {
   cfg.computed = cfg.computed || {}

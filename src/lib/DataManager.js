@@ -24,7 +24,6 @@ class DataManager {
     this.id2feat = {} // ID -> feature
     this.cid2feats = {} // cID -> [ features ]
     this.symbol2feats = {} // symbol -> [ features ]
-    this.proxy = proxy // actual data source
     this.greg = new GenomeRegistrar()
     this.genomes = this.greg.register('./index.json')
     this.mcxn = new MouseMineConnection()
