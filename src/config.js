@@ -127,9 +127,12 @@ export default {
     dbName: DATACACHE_PREFIX + 'user-prefs'
   },
   InterMineConnection: {
-    urls: {
-      MouseMine: 'http://www.mousemine.org/mousemine/service',
-      FlyMine: 'http://www.flymine.org/flymine/service'
-    }
+    mines: [{
+      name: 'MouseMine',
+      url: 'http://www.mousemine.org/mousemine',
+    }, {
+      name: 'FlyMine',
+      url: 'http://www.flymine.org/flymine'
+    }]
   }
 }

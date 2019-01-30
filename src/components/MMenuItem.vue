@@ -16,6 +16,7 @@
       :menuItems="menuItems"
       ref="subMenu"
       @menu-item-selected="$emit('menu-item-selected')"
+      :contextObject="contextObject"
       />
   </div>
 </template>
@@ -43,7 +44,8 @@ export default MComponent({
     menuItems: {
       type: Array
     },
-    itemData: {
+    contextObject: {
+      type: Object
     },
     topLevel: {
       type: Boolean,
@@ -63,7 +65,7 @@ export default MComponent({
   methods: {
     clicked: function () {
       if (this.disabled) return
-      if (this.handler) this.handler(this.itemData)
+      if (this.handler) this.handler(this.contextObject)
       if (this.$refs.subMenu) {
         this.$refs.subMenu.toggle()
       } else {

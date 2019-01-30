@@ -18,7 +18,7 @@
         :icon="mi.icon"
         :helpText="mi.helpText"
         :handler="mi.handler"
-        :itemData="mi.data"
+        :contextObject="contextObject"
         :menuItems="mi.menuItems"
         :disabled="mi.disabled"
         @menu-item-selected="menuItemSelected"
@@ -52,6 +52,9 @@ export default MComponent({
       validator: function (value) {
         return ['row', 'column'].indexOf(value) !== -1
       }
+    },
+    contextObject: {
+      type: Object
     }
   },
   components: {

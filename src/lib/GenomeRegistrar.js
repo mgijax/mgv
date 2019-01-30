@@ -1,7 +1,7 @@
 //
 import u from '@/lib/utils'
 import ChunkedGff3FileReader from '@/lib/ChunkedGff3FileReader'
-import { InterMineSequenceReader, MouseMineSequenceReader } from '@/lib/InterMineSequenceReader'
+import { InterMineSequenceReader, MouseMineSequenceReader } from '@/lib/InterMineServices'
 // -------------------------------------------------------------------------------
 const RegisteredReaderClasses = {
   ChunkedGff3FileReader,

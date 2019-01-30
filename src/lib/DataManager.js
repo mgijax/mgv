@@ -15,18 +15,18 @@ import { SwimLaneAssigner, FeaturePacker, ContigAssigner } from '@/lib/Layout'
 import config from '@/config'
 import { GenomeRegistrar } from '@/lib/GenomeRegistrar'
 import gff3 from '@/lib/gff3lite'
-import { MouseMineConnection } from '@/lib/InterMineServices'
 
 class DataManager {
-  constructor (proxy) {
+  // Args:
+  //   url - starting URL for finding genome info
+  constructor (url) {
     this.cache = {} // { genome.name -> { chr.name -> P([ feats ]) } }
     this.pending = {} // genome.name -> pending promise
     this.id2feat = {} // ID -> feature
     this.cid2feats = {} // cID -> [ features ]
     this.symbol2feats = {} // symbol -> [ features ]
     this.greg = new GenomeRegistrar()
-    this.genomes = this.greg.register('./index.json')
-    this.mcxn = new MouseMineConnection()
+    this.genomes = this.greg.register(url)
   }
   getFeatureById (id) {
     return this.id2feat[id]
@@ -164,11 +164,6 @@ class DataManager {
   // Returns the genolog of feature f from genome g, or undefined if none exists
   getGenolog (f, g) {
     return this.getGenologs(f, [g])[0]
-  }
-  //
-  getFastaUrl (f, type, genomes) {
-    return this.mcxn.getFastaUrl(this.getGenologs(f, genomes), type)
-    // return this.proxy.getFastaUrl(f, type, genomes)
   }
 }
 

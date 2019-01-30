@@ -1,8 +1,8 @@
-import { MouseMineConnection } from '@/lib/InterMineServices'
+import { connections } from '@/lib/InterMineServices'
 
 class MouseMineQueries {
   constructor () {
-    this.cxn = new MouseMineConnection()
+    this.cxn = connections.MouseMine
   }
   getQueries () {
     return [{

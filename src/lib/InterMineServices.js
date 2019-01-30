@@ -1,16 +1,18 @@
 import config from '@/config'
 import u from '@/lib/utils'
+import { SequenceTrackReader } from '@/lib/TrackReader'
 
 // ---------------------------------------------------------------------
 class InterMineConnection {
   // Args:
   //   url - web service base URL
   //   isMouseMine - boolean. If true, uses MouseMine model for strains
-  constructor (url, isMouseMine) {
-    this.url = url
-    this.qUrl = this.url + '/query/results?'
-    this.seqSliceUrl = this.url + '/sequence?'
-    this.faUrl = this.url + '/query/results/fasta?'
+  constructor (baseurl, isMouseMine) {
+    this.baseurl = baseurl
+    this.wsurl = baseurl + '/service'
+    this.qUrl = this.wsurl + '/query/results?'
+    this.seqSliceUrl = this.wsurl + '/sequence?'
+    this.faUrl = this.wsurl + '/query/results/fasta?'
     this.isMouseMine = isMouseMine
   }
   // Args:
@@ -69,11 +71,42 @@ class InterMineConnection {
   }
 }
 
+// ---------------------------------------------------------------------
 class MouseMineConnection extends InterMineConnection {
   constructor (url) {
-    url = url || config.InterMineConnection.urls.MouseMine
+    url = url || connections.MouseMine.url
     super(url, true)
   }
 }
 
-export { InterMineConnection, MouseMineConnection }
+// ---------------------------------------------------------------------
+// Implementation for sequence readers that read from an Intermine instance.
+class InterMineSequenceReader extends SequenceTrackReader {
+  constructor(name, cfg, genome) {
+    super(name, cfg, genome)
+    this.mine = new InterMineConnection(this.url)
+  }
+  readRange (chr, start, end) {
+    return this.mine.getChromosomeSlice(this.genome, chr, start, end)
+  }
+}
+// ---------------------------------------------------------------------
+// Implementation of a sequence reader the gets genomic sequences from MouseMine.
+class MouseMineSequenceReader extends InterMineSequenceReader {
+  constructor(name, cfg, genome) {
+    super(name, cfg, genome)
+    this.mine = new MouseMineConnection(this.url)
+  }
+}
+
+// initialize a connection to each configured mine (for convenience only - no reqirement to use them!)
+function initConnections () {
+  return config.InterMineConnection.mines.reduce(
+    (x,m) => { x[m.name] = new (m.name === 'MouseMine' ? MouseMineConnection : InterMineConnection)(m.url); return x }
+    , {})
+}
+
+const connections = initConnections()
+console.log(connections)
+
+export { InterMineConnection, MouseMineConnection, InterMineSequenceReader, MouseMineSequenceReader, connections }
