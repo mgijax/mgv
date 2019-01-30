@@ -9,7 +9,7 @@ import MouseMineDataSource from '@/lib/MouseMineDataSource'
 import DataManager from '@/lib/DataManager'
 import Vue from 'vue'
 
-let mm = new MouseMineDataSource('http://www.mousemine.org/mousemine/service')
+let mm = new MouseMineDataSource(config.InterMineConnection.urls.MouseMine)
 let dm = new DataManager(mm)
 
 export default function (cfg) {

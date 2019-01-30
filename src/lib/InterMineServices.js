@@ -1,3 +1,6 @@
+import config from '@/config'
+import u from '@/lib/utils'
+
 // ---------------------------------------------------------------------
 class InterMineConnection {
   // Args:
@@ -42,8 +45,8 @@ class InterMineConnection {
   //  isMouseMine - if true, adjusts query paths for mouse genomes as stored in MouseMine.
   //      - genome constraint is based on strain name rather than taxon id
   //
-  getFastaUrl (f, type, isMouseMine) {
-    feats = Array.isArray(f) ? f : [f]
+  getFastaUrl (feats, type) {
+    feats = Array.isArray(feats) ? feats : [feats]
     type = type ? type.toLowerCase() : 'genomic'
     const type2class = {
       'genomic': 'Gene',
@@ -53,21 +56,22 @@ class InterMineConnection {
     }
     const qclass = type2class[type]
     const genepath = qclass + (qclass === 'Gene' ? '' : '.gene')
-    const canonicalpath = genepath + (isMouseMine ? '.canonical' : '')
-    // const genomeidentpath = qclass + (isMouseMine ? '.strain.name' : '.organism.taxonId')
-    // const genomevals = (genomes || []).map((g) => `<value>${g[isMouseMine ? 'name' : 'taxonid']}</value>`).join('')
+    const canonicalpath = genepath + (this.isMouseMine ? '.canonical' : '')
+    // const genomeidentpath = qclass + (this.isMouseMine ? '.strain.name' : '.organism.taxonId')
+    // const genomevals = (genomes || []).map((g) => `<value>${g[this.isMouseMine ? 'name' : 'taxonid']}</value>`).join('')
     // const genomeconstraint = genomes ? `<constraint path="${genomeidentpath}" op="ONE OF">${genomevals}</constraint>` : ''
     const featurevals = feats.map(f => `<value>${f.ID}</value>`).join('')
-    const featureconstraint = `<constraint path="${qclass}.primaryIdentifier" op="ONE OF" value="${featureVals}"/>`
+    const featureconstraint = `<constraint path="${genepath}.primaryIdentifier" op="ONE OF">${featurevals}</constraint>`
     const view = `${canonicalpath}.primaryIdentifier`
     const q = `<query model="genomic" view="${qclass}.primaryIdentifier">${featureconstraint}</query>`
     const url = this.faUrl + `query=${encodeURIComponent(q)}&view=${encodeURIComponent(view)}`
-    return q
+    return url
   }
 }
 
 class MouseMineConnection extends InterMineConnection {
   constructor (url) {
+    url = url || config.InterMineConnection.urls.MouseMine
     super(url, true)
   }
 }

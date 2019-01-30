@@ -125,5 +125,11 @@ export default {
   },
   PreferencesManager: {
     dbName: DATACACHE_PREFIX + 'user-prefs'
+  },
+  InterMineConnection: {
+    urls: {
+      MouseMine: 'http://www.mousemine.org/mousemine/service',
+      FlyMine: 'http://www.flymine.org/flymine/service'
+    }
   }
 }

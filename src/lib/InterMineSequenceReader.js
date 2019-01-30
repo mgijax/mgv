@@ -1,5 +1,6 @@
 //
 import { SequenceTrackReader } from '@/lib/TrackReader'
+import { InterMineConnection, MouseMineConnection } from '@/lib/InterMineServices'
 // ---------------------------------------------------------------------
 // Implementation for sequence readers that read from an Intermine instance.
 class InterMineSequenceReader extends SequenceTrackReader {

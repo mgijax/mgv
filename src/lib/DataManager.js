@@ -15,16 +15,19 @@ import { SwimLaneAssigner, FeaturePacker, ContigAssigner } from '@/lib/Layout'
 import config from '@/config'
 import { GenomeRegistrar } from '@/lib/GenomeRegistrar'
 import gff3 from '@/lib/gff3lite'
+import { MouseMineConnection } from '@/lib/InterMineServices'
 
 class DataManager {
   constructor (proxy) {
     this.cache = {} // { genome.name -> { chr.name -> P([ feats ]) } }
+    this.pending = {} // genome.name -> pending promise
     this.id2feat = {} // ID -> feature
     this.cid2feats = {} // cID -> [ features ]
     this.symbol2feats = {} // symbol -> [ features ]
     this.proxy = proxy // actual data source
     this.greg = new GenomeRegistrar()
     this.genomes = this.greg.register('./index.json')
+    this.mcxn = new MouseMineConnection()
   }
   getFeatureById (id) {
     return this.id2feat[id]
@@ -55,10 +58,11 @@ class DataManager {
   // After resolution, one may access the features of chromosome c via this,cache[g.name][c.name]
   ensureFeatures (g) {
     //
+    if (this.pending[g.name]) return this.pending[g.name]
     if (this.cache[g.name]) return Promise.resolve(true)
     //
     this.cache[g.name] = {}
-    return this.greg.getReader(g, 'genes').readAll().then(recs => {
+    const p = this.greg.getReader(g, 'genes').readAll().then(recs => {
       let prevChr = null
       let feats = []
       let allFeats = []
@@ -76,8 +80,11 @@ class DataManager {
         }
       })
       if (feats.length) allFeats.push(this._registerChr(g, prevChr, feats))
+      delete this.pending[g.name]
       return allFeats
     })
+    this.pending[g.name] = p
+    return p
   }
   //
   _registerChr (g, c, feats) {
@@ -160,12 +167,9 @@ class DataManager {
     return this.getGenologs(f, [g])[0]
   }
   //
-  getQueries () {
-    return this.proxy.getQueries()
-  }
-  //
   getFastaUrl (f, type, genomes) {
-    return this.proxy.getFastaUrl(f, type, genomes)
+    return this.mcxn.getFastaUrl(this.getGenologs(f, genomes), type)
+    // return this.proxy.getFastaUrl(f, type, genomes)
   }
 }
 
