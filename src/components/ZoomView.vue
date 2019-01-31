@@ -29,7 +29,7 @@ import MMenu from '@/components/MMenu'
 import svg2png from '@/lib/Svg2Png'
 import { connections } from '@/lib/InterMineServices'
 import getMainMenu from '@/components/ZoomViewMainMenu'
-import getContextMenu from '@/components/ZoomViewContextMenu'
+import getFeatureMenu from '@/components/ZoomViewContextMenu'
 export default MComponent({
   name: 'ZoomView',
   props: ['context'],
@@ -40,22 +40,14 @@ export default MComponent({
       contextFeature: null,
       backgroundMenu: [],
       // main menu in the ZoomView
-      mainMenu: getMainMenu(this.context),
+      mainMenu: getMainMenu(this),
       // feature context menu
-      featureMenu: getContextMenu(this),
+      featureMenu: getFeatureMenu(this),
     }
   },
   computed: {
     menuTitle: function () {
       return this.contextFeature ? this.contextFeature.label : ''
-    }
-  },
-  watch: {
-    contextFeature: function (f) {
-      if (!f) return
-      let isPc = f.sotype === 'protein_coding_gene'
-      let cdsOption = this.featureMenu.filter(mi => mi.label === 'CDS sequences')[0]
-      cdsOption.disabled = !isPc
     }
   },
   methods: {
@@ -70,8 +62,6 @@ export default MComponent({
       let left = evt.clientX - cbb.x
       cm.open(top, left)
     }
-  },
-  mounted: function () {
   }
 })
 </script>

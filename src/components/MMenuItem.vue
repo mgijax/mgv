@@ -1,7 +1,7 @@
 <template>
   <div
     class="menu-item flexrow"
-    :class="{ topLevel: topLevel, disabled: disabled }"
+    :class="{ topLevel: topLevel, disabled: isDisabled }"
     @click.stop="clicked"
     :title="helpText"
     >
@@ -52,7 +52,7 @@ export default MComponent({
       default: false
     },
     disabled: {
-      type: Boolean,
+      type: [Boolean, Function],
       default: false
     }
   },
@@ -60,11 +60,15 @@ export default MComponent({
   computed: {
     cicon: function () {
       return this.icon || (this.menuItems ? 'keyboard_arrow_right' : '')
+    },
+    isDisabled: function () {
+      if (typeof(this.disabled) === 'function') return this.disabled(this.contextObject)
+      return this.disabled
     }
   },
   methods: {
     clicked: function () {
-      if (this.disabled) return
+      if (this.isDisabled) return
       if (this.handler) this.handler(this.contextObject)
       if (this.$refs.subMenu) {
         this.$refs.subMenu.toggle()

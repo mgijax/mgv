@@ -49,7 +49,9 @@ function getMenu(thisObj) {
     icon: 'cloud_download',
     label: 'CDS sequences',
     helpText: 'Download coding sequences for this feature from currently displayed genomes.',
-    disabled: false,
+    disabled: function (f) {
+      return f.sotype !== 'protein_coding_gene'
+    },
     handler: (function (f) {
       let url = connections.MouseMine.getFastaUrl(this.dataManager.getGenologs(f, this.context.vGenomes), 'cds')
       window.open(url, '_blank')
