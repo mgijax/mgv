@@ -94,9 +94,13 @@ export default {
     },
     baseColors: {
       a: 'blue',
+      A: 'blue',
       c: 'purple',
+      C: 'purple',
       t: 'green',
-      g: 'red'
+      T: 'green',
+      g: 'red',
+      G: 'red'
     }
   },
   GenomeView: {
