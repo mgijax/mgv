@@ -219,6 +219,8 @@ class FeatureRegistrar {
       let d = this.cid2feats[f.cID]
       if (!d) d = this.cid2feats[f.cID] = []
       d.push(f)
+    } else {
+      f.cID = null // make sure it's not undefined
     }
     if (f.symbol) {
       let lc = f.symbol.toLowerCase()
