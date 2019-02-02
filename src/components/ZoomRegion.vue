@@ -572,11 +572,9 @@ export default MComponent({
       // For lockstep dragging across regions, broadcast the drag deltas
       u.dragify(this.$el, {
         dragstart: function (e, d) {
-          // if here because user clicked on a feature, cancel the drag
           this.dragging = true
           this.dragData = d
           d.dragged = false
-          // d.bb = this.$el.getBoundingClientRect()
           d.bb = this.$refs.underlay.getBoundingClientRect()
           d.shiftDrag = e.shiftKey
         },
@@ -593,8 +591,10 @@ export default MComponent({
         dragend: function (e, d) {
           this.$root.$emit('region-dragend')
           if (!d.dragged) {
-            // this was actually just a click
-            this.$root.$emit('context', { currentSelection: [] })
+            // this was actually just a click. If it was on the background, clear current selection
+            if (!e.target.closest('.feature')) {
+              this.$root.$emit('context', { currentSelection: [] })
+            }
             this.dragData = null
             this.dragging = false
             return
