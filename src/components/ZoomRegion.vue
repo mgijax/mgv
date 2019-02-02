@@ -10,7 +10,7 @@
     :width="width"
     >
     <g
-      :transform="`translate(${regionScrollDelta},${zeroOffset})`"
+      :transform="`translate(${myDelta},${zeroOffset})`"
       >
       <!-- ======= current range box ======= -->
       <g
@@ -44,7 +44,7 @@
         opacity="0.3"
         class="underlay"
         ref="underlay"
-        :transform="`translate(${-regionScrollDelta},0)`"
+        :transform="`translate(${-myDelta},0)`"
         />
       <!-- ======= axis line ======= -->
       <line
@@ -54,7 +54,7 @@
         :x2="b2p(end)"
         :y2="0"
         stroke="black"
-        :transform="`translate(${-regionScrollDelta},0)`"
+        :transform="`translate(${-myDelta},0)`"
         v-show="!spreadTranscripts || !showDetails"
         />
       <!-- ======= label ======= -->
@@ -65,7 +65,7 @@
         alignment-baseline="hanging"
         fill="black"
         font-size="10px"
-        :transform="`translate(${-regionScrollDelta},0)`"
+        :transform="`translate(${-myDelta},0)`"
         >{{chr.name}}:{{start + deltaB}}..{{end + deltaB}}</text>
       <!-- ======= sequence ======= -->
       <text
@@ -178,7 +178,7 @@ document.body.addEventListener('keyup', function (e) {
 export default MComponent({
   name: 'ZoomRegion',
   components: { MBrush },
-  inject: ['featureColorMap', 'getFacets'],
+  inject: ['featureColorMap', 'getFacets', 'translator'],
   props: {
     // the app context
     context: {
@@ -249,6 +249,9 @@ export default MComponent({
     }
   },
   computed: {
+    myDelta: function () {
+      return (this.dragging || this.context.lcoords.landmark || this.genome === this.context.rGenome) ? this.regionScrollDelta : 0
+    },
     detailThreshold: function () {
       return Math.min(this.cfg.detailThreshold, this.cfg.detailThresholdLimit)
     },
@@ -315,7 +318,7 @@ export default MComponent({
     // bases per pixel
     bpp: function () { return 1 / this.ppb },
     //
-    deltaB: function () { return -Math.round(this.regionScrollDelta / this.ppb) },
+    deltaB: function () { return -Math.round(this.myDelta / this.ppb) },
     //
     maxLaneP: function () {
       if (this.showDetails && this.spreadTranscripts) {
@@ -599,35 +602,36 @@ export default MComponent({
             this.dragging = false
             return
           }
-          let nc
           if (d.shiftDrag) {
             // zoom
             let b1 = Math.floor(this.start + this.currRange[0] / this.ppb)
             let b2 = Math.floor(this.start + this.currRange[1] / this.ppb)
-            nc = {
-              ref: this.genome.name,
-              chr: this.chr,
-              start: Math.min(b1, b2),
-              end: Math.max(b1, b2)
-            }
+            let start = Math.min(b1, b2)
+            let end = Math.max(b1, b2)
+            this.translator().translate(this.genome, this.chr.name, start, end, this.context.rGenome)
+            .then(rs => {
+              let r = rs[0]
+              let nc = {
+                start: r.start,
+                end: r.end
+              }
+              this.$root.$emit('context', nc)
+            })
           } else {
+            let nc
             // pan
             if (this.context.lcoords.landmark) {
               nc = {
-                ref: this.genome.name,
                 delta: this.context.lcoords.delta + this.deltaB
               }
             } else {
               nc = {
-                ref: this.genome.name,
-                chr: this.chr,
-                start: this.start + this.deltaB,
-                end: this.end + this.deltaB
+                start: this.context.coords.start + this.deltaB,
+                end: this.context.coords.end + this.deltaB
               }
             }
+            this.$root.$emit('context', nc)
           }
-          //
-          this.$root.$emit('context', nc)
           //
           // for some reason, a click event is fired at mouseup, even though dragify handlers call
           // stopPropagation and preventDefault. So here we just set a little flag for ourselves to ignore
