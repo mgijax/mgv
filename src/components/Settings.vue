@@ -122,11 +122,30 @@
 
 <script>
 import MComponent from '@/components/MComponent'
+import KeyStore from '@/lib/KeyStore'
 import config from '@/config'
 export default MComponent({
   name: 'Settings',
   data: function () {
     return config
+  },
+  methods: {
+    save: function () {
+      return this.kstore.set('settings', this.$data)
+    },
+    restore: function () {
+      return this.kstore.get('settings').then(settings => {
+        if (settings === undefined) return
+        Object.assign(this.$data, settings)
+      })
+    }
+  },
+  created: function() {
+    this.kstore = new KeyStore(config.PreferencesManager.dbName)
+    this.restore()
+  },
+  mounted: function () {
+    this.$watch('$data', () => this.save(), {deep: true})
   }
 })
 </script>

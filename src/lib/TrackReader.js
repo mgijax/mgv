@@ -7,7 +7,8 @@ class TrackReader {
   //   name - track name
   //   cfg - reader config
   //   genome - genome descriptor
-  constructor (name, cfg, genome) {
+  constructor (fetcher, name, cfg, genome) {
+    this.fetcher = fetcher
     this.name = name
     this.cfg = cfg
     this.genome = genome

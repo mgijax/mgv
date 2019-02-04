@@ -1,5 +1,7 @@
 //
 import u from '@/lib/utils'
+import config from '@/config'
+import CachingFetcher from '@/lib/CachingFetcher'
 import ChunkedGff3FileReader from '@/lib/ChunkedGff3FileReader'
 import { InterMineSequenceReader, MouseMineSequenceReader } from '@/lib/InterMineServices'
 // -------------------------------------------------------------------------------
@@ -10,11 +12,12 @@ const RegisteredReaderClasses = {
 }
 // -------------------------------------------------------------------------------
 class GenomeReader {
-  constructor (info) {
+  constructor (registrar, info) {
+    this.registrar = registrar
     this.info = info
     this.readers = this.info.tracks.reduce((a,t) => {
       const rclass = RegisteredReaderClasses[t.reader.type]
-      a[t.name] = new rclass(t.name, t.reader, info)
+      a[t.name] = new rclass(this.registrar.fetcher, t.name, t.reader, info)
       return a
     }, {})
   }
@@ -37,6 +40,7 @@ class GenomeRegistrar {
     this.name2genome = {}
     this.name2reader = {}
     this.indexName = 'index.json'
+    this.fetcher = new CachingFetcher(config.CachingFetcher.dbName)
   }
   getReader (g, n) {
     return this.name2reader[g.name].readers[n]
@@ -44,7 +48,7 @@ class GenomeRegistrar {
   register (url) {
     let p = this.url2promise[url]
     if (p) return p
-    this.url2promise[url] = p = u.fetch(this._adjust(url), 'json')
+    this.url2promise[url] = p = this.fetcher.fetch(this._adjust(url), 'json')
       .then(data => this._register(url, data))
       .catch(err => console.log(err))
     return p
@@ -81,7 +85,7 @@ class GenomeRegistrar {
     info.url = info.url || url
     info.name2chr = info.chromosomes.reduce((a,c) => { a[c.name] = c; return a }, {})
     this.name2genome[info.name] = info
-    this.name2reader[info.name] = new GenomeReader(info)
+    this.name2reader[info.name] = new GenomeReader(this, info)
     return info
   }
 }

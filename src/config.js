@@ -18,9 +18,6 @@ export default {
   PageBox: {
   },
   MGV: {
-    defaultUrls: [
-      'http://localhost:5000'
-    ],
     genomeSets: [{
       label: 'DO/CC founders',
       ref: 'C57BL/6J',
@@ -30,12 +27,12 @@ export default {
       label: 'B6 vs non-musculus',
       ref: 'C57BL/6J',
       genomes: 'C57BL/6J,CAROLI/EiJ,PAHARI/EiJ,SPRET/EiJ',
-      description: 'View C57BL/6J     versus the non-musculus strains.'
+      description: 'View C57BL/6J versus the non-musculus strains.'
     }, {
       label: 'All',
       ref: 'C57BL/6J',
       genomes: '129S1/SvImJ,A/J,AKR/J,BALB/cJ,C3H/HeJ,C57BL/6J,C57BL/6NJ,CAROLI/EiJ,CAST/EiJ,CBA/J,DBA/2J,FVB    /NJ,LP/J,PAHARI/EiJ,NOD/ShiLtJ,NZO/HlLtJ,PWK/PhJ,SPRET/EiJ,WSB/EiJ C57BL/6J',
-      description: 'View all 19 strain    s (WARNING: may take a while to load and will be sluggish drawing large regions.)'
+      description: 'View all 19 strains (WARNING: may take a while to load and will be sluggish drawing large regions.)'
     }]
   },
   FeatureColorMap: {
@@ -112,8 +109,8 @@ export default {
   },
   GenomeSelector: {
   },
-  CachedDataSource: {
-    dbName: DATACACHE_PREFIX + 'features'
+  CachingFetcher: {
+    dbName: DATACACHE_PREFIX + 'urls'
   },
   ListManager: {
     dbName: DATACACHE_PREFIX + 'user-lists'

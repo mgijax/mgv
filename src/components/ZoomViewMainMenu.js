@@ -1,4 +1,7 @@
 //
+import config from '@/config'
+import KeyStore from '@/lib/KeyStore'
+//
 function getMenu (thisObj) {
   return {
     icon: 'menu',
@@ -47,6 +50,14 @@ function getMenu (thisObj) {
         let highlightArg = 'highlight='
         let linkUrl = `${urlBase}?${[dataArg, locArg, tracksArg, highlightArg].join('&')}`
         window.open(linkUrl, '_blank')
+      }).bind(thisObj)
+    }, {
+      icon: 'delete',
+      label: 'Clear cache',
+      helpText: 'Clear features from the data cache. Will be reloaded on next access.',
+      handler: (function () {
+        const kstore = new KeyStore(config.CachingFetcher.dbName)
+        kstore.clear()
       }).bind(thisObj)
     }]
   }

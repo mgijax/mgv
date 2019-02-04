@@ -82,8 +82,8 @@ class MouseMineConnection extends InterMineConnection {
 // ---------------------------------------------------------------------
 // Implementation for sequence readers that read from an Intermine instance.
 class InterMineSequenceReader extends SequenceTrackReader {
-  constructor(name, cfg, genome) {
-    super(name, cfg, genome)
+  constructor(fetcher, name, cfg, genome) {
+    super(fetcher, name, cfg, genome)
     this.mine = new InterMineConnection(this.url)
   }
   readRange (chr, start, end) {
@@ -93,8 +93,8 @@ class InterMineSequenceReader extends SequenceTrackReader {
 // ---------------------------------------------------------------------
 // Implementation of a sequence reader the gets genomic sequences from MouseMine.
 class MouseMineSequenceReader extends InterMineSequenceReader {
-  constructor(name, cfg, genome) {
-    super(name, cfg, genome)
+  constructor(fetcher, name, cfg, genome) {
+    super(fetcher, name, cfg, genome)
     this.mine = new MouseMineConnection(this.url)
   }
 }
