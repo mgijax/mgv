@@ -132,6 +132,9 @@ export default {
       name: 'MouseMine',
       url: 'http://www.mousemine.org/mousemine',
     }, {
+      name: 'HumanMine',
+      url: 'http://www.humanmine.org/humanmine'
+    }, {
       name: 'FlyMine',
       url: 'http://www.flymine.org/flymine'
     }]

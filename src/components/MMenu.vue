@@ -19,6 +19,7 @@
         :helpText="mi.helpText"
         :handler="mi.handler"
         :contextObject="contextObject"
+        :extraArgs="mi.extraArgs"
         :menuItems="mi.menuItems"
         :disabled="mi.disabled"
         @menu-item-selected="menuItemSelected"

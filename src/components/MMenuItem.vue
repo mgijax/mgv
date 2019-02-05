@@ -45,7 +45,14 @@ export default MComponent({
       type: Array
     },
     contextObject: {
+      // if this is an item in a context menu, the content object (e.g., the feature)
+      // 1st arg to handler
       type: Object
+    },
+    extraArgs: {
+      type: Array,
+      default: function () { return []}
+      // 2nd arg to handler
     },
     topLevel: {
       type: Boolean,
@@ -69,7 +76,7 @@ export default MComponent({
   methods: {
     clicked: function () {
       if (this.isDisabled) return
-      if (this.handler) this.handler(this.contextObject)
+      if (this.handler) this.handler(this.contextObject, ...this.extraArgs)
       if (this.$refs.subMenu) {
         this.$refs.subMenu.toggle()
       } else {
