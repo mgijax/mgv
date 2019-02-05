@@ -80,7 +80,7 @@ export default {
     sequenceThresholdLimit: 10000,
     spreadTranscripts: true,
     showFeatureLabels: true,
-    showTranscriptLabels: true,
+    showTranscriptLabels: false,
     currentFeature: {
       stroke: '#ffff00',
       strokeWidth: 2

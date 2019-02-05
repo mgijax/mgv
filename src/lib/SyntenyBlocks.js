@@ -220,7 +220,7 @@ class BlockCover {
   // Assumes features have already been marked with their contig number
   makeContigCover () {
     this.blocks = this.genome.features.reduce((cover, feat, i, feats) => {
-      if (i === 0 || feat.contig !== feats[i - 1].contig) {
+      if (i === 0 || feat.layout.contig !== feats[i - 1].layout.contig) {
         cover.push(new Block(this.genome, i, 1, cover.length))
       } else {
         cover[cover.length - 1].length += 1

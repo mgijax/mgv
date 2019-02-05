@@ -54,7 +54,7 @@ class DataManager {
     })
   }
   // Returns a promise that resolves when all features of genome g have been loaded and registered.
-  // After resolution, one may access the features of chromosome c via this,cache[g.name][c.name]
+  // After resolution, one may access the features of chromosome c of genome g via this.cache[g.name][c.name]
   ensureFeatures (g) {
     //
     if (this.pending[g.name]) return this.pending[g.name]
@@ -91,6 +91,7 @@ class DataManager {
     let freg = new FeatureRegistrar(g, c, this.id2feat, this.cid2feats, this.symbol2feats)
     let cfeats = feats.map(f => freg.register(f)).filter(x => x)
     this.cache[g.name][c.name] = cfeats
+    this.assignLanes(cfeats)
     return cfeats
   }
   // Returns a promise for all the feature of the specified genome, as a list, sorted by
@@ -116,11 +117,14 @@ class DataManager {
       if (includeTranscripts) {
         return this.getModels(g, c, s, e).then(tps => {
           const gid2tps = u.index(tps, t => t.gID, false)
+          let needLayout = false
           feats.forEach(f => {
             if (f.transcripts.length) return
             const ftps = gid2tps[f.ID] || []
             ftps.forEach(t => f.transcripts.push(t))
+            needLayout = true
           })
+          if (needLayout) this.assignLanes(this.cache[g.name][c.name])
           return feats
         })
       }
@@ -165,6 +169,21 @@ class DataManager {
   getGenolog (f, g) {
     return this.getGenologs(f, [g])[0]
   }
+
+  //
+  assignLanes (feats) {
+    const ca = new ContigAssigner()
+    const slap = new SwimLaneAssigner()
+    const slam = new SwimLaneAssigner()
+    const fp = new FeaturePacker(0, 15000)
+    feats.forEach(f => {
+      const sla = f.strand === '+' ? slap : slam
+      f.layout.contig = ca.assignNext(f.start, f.end)
+      f.layout.l1 = sla.assignNext(f.start, f.end)
+      f.layout.l2 = fp.assignNext(f.start, f.end, Math.max(1, f.transcripts.length), f.ID)
+    })
+  }
+
 }
 
 // Registers features for one chromsome of a genome
@@ -174,14 +193,6 @@ class FeatureRegistrar {
     // each chromosome of each genome has its own registrar
     this.genome = g
     this.chr = c
-    // swim lane assigner - plus strand
-    this.slap = new SwimLaneAssigner()
-    // swim lane assigner - minus strand
-    this.slam = new SwimLaneAssigner()
-    // feature packer
-    this.fp = new FeaturePacker(0, 15000)
-    // contig assigner
-    this.ca = new ContigAssigner()
     // map feature.ID => feature
     this.id2feat = id2f
     // map feature.cID => [ features ]
@@ -193,13 +204,11 @@ class FeatureRegistrar {
   //   r - a parsed GFF3 record
   register (r) {
     const f = gff3.record2object(r)
-    f.tCount = parseInt(f.tCount)
     f.transcripts = []
     f.sotype = f.type
     delete f.score
     delete f.phase
     delete f.type
-    let sla = f.strand === '+' ? this.slap : this.slam
     f.genome = this.genome
     f.chr = this.chr
     //
@@ -208,12 +217,12 @@ class FeatureRegistrar {
       console.log('Feature too big. Skipping: ', f)
       return null
     }
-    // assign contig number
-    f.contig = this.ca.assignNext(f.start, f.end)
-    // assign lane for +/- strand style layout
-    f.lane = sla.assignNext(f.start, f.end)
-    // assign lane for spread-transcript style layout
-    f.lane2 = this.fp.assignNext(f.start, f.end, Math.max(1, f.tCount), f.ID)
+    // A place to store layout attributes (such as swim lanes). Unlike
+    // the feature, the layout object is not frozen, so layout can be recalculated at any time.
+    // However because the owning object IS frozen, the layout objects will NOT be observed by vuejs.
+    // (This is a good thing.)
+    f.layout = {}
+    //
     this.id2feat[f.ID] = f
     if (f.cID) {
       let d = this.cid2feats[f.cID]

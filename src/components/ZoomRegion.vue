@@ -324,15 +324,15 @@ export default MComponent({
       if (this.showDetails && this.spreadTranscripts) {
         return 0
       } else {
-        let x = this.features.filter(f => f.strand === '+' && this.featureVisible(f)).reduce((v, f) => Math.max(v, f.lane), 0)
+        let x = this.features.filter(f => f.strand === '+' && this.featureVisible(f)).reduce((v, f) => Math.max(v, f.layout.l1), 0)
         return x
       }
     },
     maxLaneM: function () {
       if (this.showDetails && this.spreadTranscripts) {
-        return this.features.filter(f => this.featureVisible(f)).reduce((v, f) => Math.max(v, f.lane2 + f.tCount), 0)
+        return this.features.filter(f => this.featureVisible(f)).reduce((v, f) => Math.max(v, f.layout.l2 + f.transcripts.length), 0)
       } else {
-        return this.features.filter(f => f.strand === '-' && this.featureVisible(f)).reduce((v, f) => Math.max(v, f.lane), 0)
+        return this.features.filter(f => f.strand === '-' && this.featureVisible(f)).reduce((v, f) => Math.max(v, f.layout.l1), 0)
       }
     },
     height: function () {
@@ -407,16 +407,16 @@ export default MComponent({
     },
     featureY (f) {
       if (this.showDetails && this.spreadTranscripts) {
-        return f.lane2 * (this.featureHeight + this.laneGap) + this.laneGap
+        return f.layout.l2 * (this.featureHeight + this.laneGap) + this.laneGap
       } else if (f.strand === '+') {
-        return -f.lane * (this.featureHeight + this.laneGap)
+        return -f.layout.l1 * (this.featureHeight + this.laneGap)
       } else {
-        return (f.lane - 1) * (this.featureHeight + this.laneGap) + this.laneGap
+        return (f.layout.l1 - 1) * (this.featureHeight + this.laneGap) + this.laneGap
       }
     },
     featureH (f) {
       if (this.showDetails && this.spreadTranscripts) {
-        let tc = Math.max(f.tCount, 1)
+        let tc = Math.max(f.transcripts.length, 1)
         return this.featureHeight * tc + this.laneGap * (tc - 1)
       } else {
         return this.featureHeight
