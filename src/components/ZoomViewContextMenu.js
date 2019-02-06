@@ -65,7 +65,7 @@ function getMenus(thisObj) {
     '10093': mouseMenu,
     '10096': mouseMenu,
     '9606': humanMenu,
-    'default': [ alignOption ]
+    'default': [ alignOption() ]
   }
 }
 
