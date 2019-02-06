@@ -519,8 +519,16 @@ export default MComponent({
         if (this.showSequence) {
           this.$emit('busy-start')
           this.dataManager.getSequence(this.genome, this.chr, this.start, this.end).then(data => {
-            this.seqStart = data.start
-            this.sequence = data.seq
+            if (data) {
+              this.seqStart = data.start
+              this.sequence = data.seq
+            } else {
+              this.sequence = ''
+            }
+            this.$emit('busy-end')
+          }).catch(err => {
+            console.log('Error while fetching sequence: ', err)
+            this.sequence = ''
             this.$emit('busy-end')
           })
         } else {
