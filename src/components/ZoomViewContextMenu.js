@@ -58,12 +58,18 @@ function getMenus(thisObj) {
     externalLinkOption('Ensembl', 'http://www.ensembl.org/Homo_sapiens/Gene/Summary?db=core;g='),
     externalLinkOption('HumanMine', 'http://www.humanmine.org/humanmine/portal.do?class=Gene&externalids=')
   ]
+  // 
+  const ratMenu = [
+    alignOption(),
+    externalLinkOption('Ensembl', 'http://www.ensembl.org/Rattus_norvegicus/Gene/Summary?db=core;g=')
+  ]
 
   return {
     '10089': mouseMenu,
     '10090': mouseMenu,
     '10093': mouseMenu,
     '10096': mouseMenu,
+    '10116': ratMenu,
     '9606': humanMenu,
     'default': [ alignOption() ]
   }
