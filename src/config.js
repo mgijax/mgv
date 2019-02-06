@@ -115,7 +115,7 @@ export default {
   ListManager: {
     dbName: DATACACHE_PREFIX + 'user-lists'
   },
-  SyntenyBlockManager: {
+  Translator: {
     dbName: DATACACHE_PREFIX + 'blocks'
   },
   DataManager: {

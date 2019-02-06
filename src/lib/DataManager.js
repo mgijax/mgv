@@ -189,7 +189,6 @@ class DataManager {
 // Registers features for one chromsome of a genome
 class FeatureRegistrar {
   constructor (g, c, id2f, cid2f, sym2f) {
-    console.log('FeatureRegistrar', g.name, c.name)
     // each chromosome of each genome has its own registrar
     this.genome = g
     this.chr = c

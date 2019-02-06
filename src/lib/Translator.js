@@ -1,5 +1,5 @@
 //
-import { generateSyntenyBlocks } from '@/lib/SyntenyBlocks.js'
+import { generateSyntenyBlocks } from '@/lib/SyntenyBlocks'
 //
 class Translator {
   constructor (app) {
