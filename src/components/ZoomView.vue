@@ -29,7 +29,7 @@ import MMenu from '@/components/MMenu'
 import svg2png from '@/lib/Svg2Png'
 import { connections } from '@/lib/InterMineServices'
 import getMainMenu from '@/components/ZoomViewMainMenu'
-import getFeatureMenu from '@/components/ZoomViewContextMenu'
+import getFeatureMenus from '@/components/ZoomViewContextMenu'
 export default MComponent({
   name: 'ZoomView',
   props: ['context'],
@@ -41,8 +41,8 @@ export default MComponent({
       backgroundMenu: [],
       // main menu in the ZoomView
       mainMenu: getMainMenu(this),
-      // feature context menu
-      featureMenu: getFeatureMenu(this),
+      // taxonid -> feature context menu
+      featureMenu: getFeatureMenus(this),
     }
   },
   computed: {
@@ -54,8 +54,8 @@ export default MComponent({
     showContextMenu: function (evt) {
       let fnode = evt.target.closest('.feature')
       if (!fnode) return
-      this.contextMenu = fnode ? this.featureMenu : this.backgroundMenu
-      this.contextFeature = fnode ? this.dataManager.getFeatureById(fnode.getAttribute('name')) : null
+      const f = this.contextFeature = fnode ? this.dataManager.getFeatureById(fnode.getAttribute('name')) : null
+      this.contextMenu = f ? (this.featureMenu[f.genome.taxonid] || this.featureMenu['default']) : this.backgroundMenu
       let cm = this.$refs.contextMenu
       let cbb = this.$el.getBoundingClientRect()
       let top = evt.clientY - cbb.y
