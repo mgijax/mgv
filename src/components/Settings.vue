@@ -13,7 +13,7 @@
         />
   </div>
   <div
-    title="Sets the font size of displayed feature labels."
+    title="Set the font size of displayed feature labels."
     class="flexrow"
     >
     <label>Font size</label>
@@ -25,7 +25,7 @@
         />
   </div>
   <div
-    title="Sets the thickness of rectangles used to represent features."
+    title="Set the thickness of rectangles used to represent features."
     class="flexrow"
     >
     <label>Height</label>
@@ -37,7 +37,7 @@
         />
   </div>
   <div
-    title="Sets the amount of space separating swim lanes."
+    title="Set the amount of space separating feature swim lanes."
     class="flexrow"
     >
     <label>Lane gap</label>
@@ -51,7 +51,7 @@
   <label>Transcripts</label>
   <div
     class="flexrow"
-    title="Display all feature labels when view width is below threshold (3 Mb)."
+    title="Display all transcript labels when view width is below threshold (3 Mb) and 'Spread transcripts' is checked."
     >
     <label>Show labels</label>
     <input
@@ -72,7 +72,7 @@
         />
   </div>
   <div
-    title="If checked, spreads transcripts so you can see them all. If unchecked, piles them on top of one another for a compact view. In spread view, strand is indicated by arrows. In the collapsed view, strand is indicated by position above (+) or below (-) the axis line."
+    title="When checked, spreads transcripts so you can see them all. When unchecked, piles them on top of one another for a compact view. In spread view, strand is indicated by arrows. In the collapsed view, strand is indicated by position above (+) or below (-) the axis line."
     class="flexrow"
     >
     <label>Spread transcripts</label>
@@ -116,6 +116,7 @@
         v-model="ZoomRegion.trackMouse"
         />
   </div>
+
   </form>
   </div>
 </template>
