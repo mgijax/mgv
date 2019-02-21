@@ -118,6 +118,6 @@ export default MComponent({
 
 <style scoped>
 .zoom-main * {
-  transition: transform 0.5s height 0.5s;
+  transition: transform 0.5s, height 0.5s;
 }
 </style>

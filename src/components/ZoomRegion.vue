@@ -81,6 +81,11 @@
           :fill="baseColor(b)"
           text-anchor="middle"
           >{{b}}</tspan>
+        <tspan
+          v-if="!sequence"
+          x="25"
+          fill="black"
+          >No sequence available.</tspan>
       </text>
       <!-- ======= Features ======= -->
       <g
