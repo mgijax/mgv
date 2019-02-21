@@ -1,6 +1,7 @@
 //
 import u from '@/lib/utils'
 import config from '@/config'
+import KeyStore from '@/lib/KeyStore'
 import CachingFetcher from '@/lib/CachingFetcher'
 import ChunkedGff3FileReader from '@/lib/ChunkedGff3FileReader'
 import { InterMineSequenceReader, MouseMineSequenceReader } from '@/lib/InterMineServices'
@@ -11,15 +12,37 @@ const RegisteredReaderClasses = {
   MouseMineSequenceReader
 }
 // -------------------------------------------------------------------------------
+// Container for track readers for a genome
 class GenomeReader {
   constructor (registrar, info) {
     this.registrar = registrar
     this.info = info
+    const n = config.CachingFetcher.dbName
+    this.fetcher = new CachingFetcher(n, info.name)
+    this.kstore = new KeyStore(n)
     this.readers = this.info.tracks.reduce((a,t) => {
       const rclass = RegisteredReaderClasses[t.reader.type]
-      a[t.name] = new rclass(this.registrar.fetcher, t.name, t.reader, info)
+      a[t.name] = new rclass(this.fetcher, t.name, t.reader, info)
       return a
     }, {})
+    this.readyp = this.checkTimestamp()
+  }
+  // Compares the timestamp of the cached info for this genome against the timestamp
+  // of the info we just loaded. If they differ, drop all cached data for this genome,
+  // then save the new info.
+  // Returns a promise that resolves when all that is done.
+  checkTimestamp () {
+    return this.kstore.get(this.info.name + '::INFO').then(cinfo => {
+      if (!cinfo || cinfo.timestamp != this.info.timestamp) {
+        return this.fetcher.clearNamespace().then(() => {
+          return this.kstore.set(this.info.name+'::INFO', this.info)
+        })
+      }
+    })
+  }
+  // Returns a promise that resolves when the genome is ready to start reading
+  ready () {
+    return this.readyp
   }
 }
 // -------------------------------------------------------------------------------
@@ -40,15 +63,15 @@ class GenomeRegistrar {
     this.name2genome = {}
     this.name2reader = {}
     this.indexName = 'index.json'
-    this.fetcher = new CachingFetcher(config.CachingFetcher.dbName)
   }
   getReader (g, n) {
-    return this.name2reader[g.name].readers[n]
+    const gr = this.name2reader[g.name]
+    return gr.ready().then( () => gr.readers[n] )
   }
   register (url) {
     let p = this.url2promise[url]
     if (p) return p
-    this.url2promise[url] = p = this.fetcher.fetch(this._adjust(url), 'json')
+    this.url2promise[url] = p = u.fetch(this._adjust(url), 'json')
       .then(data => this._register(url, data))
       .catch(err => console.log(err))
     return p
@@ -85,7 +108,7 @@ class GenomeRegistrar {
     info.url = info.url || url
     info.name2chr = info.chromosomes.reduce((a,c) => { a[c.name] = c; return a }, {})
     this.name2genome[info.name] = info
-    this.name2reader[info.name] = new GenomeReader(this, info)
+    const gr = this.name2reader[info.name] = new GenomeReader(this, info)
     return info
   }
 }

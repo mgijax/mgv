@@ -61,29 +61,31 @@ class DataManager {
     if (this.cache[g.name]) return Promise.resolve(true)
     //
     this.cache[g.name] = {}
-    const p = this.greg.getReader(g, 'genes').readAll().then(recs => {
-      let prevChr = null
-      let feats = []
-      let allFeats = []
-      recs.forEach(r => {
-        if (!prevChr || r[0] !== prevChr.name) {
-          if (feats.length) {
-            allFeats.push(this._registerChr(g, prevChr, feats))
+    return this.greg.getReader(g, 'genes').then(reader => {
+      const p = reader.readAll().then(recs => {
+        let prevChr = null
+        let feats = []
+        let allFeats = []
+        recs.forEach(r => {
+          if (!prevChr || r[0] !== prevChr.name) {
+            if (feats.length) {
+              allFeats.push(this._registerChr(g, prevChr, feats))
+            }
+            prevChr = g.name2chr[r[0]]
+            if (!prevChr) u.fail("Could not find chromosome " + r[0])
+            feats = [r]
           }
-          prevChr = g.name2chr[r[0]]
-          if (!prevChr) u.fail("Could not find chromosome " + r[0])
-          feats = [r]
-        }
-        else {
-          feats.push(r)
-        }
+          else {
+            feats.push(r)
+          }
+        })
+        if (feats.length) allFeats.push(this._registerChr(g, prevChr, feats))
+        delete this.pending[g.name]
+        return allFeats
       })
-      if (feats.length) allFeats.push(this._registerChr(g, prevChr, feats))
-      delete this.pending[g.name]
-      return allFeats
+      this.pending[g.name] = p
+      return p
     })
-    this.pending[g.name] = p
-    return p
   }
   //
   _registerChr (g, c, feats) {
@@ -132,19 +134,21 @@ class DataManager {
     })
   }
   getModels (g, c, s, e) {
-    return this.greg.getReader(g, 'transcripts').readRange(c, s, e).then(ts => {
-      return ts.map(t => {
-        return {
-          gID: t[8]['Parent'],
-          tID: t[8]['ID'],
-          exons: this._unpackExons(t)
-        }
+    return this.greg.getReader(g, 'transcripts').then(reader => {
+      return reader.readRange(c, s, e).then(ts => {
+        return ts.map(t => {
+          return {
+            gID: t[8]['Parent'],
+            tID: t[8]['ID'],
+            exons: this._unpackExons(t)
+          }
+        })
       })
     })
   }
   // Returns a promise for the genomic sequence of the specified range for the specified genome
   getSequence (g, c, s, e) {
-    return this.greg.getReader(g, 'sequences').readRange(c, s, e)
+    return this.greg.getReader(g, 'sequences').then(reader => reader && reader.readRange(c, s, e))
   }
   // Returns the genologs of feature f from the specified genomes in the specified order.
   // If a genolog does not exist in a given genome, that entry in the returned list === undefined.
