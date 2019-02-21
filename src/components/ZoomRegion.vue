@@ -40,12 +40,24 @@
         :y="-zeroOffset"
         width="100%"
         :height="Math.max(height, 20)"
-        :fill="ori === '-' ? 'red' : 'white'"
-        opacity="0.3"
+        fill="none"
         class="underlay"
         ref="underlay"
         :transform="`translate(${-myDelta},0)`"
         />
+      <!-- ======= synteny blocks ======= -->
+      <g class="sblocks">
+        <rect
+         v-for="(b,i) in blocks"
+         :key="i"
+         :x="b2p(b.start)"
+         :y="-zeroOffset"
+         :width="b2p(b.end) - b2p(b.start)"
+         :height="Math.max(height, 20)"
+         :fill="b.ori === '-' ? 'red' : 'white'"
+         opacity="0.3"
+         />
+      </g>
       <!-- ======= axis line ======= -->
       <line
         class="axis"
@@ -57,7 +69,7 @@
         :transform="`translate(${-myDelta},0)`"
         v-show="!spreadTranscripts || !showDetails"
         />
-      <!-- ======= label ======= -->
+      <!-- ======= coordinates label ======= -->
       <text
         x="50%"
         :y="height - zeroOffset + 10"
@@ -67,7 +79,7 @@
         font-size="10px"
         :transform="`translate(${-myDelta},0)`"
         >{{chr.name}}:{{start + deltaB}}..{{end + deltaB}}</text>
-      <!-- ======= sequence ======= -->
+      <!-- ======= sequence string ======= -->
       <text
         v-if="showSequence"
         :font-size="featureFontSize"
@@ -246,6 +258,7 @@ export default MComponent({
   data: function () {
     return {
       features: [], // the features to draw
+      blocks: [], // the synteny blocks to draw
       sequence: '', // the sequence to display
       seqStart: 0,
       dragging: false,
@@ -288,7 +301,7 @@ export default MComponent({
       return (this.context.coords.end - this.context.coords.start + 1) < this.detailThreshold
     },
     showSequence: function () {
-      return (this.end - this.start + 1) < this.sequenceThreshold
+      return (this.context.coords.end - this.context.coords.start + 1) < this.sequenceThreshold
     },
     featureHeight: function () {
       return parseInt(this.cfg.featureHeight)
@@ -516,6 +529,9 @@ export default MComponent({
       this.seqStart = this.start
       this.busy = true
       this.$emit('busy-start')
+      this.translator()
+          .getBlocksInRange(this.genome, this.chr.name, this.start - delta, this.end + delta, this.context.rGenome)
+          .then(bs => { this.blocks = bs })
       this.dataManager.getGenes(this.genome, this.chr, this.start - delta, this.end + delta, this.showDetails).then(feats => {
         this.busy = false
         this.features = feats

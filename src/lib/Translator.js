@@ -10,6 +10,10 @@ class Translator {
     //     genome B name -> genome A name -> bCover
     this.n2block = {}
   }
+  // Returns a translator (which is just one side of a joined BlockCover - see SyntenyBlocks.js)
+  // for mapping coordinates in aGenome to coordinates in bGenome.
+  // Since creating a translator is expensive, the results are cached. 
+  // Creating a translator from A to B simultaneously creates a translator from B to A (which is also cached).
   getTranslator (aGenome, bGenome) {
     if (this.n2block[aGenome.name] && this.n2block[aGenome.name][bGenome.name]) {
       return Promise.resolve(this.n2block[aGenome.name][bGenome.name])
@@ -26,9 +30,17 @@ class Translator {
       })
     })
   }
+  // Translates a coordinate range from aGenome to the 'equivalent' coordinate range(s) in bGenome.
+  // Returns a list of coordinate ranges in bGenome.
   translate (aGenome, chr, start, end, bGenome) {
     return this.getTranslator(aGenome, bGenome).then(t => {
       return t.translate(chr, start, end)
+    })
+  }
+  //
+  getBlocksInRange(aGenome, chr, start, end, bGenome) {
+    return this.getTranslator(aGenome, bGenome).then(t => {
+      return t.getBlocksInRange(chr, start, end)
     })
   }
 }

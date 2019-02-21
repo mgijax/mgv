@@ -123,8 +123,12 @@ class Block {
     u.assert(fs, 'Genome has features.')
     u.assert(this.istart >= 0, 'Start >= 0')
     u.assert(this.length > 0, 'Length > 0')
-    u.assert(this.istart + this.length <= this.genome.features.length, 'Bounds check.')
-    u.assert(fs[this.istart].chr === fs[this.istart + this.length - 1].chr, 'Chromomse boundary check.')
+    u.assert(this.istart + this.length <= fs.length, 'Bounds check.')
+    const first = fs[this.istart]
+    u.assert(first, 'First element exists')
+    const last = fs[this.istart + this.length - 1]
+    u.assert(last, 'Last element exists')
+    u.assert(first.chr === last.chr, 'Chromosome boundary check.')
   }
   combineOri (o1, o2) {
     if (!o1) return o2
@@ -363,12 +367,12 @@ function generateSyntenyBlocks (aName, aFeats, bName, bFeats) {
   // Build a contig block cover for genome B
   let gb = new Genome(bName, bFeats)
   let bCover = new BlockCover(gb).makeContigCover()
-  // Join the blocks (by joining their features)
+  // Join the covers (by joining the features in their blocks)
   aCover.join(bCover)
-  // Merge 1:0 blocks with their neighbors
+  // In each genome, merge 1:0 blocks with their neighbors
   aCover.merge1to0s()
   bCover.merge1to0s()
-  // Try to convert 1:n's into 1:1's by merging the n blocks when possible
+  // In each genome, try to convert 1:n's into 1:1's by merging the n blocks when possible
   aCover.merge1toNs()
   bCover.merge1toNs()
   // Merge successive 1:1's into larger 1:1's
