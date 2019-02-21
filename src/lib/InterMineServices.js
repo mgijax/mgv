@@ -8,8 +8,8 @@ class InterMineConnection {
   //   url - web service base URL
   //   isMouseMine - boolean. If true, uses MouseMine model for strains
   constructor (baseurl, isMouseMine) {
-    this.baseurl = baseurl
-    this.wsurl = baseurl + '/service'
+    this.baseurl = baseurl.replace(/\/service\/?$/, '')
+    this.wsurl = this.baseurl + '/service'
     this.qUrl = this.wsurl + '/query/results?'
     this.seqSliceUrl = this.wsurl + '/sequence?'
     this.faUrl = this.wsurl + '/query/results/fasta?'
