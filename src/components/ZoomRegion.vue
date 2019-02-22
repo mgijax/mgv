@@ -619,7 +619,7 @@ export default MComponent({
           if (d.shiftDrag) {
             let x1 = d.startX - d.bb.x
             let x2 = e.clientX - d.bb.x
-            this.currRange = [x1, x2]
+            this.currRange = [Math.min(x1, x2), Math.max(x1, x2)]
           } else {
             this.$root.$emit('region-drag', d.deltaX)
           }
