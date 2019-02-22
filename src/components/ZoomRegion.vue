@@ -25,9 +25,9 @@
           {{chr.name}}:{{p2b(currRange[0])}}{{currRange[0] !== currRange[1] ? '..' + p2b(currRange[1]) : ''}}
           </text>
         <rect
-          :x="Math.min(currRange[0], currRange[1])"
+          :x="b2p(0.5 + p2b(Math.min(currRange[0], currRange[1])))"
           :y="-zeroOffset"
-          :width="Math.abs(currRange[1] - currRange[0]) + 1"
+          :width="ppb * Math.floor(bpp * Math.abs(currRange[1] - currRange[0])) + 1"
           :height="Math.max(height, 10)"
           fill-opacity="0.3"
           stroke="black"
