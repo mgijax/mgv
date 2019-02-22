@@ -69,6 +69,8 @@
 import MComponent from '@/components/MComponent'
 import ZoomRegion from '@/components/ZoomRegion'
 import u from '@/lib/utils'
+import config from '@/config'
+//
 export default MComponent({
   name: 'ZoomStrip',
   components: { ZoomRegion },
@@ -162,13 +164,33 @@ export default MComponent({
           chr: { name: '?' },
           start: cc.start,
           end: cc.end,
-          landmark: lcc.landmark
+          landmark: lcc.landmark,
+          alignOn: config.ZoomRegion.featureAlignment
         }])
       } else if (lm) {
         // landmark mode
         let delta = lcc.delta
         let w = cc.end - cc.start + 1
-        let lmp = lm.strand === '+' ? lm.start : lm.end
+        const alignOn = config.ZoomRegion.featureAlignment
+        let lmp
+        switch (alignOn) {
+        case '5-prime':
+          lmp = lm.strand === '+' ? lm.start : lm.end
+          break
+        case '3-prime':
+          lmp = lm.strand === '+' ? lm.end : lm.start
+          break
+        case 'proximal':
+          lmp = lm.start
+          break
+        case 'distal':
+          lmp = lm.end
+          break
+        case 'midpoint':
+          lmp = Math.floor((lm.start + lm.end) / 2)
+          break
+        default:
+        }
         let s = Math.round(lmp - w / 2) + delta
         if (this.genome === this.context.rGenome) {
           // if here, I am the ZoomStrip for the reference genome and we have just computed the actual

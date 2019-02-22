@@ -48,7 +48,36 @@
         max="24"
         />
   </div>
+  <div
+    title="Reference point when aligned on a feature."
+    class="flexrow"
+    >
+    <label>Align on</label>
+    <select v-model="ZoomRegion.featureAlignment">
+      <option value="5-prime">5-prime end</option>
+      <option value="3-prime">3-prime end</option>
+      <option value="proximal">proximal end</option>
+      <option value="distal">distal end</option>
+      <option value="midpoint">midpoint</option>
+    </select>
+  </div>
   <label>Transcripts</label>
+  <!--
+    WARNING: Making these threshold values editable gives the unwary user a VERY EASY way to
+    crash their brower! Need to place appropriate restrictions/safeguards.
+  -->
+  <div
+    title="Display exon structure when view width is below this value."
+    class="flexrow">
+    <label>Display threshold</label>
+    <input
+        min=0
+        max=10000000
+        step=1000000
+        type="number"
+        v-model="ZoomRegion.detailThreshold"
+        />Mb
+  </div>
   <div
     class="flexrow"
     title="Display all transcript labels when view width is below threshold (3 Mb) and 'Spread transcripts' is checked."
@@ -81,31 +110,32 @@
         v-model="ZoomRegion.spreadTranscripts"
         />
   </div>
-  <label>Misc</label>
-  <!--
-    WARNING: Making these threshold values editable gives the unwary user a VERY EASY way to
-    crash their brower! Need to place appropriate restrictions/safeguards.
-  -->
-  <div class="flexrow">
-    <label>Details threshold</label>
-    <input
-        min=0
-        max=10000000
-        step=1000000
-        type="number"
-        v-model="ZoomRegion.detailThreshold"
-        />
-  </div>
-  <div class="flexrow">
-    <label>Sequence threshold</label>
+  <label>Sequences</label>
+  <div
+    title="Display DNA sequence when view width is below this value."
+    class="flexrow">
+    <label>Display threshold</label>
     <input
         min=0
         max=10000
         step=100
         type="number"
         v-model="ZoomRegion.sequenceThreshold"
+        />bp
+  </div>
+  <div
+    title="Set the font size of displayed sequences."
+    class="flexrow"
+    >
+    <label>Font size</label>
+    <input
+        type="range"
+        v-model="ZoomRegion.sequenceFontSize"
+        min="1"
+        max="24"
         />
   </div>
+  <label>Misc</label>
   <div
     title="When checked, shows a vertical reference line indicating the base position that follows the mouse around. When unchecked, only shows during drag operations."
     class="flexrow"

@@ -69,10 +69,12 @@ export default {
   },
   ZoomRegion: {
     pad: 3,
+    featureAlignment: '5-prime', // one of: '5-prime', '3-prime', 'proximal', 'distal', 'midpoint'
     featureHeight: 10,
     laneGap: 6,
     featureFontSize: 10,
     transcriptFontSize: 10,
+    sequenceFontSize: 10,
     trackMouse: true,
     detailThreshold: 3000000,
     detailThresholdLimit: 10000000,

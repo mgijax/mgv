@@ -139,9 +139,11 @@ export default MComponent({
     innerWidth: function () {
       return this.width - 5 * this.padding
     },
+    // pixels per base
     ppb: function () {
       return (this.isOpen ? this.innerHeight : this.innerWidth) / this.maxChrLen
     },
+    // Returns the genologs from the current ref genome of the canonical IDs in the currently displayed list.
     currentListGenologs: function () {
       if (!this.context.currentList) return []
       return this.context.currentList.items.map(id => {

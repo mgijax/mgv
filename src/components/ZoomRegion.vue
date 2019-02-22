@@ -56,7 +56,7 @@
          :width="b2p(b.end) - b2p(b.start)"
          :height="Math.max(height, 20)"
          :fill="b.ori === '-' ? 'red' : 'white'"
-         opacity="0.3"
+         opacity="0.2"
          />
       </g>
       <!-- ======= axis line ======= -->
@@ -83,7 +83,7 @@
       <!-- ======= sequence string ======= -->
       <text
         v-if="showSequence"
-        :font-size="featureFontSize"
+        :font-size="sequenceFontSize"
         fill=black
         stroke=none
         >
@@ -315,6 +315,9 @@ export default MComponent({
     },
     transcriptFontSize: function () {
       return parseInt(this.cfg.transcriptFontSize)
+    },
+    sequenceFontSize: function () {
+      return parseInt(this.cfg.sequenceFontSize)
     },
     // context string. watch for changes to feature range
     cxtString: function () {
