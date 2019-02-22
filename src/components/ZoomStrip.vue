@@ -141,9 +141,9 @@ export default MComponent({
         }
         return nrs
       }, [])
-      let dx = 0
+      let dx = 12
       let gap = 2
-      let totalGap = gap * (regions.length - 1)
+      let totalGap = dx + gap * (regions.length - 1)
       regions.forEach(r => {
         let w = (this.width - totalGap) * (r.end - r.start + 1) / totalLength
         r.width = w
