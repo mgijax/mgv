@@ -116,6 +116,14 @@
               title="The main view. Shows features in the current region of the reference genome and all selected comparison genomes. Highlights features in the view that are currently selected. Many controls for panning, zooming, selecting, etc. Most anything can be undone by hitting the browser's Back button."
               />
           </page-box>
+          <page-box
+            label="Multiple Sequence Alignment">
+            <msa
+            ref="msa"
+            title="Multiple sequence alignment."
+            :sequences="msaSequences.join('\n')"
+            ></msa>
+            </page-box>
         </page-box-container>
       </div>
       <m-footer version="1.0.0"></m-footer>
@@ -136,6 +144,7 @@ import ListEditor from '@/components/ListEditor'
 import Facets from '@/components/Facets'
 import GenomeView from '@/components/GenomeView'
 import ZoomView from '@/components/ZoomView'
+import Msa from '@/components/MSA'
 import FeatureDetails from '@/components/FeatureDetails'
 import FeatureColorMap from '@/lib/FeatureColorMap'
 import MComponent from '@/components/MComponent'
@@ -160,6 +169,7 @@ export default MComponent({
     Facets,
     GenomeView,
     ZoomView,
+    Msa,
     FeatureDetails
   },
   provide: function () {
@@ -230,7 +240,9 @@ export default MComponent({
       // list currently being edited
       currentEditList: null,
       // flag to indicate when there are currently enabled facets
-      activeFacets: false
+      activeFacets: false,
+      // A list of sequences, each in fasta format
+      msaSequences: []
     }
   },
   computed: {

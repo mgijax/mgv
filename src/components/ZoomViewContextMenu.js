@@ -1,3 +1,4 @@
+import u from '@/lib/utils'
 import { connections } from '@/lib/InterMineServices'
 
 function getMenus(thisObj) {
@@ -31,14 +32,31 @@ function getMenus(thisObj) {
   function sequenceDownloadOption (type) {
     return {
       icon: 'cloud_download',
-      label: `${type} sequences`,
+      label: `Align ${type} sequences`,
       helpText: `Download ${type} sequences for this feature from currently displayed genomes.`,
-      disabled: false,
+      disabled: f => f.sotype !== 'protein_coding_gene' && type === 'cds',
       extraArgs: [type],
       handler: (function (f, seqtype) {
         const genologs = this.dataManager.getGenologs(f, this.context.vGenomes)
         const url = connections.MouseMine.getFastaUrl(genologs, seqtype)
         window.open(url, '_blank')
+      }).bind(thisObj)
+    }
+  }
+  //
+  function sequenceAlignmentOption (type) {
+    return {
+      icon: 'reorder',
+      label: `${type} sequences`,
+      helpText: `Align ${type} sequences for this feature from currently displayed genomes.`,
+      disabled: f => f.sotype !== 'protein_coding_gene' && type === 'cds',
+      extraArgs: [type],
+      handler: (function (f, seqtype) {
+        const genologs = this.dataManager.getGenologs(f, this.context.vGenomes)
+        const url = connections.MouseMine.getFastaUrl(genologs, seqtype)
+        u.fetch(url, 'text').then(t => {
+          this.context.msaSequences = [t]
+        })
       }).bind(thisObj)
     }
   }
@@ -50,7 +68,9 @@ function getMenus(thisObj) {
     sequenceDownloadOption('genomic'),
     sequenceDownloadOption('transcript'),
     sequenceDownloadOption('cds'),
-    sequenceDownloadOption('exon')
+    sequenceDownloadOption('exon'),
+    sequenceAlignmentOption('transcript'),
+    sequenceAlignmentOption('cds')
   ]
   // 
   const humanMenu = [

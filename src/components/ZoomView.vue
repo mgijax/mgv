@@ -58,9 +58,9 @@ export default MComponent({
       this.contextMenu = f ? (this.featureMenu[f.genome.taxonid] || this.featureMenu['default']) : this.backgroundMenu
       let cm = this.$refs.contextMenu
       let cbb = this.$el.getBoundingClientRect()
-      let top = evt.clientY - cbb.y
-      let left = evt.clientX - cbb.x
-      cm.open(top, left)
+      let x = evt.clientY - cbb.y
+      let y = evt.clientX - cbb.x
+      cm.open(x, y)
     }
   }
 })
