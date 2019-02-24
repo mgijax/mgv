@@ -10,6 +10,11 @@
         <div class="jd_toolParameterBox"> 
          <fieldset> 
           <legend>STEP 1 - Enter your input sequences</legend> 
+
+          <p v-if="tool==='clustalo'"> <label for="sequence"> <a href="https://www.ebi.ac.uk/seqdb/confluence/display/THD/Clustal+Omega#ClustalOmega-sequence" target="_help">Enter or paste</a> </label> a set of <select id="stype" name="stype"> <option value="protein">PROTEIN</option> <option value="dna">DNA</option> <option value="rna">RNA</option> </select> sequences in any supported <a href="https://www.ebi.ac.uk/seqdb/confluence/display/THD/Clustal+Omega#ClustalOmega-sequence" target="_help">format</a>: </p>
+
+          <p v-if="tool==='kalign'"> <label for="sequence"> <a href="https://www.ebi.ac.uk/seqdb/confluence/display/THD/Kalign#Kalign-sequence" target="_help">Enter or paste</a> </label> a set of <select id="stype" name="stype"> <option selected="selected" value="protein">Protein</option> <option value="dna">Nucleic Acid</option> </select> sequences in any supported <a href="https://www.ebi.ac.uk/seqdb/confluence/display/THD/Kalign#Kalign-sequence" target="_help">format</a>: </p>
+
           <p> <label for="sequence"> <a href="https://www.ebi.ac.uk/seqdb/confluence/display/THD/MUSCLE#MUSCLE-sequence" target="_help">Enter or paste</a> </label> a set of sequences in any supported <a href="https://www.ebi.ac.uk/seqdb/confluence/display/THD/MUSCLE#MUSCLE-sequence" target="_help">format</a>: </p> 
           <textarea v-model="sequences" cols="47" id="sequence" name="sequence" rows="7">
 </textarea> 
@@ -17,7 +22,6 @@
          </fieldset> 
         </div> 
        
-
 
         <div v-if="tool === 'muscle'" class="jd_toolParameterBox"> 
          <fieldset> 
