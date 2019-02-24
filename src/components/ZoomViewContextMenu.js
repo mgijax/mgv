@@ -32,7 +32,7 @@ function getMenus(thisObj) {
   function sequenceDownloadOption (type) {
     return {
       icon: 'cloud_download',
-      label: `Align ${type} sequences`,
+      label: `Download ${type} sequences`,
       helpText: `Download ${type} sequences for this feature from currently displayed genomes.`,
       disabled: f => f.sotype !== 'protein_coding_gene' && type === 'cds',
       extraArgs: [type],
@@ -47,7 +47,7 @@ function getMenus(thisObj) {
   function sequenceAlignmentOption (type) {
     return {
       icon: 'reorder',
-      label: `${type} sequences`,
+      label: `Align ${type} sequences`,
       helpText: `Align ${type} sequences for this feature from currently displayed genomes.`,
       disabled: f => f.sotype !== 'protein_coding_gene' && type === 'cds',
       extraArgs: [type],
