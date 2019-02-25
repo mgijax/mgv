@@ -1,5 +1,6 @@
 import u from '@/lib/utils'
 import { connections } from '@/lib/InterMineServices'
+import { translate } from '@/lib/genetic_code'
 
 function getMenus(thisObj) {
   //
@@ -45,16 +46,33 @@ function getMenus(thisObj) {
   }
   //
   function sequenceAlignmentOption (type) {
+    const tp = type === 'cds' ? 'protein' : type
+    const lbl = `Align ${tp} sequences`
+    const hlp = `Align ${tp} sequences for this feature from currently displayed genomes.`
     return {
       icon: 'reorder',
-      label: `Align ${type} sequences`,
-      helpText: `Align ${type} sequences for this feature from currently displayed genomes.`,
+      label: lbl,
+      helpText: hlp,
       disabled: f => f.sotype !== 'protein_coding_gene' && type === 'cds',
       extraArgs: [type],
       handler: (function (f, seqtype) {
         const genologs = this.dataManager.getGenologs(f, this.context.vGenomes)
         const url = connections.MouseMine.getFastaUrl(genologs, seqtype)
         u.fetch(url, 'text').then(t => {
+          if (seqtype === 'cds') {
+            // Translate cds sequences to protein.
+            // First concatenate all the lines of nucleic acid sequence.
+            const lines = t.trim().split('\n').reduce((a,l) => {
+              if (l[0] === '>' || a[a.length - 1][0] === '>') {
+                a.push(l)
+              } else {
+                a[a.length - 1] += l
+              }
+              return a
+            }, [])
+            // Then call translate on each sequence.
+            t = lines.map(l => l[0] === '>' ? l : translate(l)).join('\n')
+          }
           this.context.msaSequences = [t]
         })
       }).bind(thisObj)
