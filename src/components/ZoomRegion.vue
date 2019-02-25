@@ -124,8 +124,9 @@
         <g
           v-if="showDetails"
           v-for="(t, ti) in f.transcripts"
-          :key="t.ID"
+          :key="t.tID"
           class="transcript"
+          :name="t.tID"
           :transform="transcriptTransform(f, t, ti)"
           >
           <polyline
@@ -566,6 +567,12 @@ export default MComponent({
       if (!f) return
       let fid = f.getAttribute('name')
       let feat = this.fIndex[fid]
+      /*
+      let t = e.target.closest('.transcript')
+      if (t) {
+        console.log(t.getAttribute('name'))
+      }
+      */
       return feat
     },
     mousemove: function (e) {
