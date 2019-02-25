@@ -98,7 +98,9 @@ const genetic_code = genetic_code_t.reduce((a,r) => { a[r[0]] = r[1]; return a }
 //
 function translate (rna) {
   const codons = rna.toUpperCase().replace(/T/g,'U').match(/.{1,3}/g);
-  return codons.map(c => aaShort2Letter[genetic_code[c]]).join('')
+  const residues = codons.map(c => aaShort2Letter[genetic_code[c]]).join('')
+  // remove trailiing stop codon if it was included
+  return residues.replace(/[*]$/, '')
 }
 //
 export {
