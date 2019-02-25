@@ -100,7 +100,7 @@ function translate (rna) {
   const codons = rna.toUpperCase().replace(/T/g,'U').match(/.{1,3}/g);
   const residues = codons.map(c => aaShort2Letter[genetic_code[c]]).join('')
   // remove trailiing stop codon if it was included
-  return residues.replace(/[*]$/, '')
+  return residues.replace(/[*]/g, '-')
 }
 //
 export {
