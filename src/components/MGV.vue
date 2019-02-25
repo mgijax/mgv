@@ -126,6 +126,7 @@
             ref="msa"
             title="Multiple sequence alignment."
             :sequences="msaSequences.join('\n')"
+            @clear="clearSequences()"
             ></msa>
             </page-box>
         </page-box-container>
@@ -255,6 +256,10 @@ export default MComponent({
     }
   },
   methods: {
+    //
+    clearSequences: function () {
+      this.msaSequences = []
+    },
     // Returns a promise for the list of genome info objects
     initializeData: function () {
     },

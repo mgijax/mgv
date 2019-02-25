@@ -1,5 +1,6 @@
 <template>
   <div class="msa flexcolumn">
+<form target="_blank" :action="`https://www.ebi.ac.uk/Tools/services/web_${tool}/toolform.ebi`" enctype="multipart/form-data" id="jd_toolSubmissionForm" method="post"> 
      <div class="flexrow toolselector">
        <label>Tool</label>
         <select id="tool" name="tool" v-model="tool" > 
@@ -8,7 +9,6 @@
           <option value="kalign">Kalign</option>
         </select>
       </div>
-<form target="_blank" :action="`https://www.ebi.ac.uk/Tools/services/web_${tool}/toolform.ebi`" enctype="multipart/form-data" id="jd_toolSubmissionForm" method="post"> 
         <input id="isSAM" type="hidden" value="m" /> 
         <div class="jd_toolParameterBox"> 
          <fieldset> 
@@ -21,6 +21,7 @@
           <p> <label for="sequence"> <a href="https://www.ebi.ac.uk/seqdb/confluence/display/THD/MUSCLE#MUSCLE-sequence" target="_help">Enter or paste</a> </label> a set of sequences in any supported <a href="https://www.ebi.ac.uk/seqdb/confluence/display/THD/MUSCLE#MUSCLE-sequence" target="_help">format</a>: </p> 
           <textarea v-model="sequences" cols="67" id="sequence" name="sequence" rows="7">
 </textarea> 
+          <button @click.stop.prevent="$emit('clear')">Clear sequences</button>
           <p> Or <label for="upfile"> <a href="https://www.ebi.ac.uk/seqdb/confluence/display/THD/MUSCLE#MUSCLE-upload" target="_help">upload</a>
           </label> a file:
           <input id="upfile" name="upfile" type="file" />
@@ -173,19 +174,8 @@ export default MComponent({
   },
   data: function () {
     return {
-      tool: 'muscle',
-      tools: {
-        muscle: {
-          url: 'https://www.ebi.ac.uk/Tools/msa/kalign/../../services/web_muscle/toolform.ebi'
-        },
-        clustalo: {
-        },
-        kalign: {
-        }
-      }
+      tool: 'muscle'
     }
-  },
-  computed: {
   },
   methods: {
   }
