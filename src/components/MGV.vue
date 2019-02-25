@@ -116,7 +116,11 @@
               title="The main view. Shows features in the current region of the reference genome and all selected comparison genomes. Highlights features in the view that are currently selected. Many controls for panning, zooming, selecting, etc. Most anything can be undone by hitting the browser's Back button."
               />
           </page-box>
+          <!--
+          ============== Multiple Sequence Alignment ==============
+          -->
           <page-box
+            :initiallyOpen="false"
             label="Multiple Sequence Alignment">
             <msa
             ref="msa"
