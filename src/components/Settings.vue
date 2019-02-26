@@ -6,7 +6,7 @@
     title="Display all feature labels when view width is below threshold (3 Mb)."
     class="flexrow"
     >
-    <label>Show labels</label>
+    <label>Show all<sup title="When zoomed in">*</sup> labels</label>
     <input
         type="checkbox"
         v-model="ZoomRegion.showFeatureLabels"
