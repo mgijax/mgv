@@ -145,14 +145,29 @@
             :fill="featureColor(f)"
             stroke="none"
             />
+          <!-- ======= Start codon ======= -->
+          <path v-if="t.cds"
+            :d="codonGlyph(f, t, 'start')"
+            :fill="'cyan'"
+            stroke="cyan"
+            stroke-width="0.5"
+            />
+          <!-- ======= Stop codon ======= -->
+          <path v-if="t.cds"
+            :d="codonGlyph(f, t, 'stop')"
+            :fill="'red'"
+            stroke="red"
+            stroke-width="0.5"
+            />
           <!-- transcript label -->
           <text
             v-if="spreadTranscripts && showDetails && showTranscriptLabels"
             :x="transcriptTextX(t)"
             :y="featureHeight"
+            :font-weight="t.cds ? 'bold' : 'normal'"
             :font-size="transcriptFontSize"
             alignment-baseline="hanging"
-            >{{t.tID}}</text>
+            >{{t.cds ? t.cds.ID : t.tID}}</text>
         </g>
         <!-- feature label -->
         <text
@@ -224,7 +239,7 @@ export default MComponent({
     // my end coordinate
     end: {
       type: Number,
-      default: 1000000
+      default: 10000
     },
     //
     regionScrollDelta: {
@@ -508,6 +523,23 @@ export default MComponent({
         return this.featureY(f)
       }
     },
+    codonGlyph (f, t, which) {
+      const dir = f.strand === '+' ? 1 : -1
+      let pos
+      if ((f.strand === '+' && which === 'start')
+      || (f.strand === '-' && which === 'stop')) {
+        pos = t.cds.start
+      } else {
+        pos = t.cds.end
+      }
+      const x = this.b2p(pos + 0.5)
+      const h = Math.max(4, Math.min(12, this.featureHeight))
+      if (which === 'start') {
+        return `m${x},0 l0,${-h} l${dir * h},${h / 2} Z`
+      } else {
+        return `m${x},0 l${-h / 2},${-h} l${h},0 Z`
+      }
+    },
     transcriptAxisPoints (f, t, ti) {
       let y = this.transcriptY(f, t, ti) + this.featureHeight / 2
       y = this.featureHeight / 2
@@ -620,10 +652,12 @@ export default MComponent({
           d.dragged = false
           d.bb = this.$refs.underlay.getBoundingClientRect()
           d.shiftDrag = e.shiftKey
+          d.altDrag = e.altKey
+          this.currRange = [d.startX - d.bb.x, d.startX - d.bb.x]
         },
         drag: function (e, d) {
           d.dragged = true
-          if (d.shiftDrag) {
+          if (d.shiftDrag || d.altDrag) {
             let x1 = d.startX - d.bb.x
             let x2 = e.clientX - d.bb.x
             this.currRange = [Math.min(x1, x2), Math.max(x1, x2)]
@@ -642,23 +676,35 @@ export default MComponent({
             this.dragging = false
             return
           }
-          if (d.shiftDrag) {
-            // zoom
-            let b1 = Math.floor(this.start + this.currRange[0] / this.ppb)
-            let b2 = Math.floor(this.start + this.currRange[1] / this.ppb)
-            let start = Math.min(b1, b2)
-            let end = Math.max(b1, b2)
-            this.translator().translate(this.genome, this.chr.name, start, end, this.context.rGenome)
-            .then(rs => {
-              let r = rs[0]
-              let nc = {
-                start: r.start,
-                end: r.end
-              }
-              this.$root.$emit('context', nc)
-            })
+          const b1 = Math.floor(this.start + this.currRange[0] / this.ppb)
+          const b2 = Math.floor(this.start + this.currRange[1] / this.ppb)
+          const start = Math.min(b1, b2)
+          const end = Math.max(b1, b2)
+          //
+          if (d.altDrag) {
+            // select genomic sequence
+            const region = {
+              genome: this.genome,
+              chr: this.chr,
+              start: start,
+              end: end
+            }
+            this.$root.$emit('region-selected', region)
+          } else if (d.shiftDrag) {
+            // zoom in
+            this.translator()
+              .translate(this.genome, this.chr.name, start, end, this.context.rGenome)
+              .then(rs => {
+                const r = rs[0]
+                const nc = {
+                  start: r.start,
+                  end: r.end
+                }
+                this.$root.$emit('context', nc)
+              })
           } else {
             let nc
+            // drag
             // pan
             if (this.context.lcoords.landmark) {
               nc = {

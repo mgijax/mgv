@@ -105,12 +105,6 @@ class DataManager {
   getAllFeaturesNow (g) {
     return u.concatAll(g.chromosomes.map(c => this.cache[g.name][c.name]))
   }
-  // Returns a promise for the transcripts and exons of features that overlap the specified range of the specified genome.
-  _unpackExons (t) {
-    const exonsAttr = t[8]['exons']
-    const ecoords = exonsAttr.split(',').map(s => s.split('_').map(s => parseInt(s)))
-    return ecoords.map(ec => { return { start: t[3] + ec[0], end: t[3] + ec[0] + ec[1] - 1 } })
-  }
   // Returns a promise for the features in the specified range of the specified genome
   getGenes (g, c, s, e, includeTranscripts) {
     return this.ensureFeatures(g).then(() => {
@@ -133,6 +127,7 @@ class DataManager {
       return feats
     })
   }
+  // Returns a promise for the transcripts and exons of features that overlap the specified range of the specified genome.
   getModels (g, c, s, e) {
     return this.greg.getReader(g, 'transcripts').then(reader => {
       return reader.readRange(c, s, e).then(ts => {
@@ -140,11 +135,26 @@ class DataManager {
           return {
             gID: t[8]['Parent'],
             tID: t[8]['ID'],
-            exons: this._unpackExons(t)
+            exons: this._unpackExons(t),
+            cds: this._unpackCds(t[8]['cds'])
           }
         })
       })
     })
+  }
+  _unpackExons (t) {
+    const exonsAttr = t[8]['exons']
+    const ecoords = exonsAttr.split(',').map(s => s.split('_').map(s => parseInt(s)))
+    return ecoords.map(ec => { return { start: t[3] + ec[0], end: t[3] + ec[0] + ec[1] - 1 } })
+  }
+  _unpackCds (cdsAttr) {
+    if (!cdsAttr) return null
+    const parts = cdsAttr.split('|')
+    return {
+      ID: parts[0],
+      start: parseInt(parts[1]),
+      end: parseInt(parts[2])
+    }
   }
   // Returns a promise for the genomic sequence of the specified range for the specified genome
   getSequence (g, c, s, e) {
@@ -173,7 +183,6 @@ class DataManager {
   getGenolog (f, g) {
     return this.getGenologs(f, [g])[0]
   }
-
   //
   assignLanes (feats) {
     const ca = new ContigAssigner()
@@ -189,7 +198,6 @@ class DataManager {
   }
 
 }
-
 // Registers features for one chromsome of a genome
 class FeatureRegistrar {
   constructor (g, c, id2f, cid2f, sym2f) {

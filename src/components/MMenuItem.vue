@@ -3,6 +3,8 @@
     class="menu-item flexrow"
     :class="{ topLevel: topLevel, disabled: isDisabled }"
     @click.stop="clicked"
+    @mouseenter="mouseenter"
+    @mouseleave="mouseleave"
     :title="helpText"
     >
     <span
@@ -74,6 +76,16 @@ export default MComponent({
     }
   },
   methods: {
+    mouseenter: function () {
+      if (this.$refs.subMenu) {
+        this.$refs.subMenu.open()
+      }
+    },
+    mouseleave: function () {
+      if (this.$refs.subMenu) {
+        this.$refs.subMenu.close()
+      }
+    },
     clicked: function () {
       if (this.isDisabled) return
       if (this.handler) this.handler(this.contextObject, ...this.extraArgs)

@@ -79,16 +79,84 @@ function getMenus(thisObj) {
     }
   }
   //
+  function sequenceSelectionOption (type) {
+    const tp = type === 'cds' ? 'protein' : type
+    const lbl = `Add ${tp} sequences`
+    const hlp = `Add ${tp} sequences to your cart for this feature from currently displayed genomes.`
+    return {
+      icon: 'shopping_cart',
+      label: lbl,
+      helpText: hlp,
+      disabled: f => f.sotype !== 'protein_coding_gene' && type === 'cds',
+      extraArgs: [type],
+      handler: (function (f, seqtype) {
+        const genologs = this.dataManager.getGenologs(f, this.context.vGenomes)
+        const seqs = genologs.map(f => {
+          if (seqtype === 'dna') {
+            return {
+              genome: f.genome,
+              type: seqtype,
+              id: f.ID,
+              header: `${f.symbol || ''} (${seqtype})\n${f.ID}`
+            }
+          } else if (seqtype === 'transcript') {
+            return f.transcripts.map(t => {
+              return {
+                genome: f.genome,
+                type: seqtype,
+                id: t.tID,
+                header: `${f.symbol || ''} (${seqtype})\n${t.tID}`
+              }
+            })
+          } else if (seqtype === 'cds' || seqtype === 'protein') {
+            return f.transcripts.filter(t => t.cds).map(t => {
+              return {
+                genome: f.genome,
+                type: seqtype,
+                id: t.cds.ID,
+                header: `${f.symbol || ''} (${seqtype})\n${t.cds.ID}`
+              }
+            })
+          } else {
+            u.fail('Unknown sequence type: ' + seqtype)
+          }
+        }).reduce((a,v) => {
+          if (Array.isArray(v)) {
+            return a.concat(v)
+          } else {
+            a.push(v)
+            return a
+          }
+        }, [])
+        this.$root.$emit('sequence-selected', seqs)
+      }).bind(thisObj)
+    }
+  }
+  //
   const mouseMenu = [
     alignOption(),
     externalLinkOption('MGI', 'http://www.informatics.jax.org/accession/'),
     externalLinkOption('MouseMine', 'http://www.mousemine.org/mousemine/portal.do?class=Gene&externalids='),
-    sequenceDownloadOption('genomic'),
-    sequenceDownloadOption('transcript'),
-    sequenceDownloadOption('cds'),
-    sequenceDownloadOption('exon'),
-    sequenceAlignmentOption('transcript'),
-    sequenceAlignmentOption('cds')
+    //sequenceAlignmentOption('transcript'),
+    //sequenceAlignmentOption('cds'),
+    {
+     label: 'Download sequences',
+     helpText: 'Download sequences to a Fasta file.',
+     menuItems: [
+      sequenceDownloadOption('genomic'),
+      sequenceDownloadOption('transcript'),
+      sequenceDownloadOption('cds'),
+      sequenceDownloadOption('exon')
+     ]
+    }, {
+     label: 'Add sequences to cart',
+     helpText: 'Add sequences to cart',
+     menuItems: [
+      sequenceSelectionOption('dna'),
+      sequenceSelectionOption('transcript'),
+      sequenceSelectionOption('protein')
+     ]
+    }
   ]
   // 
   const humanMenu = [

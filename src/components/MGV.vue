@@ -117,6 +117,15 @@
               />
           </page-box>
           <!--
+          ============ Sequence Cart ==============
+          -->
+          <page-box label="Sequence Cart">
+            <sequence-cart
+              title="Your shopping cart of selected sequences."
+              ref="sequenceCart"
+              />
+          </page-box>
+          <!--
           ============== Multiple Sequence Alignment ==============
           -->
           <page-box
@@ -124,7 +133,7 @@
             label="Multiple Sequence Alignment">
             <msa
             ref="msa"
-            title="Multiple sequence alignment."
+            title="Forwards selected sequences to the specified tool at Ensembl."
             :sequences="msaSequences.join('\n')"
             @clear="clearSequences()"
             ></msa>
@@ -144,6 +153,7 @@ import PageBoxContainer from '@/components/PageBoxContainer'
 import GenomeSelector from '@/components/GenomeSelector'
 import Settings from '@/components/Settings'
 import MyLists from '@/components/MyLists'
+import SequenceCart from '@/components/SequenceCart'
 import FindGenes from '@/components/FindGenes'
 import ListEditor from '@/components/ListEditor'
 import Facets from '@/components/Facets'
@@ -168,6 +178,7 @@ export default MComponent({
     PageBoxContainer,
     GenomeSelector,
     MyLists,
+    SequenceCart,
     Settings,
     ListEditor,
     FindGenes,
@@ -209,8 +220,6 @@ export default MComponent({
       // absolute coordinates
       coords: {
         chr: { name: '1' },
-        // start: 0,
-        // end: 0
         start: 1,
         end: 10000000
       },
