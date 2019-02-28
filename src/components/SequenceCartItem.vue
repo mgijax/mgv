@@ -58,7 +58,7 @@ export default MComponent({
       } else {
         return [
           `${i.genome.name} (${i.type || 'dna'})`,
-          `${i.id || ''}` || `${i.chr.name}:${i.start}..${i.end}`
+          `${i.ID || ''}` || `${i.chr.name}:${i.start}..${i.end}`
         ]
       }
     }

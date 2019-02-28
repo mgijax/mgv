@@ -1,190 +1,553 @@
 <template>
-  <div class="msa flexcolumn">
-<form target="_blank" :action="`https://www.ebi.ac.uk/Tools/services/web_${tool}/toolform.ebi`" enctype="multipart/form-data" id="jd_toolSubmissionForm" method="post"> 
-     <div class="flexrow toolselector">
-       <label>Tool</label>
-        <select id="tool" name="tool" v-model="tool" > 
-          <option value="clustalo">Clustal Omega</option>
-          <option value="muscle">MUSCLE</option>
-          <option value="kalign">Kalign</option>
-        </select>
-      </div>
-        <input id="isSAM" type="hidden" value="m" /> 
-        <div class="jd_toolParameterBox"> 
-         <fieldset> 
-          <legend>STEP 1 - Enter your input sequences</legend> 
+  <div class="toolForm flexcolumn">
+    <form
+      target="_blank"
+      :action="`https://www.ebi.ac.uk/Tools/services/web_${tool}/toolform.ebi`"
+      enctype="multipart/form-data"
+      method="post"> 
+      
+    <select class="toolselector" name="tool" v-model="tool">
+      <option
+        v-for="(t,i) in tools"
+        :key="t.name"
+        :value="t.name"
+        >{{t.label}}</option>
+    </select>
 
-          <p v-if="tool==='clustalo'"> <label for="sequence"> <a href="https://www.ebi.ac.uk/seqdb/confluence/display/THD/Clustal+Omega#ClustalOmega-sequence" target="_help">Enter or paste</a> </label> a set of <select id="stype" name="stype"> <option value="protein">PROTEIN</option> <option value="dna">DNA</option> <option value="rna">RNA</option> </select> sequences in any supported <a href="https://www.ebi.ac.uk/seqdb/confluence/display/THD/Clustal+Omega#ClustalOmega-sequence" target="_help">format</a>: </p>
+    <table>
+    <tr 
+      v-for="(p,i) in selectedTool.parameters"
+      :key="i">
 
-          <p v-if="tool==='kalign'"> <label for="sequence"> <a href="https://www.ebi.ac.uk/seqdb/confluence/display/THD/Kalign#Kalign-sequence" target="_help">Enter or paste</a> </label> a set of <select id="stype" name="stype"> <option selected="selected" value="protein">Protein</option> <option value="dna">Nucleic Acid</option> </select> sequences in any supported <a href="https://www.ebi.ac.uk/seqdb/confluence/display/THD/Kalign#Kalign-sequence" target="_help">format</a>: </p>
+      <td> <label>{{p.label}}</label></td>
 
-          <p> <label for="sequence"> <a href="https://www.ebi.ac.uk/seqdb/confluence/display/THD/MUSCLE#MUSCLE-sequence" target="_help">Enter or paste</a> </label> a set of sequences in any supported <a href="https://www.ebi.ac.uk/seqdb/confluence/display/THD/MUSCLE#MUSCLE-sequence" target="_help">format</a>: </p> 
-          <textarea v-model="sequences" cols="67" id="sequence" name="sequence" rows="7">
-</textarea> 
-          <button @click.stop.prevent="$emit('clear')">Clear sequences</button>
-          <p> Or <label for="upfile"> <a href="https://www.ebi.ac.uk/seqdb/confluence/display/THD/MUSCLE#MUSCLE-upload" target="_help">upload</a>
-          </label> a file:
-          <input id="upfile" name="upfile" type="file" />
-          </p> 
-         </fieldset> 
-        </div> 
-       
-        <!-- ------------- Muscle parameters ------------- -->
+      <td>
+      <input v-if="p.type === 'text'" :name="p.name" type="text" :value="p.value"/>
+      <input v-if="p.type === 'checkbox'" :name="p.name" type="checkbox" />
+      <input v-if="p.type === 'file'" :name="p.name" type="file" />
 
-        <div v-if="tool === 'muscle'" class="jd_toolParameterBox"> 
-         <fieldset> 
-          <legend>STEP 2 - Set your Parameters</legend> 
-          <div class="jd_singleLineParameter"> 
-           <label for="format"> <a href="https://www.ebi.ac.uk/seqdb/confluence/display/THD/MUSCLE#MUSCLE-format" target="_help">OUTPUT FORMAT:</a> </label> 
-           <div> 
-            <select id="format" name="format"> <option value="fasta">Pearson/FASTA</option> <option selected="selected" value="clw">ClustalW</option> <option value="clwstrict">ClustalW (strict)</option> <option value="html">HTML</option> <option value="msf">GCG MSF</option> <option value="phyi">Phylip interleaved</option> <option value="phys">Phylip sequential</option> </select> 
-           </div> 
-          </div> 
+      <textarea v-if="p.type === 'sequence'" v-model="sequences" :name="p.name"></textarea>
+      <textarea v-if="p.type === 'asequence'" v-model="asequence" :name="p.name"></textarea>
+      <textarea v-if="p.type === 'bsequence'" v-model="bsequence" :name="p.name"></textarea>
 
-          <div class="flexrow"> 
-           <div class="jd_parameterCell" > <label for="tree"> <a href="https://www.ebi.ac.uk/seqdb/confluence/display/THD/MUSCLE#MUSCLE-tree" target="_help">OUTPUT TREE</a> </label> 
-           <div> 
-             <select id="tree" name="tree"> <option selected="selected" value="none">none</option> <option value="tree1">From first iteration</option> <option value="tree2">From second iteration</option> </select> 
-           </div> </div> 
-          </div> 
-         </fieldset> 
-        </div> 
+      <select v-if="p.type === 'select'" :name="p.name">
+        <option
+          v-for="(o,j) in p.options"
+          :value="o.value || o.label || o"
+          >{{o.label || o.value || o}}</option>
+      </select>
+      </td>
+    </tr>
+    </table>
 
-        <!-- ------------- Clustal-Omega parameters ------------- -->
-
-        <div v-if="tool === 'clustalo'" class="jd_toolParameterBox"> 
-         <fieldset> 
-          <legend>STEP 2 - Set your parameters</legend> 
-          <div class="jd_singleLineParameter"> 
-           <label for="outfmt"> <a href="https://www.ebi.ac.uk/seqdb/confluence/display/THD/Clustal+Omega#ClustalOmega-outfmt" target="_help">OUTPUT FORMAT</a> </label> 
-           <div> 
-            <select id="outfmt" name="outfmt"> <option selected="selected" value="clustal_num">ClustalW with character counts</option> <option value="clustal">ClustalW</option> <option value="fa">Pearson/FASTA</option> <option value="msf">MSF</option> <option value="nexus">NEXUS</option> <option value="phylip">PHYLIP</option> <option value="selex">SELEX</option> <option value="stockholm">STOCKHOLM</option> <option value="vienna">VIENNA</option> </select> 
-           </div> 
-          </div> 
-
-          <div class="flexrow">
-
-           <div class="jd_parameterCell" > <label for="dealign"> <a href="https://www.ebi.ac.uk/seqdb/confluence/display/THD/Clustal+Omega#ClustalOmega-dealign" target="_help">DEALIGN INPUT SEQUENCES</a> </label> 
-            <div> 
-             <select id="dealign" name="dealign"> <option selected="selected" value="false">no</option> <option value="true">yes</option> </select> 
-            </div> </div> 
-
-           <div class="jd_parameterCell" > <label for="mbed"> <a href="https://www.ebi.ac.uk/seqdb/confluence/display/THD/Clustal+Omega#ClustalOmega-mbed" target="_help">MBED-LIKE CLUSTERING GUIDE-TREE</a> </label> 
-            <div> 
-             <select id="mbed" name="mbed"> <option selected="selected" value="true">yes</option> <option value="false">no</option> </select> 
-            </div> </div> 
-
-           <div class="jd_parameterCell" > <label for="mbediteration"> <a href="https://www.ebi.ac.uk/seqdb/confluence/display/THD/Clustal+Omega#ClustalOmega-mbediteration" target="_help">MBED-LIKE CLUSTERING ITERATION</a> </label> 
-            <div> 
-             <select id="mbediteration" name="mbediteration"> <option selected="selected" value="true">yes</option> <option value="false">no</option> </select> 
-            </div> </div> 
-
-           <div class="jd_parameterCell" > <label for="iterations"> <a href="https://www.ebi.ac.uk/seqdb/confluence/display/THD/Clustal+Omega#ClustalOmega-iterations" target="_help">NUMBER of COMBINED ITERATIONS</a> </label> 
-            <div> 
-             <select id="iterations" name="iterations"> <option selected="selected" value="0">default(0)</option> <option value="1">1</option> <option value="2">2</option> <option value="3">3</option> <option value="4">4</option> <option value="5">5</option> </select> 
-            </div> </div> 
-
-           <div class="jd_parameterCell" > <label for="gtiterations"> <a href="https://www.ebi.ac.uk/seqdb/confluence/display/THD/Clustal+Omega#ClustalOmega-gtiterations" target="_help">MAX GUIDE TREE ITERATIONS</a> </label> 
-            <div> 
-             <select id="gtiterations" name="gtiterations"> <option selected="selected" value="-1">default</option> <option value="0">0</option> <option value="1">1</option> <option value="2">2</option> <option value="3">3</option> <option value="4">4</option> <option value="5">5</option> </select> 
-            </div> </div> 
-
-           <div class="jd_parameterCell" > <label for="hmmiterations"> <a href="https://www.ebi.ac.uk/seqdb/confluence/display/THD/Clustal+Omega#ClustalOmega-hmmiterations" target="_help">MAX HMM ITERATIONS</a> </label> 
-            <div> 
-             <select id="hmmiterations" name="hmmiterations"> <option selected="selected" value="-1">default</option> <option value="0">0</option> <option value="1">1</option> <option value="2">2</option> <option value="3">3</option> <option value="4">4</option> <option value="5">5</option> </select> 
-            </div> </div> 
-
-           <div class="jd_parameterCell" > <label for="order"> <a href="https://www.ebi.ac.uk/seqdb/confluence/display/THD/Clustal+Omega#ClustalOmega-order" target="_help">ORDER</a> </label> 
-            <div> 
-             <select id="order" name="order"> <option selected="selected" value="aligned">aligned</option> <option value="input">input</option> </select> 
-            </div> </div> 
-          </div> 
-         </fieldset> 
-        </div> 
-
-        <!-- ------------- Kalign parameters ------------- -->
-
-        <div v-if="tool === 'kalign'" class="jd_toolParameterBox"> 
-         <fieldset> 
-          <legend>STEP 2 - Set your Parameters</legend> 
-          <div class="jd_singleLineParameter"> 
-           <label for="format"> <a href="https://www.ebi.ac.uk/seqdb/confluence/display/THD/Kalign#Kalign-format" target="_help">OUTPUT FORMAT</a>:</label> 
-           <div> 
-            <select id="format" name="format"> <option value="fasta">Pearson/FASTA</option> <option selected="selected" value="clu">ClustalW</option> <option value="macsim">MACSIM</option> </select> 
-           </div> 
-          </div> 
-
-          <div class="flexrow"> 
-           <div class="jd_parameterCell" > <label for="gapopen"> <a href="https://www.ebi.ac.uk/seqdb/confluence/display/THD/Kalign#Kalign-gapopen" target="_help">GAP OPEN PENALTY</a> </label> 
-            <div> 
-             <input id="gapopen" name="gapopen" type="text" value="11.0" /> 
-            </div> </div> 
-           <div class="jd_parameterCell" > <label for="gapext"> <a href="https://www.ebi.ac.uk/seqdb/confluence/display/THD/Kalign#Kalign-gapext" target="_help">GAP EXTENSION PENALTY</a> </label> 
-            <div> 
-             <input id="gapext" name="gapext" type="text" value="0.85" /> 
-            </div> </div> 
-           <div class="jd_parameterCell" > <label for="termgap"> <a href="https://www.ebi.ac.uk/seqdb/confluence/display/THD/Kalign#Kalign-termgap" target="_help">TERMINAL GAP PENALTIES</a> </label> 
-            <div> 
-             <input id="termgap" name="termgap" type="text" value="0.45" /> 
-            </div> </div> 
-           <div class="jd_parameterCell" > <label for="bonus"> <a href="https://www.ebi.ac.uk/seqdb/confluence/display/THD/Kalign#Kalign-bonus" target="_help">BONUS SCORE</a> </label> 
-            <div> 
-             <input id="bonus" name="bonus" type="text" value="0.0" /> 
-            </div> </div> 
-          </div> 
-         </fieldset> 
-        </div> 
-
-        <!-- ------------- Submision parameters  ------------- -->
-
-        <div class="jd_toolParameterBox"> 
-         <fieldset> 
-          <legend>STEP 3 - Submit your job</legend> 
-          <div> 
-           <label> <input class="checkbox" id="notification" name="notification" type="checkbox" />Be notified by email</label> 
-           <em>(Tick this box if you want to be notified by email when the results are available)</em> 
-          </div> 
-          <div id="submission"> 
-           <div class="line"> 
-            <label for="email"> <a href="https://www.ebi.ac.uk/seqdb/confluence/display/THD/MUSCLE#MUSCLE-email" target="_help">EMAIL:</a> </label> 
-            <input class="textfield" id="email" name="email" size="100%" type="text" value="" /> 
-           </div> 
-           <div class="line"> 
-            <label for="title"> <a href="https://www.ebi.ac.uk/seqdb/confluence/display/THD/MUSCLE#MUSCLE-title" target="_help">TITLE:</a> </label> 
-            <input class="textfield" id="title" name="title" size="100%" type="text" value="" /> 
-            <br />
-            <em>If available, the title will be included in the subject of the notification email and can be used as a way to identify your analysis</em> 
-           </div> 
-          </div> 
-          <div id="jd_submitButtonPanel"> 
-           <input name="submit" type="submit" value="Submit" class="button" /> 
-          </div> 
-         </fieldset> 
-        </div> 
-       </form> 
-   </div>
+    </form> 
+  </div>
 </template>
 
 <script>
 import MComponent from '@/components/MComponent'
 export default MComponent({
   name: 'Msa',
-  props: {
-    sequences: String
-  },
   data: function () {
     return {
-      tool: 'muscle'
+      sequences: '',
+      asequence: '',
+      bsequence: '',
+      tool: 'clustalo',
+      tools: [{
+        // ----------- Clustal-Omega -----------------
+        name: 'clustalo',
+        label: 'Clustal-Omega',
+        toolclass: 'multiple',
+        parameters: [{
+          name: 'isSAM',
+          type: 'hidden',
+          value: 'm'
+        }, {
+          name: 'stype',
+          label: 'Sequence type',
+          type: 'select',
+          options: [{
+            label: 'PROTEIN',
+            value: 'protein'
+          }, {
+            label: 'DNA',
+            value: 'dna'
+          }, {
+            label: 'RNA',
+            value: 'rna'
+          }]
+        }, {
+          name: 'sequence',
+          label: 'Sequences',
+          type: 'sequence'
+        }, {
+          name: 'upfile',
+          label: 'OR upload a file of sequences',
+          type: 'file'
+        }, {
+          name: 'outfmt',
+          label: 'Output format',
+          type: 'select',
+          options: [{
+            selected: true,
+            value: 'clustal_num',
+            label: 'ClustalW with character counts'
+          }, {
+            value: 'clustal',
+            label: 'ClustalW'
+          }, {
+            value: 'fa',
+            label: 'Pearson/FASTA'
+          }, {
+            value: 'msf',
+            label: 'MSF'
+          }, {
+            value: 'nexus',
+            label: 'NEXUS'
+          }, {
+            value: 'phylip',
+            label: 'PHYLIP'
+          }, {
+            value: 'selex',
+            label: 'SELEX'
+          }, {
+            value: 'stockholm',
+            label: 'STOCKHOLM'
+          }, {
+            value: 'vienna',
+            label: 'VIENNA'
+          }]
+        }, {
+          name: 'dealign',
+          label: 'DEALIGN INPUT SEQUENCES',
+          type: 'select',
+          options: [{
+            value: 'false',
+            label: 'no',
+            selected: true
+          }, {
+            value: 'true',
+            label: 'yes'
+          }]
+        }, {
+          name: 'mbed',
+          label: 'MBED-LIKE CLUSTERING GUIDE-TREE',
+          type: 'select',
+          options: [{
+            value: 'false',
+            selected: true
+          }, {
+            value: 'true',
+            label: 'no',
+            label: 'yes'
+          }]
+        }, {
+          name: 'mbediteration',
+          label: 'MBED-LIKE CLUSTERING ITERATION',
+          type: 'select',
+          options: [{
+            value: 'false',
+            label: 'no'
+          }, {
+            value: 'true',
+            label: 'yes',
+            selected: true
+          }]
+        }, {
+          name: 'iterations',
+          label: 'NUMBER of COMBINED ITERATIONS',
+          type: 'select',
+          options: [{
+            value: '0',
+            label: 'default(0)',
+            selected: true
+          }, '1', '2', '3', '4', '5']
+        }, {
+          name: 'gtiterations',
+          label: 'MAX GUIDE TREE ITERATIONS',
+          type: 'select',
+          options: [{
+            value: '-1',
+            label: 'default',
+            selected: true
+          }, '0', '1', '2', '3', '4', '5']
+        }, {
+          name: 'hmmiterations',
+          label: 'MAX HMM ITERATIONS',
+          type: 'select',
+          options: [{
+            value: '-1',
+            label: 'default',
+            selected: true
+          }, '0', '1', '2', '3', '4', '5']
+        }, {
+          name: 'order',
+          label: 'ORDER',
+          type: 'select',
+          options: [{
+            value: 'aligned',
+            selected: true
+          }, {
+            value: 'input',
+          }]
+        }, {
+          name: 'notification',
+          label: 'Email notification',
+          type: 'checkbox'
+        }, {
+          name: 'title',
+          label: 'Job title',
+          type: 'text'
+        }, {
+          name: 'email',
+          label: 'Email address',
+          type: 'text'
+        }] // paremeter list
+      // end tool clustal-omega
+      }, {
+        // ----------- Muscle ------------------------
+        name: 'muscle',
+        label: 'Muscle',
+        toolclass: 'multiple',
+        parameters: [{
+          name: 'isSAM',
+          type: 'hidden',
+          value: 'm'
+        }, {
+          name: 'stype',
+          label: 'Sequence type',
+          type: 'select',
+          options: [{
+            label: 'PROTEIN',
+            value: 'protein'
+          }, {
+            label: 'DNA',
+            value: 'dna'
+          }, {
+            label: 'RNA',
+            value: 'rna'
+          }]
+        }, {
+          name: 'sequence',
+          label: 'Sequences',
+          type: 'sequence'
+        }, {
+          name: 'upfile',
+          type: 'file'
+        }, {
+          name: 'format',
+          label: 'Output format',
+          type: 'select',
+          options: [{
+            value: 'fasta',
+            label: 'Pearson/FASTA'
+          }, {
+            selected: true,
+            value: 'clw',
+            label: 'ClustalW'
+          }, {
+            value: 'clwstrict',
+            label: 'ClustalW (strict)'
+          }, {
+            value: 'html',
+            label: 'HTML'
+          }, {
+            value: 'msf',
+            label: 'GCG MSF'
+          }, {
+            value: 'phyi',
+            label: 'Phylip interleaved'
+          }, {
+            value: 'phys',
+            label: 'Phylip sequential'
+          }]
+        }, {
+          name: 'tree',
+          label: 'OUTPUT TREE',
+          type: 'select',
+          options: [{
+            selected: true,
+            value: 'none',
+          }, {
+            value: 'tree1',
+            label: 'From first iteration'
+          }, {
+            value: 'tree2',
+            label: 'From second iteration'
+          }]
+        }, {
+          name: 'notification',
+          label: 'Email notification',
+          type: 'checkbox'
+        }, {
+          name: 'title',
+          label: 'Job title',
+          type: 'text'
+        }, {
+          name: 'email',
+          label: 'Email address',
+          type: 'text'
+        }]
+      // end tool muscle
+      }, {
+        // ----------- KAlign ------------------------
+        name: 'kalign',
+        label: 'Kalign',
+        toolclass: 'multiple',
+        parameters: [{
+          name: 'isSAM',
+          type: 'hidden',
+          value: 'm'
+        }, {
+          name: 'stype',
+          label: 'Sequence type',
+          type: 'select',
+          options: [{
+            label: 'Protein',
+            value: 'protein',
+            select: true
+          }, {
+            label: 'Nucleid acid',
+            value: 'dna'
+          }]
+        }, {
+          name: 'sequence',
+          label: 'Sequences',
+          type: 'sequence'
+        }, {
+          name: 'upfile',
+          type: 'file'
+        }, {
+          name: 'format',
+          label: 'Output format',
+          type: 'select',
+          options: [{
+            value: 'fasta',
+            label: 'Pearson/FASTA'
+          }, {
+            selected: true,
+            value: 'clu',
+            label: 'ClustalW'
+          }, {
+            value: 'macsim',
+            label: 'MACSIM'
+          }]
+        }, {
+          name: 'gapopen',
+          label: 'GAP OPEN PENALTY',
+          type: 'text',
+          value: '11.0'
+        }, {
+          name: 'gapext',
+          label: 'GAP EXTENSION PENALTY',
+          type: 'text',
+          value: '0.85'
+        }, {
+          name: 'termgap',
+          label: 'TERMINAL GAP PENALTIES',
+          type: 'text',
+          value: '0.45'
+        }, {
+          name: 'bonus',
+          label: 'BONUS SCORE',
+          type: 'text',
+          value: '0.0'
+        }, {
+          name: 'notification',
+          label: 'Email notification',
+          type: 'checkbox'
+        }, {
+          name: 'title',
+          label: 'Job title',
+          type: 'text'
+        }, {
+          name: 'email',
+          label: 'Email address',
+          type: 'text'
+        }]
+      }, {
+        // ----------- GeneWise ------------------------
+        name: 'genewise',
+        label: 'GeneWise',
+        toolclass: 'pairwise',
+        parameters: [{
+          name: 'isSAM',
+          type: 'hidden',
+          value: 'x'
+        }, {
+          name: 'asequence',
+          label: 'Protein Sequence',
+          type: 'asequence'
+        }, {
+          name: 'aupfile',
+          type: 'file'
+        }, {
+          name: 'bsequence',
+          label: 'DNA Sequence',
+          type: 'bsequence'
+        }, {
+          name: 'bupfile',
+          type: 'file'
+        }, {
+          name: 'para',
+          label: 'SHOW PARAMETERS',
+          type: 'select',
+          options: [{
+            selected: true,
+            value: 'true',
+            label: 'ON'
+          }, {
+            value: 'false',
+            label: 'OFF'
+          }]
+        }, {
+          name: 'pretty',
+          label: 'PRETTY ASCII',
+          type: 'select',
+          options: [{
+            selected: true,
+            value: 'true',
+            label: 'ON'
+          }, {
+            value: 'false',
+            label: 'OFF'
+          }]
+        }, {
+          name: 'genes',
+          label: 'GENE STRUCTURE',
+          type: 'select',
+          options: [{
+            selected: true,
+            value: 'true',
+            label: 'ON'
+          }, {
+            value: 'false',
+            label: 'OFF'
+          }]
+        }, {
+          name: 'trans',
+          label: 'TRANSLATION',
+          type: 'select',
+          options: [{
+            selected: true,
+            value: 'true',
+            label: 'ON'
+          }, {
+            value: 'false',
+            label: 'OFF'
+          }]
+        }, {
+          name: 'cdna',
+          label: 'cDNA',
+          type: 'select',
+          options: [{
+            selected: true,
+            value: 'true',
+            label: 'ON'
+          }, {
+            value: 'false',
+            label: 'OFF'
+          }]
+        }, {
+          name: 'embl',
+          label: 'EMBL FEATURE',
+          type: 'select',
+          options: [{
+            selected: true,
+            value: 'true',
+            label: 'ON'
+          }, {
+            value: 'false',
+            label: 'OFF'
+          }]
+        }, {
+          name: 'ace',
+          label: 'ACE FILE GENE STRUCTURE',
+          type: 'select',
+          options: [{
+            selected: true,
+            value: 'true',
+            label: 'ON'
+          }, {
+            value: 'false',
+            label: 'OFF'
+          }]
+        }, {
+          name: 'gff',
+          label: 'GFF OUTPUT',
+          type: 'select',
+          options: [{
+            selected: true,
+            value: 'true',
+            label: 'ON'
+          }, {
+            value: 'false',
+            label: 'OFF'
+          }]
+        }, {
+          name: 'diana',
+          label: 'EMBL Feature For diana',
+          type: 'select',
+          options: [{
+            selected: true,
+            value: 'true',
+            label: 'ON'
+          }, {
+            value: 'false',
+            label: 'OFF'
+          }]
+        }, {
+          name: 'init',
+          label: 'LOCAL/GLOBAL MODE',
+          type: 'select',
+          options: [{
+            selected: true,
+            value: 'local',
+            label: 'Local'
+          }, {
+            value: 'global',
+            label: 'Global'
+          }]
+        }, {
+          name: 'notification',
+          label: 'Email notification',
+          type: 'checkbox'
+        }, {
+          name: 'title',
+          label: 'Job title',
+          type: 'text'
+        }, {
+          name: 'email',
+          label: 'Email address',
+          type: 'text'
+        }]
+      }] // end tools list
+    }
+  },
+  computed: {
+    selectedTool: function () {
+      return this.tools.filter(t => t.name === this.tool)[0]
     }
   },
   methods: {
+    injectSequences: function (seqs) {
+      this.sequences = seqs.map(s => {
+        return s.header + '\n' + s.seq + '\n'
+      }).join('')
+    },
+    clear: function () {
+      this.sequences = ''
+    }
+  },
+  mounted: function () {
+    this.$root.$on('sequence-cart-sequences', seqs => this.injectSequences(seqs))
   }
 })
 </script>
 
 <style scoped>
-.toolselector {
-  justify-content: flex-start;
-  padding: 3px;
+.toolForm .parameter:hover {
+  background-color: #ccc;
 }
 </style>

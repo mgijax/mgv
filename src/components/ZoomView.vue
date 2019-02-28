@@ -47,19 +47,28 @@ export default MComponent({
   },
   computed: {
     menuTitle: function () {
-      return this.contextFeature ? this.contextFeature.label : ''
+      const cxt = this.contextFeature
+      const lbl = cxt ? cxt.feature.label : ''
+      const tlbl = cxt && cxt.transcript ? cxt.transcript.tID : ''
+      return lbl
     }
   },
   methods: {
     showContextMenu: function (evt) {
-      let fnode = evt.target.closest('.feature')
+      const fnode = evt.target.closest('.feature')
       if (!fnode) return
-      const f = this.contextFeature = fnode ? this.dataManager.getFeatureById(fnode.getAttribute('name')) : null
+      const f = fnode ? this.dataManager.getFeatureById(fnode.getAttribute('name')) : null
+
+      const tnode = evt.target.closest('.transcript')
+      const tid = tnode ? tnode.getAttribute('name') : ''
+      const t = tnode ? f.transcripts.filter(t => t.tID === tid)[0] : null
+      
+      this.contextFeature = { feature: f, transcript: t }
       this.contextMenu = f ? (this.featureMenu[f.genome.taxonid] || this.featureMenu['default']) : this.backgroundMenu
-      let cm = this.$refs.contextMenu
-      let cbb = this.$el.getBoundingClientRect()
-      let x = evt.clientY - cbb.y
-      let y = evt.clientX - cbb.x
+      const cm = this.$refs.contextMenu
+      const cbb = this.$el.getBoundingClientRect()
+      const x = evt.clientY - cbb.y
+      const y = evt.clientX - cbb.x
       cm.open(x, y)
     }
   }

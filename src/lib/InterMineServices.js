@@ -39,35 +39,56 @@ class InterMineConnection {
     return u.fetch(url, 'json').then(data => data.features[0])
   }
 
-  // Returns a URL for downloading sequences of the specified type for the specified features in Fasta format.
-  //
+  // Returns a URL for downloading all sequences of the specified type belonging to the
+  // specified genes.
   // Args:
   //  f - the feature(s) whose sequences you want. May be a single feature or array of features.
+  //    Each feature may be an actual feature object, or simply an ID.
   //  type - which sequences. One of: genomic, transcript, cds, exon
-  //  isMouseMine - if true, adjusts query paths for mouse genomes as stored in MouseMine.
-  //      - genome constraint is based on strain name rather than taxon id
   //
-  getFastaUrl (feats, type) {
+  getFastaUrl (feats, type, xparm) {
     feats = Array.isArray(feats) ? feats : [feats]
     type = type ? type.toLowerCase() : 'genomic'
     const type2class = {
       'genomic': 'Gene',
+      'dna': 'Gene',
       'transcript': 'Transcript',
+      'rna': 'Transcript',
+      'cdna': 'Transcript',
       'exon': 'Exon',
-      'cds': 'CDS'
+      'cds': 'CDS',
+      'protein': 'CDS'
     }
     const qclass = type2class[type]
     const genepath = qclass + (qclass === 'Gene' ? '' : '.gene')
     const canonicalpath = genepath + (this.isMouseMine ? '.canonical' : '')
-    // const genomeidentpath = qclass + (this.isMouseMine ? '.strain.name' : '.organism.taxonId')
-    // const genomevals = (genomes || []).map((g) => `<value>${g[this.isMouseMine ? 'name' : 'taxonid']}</value>`).join('')
-    // const genomeconstraint = genomes ? `<constraint path="${genomeidentpath}" op="ONE OF">${genomevals}</constraint>` : ''
-    const featurevals = feats.map(f => `<value>${f.ID}</value>`).join('')
-    const featureconstraint = `<constraint path="${genepath}.primaryIdentifier" op="ONE OF">${featurevals}</constraint>`
+    const featurevals = feats.map(f => `<value>${f.ID||f}</value>`).join('')
+    const featureconstraint = `<constraint path="${xparm ? qclass : genepath}.primaryIdentifier" op="ONE OF">${featurevals}</constraint>`
     const view = `${canonicalpath}.primaryIdentifier`
     const q = `<query model="genomic" view="${qclass}.primaryIdentifier">${featureconstraint}</query>`
     const url = this.faUrl + `query=${encodeURIComponent(q)}&view=${encodeURIComponent(view)}`
     return url
+  }
+  // Returns a promise for the sequences of the given type for the given list of features.
+  // 
+  getFasta (feats, type) {
+    const url = this.getFastaUrl(feats, type, true)
+    return u.fetch(url, 'text').then(t => {
+      const seqs = t.trim().split('\n').reduce((a,l) => {
+        if (l[0] === '>') {
+          a.push({header: l, slines: []})
+        } else {
+          a[a.length - 1].slines.push(l)
+        }
+        return a
+      }, []).map(seq => {
+        return {
+          header: seq.header,
+          seq: seq.slines.join('')
+        }
+      })
+      return seqs
+    })
   }
 }
 
@@ -86,8 +107,25 @@ class InterMineSequenceReader extends SequenceTrackReader {
     super(fetcher, name, cfg, genome)
     this.mine = new InterMineConnection(this.url)
   }
+  // Returns a promise for the genomic gequence of the specified slice of my genome.
   readRange (chr, start, end) {
-    return this.mine.getChromosomeSlice(this.genome, chr, start, end)
+    return this.mine.getChromosomeSlice(this.genome, chr, start, end).then(ss => {
+      ss.genome = this.genome
+      ss.chr = chr
+      ss.type = 'dna'
+      ss.header = `>${this.genome.name}::${chr.name}:${start}..${end}`
+      return ss
+    })
+  }
+  getFastaForObject (id, seqtype) {
+    return this.mine.getFasta(id, seqtype).then(ss => {
+      const seq = ss[0]
+      seq.genome = this.genome
+      seq.ID = id
+      seq.type = seqtype
+      seq.header = `>${this.genome.name}::${id} (${seqtype})`
+      return seq
+    })
   }
 }
 // ---------------------------------------------------------------------

@@ -146,14 +146,14 @@
             stroke="none"
             />
           <!-- ======= Start codon ======= -->
-          <path v-if="t.cds"
+          <path v-if="t.cds && showStartStopCodons"
             :d="codonGlyph(f, t, 'start')"
             :fill="'cyan'"
             stroke="cyan"
             stroke-width="0.5"
             />
           <!-- ======= Stop codon ======= -->
-          <path v-if="t.cds"
+          <path v-if="t.cds && showStartStopCodons"
             :d="codonGlyph(f, t, 'stop')"
             :fill="'red'"
             stroke="red"
@@ -319,6 +319,9 @@ export default MComponent({
     },
     showSequence: function () {
       return (this.context.coords.end - this.context.coords.start + 1) < this.sequenceThreshold
+    },
+    showStartStopCodons: function () {
+      return this.cfg.showStartStopCodons
     },
     featureHeight: function () {
       return parseInt(this.cfg.featureHeight)
@@ -594,18 +597,18 @@ export default MComponent({
         }
       }).catch(() => this.$emit('busy-end'))
     },
-    getEventFeature (e) {
-      let f = e.target.closest('.feature')
+    getEventObjects (e) {
+      const f = e.target.closest('.feature')
       if (!f) return
-      let fid = f.getAttribute('name')
-      let feat = this.fIndex[fid]
-      /*
-      let t = e.target.closest('.transcript')
-      if (t) {
-        console.log(t.getAttribute('name'))
+      const fid = f.getAttribute('name')
+      const feat = this.fIndex[fid]
+      const t = e.target.closest('.transcript')
+      const tid = t ? t.getAttribute('name') : null
+      const transcr = tid ? feat.transcripts.filter(t => t.tID === tid)[0] : null
+      return {
+        feature: feat,
+        transcript: transcr
       }
-      */
-      return feat
     },
     mousemove: function (e) {
       if (this.dragging) return
@@ -618,17 +621,17 @@ export default MComponent({
       this.currRange = null
     },
     mouseover: function (e) {
-      let f = this.getEventFeature(e)
-      if (f) this.$root.$emit('feature-over', { feature: f, event: e })
+      let f = this.getEventObjects(e)
+      if (f) this.$root.$emit('feature-over', { feature: f.feature, transcript: f.transcript, event: e })
     },
     mouseout: function (e) {
-      let f = this.getEventFeature(e)
-      if (f) this.$root.$emit('feature-out', { feature: f, event: e })
+      let f = this.getEventObjects(e)
+      if (f) this.$root.$emit('feature-out', { feature: f.feature, transcript: f.transcript, event: e })
     },
     clicked: function (e) {
-      let f = this.getEventFeature(e)
+      let f = this.getEventObjects(e)
       if (f) {
-        this.$root.$emit('feature-click', { feature: f, event: e })
+        this.$root.$emit('feature-click', { feature: f.feature, transcript: f.transcript, event: e })
         e.stopPropagation()
       } else if (this.absorbNextClick) {
         e.stopPropagation()
@@ -636,9 +639,9 @@ export default MComponent({
       this.absorbNextClick = false
     },
     dblClicked: function (e) {
-      let f = this.getEventFeature(e)
+      let f = this.getEventObjects(e)
       if (f) {
-        this.$root.$emit('feature-dblclick', { feature: f, event: e })
+        this.$root.$emit('feature-dblclick', { feature: f.feature, transcript: f.transcript, event: e })
         e.stopPropagation()
       }
     },

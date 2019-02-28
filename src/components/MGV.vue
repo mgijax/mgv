@@ -130,13 +130,11 @@
           -->
           <page-box
             :initiallyOpen="false"
-            label="Multiple Sequence Alignment">
+            label="Sequence Alignment">
             <msa
-            ref="msa"
-            title="Forwards selected sequences to the specified tool at Ensembl."
-            :sequences="msaSequences.join('\n')"
-            @clear="clearSequences()"
-            ></msa>
+              ref="msa"
+              title="Forwards selected sequences to the specified alignment tool at Ensembl."
+              ></msa>
             </page-box>
         </page-box-container>
       </div>
@@ -254,9 +252,7 @@ export default MComponent({
       // list currently being edited
       currentEditList: null,
       // flag to indicate when there are currently enabled facets
-      activeFacets: false,
-      // A list of sequences, each in fasta format
-      msaSequences: []
+      activeFacets: false
     }
   },
   computed: {
@@ -265,10 +261,6 @@ export default MComponent({
     }
   },
   methods: {
-    //
-    clearSequences: function () {
-      this.msaSequences = []
-    },
     // Returns a promise for the list of genome info objects
     initializeData: function () {
     },
@@ -410,7 +402,7 @@ export default MComponent({
       window.setTimeout(this.resize.bind(this), this.cfg.animDur * 1000)
     },
     // FIXME All these handlers for features really belong somewhere else
-    featureOver: function (f, e) {
+    featureOver: function (f, t, e) {
       let fid = f.cID || f.ID
       this.currentMouseover = f
       if (e.ctrlKey || e.altKey) this.detailFeatures = this.dataManager.getGenologs(f, this.vGenomes)
@@ -425,10 +417,10 @@ export default MComponent({
         }
       }
     },
-    featureOff: function (f, e) {
+    featureOff: function (f, t, e) {
       this.currentMouseover = null
     },
-    featureClick: function (f, e) {
+    featureClick: function (f, t, e) {
       let fid = f.cID || f.ID
       let csel = this.currentSelection
       if (e.shiftKey) {
@@ -443,7 +435,7 @@ export default MComponent({
       }
       this.detailFeatures = this.dataManager.getGenologs(f, this.vGenomes)
     },
-    featureDblClick: function (f, e) {
+    featureDblClick: function (f, t, e) {
       let id = f.symbol || f.cID || f.ID
       this.setContext({ landmark: id, delta: 0, currentSelection: [f.cID], ref: f.genome })
     }
@@ -471,10 +463,10 @@ export default MComponent({
     // listen for context events - how descendant component announce they want to redraw
     this.$root.$on('context', cxt => this.setContext(cxt))
     //
-    this.$root.$on('feature-over', arg => this.featureOver(arg.feature, arg.event))
-    this.$root.$on('feature-out', arg => this.featureOff(arg.feature, arg.event))
-    this.$root.$on('feature-click', arg => this.featureClick(arg.feature, arg.event))
-    this.$root.$on('feature-dblclick', arg => this.featureDblClick(arg.feature, arg.event))
+    this.$root.$on('feature-over', arg => this.featureOver(arg.feature, arg.transcript, arg.event))
+    this.$root.$on('feature-out', arg => this.featureOff(arg.feature, arg.transcript, arg.event))
+    this.$root.$on('feature-click', arg => this.featureClick(arg.feature, arg.transcript, arg.event))
+    this.$root.$on('feature-dblclick', arg => this.featureDblClick(arg.feature, arg.transcript, arg.event))
     //
     this.$root.$on('list-click', data => {
       let lst = data.list || data

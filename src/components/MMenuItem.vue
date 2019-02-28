@@ -1,15 +1,15 @@
 <template>
   <div
     class="menu-item flexrow"
-    :class="{ topLevel: topLevel, disabled: isDisabled }"
+    :class="{ topLevel: topLevel, disabled: getValue('disabled') }"
     @click.stop="clicked"
     @mouseenter="mouseenter"
     @mouseleave="mouseleave"
-    :title="helpText"
+    :title="getValue('helpText')"
     >
     <span
       v-if="label"
-      >{{label}}</span>
+      >{{getValue('label')}}</span>
     <i
       class="material-icons"
       >{{cicon}}</i>
@@ -34,10 +34,11 @@ export default MComponent({
       type: String
     },
     label: {
-      type: String
+      type: [String, Function],
+      default: ''
     },
     helpText: {
-      type: String,
+      type: [String, Function],
       default: ''
     },
     handler: {
@@ -69,13 +70,13 @@ export default MComponent({
   computed: {
     cicon: function () {
       return this.icon || (this.menuItems ? 'keyboard_arrow_right' : '')
-    },
-    isDisabled: function () {
-      if (typeof(this.disabled) === 'function') return this.disabled(this.contextObject)
-      return this.disabled
     }
   },
   methods: {
+    getValue: function (n) {
+      if (typeof(this[n]) === 'function') return this[n](this.contextObject)
+      return this[n]
+    },
     mouseenter: function () {
       if (this.$refs.subMenu) {
         this.$refs.subMenu.open()

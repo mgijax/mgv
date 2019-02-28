@@ -7,10 +7,11 @@ function getMenus(thisObj) {
   function alignOption () {
     return {
       icon: 'format_align_center',
-      label: 'Align on this feature',
+      label: cxt => `Align on ${cxt.feature.label}`,
       disabled: false,
       helpText: 'Aligns the displayed genomes around this feature.',
-      handler: (function (f) {
+      handler: (function (cxt) {
+        const f = cxt.feature
         this.$root.$emit('context', { landmark: f.id, delta: 0, currentSelection: [f.cID], ref: f.genome })
       }).bind(thisObj)
     }
@@ -23,7 +24,8 @@ function getMenus(thisObj) {
       helpText: `See details for this feature at ${name}.`,
       disabled: false,
       extraArgs: [url],
-      handler: (function (f, url) {
+      handler: (function (cxt, url) {
+        const f = cxt.feature
         const u = url + f.ID
         window.open(u, '_blank')
       }).bind(thisObj)
@@ -37,7 +39,8 @@ function getMenus(thisObj) {
       helpText: `Download ${type} sequences for this feature from currently displayed genomes.`,
       disabled: f => f.sotype !== 'protein_coding_gene' && type === 'cds',
       extraArgs: [type],
-      handler: (function (f, seqtype) {
+      handler: (function (cxt, seqtype) {
+        const f = cxt.feature
         const genologs = this.dataManager.getGenologs(f, this.context.vGenomes)
         const url = connections.MouseMine.getFastaUrl(genologs, seqtype)
         window.open(url, '_blank')
@@ -45,82 +48,49 @@ function getMenus(thisObj) {
     }
   }
   //
-  function sequenceAlignmentOption (type) {
-    const tp = type === 'cds' ? 'protein' : type
-    const lbl = `Align ${tp} sequences`
-    const hlp = `Align ${tp} sequences for this feature from currently displayed genomes.`
-    return {
-      icon: 'reorder',
-      label: lbl,
-      helpText: hlp,
-      disabled: f => f.sotype !== 'protein_coding_gene' && type === 'cds',
-      extraArgs: [type],
-      handler: (function (f, seqtype) {
-        const genologs = this.dataManager.getGenologs(f, this.context.vGenomes)
-        const url = connections.MouseMine.getFastaUrl(genologs, seqtype)
-        u.fetch(url, 'text').then(t => {
-          if (seqtype === 'cds') {
-            // Translate cds sequences to protein.
-            // First concatenate all the lines of nucleic acid sequence.
-            const lines = t.trim().split('\n').reduce((a,l) => {
-              if (l[0] === '>' || a[a.length - 1][0] === '>') {
-                a.push(l)
-              } else {
-                a[a.length - 1] += l
-              }
-              return a
-            }, [])
-            // Then call translate on each sequence.
-            t = lines.map(l => l[0] === '>' ? l : translate(l)).join('\n')
-          }
-          this.context.msaSequences = [t]
-        })
-      }).bind(thisObj)
-    }
-  }
-  //
   function sequenceSelectionOption (type) {
-    const tp = type === 'cds' ? 'protein' : type
-    const lbl = `Add ${tp} sequences`
-    const hlp = `Add ${tp} sequences to your cart for this feature from currently displayed genomes.`
+    const lbl = `Add all ${type} sequences`
+    const hlp = `Adds all ${type} sequences to your cart for this feature from currently displayed genomes.`
     return {
       icon: 'shopping_cart',
       label: lbl,
       helpText: hlp,
-      disabled: f => f.sotype !== 'protein_coding_gene' && type === 'cds',
+      disabled: cxt => cxt.feature.sotype !== 'protein_coding_gene' && type === 'cds',
       extraArgs: [type],
-      handler: (function (f, seqtype) {
+      handler: (function (cxt, seqtype) {
+        const f = cxt.feature
         const genologs = this.dataManager.getGenologs(f, this.context.vGenomes)
         const seqs = genologs.map(f => {
           if (seqtype === 'dna') {
             return {
               genome: f.genome,
               type: seqtype,
-              id: f.ID,
-              header: `${f.symbol || ''} (${seqtype})\n${f.ID}`
+              ID: f.ID,
+              header: `${f.genome.name}::${f.symbol || f.ID} (genomic)`
             }
           } else if (seqtype === 'transcript') {
             return f.transcripts.map(t => {
               return {
                 genome: f.genome,
                 type: seqtype,
-                id: t.tID,
-                header: `${f.symbol || ''} (${seqtype})\n${t.tID}`
+                ID: t.tID,
+                header: `${f.genome.name}::${t.tID} ${f.symbol || f.ID} (cDNA)`
               }
             })
-          } else if (seqtype === 'cds' || seqtype === 'protein') {
+          } else if (seqtype === 'cds') {
             return f.transcripts.filter(t => t.cds).map(t => {
               return {
                 genome: f.genome,
                 type: seqtype,
-                id: t.cds.ID,
-                header: `${f.symbol || ''} (${seqtype})\n${t.cds.ID}`
+                ID: t.cds.ID,
+                header: `${f.genome.name}::${t.cds.ID} ${f.symbol || f.ID} (CDS)`
               }
             })
           } else {
             u.fail('Unknown sequence type: ' + seqtype)
           }
         }).reduce((a,v) => {
+          // flatten array where some elements are also arrays
           if (Array.isArray(v)) {
             return a.concat(v)
           } else {
@@ -137,24 +107,42 @@ function getMenus(thisObj) {
     alignOption(),
     externalLinkOption('MGI', 'http://www.informatics.jax.org/accession/'),
     externalLinkOption('MouseMine', 'http://www.mousemine.org/mousemine/portal.do?class=Gene&externalids='),
-    //sequenceAlignmentOption('transcript'),
-    //sequenceAlignmentOption('cds'),
     {
-     label: 'Download sequences',
-     helpText: 'Download sequences to a Fasta file.',
-     menuItems: [
-      sequenceDownloadOption('genomic'),
-      sequenceDownloadOption('transcript'),
-      sequenceDownloadOption('cds'),
-      sequenceDownloadOption('exon')
-     ]
-    }, {
      label: 'Add sequences to cart',
      helpText: 'Add sequences to cart',
      menuItems: [
       sequenceSelectionOption('dna'),
       sequenceSelectionOption('transcript'),
-      sequenceSelectionOption('protein')
+      sequenceSelectionOption('cds'),
+      {
+        icon: 'shopping_cart',
+        label: cxt => `Add cDNA sequence ${cxt.transcript ? cxt.transcript.tID : ''}`,
+        helpText: cxt => `Add cDNA sequence ${cxt.transcript ? cxt.transcript.tID : ''}.`,
+        disabled: cxt => !cxt.transcript,
+        handler: (function (cxt) {
+          const t = cxt.transcript
+          if (!t) return
+          this.$root.$emit('sequence-selected', [{
+            genome: cxt.feature.genome,
+            ID: t.tID,
+            type: 'transcript'
+          }])
+        }).bind(thisObj)
+      }, {
+        icon: 'shopping_cart',
+        label: cxt => `CDS sequence ${cxt.transcript && cxt.transcript.cds ? cxt.transcript.cds.ID : ''}`,
+        helpText: cxt => `CDS sequence ${cxt.transcript && cxt.transcript.cds ? cxt.transcript.cds.ID : ''}.`,
+        disabled: cxt => !cxt.transcript || !cxt.transcript.cds,
+        handler: (function (cxt) {
+          const t = cxt.transcript
+          if (!t) return
+          this.$root.$emit('sequence-selected', [{
+            genome: cxt.feature.genome,
+            ID: t.cds.ID,
+            type: 'cds'
+          }])
+        }).bind(thisObj)
+      }
      ]
     }
   ]

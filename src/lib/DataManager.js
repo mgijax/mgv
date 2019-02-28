@@ -127,7 +127,10 @@ class DataManager {
       return feats
     })
   }
-  // Returns a promise for the transcripts and exons of features that overlap the specified range of the specified genome.
+  // Returns a promise for the transcripts of features that overlap the 
+  // specified range of the specified genome. Each transcript includes
+  // its exons. Coding transcripts also contain the coordinates of the
+  // start and stop codons.
   getModels (g, c, s, e) {
     return this.greg.getReader(g, 'transcripts').then(reader => {
       return reader.readRange(c, s, e).then(ts => {
@@ -158,7 +161,23 @@ class DataManager {
   }
   // Returns a promise for the genomic sequence of the specified range for the specified genome
   getSequence (g, c, s, e) {
-    return this.greg.getReader(g, 'sequences').then(reader => reader && reader.readRange(c, s, e))
+    return this.greg.getReader(g, 'sequences').then(reader => reader ? reader.readRange(c, s, e) : '')
+  }
+  getSequenceForObject(g, id, type) {
+    return this.greg.getReader(g, 'sequences').then(reader => {
+      return reader ? reader.getFastaForObject(id, type) : null
+    })
+  }
+  //
+  getSequences(descrs) {
+    const ps = descrs.map(s => {
+      if (s.ID) {
+        return this.getSequenceForObject(s.genome, s.ID, s.type)
+      } else {
+        return this.getSequence(s.genome, s.chr, s.start, s.end)
+      }
+    })
+    return Promise.all(ps)
   }
   // Returns the genologs of feature f from the specified genomes in the specified order.
   // If a genolog does not exist in a given genome, that entry in the returned list === undefined.

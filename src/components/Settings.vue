@@ -101,6 +101,16 @@
         />
   </div>
   <div
+    class="flexrow"
+    title="Show locations of start/stop codons."
+    >
+    <label>Show start/stop codons</label>
+    <input
+        type="checkbox"
+        v-model="ZoomRegion.showStartStopCodons"
+        />
+  </div>
+  <div
     title="When checked, spreads transcripts so you can see them all. When unchecked, piles them on top of one another for a compact view. In spread view, strand is indicated by arrows. In the collapsed view, strand is indicated by position above (+) or below (-) the axis line."
     class="flexrow"
     >

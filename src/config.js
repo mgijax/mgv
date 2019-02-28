@@ -83,6 +83,7 @@ export default {
     spreadTranscripts: true,
     showFeatureLabels: true,
     showTranscriptLabels: false,
+    showStartStopCodons: true,
     currentFeature: {
       stroke: '#ffff00',
       strokeWidth: 2

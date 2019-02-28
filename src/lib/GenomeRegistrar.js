@@ -27,6 +27,7 @@ class GenomeReader {
     }, {})
     this.readyp = this.checkTimestamp()
   }
+  // -------------------------------------------------------------------------------
   // Compares the timestamp of the cached info for this genome against the timestamp
   // of the info we just loaded. If they differ, drop all cached data for this genome,
   // then save the new info.
@@ -64,10 +65,12 @@ class GenomeRegistrar {
     this.name2reader = {}
     this.indexName = 'index.json'
   }
+  // Returns a TrackReader for track n of genome g
   getReader (g, n) {
     const gr = this.name2reader[g.name]
     return gr.ready().then( () => gr.readers[n] )
   }
+  // Register
   register (url) {
     let p = this.url2promise[url]
     if (p) return p
