@@ -49,7 +49,7 @@ function getMenus(thisObj) {
   }
   //
   function sequenceSelectionOption (type) {
-    const lbl = `Add all ${type} sequences`
+    const lbl = `All ${type} sequences`
     const hlp = `Adds all ${type} sequences to your cart for this feature from currently displayed genomes.`
     return {
       icon: 'shopping_cart',
@@ -63,6 +63,7 @@ function getMenus(thisObj) {
         const seqs = genologs.map(f => {
           if (seqtype === 'dna') {
             return {
+              selected: true,
               genome: f.genome,
               type: seqtype,
               ID: f.ID,
@@ -71,6 +72,7 @@ function getMenus(thisObj) {
           } else if (seqtype === 'transcript') {
             return f.transcripts.map(t => {
               return {
+                selected: true,
                 genome: f.genome,
                 type: seqtype,
                 ID: t.tID,
@@ -80,6 +82,7 @@ function getMenus(thisObj) {
           } else if (seqtype === 'cds') {
             return f.transcripts.filter(t => t.cds).map(t => {
               return {
+                selected: true,
                 genome: f.genome,
                 type: seqtype,
                 ID: t.cds.ID,
@@ -111,13 +114,24 @@ function getMenus(thisObj) {
      label: 'Add sequences to cart',
      helpText: 'Add sequences to cart',
      menuItems: [
-      sequenceSelectionOption('dna'),
-      sequenceSelectionOption('transcript'),
-      sequenceSelectionOption('cds'),
       {
         icon: 'shopping_cart',
-        label: cxt => `Add cDNA sequence ${cxt.transcript ? cxt.transcript.tID : ''}`,
-        helpText: cxt => `Add cDNA sequence ${cxt.transcript ? cxt.transcript.tID : ''}.`,
+        label: cxt => `Genomic ${cxt.feature.ID}`,
+        helpText: cxt => `Genomic ${cxt.feature.ID}.`,
+        handler: (function (cxt) {
+          const f = cxt.feature
+          if (!f) return
+          this.$root.$emit('sequence-selected', [{
+            genome: f.genome,
+            ID: f.ID,
+            type: 'dna',
+            selected: true
+          }])
+        }).bind(thisObj)
+      }, {
+        icon: 'shopping_cart',
+        label: cxt => `Transcript ${cxt.transcript ? cxt.transcript.tID : ''}`,
+        helpText: cxt => `Transcript ${cxt.transcript ? cxt.transcript.tID : ''}.`,
         disabled: cxt => !cxt.transcript,
         handler: (function (cxt) {
           const t = cxt.transcript
@@ -125,13 +139,14 @@ function getMenus(thisObj) {
           this.$root.$emit('sequence-selected', [{
             genome: cxt.feature.genome,
             ID: t.tID,
-            type: 'transcript'
+            type: 'transcript',
+            selected: true
           }])
         }).bind(thisObj)
       }, {
         icon: 'shopping_cart',
-        label: cxt => `CDS sequence ${cxt.transcript && cxt.transcript.cds ? cxt.transcript.cds.ID : ''}`,
-        helpText: cxt => `CDS sequence ${cxt.transcript && cxt.transcript.cds ? cxt.transcript.cds.ID : ''}.`,
+        label: cxt => `CDS ${cxt.transcript && cxt.transcript.cds ? cxt.transcript.cds.ID : ''}`,
+        helpText: cxt => `CDS ${cxt.transcript && cxt.transcript.cds ? cxt.transcript.cds.ID : ''}.`,
         disabled: cxt => !cxt.transcript || !cxt.transcript.cds,
         handler: (function (cxt) {
           const t = cxt.transcript
@@ -139,10 +154,14 @@ function getMenus(thisObj) {
           this.$root.$emit('sequence-selected', [{
             genome: cxt.feature.genome,
             ID: t.cds.ID,
-            type: 'cds'
+            type: 'cds',
+            selected: true
           }])
         }).bind(thisObj)
-      }
+      },
+      sequenceSelectionOption('dna'),
+      sequenceSelectionOption('transcript'),
+      sequenceSelectionOption('cds')
      ]
     }
   ]

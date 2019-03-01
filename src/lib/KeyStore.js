@@ -5,7 +5,7 @@ class KeyStore {
     try {
       this.store = new Store(name, name)
       this.disabled = false
-      console.log(`KeyStore: ${name}`)
+      // console.log(`KeyStore: ${name}`)
     } catch (err) {
       this.store = null
       this.disabled = true

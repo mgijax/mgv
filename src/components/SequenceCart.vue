@@ -1,14 +1,5 @@
 <template>
   <div class="sequence-cart">
-     <div class="sequence-cart-items">
-       <sequence-cart-item
-         v-for="item in cart"
-         :key="item.name"
-         :item="item"
-         ref="items"
-         @delete-me="deleteItem"
-         />
-     </div>
      <div class="flexrow">
        <m-button
          icon="check_box"
@@ -38,7 +29,16 @@
          @click="clearSelected"
          />
      </div>
-     <span v-show="cart.length === 0">No sequences</span>
+     <div class="sequence-cart-items">
+       <sequence-cart-item
+         v-for="item in cart"
+         :key="item.name"
+         :item="item"
+         ref="items"
+         @delete-me="deleteItem"
+         />
+     </div>
+     <span v-show="cart.length === 0">Cart is empty.</span>
   </div>
 </template>
 
@@ -56,7 +56,7 @@ export default MComponent({
   components: { SequenceCartItem, MButton },
   methods: {
     add (r) {
-      r.selected = false
+      r.selected = r.selected || false
       this.cart.push(r)
     },
     clear () {
@@ -98,8 +98,12 @@ export default MComponent({
 </script>
 
 <style scoped>
+.sequence-cart {
+  border-radius: 4px;
+  border: thin solid black;
+}
 .sequence-cart-items {
-  max-height: 250px;
+  max-height: 450px;
   overflow: scroll;
 }
 </style>

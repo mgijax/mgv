@@ -1,63 +1,64 @@
 <template>
-  <div class="toolForm flexcolumn">
+  <div class="sequences toolForm flexrow">
+    <sequence-cart
+      title="Your shopping cart of selected sequences."
+      ref="sequenceCart"
+      style="flex-grow: 1;"
+      />
+    <div class="flexcolumn">
     <form
       target="_blank"
       :action="`https://www.ebi.ac.uk/Tools/services/web_${tool}/toolform.ebi`"
       enctype="multipart/form-data"
       method="post"> 
       
-    <select class="toolselector" name="tool" v-model="tool">
-      <option
-        v-for="(t,i) in tools"
-        :key="t.name"
-        :value="t.name"
-        >{{t.label}}</option>
-    </select>
+      <div class="flexrow">
+        <button class="submitBtn">Submit</button>
+        <select class="toolSelector" name="tool" v-model="tool">
+          <option
+            v-for="(t,i) in tools"
+            :key="t.name"
+            :value="t.name"
+            >{{t.label}}</option>
+        </select>
+        <button class="clearBtn" @click.stop.prevent="clear">Clear sequences</button>
+      </div>
 
-    <table>
-    <tr 
-      v-for="(p,i) in selectedTool.parameters"
-      :key="i">
-
-      <td> <label>{{p.label}}</label></td>
-
-      <td>
-      <input v-if="p.type === 'text'" :name="p.name" type="text" :value="p.value"/>
-      <input v-if="p.type === 'checkbox'" :name="p.name" type="checkbox" />
-      <input v-if="p.type === 'file'" :name="p.name" type="file" />
-
-      <textarea v-if="p.type === 'sequence'" v-model="sequences" :name="p.name"></textarea>
-      <textarea v-if="p.type === 'asequence'" v-model="asequence" :name="p.name"></textarea>
-      <textarea v-if="p.type === 'bsequence'" v-model="bsequence" :name="p.name"></textarea>
-
-      <select v-if="p.type === 'select'" :name="p.name">
-        <option
-          v-for="(o,j) in p.options"
-          :value="o.value || o.label || o"
-          >{{o.label || o.value || o}}</option>
-      </select>
-      </td>
-    </tr>
-    </table>
-
+      <table>
+        <form-parameter
+          v-for="(p,i) in selectedTool.parameters"
+          :key="i"
+          :tool="selectedTool"
+          :parameter="p"
+          />
+      </table>
     </form> 
+    </div>
   </div>
 </template>
 
 <script>
 import MComponent from '@/components/MComponent'
+import SequenceCart from '@/components/SequenceCart'
+import FormParameter from '@/components/FormParameter'
+import { translate } from '@/lib/genetic_code'
+import u from '@/lib/utils'
 export default MComponent({
-  name: 'Msa',
+  name: 'Sequences',
+  components: {
+    SequenceCart,
+    FormParameter
+  },
   data: function () {
     return {
-      sequences: '',
+      sequence: '',
       asequence: '',
       bsequence: '',
       tool: 'clustalo',
       tools: [{
         // ----------- Clustal-Omega -----------------
         name: 'clustalo',
-        label: 'Clustal-Omega',
+        label: 'Clustal+Omega',
         toolclass: 'multiple',
         parameters: [{
           name: 'isSAM',
@@ -208,7 +209,7 @@ export default MComponent({
       }, {
         // ----------- Muscle ------------------------
         name: 'muscle',
-        label: 'Muscle',
+        label: 'MUSCLE',
         toolclass: 'multiple',
         parameters: [{
           name: 'isSAM',
@@ -510,6 +511,42 @@ export default MComponent({
             label: 'Global'
           }]
         }, {
+          name: 'splice',
+          label: 'SPLICE SITE',
+          type: 'select',
+          options: [{
+            value: 'model',
+            label: 'Modelled'
+          }, {
+            selected: true,
+            value: 'flat',
+            label: 'GT/AG only'
+          }]
+        }, {
+          name: 'random',
+          label: 'RANDOM (NULL) MODEL',
+          type: 'select',
+          options: [{
+            selected: true,
+            value: 'syn',
+            label: 'Synchronous model'
+          }, {
+            value: 'flat',
+            label: 'Flat model'
+          }]
+        }, {
+          name: 'alg',
+          label: 'ALGORITHM',
+          type: 'select',
+          options: [{
+            selected: true,
+            value: '623',
+            label: 'GeneWise 623'
+          }, {
+            value: '2193',
+            label: 'GeneWise 2193'
+          }]
+        }, {
           name: 'notification',
           label: 'Email notification',
           type: 'checkbox'
@@ -532,12 +569,23 @@ export default MComponent({
   },
   methods: {
     injectSequences: function (seqs) {
-      this.sequences = seqs.map(s => {
-        return s.header + '\n' + s.seq + '\n'
-      }).join('')
+      const fseq = s => s.header + '\n' + (s.type === 'cds' ? translate(s.seq) : s.seq) + '\n'
+      if (this.selectedTool.toolclass === 'multiple') {
+        this.sequence = seqs.map(s => fseq(s)).join('')
+      } else {
+        seqs.forEach(s => {
+          if (s.type === 'cds') {
+            this.asequence = fseq(s)
+          } else {
+            this.bsequence = fseq(s)
+          }
+        })
+      }
     },
     clear: function () {
-      this.sequences = ''
+      this.sequence = ''
+      this.asequence = ''
+      this.bsequence = ''
     }
   },
   mounted: function () {
@@ -547,7 +595,22 @@ export default MComponent({
 </script>
 
 <style scoped>
-.toolForm .parameter:hover {
-  background-color: #ccc;
+.toolForm {
+  align-items: flex-start;
+}
+.toolForm table {
+  text-align: left;
+}
+.toolSelector,
+.clearBtn,
+.submitBtn {
+  height: 40px;
+  flex-grow: 1;
+}
+.submitBtn {
+  background-color: green;
+}
+.clearBtn {
+  background-color: coral;
 }
 </style>

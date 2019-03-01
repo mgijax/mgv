@@ -117,24 +117,15 @@
               />
           </page-box>
           <!--
-          ============ Sequence Cart ==============
-          -->
-          <page-box label="Sequence Cart">
-            <sequence-cart
-              title="Your shopping cart of selected sequences."
-              ref="sequenceCart"
-              />
-          </page-box>
-          <!--
           ============== Multiple Sequence Alignment ==============
           -->
           <page-box
             :initiallyOpen="false"
-            label="Sequence Alignment">
-            <msa
+            label="Sequences">
+            <sequences
               ref="msa"
               title="Forwards selected sequences to the specified alignment tool at Ensembl."
-              ></msa>
+              ></sequences>
             </page-box>
         </page-box-container>
       </div>
@@ -157,7 +148,7 @@ import ListEditor from '@/components/ListEditor'
 import Facets from '@/components/Facets'
 import GenomeView from '@/components/GenomeView'
 import ZoomView from '@/components/ZoomView'
-import Msa from '@/components/MSA'
+import Sequences from '@/components/Sequences'
 import FeatureDetails from '@/components/FeatureDetails'
 import FeatureColorMap from '@/lib/FeatureColorMap'
 import MComponent from '@/components/MComponent'
@@ -183,7 +174,7 @@ export default MComponent({
     Facets,
     GenomeView,
     ZoomView,
-    Msa,
+    Sequences,
     FeatureDetails
   },
   provide: function () {
