@@ -4,7 +4,7 @@
         <a
         target="_blank"
         :href="`https://www.ebi.ac.uk/seqdb/confluence/display/THD/${tdesc.label}#${tdesc.label.replace('+','')}-${pdesc.name}`"
-        ><label>{{pdesc.label}} {{length}}</label></a>
+        ><label>{{pdesc.label}} {{labelXtra}}</label></a>
       </td>
 
       <td>
@@ -31,7 +31,7 @@
 import MComponent from '@/components/MComponent'
 export default MComponent({
   name: 'FormParameter',
-  props: ['tool', 'parameter'],
+  props: ['tool', 'parameter', 'labelXtra', 'sequence', 'asequence', 'bsequence'],
   computed: {
     pdesc: function () {
       return this.parameter
@@ -39,13 +39,6 @@ export default MComponent({
     tdesc: function () {
       return this.tool
     },
-    length: function () {
-      const p = this.parameter
-      if (p.type.includes('sequence') && this[p.type].length > 0) {
-        return u.prettyPrintBases(this[p.type].length)
-      }
-      return ''
-    }
   }
 })
 </script>

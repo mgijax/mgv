@@ -30,6 +30,10 @@
           :key="i"
           :tool="selectedTool"
           :parameter="p"
+          :labelXtra="length(p)"
+          :sequence="sequence"
+          :asequence="asequence"
+          :bsequence="bsequence"
           />
       </table>
     </form> 
@@ -586,6 +590,12 @@ export default MComponent({
       this.sequence = ''
       this.asequence = ''
       this.bsequence = ''
+    },
+    length: function (p) {
+      if (p.type.includes('sequence') && this[p.type].length > 0) {
+        return u.prettyPrintBases(this[p.type].length)
+      }
+      return ''
     }
   },
   mounted: function () {
