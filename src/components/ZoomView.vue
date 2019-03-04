@@ -17,6 +17,7 @@
       ref="contextMenu"
       :title="menuTitle"
       :contextObject="contextFeature"
+      :closeButton="true"
       />
   </div>
 </template>

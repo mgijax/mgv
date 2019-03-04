@@ -4,6 +4,7 @@
       v-show="isOpen"
       :class="`flex${orientation}`"
       :style="style"
+      @click.stop=""
       >
       <div
         v-if="title"
@@ -19,6 +20,12 @@
             >{{tline}}</div>
         </div>
       </div>
+      <m-button
+        v-if="closeButton"
+        icon="close"
+        name="closeBtn"
+        @click.stop="close()"
+        />
       <m-menu-item
         v-for="(mi,i) in menuItems"
         :key="i"
@@ -52,6 +59,10 @@ export default MComponent({
       default: ''
     },
     initialOpen: {
+      type: Boolean,
+      default: false
+    },
+    closeButton: {
       type: Boolean,
       default: false
     },
@@ -125,6 +136,11 @@ export default MComponent({
 }
 .m-menu [name="title"] .subtitle {
   font-weight: normal;
-  font-size: smaller;
+  font-size: 10px;
+}
+[name="closeBtn"] {
+  position: absolute;
+  top: 3px;
+  right: 3px;
 }
 </style>

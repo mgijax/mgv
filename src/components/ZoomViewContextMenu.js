@@ -108,9 +108,14 @@ function getMenus(thisObj) {
   //
   const mouseMenu = [
     alignOption(),
-    externalLinkOption('MGI', 'http://www.informatics.jax.org/accession/'),
-    externalLinkOption('MouseMine', 'http://www.mousemine.org/mousemine/portal.do?class=Gene&externalids='),
     {
+      icon: '',
+      label: `Link outs`,
+      menuItems: [
+        externalLinkOption('MGI', 'http://www.informatics.jax.org/accession/'),
+        externalLinkOption('MouseMine', 'http://www.mousemine.org/mousemine/portal.do?class=Gene&externalids=')
+      ]
+    }, {
      label: 'Add sequences to cart',
      helpText: 'Add sequences to cart',
      menuItems: [
