@@ -5,12 +5,20 @@
       :class="`flex${orientation}`"
       :style="style"
       >
-      <span
+      <div
         v-if="title"
         name="title"
         >
-        {{ title }}
-        </span>
+        <div v-if="typeof(title) === 'string'"
+          >{{ title }}</div>
+        <div v-if="Array.isArray(title)">
+          <div
+            v-for="(tline, i) in title"
+            :key="i"
+            :class="{ subtitle: i > 0 }"
+            >{{tline}}</div>
+        </div>
+      </div>
       <m-menu-item
         v-for="(mi,i) in menuItems"
         :key="i"
@@ -40,7 +48,7 @@ export default MComponent({
       required: true
     },
     title: {
-      type: String,
+      type: [String, Array],
       default: ''
     },
     initialOpen: {
@@ -114,5 +122,9 @@ export default MComponent({
 }
 .m-menu [name="title"] {
   font-weight: bold
+}
+.m-menu [name="title"] .subtitle {
+  font-weight: normal;
+  font-size: smaller;
 }
 </style>

@@ -15,6 +15,7 @@
     <zoom-fiducials
       :features="context.currentSelection"
       :currentMouseover="context.currentMouseover"
+      :currentMouseoverT="context.currentMouseoverT"
       :vGenomes="context.vGenomes"
       :height="height"
       ref="fiducials"

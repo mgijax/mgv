@@ -2,11 +2,20 @@
   <div
     class="sequence-cart-item flexrow"
     :class="{ selected: item.selected }"
-    @click.stop="toggleSelect"
     >
     <m-button
-      :icon="item.selected ? 'check_box' : 'check_box_outline_blank'"
+      title="Remove from cart."
+      icon="highlight_off"
+      color="red"
+      hoverBackgroundColor="red"
+      @click.stop="deleteClicked"
       />
+    <!--
+    <m-button
+      :icon="item.selected ? 'check_box' : 'check_box_outline_blank'"
+      @click.stop="item.selected = !item.selected"
+      />
+    -->
     <div class="flexcolumn" style="align-items: flex-start;">
       <span
         v-for="(v,i) in headerLines"
@@ -14,11 +23,8 @@
         >{{v}}</span>
     </div>
     <m-button
-      title="Remove from cart."
-      icon="highlight_off"
-      color="red"
-      hoverBackgroundColor="red"
-      @click.stop="deleteClicked"
+      :icon="item.selected ? 'check_box' : 'check_box_outline_blank'"
+      @click.stop="item.selected = !item.selected"
       />
   </div>
 </template>

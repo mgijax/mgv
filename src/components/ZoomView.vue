@@ -49,8 +49,10 @@ export default MComponent({
     menuTitle: function () {
       const cxt = this.contextFeature
       const lbl = cxt ? cxt.feature.label : ''
-      const tlbl = cxt && cxt.transcript ? cxt.transcript.tID : ''
-      return lbl
+      const glbl = cxt ? cxt.feature.ID : ''
+      const tlbl = cxt && cxt.transcript ? cxt.transcript.ID : ''
+      const plbl = cxt && cxt.transcript && cxt.transcript.cds ? cxt.transcript.cds.ID : ''
+      return [lbl, glbl, tlbl, plbl]
     }
   },
   methods: {
@@ -61,7 +63,7 @@ export default MComponent({
 
       const tnode = evt.target.closest('.transcript')
       const tid = tnode ? tnode.getAttribute('name') : ''
-      const t = tnode ? f.transcripts.filter(t => t.tID === tid)[0] : null
+      const t = tnode ? f.transcripts.filter(t => t.ID === tid)[0] : null
       
       this.contextFeature = { feature: f, transcript: t }
       this.contextMenu = f ? (this.featureMenu[f.genome.taxonid] || this.featureMenu['default']) : this.backgroundMenu

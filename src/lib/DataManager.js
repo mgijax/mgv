@@ -135,10 +135,13 @@ class DataManager {
     return this.greg.getReader(g, 'transcripts').then(reader => {
       return reader.readRange(c, s, e).then(ts => {
         return ts.map(t => {
+          const exons = this._unpackExons(t)
           return {
             gID: t[8]['Parent'],
-            tID: t[8]['ID'],
-            exons: this._unpackExons(t),
+            ID: t[8]['ID'],
+            exons: exons,
+            start: Math.min.apply(null,exons.map(e => e.start)),
+            end: Math.max.apply(null,exons.map(e => e.end)),
             cds: this._unpackCds(t[8]['cds'])
           }
         })

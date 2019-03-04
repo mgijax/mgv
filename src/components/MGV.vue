@@ -228,6 +228,8 @@ export default MComponent({
       },
       // while mouse is over a feature, its ID. Otherwise null.
       currentMouseover: null,
+      // while mouse is over a transcript, its ID. Otherwise null.
+      currentMouseoverT: null,
       // features to draw in the FeatureDetail section
       detailFeatures: [],
       // user lists
@@ -346,6 +348,7 @@ export default MComponent({
         //
         // currentMouseover
         newc.currentMouseover = cxt.currentMouseover === undefined ? this.currentMouseover : cxt.currentMouseover
+        newc.currentMouseoverT = cxt.currentMouseoverT === undefined ? this.currentMouseoverT : cxt.currentMouseoverT
         //
         // current selection
         newc.currentSelection = cxt.currentSelection || this.currentSelection
@@ -361,6 +364,7 @@ export default MComponent({
         this.coords = cxt.coords
         this.lcoords = cxt.lcoords
         this.currentMouseover = cxt.currentMouseover
+        this.currentMouseoverT = cxt.currentMouseoverT
         this.currentSelection = cxt.currentSelection
         if (!quietly) this.$root.$emit('context-changed', cxt)
       })
@@ -396,6 +400,7 @@ export default MComponent({
     featureOver: function (f, t, e) {
       let fid = f.cID || f.ID
       this.currentMouseover = f
+      this.currentMouseoverT = t
       if (e.ctrlKey || e.altKey) this.detailFeatures = this.dataManager.getGenologs(f, this.vGenomes)
       if (e.altKey) {
         if (this.currentSelection.indexOf(fid) === -1) {
@@ -410,6 +415,7 @@ export default MComponent({
     },
     featureOff: function (f, t, e) {
       this.currentMouseover = null
+      this.currentMouseoverT = null
     },
     featureClick: function (f, t, e) {
       let fid = f.cID || f.ID

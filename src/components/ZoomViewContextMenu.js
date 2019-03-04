@@ -75,8 +75,8 @@ function getMenus(thisObj) {
                 selected: true,
                 genome: f.genome,
                 type: seqtype,
-                ID: t.tID,
-                header: `${f.genome.name}::${t.tID} ${f.symbol || f.ID} (cDNA)`
+                ID: t.ID,
+                header: `${f.genome.name}::${t.ID} ${f.symbol || f.ID} (cDNA)`
               }
             })
           } else if (seqtype === 'cds') {
@@ -130,15 +130,15 @@ function getMenus(thisObj) {
         }).bind(thisObj)
       }, {
         icon: 'shopping_cart',
-        label: cxt => `Transcript ${cxt.transcript ? cxt.transcript.tID : ''}`,
-        helpText: cxt => `Transcript ${cxt.transcript ? cxt.transcript.tID : ''}.`,
+        label: cxt => `Transcript ${cxt.transcript ? cxt.transcript.ID : ''}`,
+        helpText: cxt => `Transcript ${cxt.transcript ? cxt.transcript.ID : ''}.`,
         disabled: cxt => !cxt.transcript,
         handler: (function (cxt) {
           const t = cxt.transcript
           if (!t) return
           this.$root.$emit('sequence-selected', [{
             genome: cxt.feature.genome,
-            ID: t.tID,
+            ID: t.ID,
             type: 'transcript',
             selected: true
           }])

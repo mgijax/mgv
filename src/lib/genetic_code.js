@@ -1,3 +1,17 @@
+const base_complement = {
+  'a' : 't',
+  't' : 'a',
+  'c' : 'g',
+  'g' : 'c',
+  'n' : 'n',
+  //
+  'A' : 'T',
+  'T' : 'A',
+  'C' : 'G',
+  'G' : 'C',
+  'N' : 'N'
+}
+
 //
 const amino_acids_s = `
   Alanine Ala     A
@@ -101,7 +115,15 @@ function translate (rna) {
   const residues = codons.map(c => aaShort2Letter[genetic_code[c]]).join('')
   return residues
 }
+function complement (dna) {
+  return dna.split('').map(b => base_complement[b]).join('')
+}
+function reverseComplement (dna) {
+  return complement(dna).reverse()
+}
 //
 export {
+  complement,
+  reverseComplement,
   translate
 }

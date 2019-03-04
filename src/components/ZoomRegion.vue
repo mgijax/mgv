@@ -87,10 +87,20 @@
         fill=black
         stroke=none
         >
+        <!-- forward strand -->
         <tspan
           v-for="(b,i) in sequence"
           :key="i"
           :x="b2p(seqStart + i + 1.5)"
+          :fill="baseColor(b)"
+          text-anchor="middle"
+          >{{b}}</tspan>
+        <!-- reverse strand -->
+        <tspan
+          v-for="(b,i) in scomplement"
+          :key="-i-1"
+          :x="b2p(seqStart + i + 1.5)"
+          :y="sequenceFontSize"
           :fill="baseColor(b)"
           text-anchor="middle"
           >{{b}}</tspan>
@@ -122,13 +132,24 @@
           />
         <!-- ======= Transcripts ======= -->
         <g
+          class="transcript"
           v-if="showDetails"
           v-for="(t, ti) in f.transcripts"
-          :key="t.tID"
-          class="transcript"
-          :name="t.tID"
+          :key="t.ID"
+          :name="t.ID"
           :transform="transcriptTransform(f, t, ti)"
           >
+          <!-- ======= Underlay  ======= -->
+          <rect
+            class="underlay"
+            :x="featureX(t)"
+            :y="0"
+            :width="featureW(t)"
+            :height="featureH(t)"
+            fill="white"
+            :fill-opacity="transcriptHighlighted(t) ? 0.6 : 0.2"
+            />
+          <!-- ======= Transcript axis line, arrow ======= -->
           <polyline
             :points="transcriptAxisPoints(f, t, ti)"
             :stroke="featureColor(f)"
@@ -167,7 +188,7 @@
             :font-weight="t.cds ? 'bold' : 'normal'"
             :font-size="transcriptFontSize"
             alignment-baseline="hanging"
-            >{{t.cds ? t.cds.ID : t.tID}}</text>
+            >{{t.cds ? t.cds.ID : t.ID}}</text>
         </g>
         <!-- feature label -->
         <text
@@ -197,6 +218,7 @@ import MComponent from '@/components/MComponent'
 import MBrush from '@/components/MBrush'
 import u from '@/lib/utils'
 import { TextSpreader } from '@/lib/Layout'
+import { complement } from '@/lib/genetic_code'
 //
 document.body.addEventListener('keydown', function (e) {
   if (e.code === 'Tab') {
@@ -284,6 +306,9 @@ export default MComponent({
     }
   },
   computed: {
+    scomplement: function () {
+      return complement(this.sequence)
+    },
     myDelta: function () {
       return (this.dragging || this.context.lcoords.landmark || this.genome === this.context.rGenome) ? this.regionScrollDelta : 0
     },
@@ -456,7 +481,7 @@ export default MComponent({
       }
     },
     featureH (f) {
-      if (this.showDetails && this.spreadTranscripts) {
+      if (this.showDetails && this.spreadTranscripts && f.transcripts) {
         let tc = Math.max(f.transcripts.length, 1)
         return this.featureHeight * tc + this.laneGap * (tc - 1)
       } else {
@@ -473,6 +498,9 @@ export default MComponent({
     featureHighlighted: function (f) {
       let c = this.context.currentMouseover
       return c && (c.ID === f.ID || (c.cID && c.cID === f.cID))
+    },
+    transcriptHighlighted: function (t) {
+      return t === this.context.currentMouseoverT
     },
     featureSelected: function (f) {
       return this.selectedSet.has(f.cID) || this.selectedSet.has(f.ID)
@@ -604,7 +632,7 @@ export default MComponent({
       const feat = this.fIndex[fid]
       const t = e.target.closest('.transcript')
       const tid = t ? t.getAttribute('name') : null
-      const transcr = tid ? feat.transcripts.filter(t => t.tID === tid)[0] : null
+      const transcr = tid ? feat.transcripts.filter(t => t.ID === tid)[0] : null
       return {
         feature: feat,
         transcript: transcr

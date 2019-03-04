@@ -1,10 +1,12 @@
 <template>
   <div class="sequences toolForm flexrow">
-    <sequence-cart
-      title="Your shopping cart of selected sequences."
-      ref="sequenceCart"
-      style="flex-grow: 1;"
-      />
+    <div class="flexcolumn">
+      <label class="cart-label">Sequence Cart</label>
+      <sequence-cart
+        title="Your shopping cart of selected sequences."
+        ref="sequenceCart"
+        />
+    </div>
     <div class="flexcolumn">
     <form
       target="_blank"
@@ -13,7 +15,7 @@
       method="post"> 
       
       <div class="flexrow">
-        <button class="submitBtn">Submit</button>
+        <label>Tool:</label>
         <select class="toolSelector" name="tool" v-model="tool">
           <option
             v-for="(t,i) in tools"
@@ -21,12 +23,16 @@
             :value="t.name"
             >{{t.label}}</option>
         </select>
-        <button class="clearBtn" @click.stop.prevent="clear">Clear sequences</button>
       </div>
 
+      <fieldset
+        v-for="(fs,i) in selectedTool.parameterSets"
+        :key="i"
+        >
+      <legend>{{fs.name}}</legend>
       <table>
         <form-parameter
-          v-for="(p,i) in selectedTool.parameters"
+          v-for="(p,i) in fs.parameters"
           :key="i"
           :tool="selectedTool"
           :parameter="p"
@@ -34,8 +40,11 @@
           :sequence="sequence"
           :asequence="asequence"
           :bsequence="bsequence"
+          @clear="clear"
           />
       </table>
+      </fieldset>
+      <button class="submitBtn">Submit</button>
     </form> 
     </div>
   </div>
@@ -47,6 +56,7 @@ import SequenceCart from '@/components/SequenceCart'
 import FormParameter from '@/components/FormParameter'
 import { translate } from '@/lib/genetic_code'
 import u from '@/lib/utils'
+import etools from '@/lib/ensembl_tools'
 export default MComponent({
   name: 'Sequences',
   components: {
@@ -59,511 +69,7 @@ export default MComponent({
       asequence: '',
       bsequence: '',
       tool: 'clustalo',
-      tools: [{
-        // ----------- Clustal-Omega -----------------
-        name: 'clustalo',
-        label: 'Clustal+Omega',
-        toolclass: 'multiple',
-        parameters: [{
-          name: 'isSAM',
-          type: 'hidden',
-          value: 'm'
-        }, {
-          name: 'stype',
-          label: 'Sequence type',
-          type: 'select',
-          options: [{
-            label: 'PROTEIN',
-            value: 'protein'
-          }, {
-            label: 'DNA',
-            value: 'dna'
-          }, {
-            label: 'RNA',
-            value: 'rna'
-          }]
-        }, {
-          name: 'sequence',
-          label: 'Sequences',
-          type: 'sequence'
-        }, {
-          name: 'upfile',
-          label: 'OR upload a file of sequences',
-          type: 'file'
-        }, {
-          name: 'outfmt',
-          label: 'Output format',
-          type: 'select',
-          options: [{
-            selected: true,
-            value: 'clustal_num',
-            label: 'ClustalW with character counts'
-          }, {
-            value: 'clustal',
-            label: 'ClustalW'
-          }, {
-            value: 'fa',
-            label: 'Pearson/FASTA'
-          }, {
-            value: 'msf',
-            label: 'MSF'
-          }, {
-            value: 'nexus',
-            label: 'NEXUS'
-          }, {
-            value: 'phylip',
-            label: 'PHYLIP'
-          }, {
-            value: 'selex',
-            label: 'SELEX'
-          }, {
-            value: 'stockholm',
-            label: 'STOCKHOLM'
-          }, {
-            value: 'vienna',
-            label: 'VIENNA'
-          }]
-        }, {
-          name: 'dealign',
-          label: 'DEALIGN INPUT SEQUENCES',
-          type: 'select',
-          options: [{
-            value: 'false',
-            label: 'no',
-            selected: true
-          }, {
-            value: 'true',
-            label: 'yes'
-          }]
-        }, {
-          name: 'mbed',
-          label: 'MBED-LIKE CLUSTERING GUIDE-TREE',
-          type: 'select',
-          options: [{
-            value: 'false',
-            selected: true
-          }, {
-            value: 'true',
-            label: 'no',
-            label: 'yes'
-          }]
-        }, {
-          name: 'mbediteration',
-          label: 'MBED-LIKE CLUSTERING ITERATION',
-          type: 'select',
-          options: [{
-            value: 'false',
-            label: 'no'
-          }, {
-            value: 'true',
-            label: 'yes',
-            selected: true
-          }]
-        }, {
-          name: 'iterations',
-          label: 'NUMBER of COMBINED ITERATIONS',
-          type: 'select',
-          options: [{
-            value: '0',
-            label: 'default(0)',
-            selected: true
-          }, '1', '2', '3', '4', '5']
-        }, {
-          name: 'gtiterations',
-          label: 'MAX GUIDE TREE ITERATIONS',
-          type: 'select',
-          options: [{
-            value: '-1',
-            label: 'default',
-            selected: true
-          }, '0', '1', '2', '3', '4', '5']
-        }, {
-          name: 'hmmiterations',
-          label: 'MAX HMM ITERATIONS',
-          type: 'select',
-          options: [{
-            value: '-1',
-            label: 'default',
-            selected: true
-          }, '0', '1', '2', '3', '4', '5']
-        }, {
-          name: 'order',
-          label: 'ORDER',
-          type: 'select',
-          options: [{
-            value: 'aligned',
-            selected: true
-          }, {
-            value: 'input',
-          }]
-        }, {
-          name: 'notification',
-          label: 'Email notification',
-          type: 'checkbox'
-        }, {
-          name: 'title',
-          label: 'Job title',
-          type: 'text'
-        }, {
-          name: 'email',
-          label: 'Email address',
-          type: 'text'
-        }] // paremeter list
-      // end tool clustal-omega
-      }, {
-        // ----------- Muscle ------------------------
-        name: 'muscle',
-        label: 'MUSCLE',
-        toolclass: 'multiple',
-        parameters: [{
-          name: 'isSAM',
-          type: 'hidden',
-          value: 'm'
-        }, {
-          name: 'stype',
-          label: 'Sequence type',
-          type: 'select',
-          options: [{
-            label: 'PROTEIN',
-            value: 'protein'
-          }, {
-            label: 'DNA',
-            value: 'dna'
-          }, {
-            label: 'RNA',
-            value: 'rna'
-          }]
-        }, {
-          name: 'sequence',
-          label: 'Sequences',
-          type: 'sequence'
-        }, {
-          name: 'upfile',
-          type: 'file'
-        }, {
-          name: 'format',
-          label: 'Output format',
-          type: 'select',
-          options: [{
-            value: 'fasta',
-            label: 'Pearson/FASTA'
-          }, {
-            selected: true,
-            value: 'clw',
-            label: 'ClustalW'
-          }, {
-            value: 'clwstrict',
-            label: 'ClustalW (strict)'
-          }, {
-            value: 'html',
-            label: 'HTML'
-          }, {
-            value: 'msf',
-            label: 'GCG MSF'
-          }, {
-            value: 'phyi',
-            label: 'Phylip interleaved'
-          }, {
-            value: 'phys',
-            label: 'Phylip sequential'
-          }]
-        }, {
-          name: 'tree',
-          label: 'OUTPUT TREE',
-          type: 'select',
-          options: [{
-            selected: true,
-            value: 'none',
-          }, {
-            value: 'tree1',
-            label: 'From first iteration'
-          }, {
-            value: 'tree2',
-            label: 'From second iteration'
-          }]
-        }, {
-          name: 'notification',
-          label: 'Email notification',
-          type: 'checkbox'
-        }, {
-          name: 'title',
-          label: 'Job title',
-          type: 'text'
-        }, {
-          name: 'email',
-          label: 'Email address',
-          type: 'text'
-        }]
-      // end tool muscle
-      }, {
-        // ----------- KAlign ------------------------
-        name: 'kalign',
-        label: 'Kalign',
-        toolclass: 'multiple',
-        parameters: [{
-          name: 'isSAM',
-          type: 'hidden',
-          value: 'm'
-        }, {
-          name: 'stype',
-          label: 'Sequence type',
-          type: 'select',
-          options: [{
-            label: 'Protein',
-            value: 'protein',
-            select: true
-          }, {
-            label: 'Nucleid acid',
-            value: 'dna'
-          }]
-        }, {
-          name: 'sequence',
-          label: 'Sequences',
-          type: 'sequence'
-        }, {
-          name: 'upfile',
-          type: 'file'
-        }, {
-          name: 'format',
-          label: 'Output format',
-          type: 'select',
-          options: [{
-            value: 'fasta',
-            label: 'Pearson/FASTA'
-          }, {
-            selected: true,
-            value: 'clu',
-            label: 'ClustalW'
-          }, {
-            value: 'macsim',
-            label: 'MACSIM'
-          }]
-        }, {
-          name: 'gapopen',
-          label: 'GAP OPEN PENALTY',
-          type: 'text',
-          value: '11.0'
-        }, {
-          name: 'gapext',
-          label: 'GAP EXTENSION PENALTY',
-          type: 'text',
-          value: '0.85'
-        }, {
-          name: 'termgap',
-          label: 'TERMINAL GAP PENALTIES',
-          type: 'text',
-          value: '0.45'
-        }, {
-          name: 'bonus',
-          label: 'BONUS SCORE',
-          type: 'text',
-          value: '0.0'
-        }, {
-          name: 'notification',
-          label: 'Email notification',
-          type: 'checkbox'
-        }, {
-          name: 'title',
-          label: 'Job title',
-          type: 'text'
-        }, {
-          name: 'email',
-          label: 'Email address',
-          type: 'text'
-        }]
-      }, {
-        // ----------- GeneWise ------------------------
-        name: 'genewise',
-        label: 'GeneWise',
-        toolclass: 'pairwise',
-        parameters: [{
-          name: 'isSAM',
-          type: 'hidden',
-          value: 'x'
-        }, {
-          name: 'asequence',
-          label: 'Protein Sequence',
-          type: 'asequence'
-        }, {
-          name: 'aupfile',
-          type: 'file'
-        }, {
-          name: 'bsequence',
-          label: 'DNA Sequence',
-          type: 'bsequence'
-        }, {
-          name: 'bupfile',
-          type: 'file'
-        }, {
-          name: 'para',
-          label: 'SHOW PARAMETERS',
-          type: 'select',
-          options: [{
-            selected: true,
-            value: 'true',
-            label: 'ON'
-          }, {
-            value: 'false',
-            label: 'OFF'
-          }]
-        }, {
-          name: 'pretty',
-          label: 'PRETTY ASCII',
-          type: 'select',
-          options: [{
-            selected: true,
-            value: 'true',
-            label: 'ON'
-          }, {
-            value: 'false',
-            label: 'OFF'
-          }]
-        }, {
-          name: 'genes',
-          label: 'GENE STRUCTURE',
-          type: 'select',
-          options: [{
-            selected: true,
-            value: 'true',
-            label: 'ON'
-          }, {
-            value: 'false',
-            label: 'OFF'
-          }]
-        }, {
-          name: 'trans',
-          label: 'TRANSLATION',
-          type: 'select',
-          options: [{
-            selected: true,
-            value: 'true',
-            label: 'ON'
-          }, {
-            value: 'false',
-            label: 'OFF'
-          }]
-        }, {
-          name: 'cdna',
-          label: 'cDNA',
-          type: 'select',
-          options: [{
-            selected: true,
-            value: 'true',
-            label: 'ON'
-          }, {
-            value: 'false',
-            label: 'OFF'
-          }]
-        }, {
-          name: 'embl',
-          label: 'EMBL FEATURE',
-          type: 'select',
-          options: [{
-            selected: true,
-            value: 'true',
-            label: 'ON'
-          }, {
-            value: 'false',
-            label: 'OFF'
-          }]
-        }, {
-          name: 'ace',
-          label: 'ACE FILE GENE STRUCTURE',
-          type: 'select',
-          options: [{
-            selected: true,
-            value: 'true',
-            label: 'ON'
-          }, {
-            value: 'false',
-            label: 'OFF'
-          }]
-        }, {
-          name: 'gff',
-          label: 'GFF OUTPUT',
-          type: 'select',
-          options: [{
-            selected: true,
-            value: 'true',
-            label: 'ON'
-          }, {
-            value: 'false',
-            label: 'OFF'
-          }]
-        }, {
-          name: 'diana',
-          label: 'EMBL Feature For diana',
-          type: 'select',
-          options: [{
-            selected: true,
-            value: 'true',
-            label: 'ON'
-          }, {
-            value: 'false',
-            label: 'OFF'
-          }]
-        }, {
-          name: 'init',
-          label: 'LOCAL/GLOBAL MODE',
-          type: 'select',
-          options: [{
-            selected: true,
-            value: 'local',
-            label: 'Local'
-          }, {
-            value: 'global',
-            label: 'Global'
-          }]
-        }, {
-          name: 'splice',
-          label: 'SPLICE SITE',
-          type: 'select',
-          options: [{
-            value: 'model',
-            label: 'Modelled'
-          }, {
-            selected: true,
-            value: 'flat',
-            label: 'GT/AG only'
-          }]
-        }, {
-          name: 'random',
-          label: 'RANDOM (NULL) MODEL',
-          type: 'select',
-          options: [{
-            selected: true,
-            value: 'syn',
-            label: 'Synchronous model'
-          }, {
-            value: 'flat',
-            label: 'Flat model'
-          }]
-        }, {
-          name: 'alg',
-          label: 'ALGORITHM',
-          type: 'select',
-          options: [{
-            selected: true,
-            value: '623',
-            label: 'GeneWise 623'
-          }, {
-            value: '2193',
-            label: 'GeneWise 2193'
-          }]
-        }, {
-          name: 'notification',
-          label: 'Email notification',
-          type: 'checkbox'
-        }, {
-          name: 'title',
-          label: 'Job title',
-          type: 'text'
-        }, {
-          name: 'email',
-          label: 'Email address',
-          type: 'text'
-        }]
-      }] // end tools list
+      tools: etools
     }
   },
   computed: {
@@ -573,7 +79,9 @@ export default MComponent({
   },
   methods: {
     injectSequences: function (seqs) {
-      const fseq = s => s.header + '\n' + (s.type === 'cds' ? translate(s.seq) : s.seq) + '\n'
+      const fseq = s => {
+        return s.header + '\n' + (s.type === 'cds' ? translate(s.seq) : s.seq) + '\n'
+      }
       if (this.selectedTool.toolclass === 'multiple') {
         this.sequence = seqs.map(s => fseq(s)).join('')
       } else {
@@ -586,14 +94,12 @@ export default MComponent({
         })
       }
     },
-    clear: function () {
-      this.sequence = ''
-      this.asequence = ''
-      this.bsequence = ''
+    clear: function (n) {
+      this[n] = ''
     },
     length: function (p) {
       if (p.type.includes('sequence') && this[p.type].length > 0) {
-        return u.prettyPrintBases(this[p.type].length)
+        return `${this[p.type].length} characters`
       }
       return ''
     }
@@ -617,10 +123,24 @@ export default MComponent({
   height: 40px;
   flex-grow: 1;
 }
+.cart-label {
+  padding-top: 15px;
+  padding-bottom: 15px;
+}
 .submitBtn {
-  background-color: green;
+  width: 100%;
+  background-color: #16ab16;
+  color: white;
+  font-size: 18px;
+  font-weight: bold;
+}
+.submitBtn:hover {
 }
 .clearBtn {
   background-color: coral;
+}
+fieldset,
+button {
+  border-radius: 4px;
 }
 </style>

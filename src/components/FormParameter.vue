@@ -4,7 +4,7 @@
         <a
         target="_blank"
         :href="`https://www.ebi.ac.uk/seqdb/confluence/display/THD/${tdesc.label}#${tdesc.label.replace('+','')}-${pdesc.name}`"
-        ><label>{{pdesc.label}} {{labelXtra}}</label></a>
+        ><label>{{pdesc.label}}</label></a>
       </td>
 
       <td>
@@ -12,9 +12,28 @@
       <input v-if="pdesc.type === 'checkbox'" :name="pdesc.name" type="checkbox" />
       <input v-if="pdesc.type === 'file'" :name="pdesc.name" type="file" />
 
-      <textarea v-if="pdesc.type === 'sequence'" v-model="sequence" :name="pdesc.name" rows="10" cols="65"></textarea>
-      <textarea v-if="pdesc.type === 'asequence'" v-model="asequence" :name="pdesc.name" rows="10" cols="65"></textarea>
-      <textarea v-if="pdesc.type === 'bsequence'" v-model="bsequence" :name="pdesc.name" rows="10" cols="65"></textarea>
+      <div v-if="pdesc.type === 'sequence'" >
+        <textarea v-model="sequence" :name="pdesc.name" rows="10" cols="65"></textarea>
+        <div class="flexrow">
+          <span>{{sequence.length}} characters</span>
+          <button @click.stop.prevent="$emit('clear','sequence')">Clear</button>
+        </div>
+      </div>
+      <div v-if="pdesc.type === 'asequence'" >
+        <textarea v-model="asequence" :name="pdesc.name" rows="10" cols="65"></textarea>
+        <div class="flexrow">
+          <span>{{asequence.length}} characters</span>
+          <button @click.stop.prevent="$emit('clear','asequence')">Clear</button>
+        </div>
+      </div>
+      <div v-if="pdesc.type === 'bsequence'" >
+        <textarea v-model="bsequence" :name="pdesc.name" rows="10" cols="65"></textarea>
+        <div class="flexrow">
+          <span>{{bsequence.length}} characters</span>
+          <button @click.stop.prevent="$emit('clear','bsequence')">Clear</button>
+        </div>
+      </div>
+      </div>
 
       <select v-if="pdesc.type === 'select'" :name="pdesc.name">
         <option

@@ -30,7 +30,7 @@ import MComponent from '@/components/MComponent'
 import u from '@/lib/utils'
 export default MComponent({
   name: 'ZoomFiducials',
-  props: ['features', 'currentMouseover', 'vGenomes', 'height'],
+  props: ['features', 'currentMouseover',  'currentMouseoverT', 'vGenomes', 'height'],
   data: function () {
     return {
       deltaX: 0,

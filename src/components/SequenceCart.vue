@@ -15,8 +15,8 @@
        <div style="flex-grow: 1;"></div>
 
        <m-button
-         icon="format_align_center"
-         title="Align the selected sequences."
+         icon="input"
+         title="Inject selected sequences into tool."
          @click="emitSelected"
          />
 
@@ -101,6 +101,7 @@ export default MComponent({
 .sequence-cart {
   border-radius: 4px;
   border: thin solid black;
+  min-width: 350px;
 }
 .sequence-cart-items {
   max-height: 450px;
