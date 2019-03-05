@@ -102,9 +102,9 @@ const clustalo = {
       options: [{
         value: 'false',
         selected: true
+        label: 'no',
       }, {
         value: 'true',
-        label: 'no',
         label: 'yes'
       }]
     }, {
