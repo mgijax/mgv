@@ -17,7 +17,7 @@
         >{{v}}</span>
     </div>
     <m-button
-      v-if="item.type==='dna'"
+      v-if="item.type==='dna' && item.start"
       :icon="item.reverseComplement ? 'TAG' : 'CTA'"
       :style="{ transform: `rotate(${item.reverseComplement ? 180 : 0}deg)` }"
       :title="`Reverse complement is ${item.reverseComplement ? 'ON' : 'OFF'}. Click to turn ${item.reverseComplement ? 'OFF' : 'ON'}.`"

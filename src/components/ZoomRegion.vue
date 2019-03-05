@@ -719,7 +719,9 @@ export default MComponent({
               chr: this.chr,
               start: start,
               end: end,
-              type: 'dna'
+              type: 'dna',
+              reverseComplement: e.clientX < d.startX,
+              selected: true
             }
             this.$root.$emit('region-selected', region)
           } else if (d.shiftDrag) {
