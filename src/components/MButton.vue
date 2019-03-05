@@ -1,6 +1,7 @@
 <template>
   <i
-    class="material-icons button"
+    class="button"
+    :class="{ 'material-icons' : isMaterialIcon }"
     v-on="$listeners"
     :style="style"
     @mouseover="hover=true"
@@ -40,6 +41,10 @@ export default MComponent({
         color: this.hover ? this.hoverColor : this.color,
         backgroundColor: this.hover ? this.hoverBackgroundColor : this.backgroundColor
       }
+    },
+    isMaterialIcon: function () {
+      let fc = this.icon.charAt(0)
+      return fc >= 'a' && fc <= 'z'
     }
   }
 })

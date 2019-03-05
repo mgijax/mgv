@@ -718,7 +718,8 @@ export default MComponent({
               genome: this.genome,
               chr: this.chr,
               start: start,
-              end: end
+              end: end,
+              type: 'dna'
             }
             this.$root.$emit('region-selected', region)
           } else if (d.shiftDrag) {

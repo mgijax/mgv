@@ -70,4 +70,7 @@ export default MComponent({
   background-color: #ccc;
 }
 
+.formParameter input[type="text"] {
+  width: 250px; 
+}
 </style>

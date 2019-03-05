@@ -85,7 +85,7 @@ const clustalo = {
       }]
     }, {
       name: 'dealign',
-      label: 'DEALIGN INPUT SEQUENCES',
+      label: 'Dealign input sequences',
       type: 'select',
       options: [{
         value: 'false',
@@ -97,7 +97,7 @@ const clustalo = {
       }]
     }, {
       name: 'mbed',
-      label: 'MBED-LIKE CLUSTERING GUIDE-TREE',
+      label: 'mBed-like clustering guide-tree',
       type: 'select',
       options: [{
         value: 'false',
@@ -109,7 +109,7 @@ const clustalo = {
       }]
     }, {
       name: 'mbediteration',
-      label: 'MBED-LIKE CLUSTERING ITERATION',
+      label: 'mBed-like clustering iteration',
       type: 'select',
       options: [{
         value: 'false',
@@ -121,7 +121,7 @@ const clustalo = {
       }]
     }, {
       name: 'iterations',
-      label: 'NUMBER of COMBINED ITERATIONS',
+      label: 'Number of combined iterations',
       type: 'select',
       options: [{
         value: '0',
@@ -130,7 +130,7 @@ const clustalo = {
       }, '1', '2', '3', '4', '5']
     }, {
       name: 'gtiterations',
-      label: 'MAX GUIDE TREE ITERATIONS',
+      label: 'Max guide tree iterations',
       type: 'select',
       options: [{
         value: '-1',
@@ -139,7 +139,7 @@ const clustalo = {
       }, '0', '1', '2', '3', '4', '5']
     }, {
       name: 'hmmiterations',
-      label: 'MAX HMM ITERATIONS',
+      label: 'Max HMM iterations',
       type: 'select',
       options: [{
         value: '-1',
@@ -148,7 +148,7 @@ const clustalo = {
       }, '0', '1', '2', '3', '4', '5']
     }, {
       name: 'order',
-      label: 'ORDER',
+      label: 'Order',
       type: 'select',
       options: [{
         value: 'aligned',
@@ -224,7 +224,7 @@ const muscle = {
       }]
     }, {
       name: 'tree',
-      label: 'OUTPUT TREE',
+      label: 'Output tree',
       type: 'select',
       options: [{
         selected: true,
@@ -290,22 +290,22 @@ const kalign = {
       }]
     }, {
       name: 'gapopen',
-      label: 'GAP OPEN PENALTY',
+      label: 'Gap open penalty',
       type: 'text',
       value: '11.0'
     }, {
       name: 'gapext',
-      label: 'GAP EXTENSION PENALTY',
+      label: 'Gap extension penalty',
       type: 'text',
       value: '0.85'
     }, {
       name: 'termgap',
-      label: 'TERMINAL GAP PENALTIES',
+      label: 'Terminal gap penalties',
       type: 'text',
       value: '0.45'
     }, {
       name: 'bonus',
-      label: 'BONUS SCORE',
+      label: 'Bonus score',
       type: 'text',
       value: '0.0'
     }]
@@ -343,7 +343,7 @@ const genewise = {
     name: '2. Tool Parameters',
     parameters: [{
       name: 'para',
-      label: 'SHOW PARAMETERS',
+      label: 'Show parameters',
       type: 'select',
       options: [{
         selected: true,
@@ -355,7 +355,7 @@ const genewise = {
       }]
     }, {
       name: 'pretty',
-      label: 'PRETTY ASCII',
+      label: 'Pretty ascii',
       type: 'select',
       options: [{
         selected: true,
@@ -367,7 +367,7 @@ const genewise = {
       }]
     }, {
       name: 'genes',
-      label: 'GENE STRUCTURE',
+      label: 'Gene structure',
       type: 'select',
       options: [{
         selected: true,
@@ -379,7 +379,7 @@ const genewise = {
       }]
     }, {
       name: 'trans',
-      label: 'TRANSLATION',
+      label: 'Translation',
       type: 'select',
       options: [{
         selected: true,
@@ -403,7 +403,7 @@ const genewise = {
       }]
     }, {
       name: 'embl',
-      label: 'EMBL FEATURE',
+      label: 'EMBL feature',
       type: 'select',
       options: [{
         selected: true,
@@ -415,7 +415,7 @@ const genewise = {
       }]
     }, {
       name: 'ace',
-      label: 'ACE FILE GENE STRUCTURE',
+      label: 'Ace file gene structure',
       type: 'select',
       options: [{
         selected: true,
@@ -427,7 +427,7 @@ const genewise = {
       }]
     }, {
       name: 'gff',
-      label: 'GFF OUTPUT',
+      label: 'GFF output',
       type: 'select',
       options: [{
         selected: true,
@@ -439,7 +439,7 @@ const genewise = {
       }]
     }, {
       name: 'diana',
-      label: 'EMBL Feature For diana',
+      label: 'EMBL Feature For Diana',
       type: 'select',
       options: [{
         selected: true,
@@ -451,7 +451,7 @@ const genewise = {
       }]
     }, {
       name: 'init',
-      label: 'LOCAL/GLOBAL MODE',
+      label: 'Local/global mode',
       type: 'select',
       options: [{
         selected: true,
@@ -463,7 +463,7 @@ const genewise = {
       }]
     }, {
       name: 'splice',
-      label: 'SPLICE SITE',
+      LABEL: 'splice site',
       type: 'select',
       options: [{
         value: 'model',
@@ -475,7 +475,7 @@ const genewise = {
       }]
     }, {
       name: 'random',
-      label: 'RANDOM (NULL) MODEL',
+      label: 'Random (null) model',
       type: 'select',
       options: [{
         selected: true,
@@ -487,7 +487,7 @@ const genewise = {
       }]
     }, {
       name: 'alg',
-      label: 'ALGORITHM',
+      label: 'Algorithm',
       type: 'select',
       options: [{
         selected: true,

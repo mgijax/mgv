@@ -4,8 +4,11 @@
     :class="{ selected: item.selected }"
     >
     <m-button
-      :icon="item.selected ? 'check_box' : 'check_box_outline_blank'"
-      @click.stop="item.selected = !item.selected"
+      title="Remove from cart."
+      icon="highlight_off"
+      color="red"
+      hoverBackgroundColor="red"
+      @click.stop="deleteClicked"
       />
     <div class="flexcolumn" style="align-items: flex-start;">
       <span
@@ -14,11 +17,21 @@
         >{{v}}</span>
     </div>
     <m-button
-      title="Remove from cart."
-      icon="highlight_off"
-      color="red"
-      hoverBackgroundColor="red"
-      @click.stop="deleteClicked"
+      v-if="item.type==='dna'"
+      icon="text_rotation_none"
+      :style="{ transform: `rotate(${item.reverseComplement ? 180 : 0}deg)` }"
+      :title="`Reverse complement is ${item.reverseComplement ? 'ON' : 'OFF'}. Click to turn ${item.reverseComplement ? 'OFF' : 'ON'}.`"
+      @click.stop="item.reverseComplement = !item.reverseComplement"
+      />
+    <m-button
+      v-if="item.type==='cds'"
+      :icon="item.translate ? 'M' : 'ATG'"
+      :title="`Protein translation is ${item.translate ? 'ON' : 'OFF'}. Click to turn ${item.translate ? 'OFF' : 'ON'}.`"
+      @click.stop="item.translate = !item.translate"
+      />
+    <m-button
+      :icon="item.selected ? 'check_box' : 'check_box_outline_blank'"
+      @click.stop="item.selected = !item.selected"
       />
   </div>
 </template>

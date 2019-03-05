@@ -54,7 +54,7 @@
 import MComponent from '@/components/MComponent'
 import SequenceCart from '@/components/SequenceCart'
 import FormParameter from '@/components/FormParameter'
-import { translate } from '@/lib/genetic_code'
+import { reverseComplement, translate } from '@/lib/genetic_code'
 import u from '@/lib/utils'
 import etools from '@/lib/ensembl_tools'
 export default MComponent({
@@ -80,7 +80,7 @@ export default MComponent({
   methods: {
     injectSequences: function (seqs) {
       const fseq = s => {
-        return s.header + '\n' + (s.type === 'cds' ? translate(s.seq) : s.seq) + '\n'
+        return s.header + '\n' + s.seq + '\n'
       }
       if (this.selectedTool.toolclass === 'multiple') {
         this.sequence = seqs.map(s => fseq(s)).join('')

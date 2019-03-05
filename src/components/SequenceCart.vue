@@ -2,14 +2,10 @@
   <div class="sequence-cart">
      <div class="flexrow">
        <m-button
-         icon="check_box"
-         title="Select all items in the cart."
-         @click="selectAll"
-         />
-       <m-button
-         icon="check_box_outline_blank"
-         title="Un-select all items in the cart."
-         @click="unselectAll"
+         icon="delete"
+         color="red"
+         title="Remove selected items from the cart."
+         @click="clearSelected"
          />
 
        <div style="flex-grow: 1;"></div>
@@ -23,11 +19,16 @@
        <div style="flex-grow: 1;"></div>
 
        <m-button
-         icon="delete"
-         color="red"
-         title="Remove selected items from the cart."
-         @click="clearSelected"
+         icon="check_box"
+         title="Select all items in the cart."
+         @click="selectAll"
          />
+       <m-button
+         icon="check_box_outline_blank"
+         title="Un-select all items in the cart."
+         @click="unselectAll"
+         />
+
      </div>
      <div class="sequence-cart-items">
        <sequence-cart-item
@@ -57,6 +58,8 @@ export default MComponent({
   methods: {
     add (r) {
       r.selected = r.selected || false
+      r.reverseComplement = r.reverseComplement || false
+      r.translate = r.translate || false
       this.cart.push(r)
     },
     clear () {

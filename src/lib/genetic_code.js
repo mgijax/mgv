@@ -119,7 +119,7 @@ function complement (dna) {
   return dna.split('').map(b => base_complement[b]).join('')
 }
 function reverseComplement (dna) {
-  return complement(dna).reverse()
+  return dna.split('').reverse().map(b => base_complement[b]).join('')
 }
 //
 export {

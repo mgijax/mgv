@@ -15,6 +15,7 @@ import { SwimLaneAssigner, FeaturePacker, ContigAssigner } from '@/lib/Layout'
 import config from '@/config'
 import { GenomeRegistrar } from '@/lib/GenomeRegistrar'
 import gff3 from '@/lib/gff3lite'
+import { translate, reverseComplement } from '@/lib/genetic_code'
 
 class DataManager {
   // Args:
@@ -163,21 +164,29 @@ class DataManager {
     }
   }
   // Returns a promise for the genomic sequence of the specified range for the specified genome
-  getSequence (g, c, s, e) {
-    return this.greg.getReader(g, 'sequences').then(reader => reader ? reader.readRange(c, s, e) : '')
+  getSequence (g, c, s, e, doRC) {
+    return this.greg.getReader(g, 'sequences')
+      .then(reader => reader ? reader.readRange(c, s, e) : '')
+      .then(s => {
+        s.seq = doRC ? reverseComplement(s.seq) : s.seq
+        return s
+      })
   }
-  getSequenceForObject(g, id, type) {
+  getSequenceForObject(g, id, type, doRC, doPT) {
     return this.greg.getReader(g, 'sequences').then(reader => {
       return reader ? reader.getFastaForObject(id, type) : null
+    }).then(s => {
+        s.seq = doRC ? reverseComplement(s.seq) : doPT ? translate(s.seq) : s.seq
+        return s
     })
   }
   //
   getSequences(descrs) {
     const ps = descrs.map(s => {
       if (s.ID) {
-        return this.getSequenceForObject(s.genome, s.ID, s.type)
+        return this.getSequenceForObject(s.genome, s.ID, s.type, s.reverseComplement, s.translate)
       } else {
-        return this.getSequence(s.genome, s.chr, s.start, s.end)
+        return this.getSequence(s.genome, s.chr, s.start, s.end, s.reverseComplement)
       }
     })
     return Promise.all(ps)
