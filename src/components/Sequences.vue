@@ -23,6 +23,7 @@
             :value="t.name"
             >{{t.label}}</option>
         </select>
+        <button class="submitBtn">Submit</button>
       </div>
 
       <fieldset
@@ -30,7 +31,13 @@
         :key="i"
         >
       <legend>{{fs.name}}</legend>
-      <table>
+      <m-button
+        name="closeBtn"
+        :icon="fs.isOpen ? 'close' : 'add'"
+        :title="fs.isOpen ? 'Click to close.' : 'Click to open.'"
+        @click.stop="fs.isOpen = !fs.isOpen"
+        />
+      <table v-show="fs.isOpen">
         <form-parameter
           v-for="(p,i) in fs.parameters"
           :key="i"
@@ -44,7 +51,6 @@
           />
       </table>
       </fieldset>
-      <button class="submitBtn">Submit</button>
     </form> 
     </div>
   </div>
@@ -52,6 +58,7 @@
 
 <script>
 import MComponent from '@/components/MComponent'
+import MButton from '@/components/MButton'
 import SequenceCart from '@/components/SequenceCart'
 import FormParameter from '@/components/FormParameter'
 import { reverseComplement, translate } from '@/lib/genetic_code'
@@ -61,7 +68,8 @@ export default MComponent({
   name: 'Sequences',
   components: {
     SequenceCart,
-    FormParameter
+    FormParameter,
+    MButton
   },
   data: function () {
     return {
@@ -128,7 +136,6 @@ export default MComponent({
   padding-bottom: 15px;
 }
 .submitBtn {
-  width: 100%;
   background-color: #16ab16;
   color: white;
   font-size: 18px;
@@ -142,5 +149,13 @@ export default MComponent({
 fieldset,
 button {
   border-radius: 4px;
+}
+fieldset {
+ position: relative;
+}
+fieldset [name="closeBtn"] {
+  position: absolute;
+  top: 12px;
+  right: 3px;
 }
 </style>

@@ -1,5 +1,6 @@
 const jobParametersGroup = {
   name: '3. Job Parameters',
+  isOpen: true,
   parameters: [{
     name: 'notification',
     label: 'Email notification',
@@ -20,6 +21,7 @@ const clustalo = {
   label: 'Clustal+Omega',
   toolclass: 'multiple',
   parameterSets: [{
+    isOpen: true,
     name: '1. Inputs',
     parameters: [{
       name: 'isSAM',
@@ -50,6 +52,7 @@ const clustalo = {
     }]
   }, {
     name: '2. Tool Parameters',
+    isOpen: false,
     parameters: [{
       name: 'outfmt',
       label: 'Output format',
@@ -166,6 +169,7 @@ const muscle = {
   label: 'MUSCLE',
   toolclass: 'multiple',
   parameterSets: [{
+    isOpen: true,
     name: '1. Inputs',
     parameters: [{
       name: 'isSAM',
@@ -195,6 +199,7 @@ const muscle = {
     }]
   }, {
     name: '2. Tool Parameters',
+    isOpen: false,
     parameters: [{
       name: 'format',
       label: 'Output format',
@@ -246,6 +251,7 @@ const kalign = {
   label: 'Kalign',
   toolclass: 'multiple',
   parameterSets: [{
+    isOpen: true,
     name: '1. Inputs',
     parameters: [{
       name: 'isSAM',
@@ -273,6 +279,7 @@ const kalign = {
     }]
   },{ 
     name: '2. Tool Parameters',
+    isOpen: false,
     parameters: [{
       name: 'format',
       label: 'Output format',
@@ -319,6 +326,7 @@ const genewise = {
   label: 'GeneWise',
   toolclass: 'pairwise',
   parameterSets: [{
+    isOpen: true,
     name: '1. Inputs',
     parameters: [{
       name: 'isSAM',
@@ -341,6 +349,7 @@ const genewise = {
     }]
   }, {
     name: '2. Tool Parameters',
+    isOpen: false,
     parameters: [{
       name: 'para',
       label: 'Show parameters',
