@@ -177,6 +177,12 @@ function prettyPrintBases (n) {
 }
 // ---------------------------------------------
 //
+function deepCopy (obj) {
+  return JSON.parse(JSON.stringify(obj))
+}
+
+// ---------------------------------------------
+//
 function fetch (url, type) {
   const types = ['text', 'json', 'gff3']
   if (!type) type = 'text'
@@ -224,5 +230,6 @@ export default {
   eachTick,
   prettyPrintBases,
   fetch,
-  uniqueItems
+  uniqueItems,
+  deepCopy
 }

@@ -8,6 +8,13 @@
 const DATACACHE_PREFIX = 'mgv2-datacache-'
 //
 export default {
+
+  ///////////////////////////////////////////
+  // Timestamp used at page load to determine whether to flush user's setting cache.
+  // IMPORTANT!!! You MUST update this value whenever this config file changes!!!
+  TIMESTAMP: 'Tue Mar  5 05:56:39 EST 2019',
+  ///////////////////////////////////////////
+
   //
   // global config settings, applied to every class
   //

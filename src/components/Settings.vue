@@ -165,25 +165,33 @@
 import MComponent from '@/components/MComponent'
 import KeyStore from '@/lib/KeyStore'
 import config from '@/config'
+import u from '@/lib/utils'
 export default MComponent({
   name: 'Settings',
   data: function () {
     return config
   },
   methods: {
+    // saves current settings to database
     save: function () {
       return this.kstore.set('settings', this.$data)
     },
-    restore: function () {
+    // restores current settings after a page load
+    // checks timestamps and either restores setting from cache,
+    // or resets the cache to the lastest values
+    restore: function (timestamp) {
       return this.kstore.get('settings').then(settings => {
-        if (settings === undefined) return
-        Object.assign(this.$data, settings)
+        if (settings === undefined || settings.TIMESTAMP !== timestamp) {
+          return this.save()
+        } else {
+          Object.assign(this.$data, settings)
+        }
       })
     }
   },
   created: function() {
     this.kstore = new KeyStore(config.PreferencesManager.dbName)
-    this.restore()
+    this.restore(config.TIMESTAMP)
   },
   mounted: function () {
     this.$watch('$data', () => this.save(), {deep: true})
