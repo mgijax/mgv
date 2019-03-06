@@ -31,7 +31,7 @@
        name="injectBtn"
        icon="input"
        title="Inject selected sequences into tool."
-       @click.stop="$refs.sequenceCart.emitSelected"
+       @click.stop="emitSelected"
        />
 
        <div style="flex-grow: 1;"></div>

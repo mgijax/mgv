@@ -59,7 +59,7 @@ function getMenus(thisObj) {
       extraArgs: [type],
       handler: (function (cxt, seqtype) {
         const f = cxt.feature
-        const genologs = this.dataManager.getGenologs(f, this.context.vGenomes)
+        const genologs = this.dataManager.getGenologs(f, this.context.vGenomes).filter(x => x)
         const seqs = genologs.map(f => {
           if (seqtype === 'dna') {
             return {
