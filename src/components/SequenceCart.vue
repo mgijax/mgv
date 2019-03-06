@@ -10,11 +10,29 @@
 
        <div style="flex-grow: 1;"></div>
 
+       <form
+         ref="sequenceDownloadForm"
+         action="http://proto.informatics.jax.org/prototypes/sequenceHound/sequenceHound.cgi"
+         target="_blank"
+         method="POST"
+         download>
+         <input type="hidden" name="descriptors" v-model="descriptors"></textarea>
+         <input type="text" placeholder="Enter file name." name="filename"></input>
+       </form>
+
        <m-button
-         icon="input"
-         title="Inject selected sequences into tool."
-         @click="emitSelected"
+         icon="cloud_download"
+         title="Download selected sequences in Fasta format."
+         @click="downloadSelected"
          />
+       <div style="flex-grow: 1;"></div>
+
+      <m-button
+       name="injectBtn"
+       icon="input"
+       title="Inject selected sequences into tool."
+       @click.stop="$refs.sequenceCart.emitSelected"
+       />
 
        <div style="flex-grow: 1;"></div>
 
@@ -51,7 +69,8 @@ export default MComponent({
   name: 'SequenceCart',
   data: function () {
     return {
-      cart: []
+      cart: [],
+      descriptors: ''
     }
   },
   components: { SequenceCartItem, MButton },
@@ -88,6 +107,15 @@ export default MComponent({
       this.getSequencesForSelected().then(seqs => {
         this.$root.$emit('sequence-cart-sequences', seqs)
       })
+    },
+    downloadSelected: function () {
+      const selected = this.cart.filter(item => item.selected)
+      this.dataManager.getSequenceUrls(selected).then(descrs => {
+        this.descriptors = JSON.stringify(descrs)
+        this.$nextTick(() => {
+          this.$refs.sequenceDownloadForm.submit()
+        })
+      })
     }
 
   },
@@ -103,7 +131,7 @@ export default MComponent({
 <style scoped>
 .sequence-cart {
   border-radius: 4px;
-  border: thin solid black;
+  border: 2px groove white;
   min-width: 350px;
 }
 .sequence-cart-items {

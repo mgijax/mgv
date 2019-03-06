@@ -1,3 +1,17 @@
+// The tools suite at Ensembl has a unified forms-based interface for accessing all its tools.
+// Each form has common elements and layout, and all launch jobs in a queue at Ensembl.
+// The result of submitting a form is a page (at Ensembl) that monitors the job and shows the
+// results when ready. All we're doing in MGV is mimicking the native Ensembl forms.
+//
+// This file defines descriptors for each of the Ensembl tools that we want to include in MGV.
+// Each tool has common attributes like name and description, and has descriptors specifying 
+// each of the form parameters. The parameters are grouped, and each group can be opened/closed 
+// in the UI.
+// -------------------------------
+
+
+// -------------------------------
+// All tools have a common section at the end, so define it once here.
 const jobParametersGroup = {
   name: '3. Job Parameters',
   isOpen: true,
@@ -16,10 +30,17 @@ const jobParametersGroup = {
   }]
 }
 
+// -------------------------------
+// Clustal+Omega tool descriptor.
 const clustalo = {
   name: 'clustalo',
   label: 'Clustal+Omega',
+  description: 'Multiple sequence alignment of DNA or protein sequences.',
+  limits: '4000 seqs OR 4 MB total',
   toolclass: 'multiple',
+  action: "https://www.ebi.ac.uk/Tools/services/web_clustalo/toolform.ebi",
+  enctype: "multipart/form-data",
+  method: "post",
   parameterSets: [{
     isOpen: true,
     name: '1. Inputs',
@@ -164,10 +185,16 @@ const clustalo = {
   jobParametersGroup
 ]} // clustalo
 
+// -------------------------------
 const muscle = {
   name: 'muscle',
   label: 'MUSCLE',
   toolclass: 'multiple',
+  description: 'Multiple sequence alignment tool for protein or nucleotide sequences.',
+  limits: '500 sequences OR 1 MB total',
+  action: "https://www.ebi.ac.uk/Tools/services/web_muscle/toolform.ebi",
+  enctype: "multipart/form-data",
+  method: "post",
   parameterSets: [{
     isOpen: true,
     name: '1. Inputs',
@@ -246,10 +273,16 @@ const muscle = {
   jobParametersGroup
 ]} // end muscle
 
+// -------------------------------
 const kalign = {
   name: 'kalign',
   label: 'Kalign',
   toolclass: 'multiple',
+  description: 'Fast multiple sequence alignment tool, suitable for large alignments',
+  limits: '2000 sequences or a maximum file size of 2 MB',
+  action: "https://www.ebi.ac.uk/Tools/services/web_kalign/toolform.ebi",
+  enctype: "multipart/form-data",
+  method: "post",
   parameterSets: [{
     isOpen: true,
     name: '1. Inputs',
@@ -320,11 +353,16 @@ const kalign = {
   jobParametersGroup
 ]} // end kalign
       
+// -------------------------------
 const genewise = {
-  // ----------- GeneWise ------------------------
   name: 'genewise',
   label: 'GeneWise',
   toolclass: 'pairwise',
+  description: 'Compare a protein sequence to a genomic DNA sequence.',
+  limits: '1 MB total for each input',
+  action: "https://www.ebi.ac.uk/Tools/services/web_genewise/toolform.ebi",
+  enctype: "multipart/form-data",
+  method: "post",
   parameterSets: [{
     isOpen: true,
     name: '1. Inputs',
@@ -511,6 +549,7 @@ const genewise = {
   jobParametersGroup
 ]} // end genewise
 
+// ----------------------------------
 export default [
   clustalo,
   muscle,

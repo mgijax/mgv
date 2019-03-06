@@ -26,8 +26,8 @@ class InterMineConnection {
     return u.fetch(url, 'json').then(data => data.results.map(mapper))
   }
 
-  // Returns a promise for the genomic sequence from genome g whose coordinates are given.
-  getChromosomeSlice (g, c, start, end) {
+  // Returns a URL for downloading a specified genomic sequence slice.
+  getChromosomeSliceUrl (g, c, start, end) {
     const genomepath = this.isMouseMine ? 'strain.name' : 'organism.taxonId'
     const genomeval = this.isMouseMine ? g.name : g.taxonid
     const q = `<query model="genomic"
@@ -36,6 +36,12 @@ class InterMineConnection {
         <constraint path="Chromosome.${genomepath}" op="=" value="${genomeval}" />
       </query>`
     const url = this.seqSliceUrl + `start=${start - 1}&end=${end}&query=${encodeURIComponent(q)}`
+    return url
+  }
+
+  // Returns a promise for the genomic sequence from genome g whose coordinates are given.
+  getChromosomeSlice (g, c, start, end) {
+    const url = this.getChromosomeSliceUrl(g, c, start, end)
     return u.fetch(url, 'json').then(data => data.features[0])
   }
 

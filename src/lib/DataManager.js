@@ -172,6 +172,7 @@ class DataManager {
         return s
       })
   }
+  // Returns a promise for the sequence of the specified object
   getSequenceForObject(g, id, type, doRC, doPT) {
     return this.greg.getReader(g, 'sequences').then(reader => {
       return reader ? reader.getFastaForObject(id, type) : null
@@ -182,12 +183,33 @@ class DataManager {
   }
   //
   getSequences(descrs) {
-    const ps = descrs.map(s => {
-      if (s.ID) {
-        return this.getSequenceForObject(s.genome, s.ID, s.type, s.reverseComplement, s.translate)
+    const ps = descrs.map(d => {
+      if (d.ID) {
+        return this.getSequenceForObject(d.genome, d.ID, d.type, d.reverseComplement, d.translate)
       } else {
-        return this.getSequence(s.genome, s.chr, s.start, s.end, s.reverseComplement)
+        return this.getSequence(d.genome, d.chr, d.start, d.end, d.reverseComplement)
       }
+    })
+    return Promise.all(ps)
+  }
+  // Returns a promise for the urls that will fetch the each of the sequences described
+  // by the given list of descriptors.
+  getSequenceUrls(descrs) {
+    const ps = descrs.map(d => {
+      return this.greg.getReader(d.genome, 'sequences').then(reader => {
+        const dd = Object.assign({}, d)
+        dd.genome = d.genome.name
+        if (dd.chr) dd.chr = d.chr.name
+        dd.url = null
+        if (reader && reader.mine) {
+          if (d.ID) {
+            dd.url = reader.mine.getFastaUrl(d.ID, d.type, true)
+          } else {
+            dd.url = reader.mine.getChromosomeSliceUrl(d.genome, d.chr, d.start, d.end)
+          }
+        }
+        return dd
+      })
     })
     return Promise.all(ps)
   }

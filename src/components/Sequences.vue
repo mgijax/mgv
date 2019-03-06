@@ -10,12 +10,14 @@
     <div class="flexcolumn">
     <form
       target="_blank"
-      :action="`https://www.ebi.ac.uk/Tools/services/web_${tool}/toolform.ebi`"
-      enctype="multipart/form-data"
-      method="post"> 
+      :action="selectedTool.action"
+      :enctype="selectedTool.enctype"
+      :method="selectedTool.method"> 
       
+      <!-- tool selector  and submit button -->
+      <fieldset>
       <div class="flexrow">
-        <label>Tool:</label>
+        <label style="font-weight: bold;">Tool:</label>
         <select class="toolSelector" name="tool" v-model="tool">
           <option
             v-for="(t,i) in tools"
@@ -25,7 +27,13 @@
         </select>
         <button class="submitBtn">Submit</button>
       </div>
-
+      <!-- tool info -->
+      <div class="toolInfo flexcolumn">
+        <span v-if="selectedTool.description">{{selectedTool.description}}</span>
+        <span v-if="selectedTool.limits">(Tool's stated limits: {{selectedTool.limits}})</span>
+      </div>
+      </fieldset>
+      <!-- Form parameter groups -->
       <fieldset
         v-for="(fs,i) in selectedTool.parameterSets"
         :key="i"
@@ -119,6 +127,11 @@ export default MComponent({
 </script>
 
 <style scoped>
+.toolInfo {
+  align-items: flex-start;
+  padding-left:40px;
+  font-size: smaller;
+}
 .toolForm {
   align-items: flex-start;
 }
@@ -134,6 +147,7 @@ export default MComponent({
 .cart-label {
   padding-top: 15px;
   padding-bottom: 15px;
+  font-weight: bold;
 }
 .submitBtn {
   background-color: #16ab16;
@@ -152,6 +166,10 @@ button {
 }
 fieldset {
  position: relative;
+ border: 2px groove white;
+}
+fieldset > legend {
+  font-weight: bold;
 }
 fieldset [name="closeBtn"] {
   position: absolute;
