@@ -23,9 +23,9 @@ def defaultHeader (desc) :
   desc['rc'] = 'reverse complement ' if desc['reverseComplement'] else ''
   desc['tr'] = 'translated ' if desc['translate'] else ''
   if 'chr' in desc:
-    return '>%(genome)s (%(rc)s%(tr)s%(type)s) %(chr)s:%(start)d..%(end)d' % desc
+    return '>%(genome)s::%(chr)s:%(start)d..%(end)d (%(rc)s%(tr)s%(type)s)' % desc
   else:
-    return '>%(genome)s (%(rc)s%(tr)s%(type)s) %(ID)s' % desc
+    return '>%(genome)s::%(ID)s (%(rc)s%(tr)s%(type)s)' % desc
 
 def doOneSequence (desc) :
   fd = urllib.urlopen(desc['url'])
