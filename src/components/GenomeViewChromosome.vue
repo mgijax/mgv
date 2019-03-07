@@ -70,7 +70,7 @@
         fill="blue"
         :range="[1, chromosome.length]"
         :tabRange="[coords.start, coords.end]"
-        :current="chromosome === coords.chr"
+        :current="chromosome.name === coords.chr.name"
         :orientation="orientation"
         @brush="brushed($event)"
         />
