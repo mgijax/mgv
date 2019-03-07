@@ -1,12 +1,12 @@
 <template>
   <div class="sequences toolForm flexrow">
-    <div class="flexcolumn">
-      <label class="cart-label">Sequence Cart</label>
+    <fieldset>
+      <legend class="cart-label">Sequence Cart</legend>
       <sequence-cart
         title="Your shopping cart of selected sequences."
         ref="sequenceCart"
         />
-    </div>
+    </fieldset>
     <div class="flexcolumn">
     <form
       target="_blank"
@@ -16,8 +16,8 @@
       
       <!-- tool selector  and submit button -->
       <fieldset>
+      <legend>Alignment Tools</legend>
       <div class="flexrow">
-        <label style="font-weight: bold;">Tool:</label>
         <select class="toolSelector" name="tool" v-model="tool">
           <option
             v-for="(t,i) in tools"
@@ -145,8 +145,6 @@ export default MComponent({
   flex-grow: 1;
 }
 .cart-label {
-  padding-top: 15px;
-  padding-bottom: 15px;
   font-weight: bold;
 }
 .submitBtn {

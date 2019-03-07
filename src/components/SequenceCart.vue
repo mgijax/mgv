@@ -130,8 +130,6 @@ export default MComponent({
 
 <style scoped>
 .sequence-cart {
-  border-radius: 4px;
-  border: 2px groove white;
   min-width: 350px;
 }
 .sequence-cart-items {
