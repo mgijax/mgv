@@ -52,12 +52,17 @@ function getMenu (thisObj) {
         window.open(linkUrl, '_blank')
       }).bind(thisObj)
     }, {
-      icon: 'delete',
-      label: 'Clear cache',
-      helpText: 'Clear features from the data cache. Will be reloaded on next access.',
+      icon: 'cached',
+      label: 'Clear cache and reload',
+      helpText: 'Clears data and preferences caches, and reloads the page.',
       handler: (function () {
         const kstore = new KeyStore(config.CachingFetcher.dbName)
-        kstore.clear()
+        kstore.clear().then(() => {
+          const kstore2 = new KeyStore(config.PreferencesManager.dbName)
+          return kstore2.clear()
+        }).then(() => {
+          window.location.reload()
+        })
       }).bind(thisObj)
     }]
   }
