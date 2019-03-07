@@ -62,8 +62,8 @@ class DataManager {
     if (this.cache[g.name]) return Promise.resolve(true)
     //
     this.cache[g.name] = {}
-    return this.greg.getReader(g, 'genes').then(reader => {
-      const p = reader.readAll().then(recs => {
+    this.pending[g.name] = this.greg.getReader(g, 'genes').then(reader => {
+      return reader.readAll().then(recs => {
         let prevChr = null
         let feats = []
         let allFeats = []
@@ -84,9 +84,8 @@ class DataManager {
         delete this.pending[g.name]
         return allFeats
       })
-      this.pending[g.name] = p
-      return p
     })
+    return this.pending[g.name]
   }
   //
   _registerChr (g, c, feats) {
