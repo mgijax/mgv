@@ -37,9 +37,10 @@ export default MComponent({
   },
   computed: {
     style: function () {
+      const isDisabled = this.$el && this.$el.getAttribute('disabled')
       return {
-        color: this.hover ? this.hoverColor : this.color,
-        backgroundColor: this.hover ? this.hoverBackgroundColor : this.backgroundColor
+        color: this.hover && !isDisabled ? this.hoverColor : this.color,
+        backgroundColor: this.hover && !isDisabled ? this.hoverBackgroundColor : this.backgroundColor
       }
     },
     isMaterialIcon: function () {
@@ -58,7 +59,7 @@ export default MComponent({
 }
 .material-icons.button[disabled] {
   cursor: default;
-  color: #ccc;
+  opacity: 0.5;
 }
 .material-icons.button:hover:not([disabled]) {
 }

@@ -6,6 +6,7 @@
          color="red"
          title="Remove selected items from the cart."
          @click="clearSelected"
+         :disabled="cartEmpty"
          />
 
        <div style="flex-grow: 1;"></div>
@@ -17,13 +18,14 @@
          method="POST"
          download>
          <input type="hidden" name="descriptors" v-model="descriptors"></textarea>
-         <input type="text" placeholder="Enter file name." name="filename"></input>
+         <input :disabled="cartEmpty" type="text" placeholder="Enter file name." name="filename"></input>
        </form>
 
        <m-button
          icon="cloud_download"
          title="Download selected sequences in Fasta format."
          @click="downloadSelected"
+         :disabled="cartEmpty"
          />
        <div style="flex-grow: 1;"></div>
 
@@ -32,6 +34,7 @@
        icon="input"
        title="Inject selected sequences into tool."
        @click.stop="emitSelected"
+       :disabled="cartEmpty"
        />
 
        <div style="flex-grow: 1;"></div>
@@ -40,11 +43,13 @@
          icon="check_box"
          title="Select all items in the cart."
          @click="selectAll"
+         :disabled="cartEmpty"
          />
        <m-button
          icon="check_box_outline_blank"
          title="Un-select all items in the cart."
          @click="unselectAll"
+         :disabled="cartEmpty"
          />
 
      </div>
@@ -67,13 +72,18 @@ import MButton from '@/components/MButton'
 import SequenceCartItem from '@/components/SequenceCartItem'
 export default MComponent({
   name: 'SequenceCart',
+  components: { SequenceCartItem, MButton },
   data: function () {
     return {
       cart: [],
       descriptors: ''
     }
   },
-  components: { SequenceCartItem, MButton },
+  computed: {
+    cartEmpty () {
+      return this.cart.length === 0
+    }
+  },
   methods: {
     add (r) {
       r.selected = r.selected || false
@@ -110,10 +120,12 @@ export default MComponent({
     },
     downloadSelected: function () {
       const selected = this.cart.filter(item => item.selected)
+      if (selected.length === 0) return
       this.dataManager.getSequenceUrls(selected).then(descrs => {
         this.descriptors = JSON.stringify(descrs)
         this.$nextTick(() => {
           this.$refs.sequenceDownloadForm.submit()
+          this.$refs.sequenceDownloadForm.reset()
         })
       })
     }
