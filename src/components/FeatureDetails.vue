@@ -14,8 +14,6 @@
         v-for="(f,i) in features"
         :key="i"
         :class="{ current: isCurrent(f) }"
-        @mouseover="mouseover(f)"
-        @mouseout="mouseout(f)"
         >
         <td>{{f && f.cID || '.'}}</td>
         <td>{{f && f.symbol || '.'}}</td>
@@ -45,12 +43,6 @@ export default MComponent({
       let cmo = this.currentMouseover
       return cmo && cmo.ID === f.ID
     },
-    mouseover: function (f) {
-      this.$root.$emit('context', { currentMouseover: f })
-    },
-    mouseout: function (f) {
-      this.$root.$emit('context', { currentMouseover: null })
-    }
   }
 })
 </script>
