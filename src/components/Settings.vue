@@ -3,7 +3,7 @@
   <form>
   <label>Features</label>
   <div
-    title="Display all feature labels when view width is below threshold (3 Mb)."
+    title="Display all feature labels when view width is below display threshold."
     class="flexrow"
     >
     <label>Show all<sup title="When zoomed in">*</sup> labels</label>
@@ -80,9 +80,9 @@
   </div>
   <div
     class="flexrow"
-    title="Display all transcript labels when view width is below threshold (3 Mb) and 'Spread transcripts' is checked."
+    title="Display all transcript labels when view width is below display threshold and 'Spread transcripts' is checked."
     >
-    <label>Show labels</label>
+    <label>Show all<sup title="When zoomed in">*</sup> labels</label>
     <input
         type="checkbox"
         v-model="ZoomRegion.showTranscriptLabels"
