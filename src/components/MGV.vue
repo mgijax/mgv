@@ -155,6 +155,7 @@ import MComponent from '@/components/MComponent'
 import gc from '@/lib/GenomeCoordinates'
 import HistoryManager from '@/lib/HistoryManager'
 import ListManager from '@/lib/ListManager'
+import KeyManager from '@/lib/KeyManager'
 import Translator from '@/lib/Translator'
 import PreferencesManager from '@/lib/PreferencesManager'
 //
@@ -444,6 +445,13 @@ export default MComponent({
     this.preferencesManager = new PreferencesManager(this)
   },
   mounted: function () {
+    //
+    this.keyManager = new KeyManager(this)
+    this.keyManager.register({
+     key: 'o',
+     ctrlKey: true,
+     handler: () => this.toggleDrawer()
+    })
     //
     this.genomeSets = this.cfg.genomeSets
     // a global handle for debugging
