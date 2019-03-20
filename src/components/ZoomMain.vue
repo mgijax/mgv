@@ -5,6 +5,7 @@
     :width="width"
     @click="backgroundClick"
     >
+    <!-- underlay -->
     <rect
       x=0
       y=0
@@ -99,8 +100,10 @@ export default MComponent({
       let gs = ys.map(d => d.strip.genome.name)
       this.$root.$emit('context', { genomes: gs })
     },
-    backgroundClick: function () {
-      this.$root.$emit('context', { currentSelection: [] })
+    backgroundClick: function (e) {
+      if (e.target.closest('.zoom-region')) {
+        this.$root.$emit('context', { currentSelection: [] })
+      }
     }
   },
   mounted: function () {
