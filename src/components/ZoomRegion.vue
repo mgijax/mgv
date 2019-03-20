@@ -4,6 +4,7 @@
     @mouseover.stop="mouseover"
     @mouseout.stop="mouseout"
     @mousemove="mousemove"
+    @mouseenter.stop="mouseenter"
     @mouseleave.stop="mouseleave"
     @click="clicked"
     @dblclick="dblClicked"
@@ -83,6 +84,7 @@
       <!-- ======= sequence string ======= -->
       <text
         v-if="showSequence"
+        :y="-sequenceFontSize"
         :font-size="sequenceFontSize"
         fill=black
         stroke=none
@@ -100,7 +102,7 @@
           v-for="(b,i) in scomplement"
           :key="-i-1"
           :x="b2p(seqStart + i + 1.5)"
-          :y="sequenceFontSize"
+          :y="0"
           :fill="baseColor(b)"
           text-anchor="middle"
           >{{b}}</tspan>
@@ -388,7 +390,7 @@ export default MComponent({
     //
     maxLaneP: function () {
       if (this.showDetails && this.spreadTranscripts) {
-        return 0
+        return 1
       } else {
         let x = this.features.filter(f => f.strand === '+' && this.featureVisible(f)).reduce((v, f) => Math.max(v, f.layout.l1), 0)
         return x
@@ -595,6 +597,7 @@ export default MComponent({
     // Request features in my range, which will asynchromously cause a redraw.
     getFeatures () {
       //
+      console.log('getFeatures')
       let delta = Math.round((this.end - this.start + 1) / 2)
       this.seqStart = this.start
       this.busy = true
@@ -645,6 +648,8 @@ export default MComponent({
       let bb = this.$refs.underlay.getBoundingClientRect()
       let px = e.clientX - bb.x
       this.currRange = [px, px]
+    },
+    mouseenter: function (e) {
     },
     mouseleave: function (e) {
       if (this.dragging) return
