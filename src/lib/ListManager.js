@@ -2,18 +2,6 @@ import KeyStore from '@/lib/KeyStore'
 import config from '@/config'
 import u from '@/lib/utils'
 
-function recoverVersion1Lists () {
-  const name = 'mgv-datacache-user-lists'
-  const store = new KeyStore(name, 'user-lists')
-  store.get('all').then(lists => {
-    if (lists) {
-      console.log('Recovered lists: ', lists)
-    } else { 
-      console.log('No lists found for recovery.')
-    }
-  })
-}
-
 class ListManager {
   constructor (app, lists) {
     this.app = app
@@ -27,7 +15,7 @@ class ListManager {
       this.newList(`${d.queryType.name} = ${d.query}`, d.results)
     })
     this.initFromStore()
-    recoverVersion1Lists()
+    this.recoverVersion1Lists()
   }
   uniqify (n) {
     if (!this.listByName[n]) return n
@@ -39,12 +27,14 @@ class ListManager {
     }
     return nn
   }
-  newList (name, items, color) {
+  newList (name, items, color, formula, description) {
     let now = new Date()
     let uname = this.uniqify(name)
     let list = {
       name: uname,
       items: items || [],
+      formula: formula || "",
+      description: description || "",
       color: color || u.randomColor(),
       created: now,
       modified: now
@@ -79,7 +69,7 @@ class ListManager {
   initFromStore () {
     this.lists.splice(0, this.lists.length)
     this.listByName = {}
-    this.listStore.get('all').then(lists => {
+    return this.listStore.get('all').then(lists => {
       if (lists) {
         lists.forEach(l => {
           this.lists.push(l)
@@ -93,7 +83,25 @@ class ListManager {
   }
   saveToStore () {
     console.log(`ListManager: saving ${this.lists.length} lists to store`)
-    this.listStore.set('all', this.lists)
+    return this.listStore.set('all', this.lists)
+  }
+  recoverVersion1Lists () {
+    const name = 'mgv-datacache-user-lists'
+    const store = new KeyStore(name, 'user-lists')
+    return store.get('all').then(listDict => {
+      if (!listDict) return
+      const doImport = confirm(
+        'It looks like you have saved lists from a previous version. Would you like to import them?')
+      if (doImport) {
+        for (const n in listDict) {
+          const lst = listDict[n]
+          this.newList( lst.name, lst.ids.concat(), u.randomColor(), lst.formula, "" )
+        }
+        if(confirm('Delete the old lists?')) {
+          indexedDB.deleteDatabase(name)
+        }
+      }
+    })
   }
 }
 
