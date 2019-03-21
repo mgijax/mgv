@@ -2,6 +2,18 @@ import KeyStore from '@/lib/KeyStore'
 import config from '@/config'
 import u from '@/lib/utils'
 
+function recoverVersion1Lists () {
+  const name = 'mgv-datacache-user-lists'
+  const store = new KeyStore(name, 'user-lists')
+  store.get('all').then(lists => {
+    if (lists) {
+      console.log('Recovered lists: ', lists)
+    } else { 
+      console.log('No lists found for recovery.')
+    }
+  })
+}
+
 class ListManager {
   constructor (app, lists) {
     this.app = app
@@ -15,6 +27,7 @@ class ListManager {
       this.newList(`${d.queryType.name} = ${d.query}`, d.results)
     })
     this.initFromStore()
+    recoverVersion1Lists()
   }
   uniqify (n) {
     if (!this.listByName[n]) return n

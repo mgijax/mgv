@@ -71,11 +71,11 @@ export default MComponent({
     },
     iconOpen: {
       type: String,
-      default: 'arrow_right'
+      default: 'add'
     },
     iconClose: {
       type: String,
-      default: 'arrow_drop_down'
+      default: 'close'
     }
   },
   data () {

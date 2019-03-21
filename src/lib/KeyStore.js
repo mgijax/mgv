@@ -1,9 +1,9 @@
 import { Store, set, get, del, clear, keys } from 'idb-keyval'
 
 class KeyStore {
-  constructor (name) {
+  constructor (name, osname) {
     try {
-      this.store = new Store(name, name)
+      this.store = new Store(name, osname || name)
       this.disabled = false
       // console.log(`KeyStore: ${name}`)
     } catch (err) {

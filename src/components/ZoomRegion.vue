@@ -597,7 +597,6 @@ export default MComponent({
     // Request features in my range, which will asynchromously cause a redraw.
     getFeatures () {
       //
-      console.log('getFeatures')
       let delta = Math.round((this.end - this.start + 1) / 2)
       this.seqStart = this.start
       this.busy = true
