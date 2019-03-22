@@ -78,6 +78,15 @@
               ref="settings"
               />
           </page-box>
+          <!--
+          ============ Sequence Cart ==============
+          -->
+          <page-box label="SequenceCart">
+            <sequence-cart
+              title="Your shopping cart of selected sequences."
+              ref="sequenceCart"
+              />
+          </page-box>
         </page-box-container>
         <!--
         ============ Right column ==============================================
@@ -116,17 +125,6 @@
               title="The main view. Shows features in the current region of the reference genome and all selected comparison genomes. Highlights features in the view that are currently selected. Many controls for panning, zooming, selecting, etc. Most anything can be undone by hitting the browser's Back button."
               />
           </page-box>
-          <!--
-          ============== Multiple Sequence Alignment ==============
-          -->
-          <page-box
-            :initiallyOpen="false"
-            label="Sequences">
-            <sequences
-              ref="msa"
-              title="Forwards selected sequences to the specified alignment tool at Ensembl."
-              ></sequences>
-            </page-box>
         </page-box-container>
       </div>
       <m-footer version="1.0.0"></m-footer>
@@ -148,7 +146,6 @@ import ListEditor from '@/components/ListEditor'
 import Facets from '@/components/Facets'
 import GenomeView from '@/components/GenomeView'
 import ZoomView from '@/components/ZoomView'
-import Sequences from '@/components/Sequences'
 import FeatureDetails from '@/components/FeatureDetails'
 import FeatureColorMap from '@/lib/FeatureColorMap'
 import MComponent from '@/components/MComponent'
@@ -175,7 +172,6 @@ export default MComponent({
     Facets,
     GenomeView,
     ZoomView,
-    Sequences,
     FeatureDetails
   },
   provide: function () {

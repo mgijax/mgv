@@ -3,19 +3,19 @@
     class="sequence-cart-item flexrow"
     :class="{ selected: item.selected }"
     >
+    <!-- Selected checkbox -->
     <m-button
-      title="Remove from cart."
-      icon="highlight_off"
-      color="red"
-      hoverBackgroundColor="red"
-      @click.stop="deleteClicked"
+      :icon="item.selected ? 'check_box' : 'check_box_outline_blank'"
+      @click.stop="item.selected = !item.selected"
       />
+    <!-- Sequence header -->
     <div class="flexcolumn" style="align-items: flex-start;">
       <span
         v-for="(v,i) in headerLines"
         :key="i"
         >{{v}}</span>
     </div>
+    <!-- Reverse-complement button (for genomic sequence only) -->
     <m-button
       v-if="item.type==='dna' && item.start"
       :icon="item.reverseComplement ? 'AG' : 'CT'"
@@ -23,15 +23,20 @@
       :title="`Reverse complement is ${item.reverseComplement ? 'ON' : 'OFF'}. Click to turn ${item.reverseComplement ? 'OFF' : 'ON'}.`"
       @click.stop="item.reverseComplement = !item.reverseComplement"
       />
+    <!-- Translate button (for CDS sequence only) -->
     <m-button
       v-if="item.type==='cds'"
       :icon="item.translate ? 'M' : 'ATG'"
       :title="`Protein translation is ${item.translate ? 'ON' : 'OFF'}. Click to turn ${item.translate ? 'OFF' : 'ON'}.`"
       @click.stop="item.translate = !item.translate"
       />
+    <!-- Delete button -->
     <m-button
-      :icon="item.selected ? 'check_box' : 'check_box_outline_blank'"
-      @click.stop="item.selected = !item.selected"
+      title="Remove from cart."
+      icon="highlight_off"
+      color="red"
+      hoverBackgroundColor="red"
+      @click.stop="deleteClicked"
       />
   </div>
 </template>
@@ -75,6 +80,9 @@ export default MComponent({
         ]
       }
     }
+  },
+  mounted: function () {
+    this.$watch('item', function () {this.$emit('item-changed')}, {deep:true})
   }
 })
 </script>

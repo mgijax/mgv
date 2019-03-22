@@ -1,16 +1,39 @@
 <template>
   <div class="sequence-cart">
+     <!-- Cart items -->
+     <div class="sequence-cart-items">
+       <sequence-cart-item
+         v-for="item in cart"
+         :key="item.name"
+         :item="item"
+         ref="items"
+         @delete-me="deleteItem"
+         @item-changed="save"
+         />
+     </div>
+     <span v-show="cart.length === 0">Cart is empty.</span>
+     <!-- row of buttons -->
      <div class="flexrow">
+       <!-- Select all button -->
        <m-button
-         icon="delete"
-         color="red"
-         title="Remove selected items from the cart."
-         @click="clearSelected"
+         icon="check_box"
+         title="Select all items in the cart."
+         @click="selectAll"
          :disabled="cartEmpty"
          />
 
+       <!-- Unselect all button -->
+       <m-button
+         icon="check_box_outline_blank"
+         title="Un-select all items in the cart."
+         @click="unselectAll"
+         :disabled="cartEmpty"
+         />
+
+       <!-- spacer -->
        <div style="flex-grow: 1;"></div>
 
+       <!-- Download form -->
        <form
          ref="sequenceDownloadForm"
          action="http://proto.informatics.jax.org/prototypes/sequenceHound/sequenceHound.cgi"
@@ -19,50 +42,29 @@
          download>
          <input type="hidden" name="descriptors" v-model="descriptors"></textarea>
          <input :disabled="cartEmpty" type="text" placeholder="Enter file name." name="filename"></input>
+
+         <!-- Download button -->
+         <m-button
+           icon="cloud_download"
+           title="Download selected sequences in Fasta format."
+           @click="downloadSelected"
+           :disabled="cartEmpty"
+           />
        </form>
 
-       <m-button
-         icon="cloud_download"
-         title="Download selected sequences in Fasta format."
-         @click="downloadSelected"
-         :disabled="cartEmpty"
-         />
+       <!-- spacer -->
        <div style="flex-grow: 1;"></div>
 
-      <m-button
-       name="injectBtn"
-       icon="input"
-       title="Inject selected sequences into tool."
-       @click.stop="emitSelected"
-       :disabled="cartEmpty"
-       />
-
-       <div style="flex-grow: 1;"></div>
-
+       <!-- Delete selected button -->
        <m-button
-         icon="check_box"
-         title="Select all items in the cart."
-         @click="selectAll"
-         :disabled="cartEmpty"
-         />
-       <m-button
-         icon="check_box_outline_blank"
-         title="Un-select all items in the cart."
-         @click="unselectAll"
+         icon="delete"
+         color="red"
+         title="Remove selected items from the cart."
+         @click="clearSelected"
          :disabled="cartEmpty"
          />
 
      </div>
-     <div class="sequence-cart-items">
-       <sequence-cart-item
-         v-for="item in cart"
-         :key="item.name"
-         :item="item"
-         ref="items"
-         @delete-me="deleteItem"
-         />
-     </div>
-     <span v-show="cart.length === 0">Cart is empty.</span>
   </div>
 </template>
 
@@ -172,7 +174,6 @@ export default MComponent({
 
 <style scoped>
 .sequence-cart {
-  min-width: 350px;
 }
 .sequence-cart-items {
   max-height: 450px;
