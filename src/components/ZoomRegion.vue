@@ -727,7 +727,8 @@ export default MComponent({
               end: end,
               type: 'dna',
               reverseComplement: e.clientX < d.startX,
-              selected: true
+              selected: true,
+              length: end - start + 1
             }
             this.$root.$emit('region-selected', region)
           } else if (d.shiftDrag) {

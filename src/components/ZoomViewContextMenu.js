@@ -67,6 +67,7 @@ function getMenus(thisObj) {
               genome: f.genome,
               type: seqtype,
               ID: f.ID,
+              length: f.length,
               header: `${f.genome.name}::${f.symbol || f.ID} (genomic)`
             }
           } else if (seqtype === 'transcript') {
@@ -76,6 +77,7 @@ function getMenus(thisObj) {
                 genome: f.genome,
                 type: seqtype,
                 ID: t.ID,
+                length: t.length,
                 header: `${f.genome.name}::${t.ID} ${f.symbol || f.ID} (cDNA)`
               }
             })
@@ -86,6 +88,7 @@ function getMenus(thisObj) {
                 genome: f.genome,
                 type: seqtype,
                 ID: t.cds.ID,
+                length: t.cds.length,
                 header: `${f.genome.name}::${t.cds.ID} ${f.symbol || f.ID} (CDS)`
               }
             })
@@ -130,6 +133,7 @@ function getMenus(thisObj) {
             genome: f.genome,
             ID: f.ID,
             type: 'dna',
+            length: f.length,
             selected: true
           }])
         }).bind(thisObj)
@@ -145,6 +149,7 @@ function getMenus(thisObj) {
             genome: cxt.feature.genome,
             ID: t.ID,
             type: 'transcript',
+            length: t.length,
             selected: true
           }])
         }).bind(thisObj)
@@ -160,6 +165,7 @@ function getMenus(thisObj) {
             genome: cxt.feature.genome,
             ID: t.cds.ID,
             type: 'cds',
+            length: t.cds.length,
             selected: true
           }])
         }).bind(thisObj)

@@ -9,12 +9,13 @@
       @click.stop="item.selected = !item.selected"
       />
     <!-- Sequence header -->
-    <div class="flexcolumn" style="align-items: flex-start;">
-      <span
+    <div class="flexcolumn seqheader" style="align-items: flex-start;">
+      <div
         v-for="(v,i) in headerLines"
         :key="i"
-        >{{v}}</span>
+        >{{v.replace('::', ' ')}}</div>
     </div>
+    <div>{{prettyPrint(item.length)}}</div>
     <!-- Reverse-complement button (for genomic sequence only) -->
     <m-button
       v-if="item.type==='dna' && item.start"
@@ -50,6 +51,7 @@
 // Header is an optional string to display with the item
 import MComponent from '@/components/MComponent'
 import MButton from '@/components/MButton'
+import u from '@/lib/utils'
 export default MComponent({
   name: 'SequenceCartItem',
   props: ['item'],
@@ -66,6 +68,9 @@ export default MComponent({
     },
     toggleSelect: function () {
       this.item.selected = !this.item.selected
+    },
+    prettyPrint (len) {
+      return u.prettyPrintBases(len)
     }
   },
   computed: {
@@ -101,5 +106,8 @@ export default MComponent({
 }
 .sequence-cart-item.selected {
   background-color: #ccc;
+}
+.seqheader {
+  font-size: 10px;
 }
 </style>
