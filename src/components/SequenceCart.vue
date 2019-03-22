@@ -70,6 +70,7 @@
 import MComponent from '@/components/MComponent'
 import MButton from '@/components/MButton'
 import SequenceCartItem from '@/components/SequenceCartItem'
+import KeyStore from '@/lib/KeyStore'
 export default MComponent({
   name: 'SequenceCart',
   components: { SequenceCartItem, MButton },
@@ -90,17 +91,21 @@ export default MComponent({
       r.reverseComplement = r.reverseComplement || false
       r.translate = r.translate || false
       this.cart.push(r)
+      this.save()
     },
     clear () {
       this.cart = []
+      this.save()
     },
     clearSelected () {
       this.cart = this.cart.filter(item => !item.selected)
+      this.save()
     },
     deleteItem: function (item) {
       const i = this.cart.indexOf(item)
       if (i >= 0) {
         this.cart.splice(i, 1)
+        this.save()
       }
     },
     selectAll: function () {
@@ -128,6 +133,29 @@ export default MComponent({
           this.$refs.sequenceDownloadForm.reset()
         })
       })
+    },
+    save () {
+      return this.kstore.set('all', this.cart.map(seq => {
+        // sequences have actual genome objects. For db store, just want the name.
+        const obj = Object.assign({}, seq)
+        obj.genome = obj.genome.name
+        return obj
+      }))
+    },
+    restore () {
+      return this.kstore.get('all').then(all => {
+        if (all) {
+          this.cart = all.map(obj => {
+            // look up the genome name, convert to actual genome
+            const g = this.dataManager.lookupGenome(obj.genome)
+            if (g) {
+              obj.genome = g
+              return obj
+            }
+            return null
+          }).filter(x => x)
+        }
+      })
     }
 
   },
@@ -136,6 +164,8 @@ export default MComponent({
     this.$root.$on('sequence-selected', rs => {
       rs.forEach(r => this.add(r))
     })
+    this.kstore = new KeyStore(this.cfg.dbName)
+    this.restore()
   }
 })
 </script>

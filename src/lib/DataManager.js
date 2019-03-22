@@ -43,6 +43,10 @@ class DataManager {
     if (f) return [f]
     return this.getFeaturesByCid(val) || this.getFeaturesBySymbol(val) || []
   }
+  //
+  lookupGenome (n) {
+    return this.greg.lookupGenome(n)
+  }
   // Returns a promise for all the genomes we know about.
   getGenomes () {
     return this.genomes.then(genomes => {

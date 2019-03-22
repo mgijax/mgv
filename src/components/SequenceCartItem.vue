@@ -88,6 +88,9 @@ export default MComponent({
   border: thin solid transparent;
   min-height: 40px;
 }
+.sequence-cart-item[disabled] {
+  opacity: 0.5;
+}
 .sequence-cart-item.selected {
   background-color: #ccc;
 }

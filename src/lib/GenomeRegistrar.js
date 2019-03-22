@@ -107,6 +107,9 @@ class GenomeRegistrar {
       return Promise.resolve(this.registerGenome(url, data))
     }
   }
+  lookupGenome (n) {
+    return this.name2genome[n]
+  }
   registerGenome (url, info) {
     info.url = info.url || url
     info.name2chr = info.chromosomes.reduce((a,c) => { a[c.name] = c; return a }, {})

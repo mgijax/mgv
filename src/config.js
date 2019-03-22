@@ -128,6 +128,9 @@ export default {
   Translator: {
     dbName: DATACACHE_PREFIX + 'blocks'
   },
+  SequenceCart: {
+    dbName: DATACACHE_PREFIX + 'user-seqs'
+  },
   DataManager: {
     // when loading transcripts+exons from DataSource, the size block to chop the chromosome into
     transcriptBlockSize: 2000000,
