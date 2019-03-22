@@ -140,13 +140,16 @@ class DataManager {
       return reader.readRange(c, s, e).then(ts => {
         return ts.map(t => {
           const exons = this._unpackExons(t)
+          const tlen = exons.reduce((l,x) => l + x.end - x.start + 1, 0)
+          const cds = this._unpackCds(t[8]['cds'], tlen, exons)
           return {
             gID: t[8]['Parent'],
             ID: t[8]['ID'],
             exons: exons,
             start: Math.min.apply(null,exons.map(e => e.start)),
             end: Math.max.apply(null,exons.map(e => e.end)),
-            cds: this._unpackCds(t[8]['cds'])
+            length: tlen,
+            cds: cds
           }
         })
       })
@@ -157,14 +160,19 @@ class DataManager {
     const ecoords = exonsAttr.split(',').map(s => s.split('_').map(s => parseInt(s)))
     return ecoords.map(ec => { return { start: t[3] + ec[0], end: t[3] + ec[0] + ec[1] - 1 } })
   }
-  _unpackCds (cdsAttr) {
+  _unpackCds (cdsAttr, tlen, exons) {
     if (!cdsAttr) return null
     const parts = cdsAttr.split('|')
-    return {
+    const c = {
       ID: parts[0],
       start: parseInt(parts[1]),
       end: parseInt(parts[2])
     }
+    c.length = exons.reduce((a,x) => {
+      if (c.start > x.end || c.end < x.start) return a
+      return a + Math.min(c.end, x.end) - Math.max(c.start, x.start) + 1
+    }, 0)
+    return c
   }
   // Returns a promise for the genomic sequence of the specified range for the specified genome
   getSequence (g, c, s, e, doRC) {
