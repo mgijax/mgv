@@ -94,10 +94,13 @@ export default MComponent({
       helpText: 'Heeeeelp!!',
     }
   },
+  created: function () {
+    console.log("PageBox.created:", this.label)
+  },
   methods: {
     toggleOpen: function () {
       this.isOpen = !this.isOpen
-      this.$root.$emit('pagebox-' + (this.isOpen ? 'open' : 'close'), this)
+      this.$emit('pagebox-' + (this.isOpen ? 'open' : 'close'), this)
       if (this.childHandlesOpenClose) {
         this.$refs.content.setDisplay(this.isOpen)
       }

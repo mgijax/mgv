@@ -8,8 +8,11 @@
         -->
         <page-box-container
           name="leftColumn"
+          ref="toolDrawer"
           class="flexcolumn"
           :class="{ open: drawerOpen, closed: !drawerOpen}"
+          layout="accordian"
+          :fixed="true"
           >
           <!--
           ============ Genomes ==============

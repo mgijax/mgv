@@ -15,7 +15,11 @@ import MComponent from '@/components/MComponent'
 export default MComponent({
   name: 'PageBoxContainer',
   inject: ['preferencesManager'],
-  props: ['name', 'fixed'],
+  props: {
+    name: String,
+    fixed: Boolean,
+    layout: String // one of "default", "accordian"
+  },
   data: function () {
     return {
       topOffset: 0
@@ -48,7 +52,7 @@ export default MComponent({
       })
       kids.sort((a, b) => a.y - b.y)
       return kids.map(k => {
-        return { label: k.c.label, isOpen: k.c.isOpen }
+        return { label: k.c.label, isOpen: k.c.isOpen, floating: k.c.floating }
       })
     },
     // Sets the Y order and open/closed state of my children.
@@ -65,6 +69,13 @@ export default MComponent({
       })
       this.saveChildState()
     },
+    //
+    accordianOpen (child) {
+      this.setChildState(this.getChildState().map(cs => {
+        cs.isOpen = cs.floating ? cs.isOpen : (cs === child || cs.label === child)
+        return cs
+      }))
+    },
     // Sets child state from the last saved preferences
     setChildStateFromSaved: function () {
       this.preferencesManager().getPrefs(this.storeName).then(state => {
@@ -77,6 +88,9 @@ export default MComponent({
     saveChildState: function () {
       this.preferencesManager().setPrefs(this.storeName, this.getChildState())
     }
+  },
+  created: function () {
+    console.log("PageBoxContainer.created: children=", this.$children)
   },
   mounted: function () {
     //
@@ -91,8 +105,16 @@ export default MComponent({
       })
     }
     //
-    this.$root.$on('pagebox-open', () => this.saveChildState())
-    this.$root.$on('pagebox-close', () => this.saveChildState())
+    this.$children.forEach(c => { 
+      c.$on('pagebox-open', pb => {
+        if (this.layout === "accordian" && !pb.floating) {
+          this.accordianOpen(pb.label)
+        } else {
+          this.saveChildState()
+        }
+      })
+      c.$on('pagebox-close', () => this.saveChildState())
+    })
     this.preferencesManager().getPrefs(this.storeName).then(prefs => {
       if (prefs) {
         this.setChildState(prefs)
