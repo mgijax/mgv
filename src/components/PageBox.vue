@@ -178,6 +178,10 @@ export default MComponent({
   background-color: #e1e1e1;
   border-radius: 2px;
 }
+[name="leftColumn"] .pagebox {
+  max-height: 400px;
+  overflow: scroll;
+}
 .pagebox.floating {
   position: absolute;
   outline: thin solid black;
@@ -198,6 +202,9 @@ export default MComponent({
   position: absolute;
   top: 2px;
   right: 2px;
+}
+.pagebox [name="buttonBox"] .m-button {
+  margin-right: 8px;
 }
 .pagebox canvas {
   position: absolute;
