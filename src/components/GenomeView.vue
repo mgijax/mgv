@@ -45,7 +45,6 @@
       class="genome-view"
       ref="svg"
       :height="isOpen ? height : closedHeight"
-      :width="width"
       style="font-family: sans-serif;"
       >
       <rect

@@ -619,7 +619,7 @@ button:hover {
 }
 [name="leftColumn"].open {
   min-width: 250px;
-  max-width: 350px;
+  max-width: 250px;
   opacity: 1;
 }
 [name="leftColumn"].closed {

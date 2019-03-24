@@ -2,7 +2,6 @@
   <svg
     class="zoom-main"
     :height="height"
-    :width="width"
     @click="backgroundClick"
     >
     <!-- underlay -->
