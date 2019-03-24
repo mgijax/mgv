@@ -52,7 +52,7 @@
             label="List editor"
             :floating="true"
             :initialX="250"
-            :initialY="337"
+            :initialY="100"
             :initiallyOpen="false"
             iconClose="close"
             ><list-editor
@@ -510,6 +510,10 @@ export default MComponent({
       }
     })
     //
+    this.$root.$on('list-edit-newfromselected', () => {
+      this.currentEditList = this.listManager.newList("selected", this.currentSelection, "#cccccc")
+    })
+    //
     this.$root.$on('list-edit-open', data => {
       this.currentEditList = data.list
       this.$refs.listEditor.open()
@@ -582,6 +586,10 @@ export default MComponent({
 .flexrow > *,
 .flexcolumn > * {
   padding: 2px;
+}
+
+button:hover {
+  font-weight: bold;
 }
 
 .rotating {
