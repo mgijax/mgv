@@ -47,10 +47,12 @@
            <div class="flexrow dropzone">
              <div
                name="union"
-               title="Drag a list here to ADD its items to the current list."
+               class="listop"
+               title="DRAG a list here to ADD its items to this list. CLICK here to add currently selected items."
                @dragover="dragover"
                @dragleave="dragleave"
                @drop="drop"
+               @click="addSelected"
                >
                  <div class="circle c1"></div>
                  <div class="circle c2"></div>
@@ -58,10 +60,12 @@
                </div>
              <div
                name="intersection"
-               title="Drag a list here to INTERSECT its items with the current list."
+               class="listop"
+               title="DRAG a list here to INTERSECT its items with this list. CLICK here to intersect with the current selection."
                @dragover="dragover"
                @dragleave="dragleave"
                @drop="drop"
+               @click="intersectWithSelected"
                >
                  <div class="circle c1"></div>
                  <div class="circle c2"></div>
@@ -69,10 +73,12 @@
                </div>
              <div
                name="difference"
-               title="Drag a list here to REMOVE its items from the current list."
+               class="listop"
+               title="DRAG a list here to REMOVE its items from this list. CLICK here to remove currently selected items."
                @dragover="dragover"
                @dragleave="dragleave"
                @drop="drop"
+               @click="removeSelected"
                >
                  <div class="circle c1"></div>
                  <div class="circle c2"></div>
@@ -249,6 +255,15 @@ export default MComponent({
       let ss = new Set()
       lst.items.forEach(i => s.has(i) && ss.add(i))
       this.items = Array.from(ss)
+    },
+    addSelected: function () {
+      this.union({items:this.app.currentSelection})
+    },
+    removeSelected: function () {
+      this.difference({items:this.app.currentSelection})
+    },
+    intersectWithSelected: function () {
+      this.intersection({items:this.app.currentSelection})
     }
   }
 })
@@ -300,6 +315,10 @@ textarea {
 }
 .circle.c2 {
   left: 28px;
+}
+.listop:hover {
+  color: black;
+  border-color: black;
 }
 [name="union"] .circle {
   opacity: 0.9;
