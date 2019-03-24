@@ -22,9 +22,8 @@
       title="Drag up/down to reposition."
       icon="drag_indicator"
       draggable="true"
-      @dragstart="dragStart($event)"
-      @drag="drag"
-      @dragend="dragEnd($event)"
+      @dragstart="dragStart"
+      @dragend="dragEnd"
       />
   </div>
   <div name="label">
@@ -38,7 +37,7 @@
   <div name="content" v-show="isOpen || childHandlesOpenClose">
     <slot></slot>
   </div>
-  <canvas ref="canvas" width=1 height=1 style="opacity: 0;" />
+  <canvas ref="canvas" width=1 height=1 />
 </div>
 </template>
 
@@ -95,7 +94,7 @@ export default MComponent({
     }
   },
   created: function () {
-    console.log("PageBox.created:", this.label)
+    // console.log("PageBox.created:", this.label)
   },
   methods: {
     toggleOpen: function () {
@@ -113,11 +112,18 @@ export default MComponent({
     close: function () {
       if (this.isOpen) this.toggleOpen()
     },
+    // -------------------------------
+    // Drag and drop handlers. NOTE that Firefox drag event do not expose clientX, clientY 
+    // (among others) - they are always 0. The workaround is to attach dragover listeners on
+    // the document. Here, we attach the listener on dragstart and remove it on dragend.
+    // This also works on chrome and safari.
     dragStart: function (ev) {
+      // console.log('PageBox.dragStart', ev)
       let dt = ev.dataTransfer
       dt.setData('text', this.label)
       dt.effectAllowed = 'move'
       dt.dropEffect = 'move'
+      dt.setDragImage(this.$refs.canvas, 0, 0)
       //
       this.isDragging = true
       let d = this.ddData
@@ -125,15 +131,18 @@ export default MComponent({
       d.yStart = ev.clientY
       d.dx = 0
       d.dy = 0
-      dt.setDragImage(this.$refs.canvas, 0, 0)
-      //
+      d.listener = ev => this.drag(ev)
+      document.addEventListener('dragover', d.listener)
     },
     drag: function (ev) {
+      // console.log('PageBox.drag', ev)
       let d = this.ddData
       if (this.floating) d.dx = ev.clientX - d.xStart
       d.dy = ev.clientY - d.yStart
     },
-    dragEnd: function () {
+    dragEnd: function (ev) {
+      // console.log('PageBox.dragEnd', ev)
+      document.removeEventListener('dragover', this.ddData.listener)
       this.isDragging = false
       let d = this.ddData
       if (this.floating) {
@@ -142,6 +151,8 @@ export default MComponent({
       }
       d.dx = d.dy = 0
     }
+    // end D&D handlers
+    // -------------------------------
   },
   computed: {
     closeBtnIcon: function () {
