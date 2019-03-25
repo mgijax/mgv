@@ -24,7 +24,11 @@ function svg2png (svg, width, height, fname) {
   canvas.height = height
   document.body.appendChild(canvas)
   const cxt = canvas.getContext('2d')
-  const data = (new XMLSerializer()).serializeToString(svg)
+  let data = (new XMLSerializer()).serializeToString(svg)
+  // Problem if the svg element has no explicit width
+  const svgBB = svg.getBoundingClientRect()
+  data = data.replace('height', `width=\"${svgBB.width}\" height`)
+  //
   const DOMURL = window.URL || window.webkitURL || window
   const img = new Image()
   const svgBlob = new Blob([data], {type: 'image/svg+xml'})
