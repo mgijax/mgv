@@ -121,10 +121,10 @@ export default MComponent({
   },
   mounted: function () {
     this.$watch('context', () => this.reset(), { 'deep': true })
-    document.addEventListener('scroll', () => {
+    this.$el.closest('.page-box-container').addEventListener('scroll', () => {
       let bcr = this.$parent.$el.getBoundingClientRect()
-      this.fixed = bcr.top < -40
-      this.offset = this.fixed ? -bcr.top : 0
+      this.fixed = bcr.top < 60
+      this.offset = this.fixed ? -bcr.top + 60 : 0
     })
   },
   computed: {

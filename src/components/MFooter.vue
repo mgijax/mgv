@@ -22,17 +22,12 @@ export default MComponent({
 
 <style scoped>
 [name="footer"] {
-  padding-left: 12px;
-  padding-top: 0px;
-  padding-bottom: 0px;
-  background-color: #557f9e;
+  height: 20px;
+  width: 100%;
   color: white;
+  background-color: #557f9e;
   font-size: 12px;
   font-weight: bold;
-  position: fixed;
-  left: 0px;
-  bottom: 0px;
-  width: 99%;
 }
 a:link, a:visited {
   color: white;

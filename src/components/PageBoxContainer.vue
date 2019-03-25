@@ -2,7 +2,6 @@
   <div
     :name="name"
     class="page-box-container"
-    :style="{ top: topOffset + 'px' }"
     @dragover="dragOver"
     @drop="drop"
     >
@@ -12,18 +11,13 @@
 
 <script>
 import MComponent from '@/components/MComponent'
+import u from '@/lib/utils'
 export default MComponent({
   name: 'PageBoxContainer',
   inject: ['preferencesManager'],
   props: {
     name: String,
-    fixed: Boolean,
     layout: String // one of "default", "accordian"
-  },
-  data: function () {
-    return {
-      topOffset: 0
-    }
   },
   computed: {
     storeName: function () {
@@ -89,21 +83,7 @@ export default MComponent({
       this.preferencesManager().setPrefs(this.storeName, this.getChildState())
     }
   },
-  created: function () {
-    console.log("PageBoxContainer.created: children=", this.$children)
-  },
   mounted: function () {
-    //
-    if (this.fixed) {
-      document.addEventListener('scroll', () => {
-        let bcr = this.$el.parentNode.getBoundingClientRect()
-        if (bcr.y < 0) {
-          this.topOffset = -bcr.y
-        } else {
-          this.topOffset = 0
-        }
-      })
-    }
     //
     this.$children.forEach(c => { 
       c.$on('pagebox-open', pb => {

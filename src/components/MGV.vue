@@ -1,137 +1,137 @@
 <template>
   <div class="mgv-app">
-    <div class="flexcolumn">
-      <m-header @gear-clicked="toggleDrawer"></m-header>
-      <div name="content" class="flexrow">
+    <m-header @gear-clicked="toggleDrawer"></m-header>
+    <div name="content" class="flexrow">
+      <!--
+      ============ Left column ==============================================
+      -->
+      <page-box-container
+        name="leftColumn"
+        ref="toolDrawer"
+        class="flexcolumn"
+        :class="{ open: drawerOpen, closed: !drawerOpen}"
+        :style="{ height: visHeight + 'px', overflow: 'scroll' }"
+        >
         <!--
-        ============ Left column ==============================================
+        ============ Genomes ==============
         -->
-        <page-box-container
-          name="leftColumn"
-          ref="toolDrawer"
-          class="flexcolumn"
-          :class="{ open: drawerOpen, closed: !drawerOpen}"
-          layout="accordian"
-          :fixed="true"
-          >
-          <!--
-          ============ Genomes ==============
-          -->
-          <page-box label="Genomes">
-            <genome-selector
-              title="Select one genome as the reference and any number of genomes as comparisons."
-              :allGenomes="allGenomes"
-              :vGenomes="vGenomes"
-              :rGenome="rGenome"
-              :genomeSets="genomeSets"
-              />
-          </page-box>
-          <!--
-          ============ Find Genes ==============
-          -->
-          <page-box label="Find genes">
-            <find-genes
-              ref="findGenes"
-              title="Search MouseMine for genes annotated to specified diseases, pathways, etc. Pick a search type, enter a search term and hit enter. Results are returned in a new list (see MyLists)."
-              />
-          </page-box>
-          <!--
-          ============ My Lists ==============
-          -->
-          <page-box label="My lists">
-            <my-lists
-              title="Shows your current lists. A list simply contains identifiers. Click on a list to show its items in the genome view; click again to hide them. Click on the 'x' to delete a list. Click on the pencil to edit the list (see ListEditor)."
-              :lists="lists"
-              :currentList="currentList"
-              />
-          </page-box>
-          <!--
-          ============ List Editor ==============
-          -->
-          <page-box
-            label="List editor"
-            :floating="true"
-            :initialX="250"
-            :initialY="100"
-            :initiallyOpen="false"
-            iconClose="close"
-            ><list-editor
-              title="Examine/modify the contents of a list. Create a new list. Combine lists with intersection, union, and difference."
-              :list="currentEditList"
-              ref="listEditor"
-              />
-          </page-box>
-          <!--
-          ============ Facets (aka Filters) ==============
-          -->
-          <page-box
-            :message="activeFacets ? 'There are active filters. Some features may not be visible.' : ''"
-            label="Filters">
-            <facets
-              title="Limit what feature are displayed by different criteria."
-              ref="facets"
-              />
-          </page-box>
-          <!--
-          ============ Settings ==============
-          -->
-          <page-box label="Settings">
-            <settings
-              title="Settings."
-              ref="settings"
-              />
-          </page-box>
-          <!--
-          ============ Sequence Cart ==============
-          -->
-          <page-box label="SequenceCart">
-            <sequence-cart
-              title="Your shopping cart of selected sequences."
-              ref="sequenceCart"
-              />
-          </page-box>
-        </page-box-container>
+        <page-box label="Genomes">
+          <genome-selector
+            title="Select one genome as the reference and any number of genomes as comparisons."
+            :allGenomes="allGenomes"
+            :vGenomes="vGenomes"
+            :rGenome="rGenome"
+            :genomeSets="genomeSets"
+            />
+        </page-box>
         <!--
-        ============ Right column ==============================================
+        ============ Find Genes ==============
         -->
-        <page-box-container name="rightColumn" class="flexcolumn">
-          <!--
-          ============ Genome View ==============
-          -->
-          <page-box label="GenomeView">
-            <genome-view
-              :context="$data"
-              ref="genomeView"
-              title="When open, shows the reference genome's chromosomes as vertical lines. When closed, shows the current chromosome as a horizontal line. Click (drag) on a chromosome to jump (zoom) to that location. Red circles show current list items (if any). Click on a circle to jump to that feature."
-              />
-          </page-box>
-          <!--
-          ============ Feature Details ==========
-          -->
-          <page-box label="FeatureDetails">
-            <feature-details
-              ref="featureDetails"
-              title="Shows details of a feature you click on. When open, shows details for genologs in all currently displayed genomes. When closed, shows only the feature in the genome that was clicked."
-              :features="detailFeatures"
-              :currentMouseover="currentMouseover"
-              />
-          </page-box>
-          <!--
-          ============== Zoom View ==============
-          -->
-          <page-box
-            :message="activeFacets ? 'There are active filters. Some features may not be visible.' : ''"
-            label="ZoomView">
-            <zoom-view
-              :context="$data"
-              ref="zoomView"
-              title="The main view. Shows features in the current region of the reference genome and all selected comparison genomes. Highlights features in the view that are currently selected. Many controls for panning, zooming, selecting, etc. Most anything can be undone by hitting the browser's Back button."
-              />
-          </page-box>
-        </page-box-container>
-      </div>
-      <m-footer version="1.0.0"></m-footer>
+        <page-box label="Find genes">
+          <find-genes
+            ref="findGenes"
+            title="Search MouseMine for genes annotated to specified diseases, pathways, etc. Pick a search type, enter a search term and hit enter. Results are returned in a new list (see MyLists)."
+            />
+        </page-box>
+        <!--
+        ============ My Lists ==============
+        -->
+        <page-box label="My lists">
+          <my-lists
+            title="Shows your current lists. A list simply contains identifiers. Click on a list to show its items in the genome view; click again to hide them. Click on the 'x' to delete a list. Click on the pencil to edit the list (see ListEditor)."
+            :lists="lists"
+            :currentList="currentList"
+            />
+        </page-box>
+        <!--
+        ============ List Editor ==============
+        -->
+        <page-box
+          label="List editor"
+          :floating="true"
+          :initialX="250"
+          :initialY="100"
+          :initiallyOpen="false"
+          iconClose="close"
+          ><list-editor
+            title="Examine/modify the contents of a list. Create a new list. Combine lists with intersection, union, and difference."
+            :list="currentEditList"
+            ref="listEditor"
+            />
+        </page-box>
+        <!--
+        ============ Facets (aka Filters) ==============
+        -->
+        <page-box
+          :message="activeFacets ? 'There are active filters. Some features may not be visible.' : ''"
+          label="Filters">
+          <facets
+            title="Limit what feature are displayed by different criteria."
+            ref="facets"
+            />
+        </page-box>
+        <!--
+        ============ Settings ==============
+        -->
+        <page-box label="Settings">
+          <settings
+            title="Settings."
+            ref="settings"
+            />
+        </page-box>
+        <!--
+        ============ Sequence Cart ==============
+        -->
+        <page-box label="SequenceCart">
+          <sequence-cart
+            title="Your shopping cart of selected sequences."
+            ref="sequenceCart"
+            />
+        </page-box>
+      </page-box-container>
+      <!--
+      ============ Right column ==============================================
+      -->
+      <page-box-container
+        name="rightColumn"
+        :style="{ height: visHeight + 'px', overflow: 'scroll' }"
+        class="flexcolumn">
+        <!--
+        ============ Genome View ==============
+        -->
+        <page-box label="GenomeView">
+          <genome-view
+            :context="$data"
+            ref="genomeView"
+            title="When open, shows the reference genome's chromosomes as vertical lines. When closed, shows the current chromosome as a horizontal line. Click (drag) on a chromosome to jump (zoom) to that location. Red circles show current list items (if any). Click on a circle to jump to that feature."
+            />
+        </page-box>
+        <!--
+        ============ Feature Details ==========
+        -->
+        <page-box label="FeatureDetails">
+          <feature-details
+            ref="featureDetails"
+            title="Shows details of a feature you click on. When open, shows details for genologs in all currently displayed genomes. When closed, shows only the feature in the genome that was clicked."
+            :features="detailFeatures"
+            :currentMouseover="currentMouseover"
+            />
+        </page-box>
+        <!--
+        ============== Zoom View ==============
+        -->
+        <page-box
+          :message="activeFacets ? 'There are active filters. Some features may not be visible.' : ''"
+          label="ZoomView">
+          <zoom-view
+            :context="$data"
+            ref="zoomView"
+            title="The main view. Shows features in the current region of the reference genome and all selected comparison genomes. Highlights features in the view that are currently selected. Many controls for panning, zooming, selecting, etc. Most anything can be undone by hitting the browser's Back button."
+            />
+        </page-box>
+      </page-box-container>
     </div>
+    <m-footer version="1.0.0"></m-footer>
   </div>
 </template>
 
@@ -153,6 +153,7 @@ import FeatureDetails from '@/components/FeatureDetails'
 import FeatureColorMap from '@/lib/FeatureColorMap'
 import MComponent from '@/components/MComponent'
 import gc from '@/lib/GenomeCoordinates'
+import u from '@/lib/utils'
 import HistoryManager from '@/lib/HistoryManager'
 import ListManager from '@/lib/ListManager'
 import KeyManager from '@/lib/KeyManager'
@@ -245,7 +246,9 @@ export default MComponent({
       // list currently being edited
       currentEditList: null,
       // flag to indicate when there are currently enabled facets
-      activeFacets: false
+      activeFacets: false,
+      // visible Height minus header and footer
+      visHeight: 350
     }
   },
   computed: {
@@ -258,7 +261,9 @@ export default MComponent({
     initializeData: function () {
     },
     resize: function () {
-      this.$root.$emit('resize')
+      const sz = {width: u.wWidth(), height: u.wHeight()}
+      this.visHeight = sz.height - 80
+      this.$root.$emit('resize', sz)
     },
     // Returns a promise for a sanitized version of a context configuration.
     // Missing fields are filled in (usually with current values)
@@ -456,7 +461,9 @@ export default MComponent({
     // a global handle for debugging
     window.app = this
     // be responsive to window size changes
-    window.onresize = () => this.resize()
+    window.addEventListener('resize', () => this.resize())
+    this.$nextTick(() => this.resize())
+
     //
     this.historyManager = new HistoryManager(this)
     //
@@ -545,6 +552,10 @@ export default MComponent({
 </script>
 
 <style>
+html, body {
+  height: 100%;
+  margin: 0px;
+}
 /* -----------------------------------------
  * Global styles for the app
  * -----------------------------------------
@@ -578,7 +589,6 @@ export default MComponent({
   position: relative;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
   flex-wrap: nowrap;
   flex-grow: 1;
 }

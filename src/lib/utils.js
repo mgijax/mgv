@@ -218,6 +218,25 @@ function uniqueItems (list, key) {
   }).filter(x => x)
 }
 // ---------------------------------------------
+// https://stackoverflow.com/questions/4987309/screen-width-vs-visible-portion
+function wWidth(){
+   return window.innerWidth 
+       || document.documentElement.clientWidth 
+       || document.body.clientWidth 
+       || 0;
+}
+function wHeight(){
+   return window.innerHeight 
+       || document.documentElement.clientHeight 
+       || document.body.clientHeight 
+       || 0;
+}
+// ---------------------------------------------
+// https://stackoverflow.com/questions/19618545/body-scrolltop-vs-documentelement-scrolltop-vs-window-pageyoffset-vs-window-scro
+function wScrollTop () {
+  return window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop || 0;
+}
+// ---------------------------------------------
 export default {
   fail,
   concatAll,
@@ -231,5 +250,8 @@ export default {
   prettyPrintBases,
   fetch,
   uniqueItems,
-  deepCopy
+  deepCopy,
+  wWidth,
+  wHeight,
+  wScrollTop
 }

@@ -51,9 +51,10 @@ export default MComponent({
 
 <style scoped>
 [name="header"] {
-  padding: 12px;
-  background-color: #557f9e;
   color: white;
+  background-color: #557f9e;
+  width: 100%;
+  height: 60px;
 }
 img.logo {
   height: 40px;
@@ -62,7 +63,7 @@ img.logo {
     font-size: 24px !important;
 }
 [name="title"] {
-    font-size: 16px;
+    font-size: 26px;
     font-weight: bold;
 }
 [name="settingBtn"].fixed {
