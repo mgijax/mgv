@@ -21,6 +21,7 @@
           :x="currRangeTextX"
           :y="-zeroOffset + Math.max(height, 10) + 10"
           font-size="10"
+          font-family="sans-serif"
           :text-anchor="currRangeAnchor"
           >
           {{chr.name}}:{{p2b(currRange[0])}}{{currRange[0] !== currRange[1] ? '..' + p2b(currRange[1]) : ''}}
@@ -79,6 +80,7 @@
         alignment-baseline="hanging"
         fill="black"
         font-size="10px"
+        font-family="sans-serif"
         :transform="`translate(${-myDelta},0)`"
         >{{chr.name}}:{{start + deltaB}}..{{end + deltaB}}</text>
       <!-- ======= sequence string ======= -->

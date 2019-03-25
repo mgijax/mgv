@@ -7,6 +7,7 @@
       :y="height + 10"
       alignment-baseline="hanging"
       stroke="none"
+      font-family= "sans-serif"
       fill="black">{{ genome.name }}</text>
     <!-- list of ZoomRegions -->
     <zoom-region
