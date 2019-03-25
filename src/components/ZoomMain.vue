@@ -66,7 +66,7 @@ export default MComponent({
   methods: {
     downloadImage: function () {
       const fname = `mgv.zoomview.png`
-      svg2png(this.$el, fname)
+      svg2png(this.$el, this.width, this.height, fname)
     },
     resize: function () {
       this.width = this.$el.parentNode.getBoundingClientRect().width

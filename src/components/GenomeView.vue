@@ -152,7 +152,7 @@ export default MComponent({
   },
   methods: {
     downloadImage: function () {
-      svg2png(this.$refs.svg, 'mgv.genomeview.png')
+      svg2png(this.$refs.svg, this.width, this.height, 'mgv.genomeview.png')
     },
     // Returns the length in pixels to draw chromosome c
     chrLen: function (c) {

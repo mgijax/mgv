@@ -18,10 +18,10 @@ function triggerDownload (imgURI, fname) {
   a.dispatchEvent(evt)
 }
 
-function svg2png (svg, fname) {
+function svg2png (svg, width, height, fname) {
   const canvas = document.createElement('canvas')
-  canvas.width = parseInt(svg.getAttribute('width'))
-  canvas.height = parseInt(svg.getAttribute('height'))
+  canvas.width = width
+  canvas.height = height
   document.body.appendChild(canvas)
   const cxt = canvas.getContext('2d')
   const data = (new XMLSerializer()).serializeToString(svg)
