@@ -538,14 +538,22 @@ export default MComponent({
       this.activeFacets = data.length > 0
     })
     //
-    // Kick things off by getting all the genomes we know about and all their chomosomes (names and lengths)
+    // Kick things off by getting all the genomes we know about and all their chomosomes 
+    // (names and lengths).
     //
     this.dataManager.getGenomes().then(genomes => {
-      console.log('MGV: setting initial context', this.historyManager.initialHash)
       this.allGenomes = genomes // all the genomes (at least one)
       this.rGenome = genomes[0] // current reference genome (always set)
       this.vGenomes = [genomes[0]] // currently visible genomes (always contains reference)
-      this.setContext(this.historyManager.initialHash, true)
+      const ih = Object.assign({
+          chr: this.coords.chr.name,
+          start: this.coords.start,
+          end: this.coords.end,
+          width: u.wWidth()
+        },
+        this.historyManager.initialHash)
+      console.log('MGV: setting initial context', ih)
+      this.setContext(ih, true)
     })
   }
 })
