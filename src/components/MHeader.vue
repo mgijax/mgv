@@ -56,6 +56,10 @@ export default MComponent({
   width: 100%;
   height: 60px;
 }
+[name="header"] > * {
+  margin-left: 16px;
+  margin-right: 16px;
+}
 img.logo {
   height: 40px;
 }
