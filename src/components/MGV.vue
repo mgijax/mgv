@@ -44,22 +44,6 @@
             />
         </page-box>
         <!--
-        ============ List Editor ==============
-        -->
-        <page-box
-          label="List editor"
-          :floating="true"
-          :initialX="250"
-          :initialY="100"
-          :initiallyOpen="false"
-          iconClose="close"
-          ><list-editor
-            title="Examine/modify the contents of a list. Create a new list. Combine lists with intersection, union, and difference."
-            :list="currentEditList"
-            ref="listEditor"
-            />
-        </page-box>
-        <!--
         ============ Facets (aka Filters) ==============
         -->
         <page-box
@@ -130,6 +114,25 @@
             />
         </page-box>
       </page-box-container>
+      <!--
+      ============ Floating ==============================================
+      -->
+      <!--
+      ============ List Editor ==============
+      -->
+      <page-box
+        label="List editor"
+        :floating="true"
+        :initialX="250"
+        :initialY="100"
+        :initiallyOpen="false"
+        iconClose="close"
+        ><list-editor
+          title="Examine/modify the contents of a list. Create a new list. Combine lists with intersection, union, and difference."
+          :list="currentEditList"
+          ref="listEditor"
+          />
+      </page-box>
     </div>
     <m-footer version="1.0.0"></m-footer>
   </div>
@@ -523,7 +526,6 @@ export default MComponent({
     //
     this.$root.$on('list-edit-open', data => {
       this.currentEditList = data.list
-      this.$refs.listEditor.open()
     })
     //
     this.$root.$on('list-edit-cancel', data => {
