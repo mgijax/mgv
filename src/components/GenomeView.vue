@@ -97,11 +97,11 @@ export default MComponent({
     return {
       isOpen: true,
       width: 600,
-      titleHeight: 50,
       chrWidth: 20,
       padding: 10,
       openHeight: 250,
-      closedHeight: 100,
+      closedHeight: 70,
+      titleHeight: 30,
       scrollDelta: 0,
       fixedHeight: false,
       showLabels: true
