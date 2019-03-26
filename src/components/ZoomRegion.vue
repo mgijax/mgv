@@ -136,8 +136,11 @@
           />
         <!-- ======= Transcripts ======= -->
         <g
-          class="transcript"
           v-if="showDetails"
+          class="transcripts"
+          >
+        <g
+          class="transcript"
           v-for="(t, ti) in f.transcripts"
           :key="t.ID"
           :name="t.ID"
@@ -194,6 +197,7 @@
             alignment-baseline="hanging"
             >{{t.cds ? t.cds.ID : t.ID}}</text>
         </g>
+        </g>
         <!-- feature label -->
         <text
           class="symbol"
@@ -223,17 +227,6 @@ import MBrush from '@/components/MBrush'
 import u from '@/lib/utils'
 import { TextSpreader } from '@/lib/Layout'
 import { complement } from '@/lib/genetic_code'
-//
-document.body.addEventListener('keydown', function (e) {
-  if (e.code === 'Tab') {
-    console.log('keydown', e)
-  }
-})
-document.body.addEventListener('keyup', function (e) {
-  if (e.code === 'Tab') {
-    console.log('keyup', e)
-  }
-})
 //
 export default MComponent({
   name: 'ZoomRegion',

@@ -162,7 +162,7 @@ import ListManager from '@/lib/ListManager'
 import KeyManager from '@/lib/KeyManager'
 import Translator from '@/lib/Translator'
 import PreferencesManager from '@/lib/PreferencesManager'
-//
+
 export default MComponent({
   name: 'MGV',
   components: {
