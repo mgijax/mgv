@@ -23,7 +23,6 @@ class HistoryManager {
     // tell the app about the initial state
     let qstring = window.location.hash.substring(1)
     this.initialHash = this.pqstring(qstring)
-    this.initialHash.width = window.innerWidth
     // console.log('HistoryManager: initial hash ', this.initialHash)
   }
   // Uses the current app context to set the hash part of the
