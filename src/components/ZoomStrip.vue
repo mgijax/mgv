@@ -129,11 +129,9 @@ export default MComponent({
     // lay out the regions horizontally
     layoutRegions (regions) {
       regions.sort((a, b) => a.index - b.index)
-      let totalLength = 0
       regions = regions.reduce((nrs, r) => {
         let prev = nrs[nrs.length - 1]
         if (prev && prev.index === r.index) return nrs
-        totalLength += (r.end - r.start + 1)
         if (!prev || prev.index + 1 !== r.index || prev.ori !== r.ori) {
           nrs.push(r)
         } else {
@@ -142,11 +140,13 @@ export default MComponent({
         }
         return nrs
       }, [])
+      const totalLength = regions.reduce((tl, r) => tl + (r.end - r.start + 1), 0)
       let dx = 12
       let gap = 2
       let totalGap = dx + gap * (regions.length - 1)
+      const ppb = (this.width - totalGap) / totalLength
       regions.forEach(r => {
-        let w = (this.width - totalGap) * (r.end - r.start + 1) / totalLength
+        let w = ppb * (r.end - r.start + 1)
         r.width = w
         r.deltaX = dx
         dx += r.width + gap
