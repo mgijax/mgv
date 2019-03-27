@@ -20,7 +20,7 @@ class KeyManager {
   keydown (e) {
     const k = this.makeKey(e)
     const d = this.handlers[k]
-    if (d) {
+    if (d && e.target.tagName !== 'INPUT' && e.target.tagName !== 'TEXTAREA' ) {
       d.handler.call(d.thisObj, e)
     }
   }
