@@ -43,7 +43,9 @@
         width="100%"
         :height="Math.max(height, 20)"
         fill="white"
-        opacity="0"
+        fill-opacity="0"
+        stroke="black"
+        stroke-opacity="0.5"
         class="underlay"
         ref="underlay"
         :transform="`translate(${-myDelta},0)`"
@@ -602,8 +604,10 @@ export default MComponent({
       this.dataManager.getGenes(this.genome, this.chr, this.start - delta, this.end + delta, this.showDetails).then(feats => {
         this.busy = false
         this.features = feats
-        this.nextTick(() => this.$emit('region-draw', this))
-        this.$emit('busy-end')
+        this.nextTick(() => {
+          this.$emit('busy-end')
+          this.$emit('region-draw', this)
+        })
         if (this.showSequence) {
           this.$emit('busy-start')
           this.dataManager.getSequence(this.genome, this.chr, this.start, this.end).then(data => {

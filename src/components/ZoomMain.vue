@@ -106,14 +106,16 @@ export default MComponent({
     }
   },
   mounted: function () {
-    this.$root.$on('resize', () => this.resize())
     this.$root.$on('region-drag', d => {
       this.regionScrollDelta = d
     })
     this.$root.$on('region-dragend', d => {
       this.regionScrollDelta = 0
     })
+    //
+    this.$root.$on('resize', () => this.resize())
     window.setTimeout(() => this.resize(), 1000)
+    //
     this.$root.$on('camera-click', (v) => v === 'zoomview' && this.downloadImage())
   }
 })

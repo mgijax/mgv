@@ -1,5 +1,6 @@
 <template>
-  <g class="zoom-strip" :class="{ dragging: dragging }">
+  <g class="zoom-strip" :class="{ dragging: dragging }"
+  >
     <!-- genome label -->
     <text
       name="label"
@@ -114,7 +115,7 @@ export default MComponent({
   },
   methods: {
     busyStart () {
-      window.setTimeout(() => { this.busyCount += 1 }, 1000)
+      this.busyCount += 1
     },
     busyEnd () {
       this.busyCount -= 1
@@ -128,19 +129,40 @@ export default MComponent({
     },
     // lay out the regions horizontally
     layoutRegions (regions) {
+      // Combine regions whose indexes form a sequence
       regions.sort((a, b) => a.index - b.index)
       regions = regions.reduce((nrs, r) => {
         let prev = nrs[nrs.length - 1]
-        if (prev && prev.index === r.index) return nrs
-        if (!prev || prev.index + 1 !== r.index || prev.ori !== r.ori) {
-          nrs.push(r)
-        } else {
+        if (prev && prev.index === r.index) {
+          return nrs
+        } else if (prev && prev.index + 1 === r.index) {
           prev.end = r.end
           prev.index = r.index
+        } else {
+          nrs.push(r)
         }
         return nrs
       }, [])
-      const totalLength = regions.reduce((tl, r) => tl + (r.end - r.start + 1), 0)
+      // Compute lengths and total
+      let totalLength = regions.reduce((tl, r) => {
+        r.length = r.end - r.start + 1
+        return tl + r.length
+      }, 0)
+      // Adjust to expand tiny regions
+      // 'Tiny' === less than 10% of the total length
+      const minLength = totalLength * 0.02
+      let debit = 0
+      regions.forEach(r => {
+        const delta = minLength - r.length
+        if (delta > 0) {
+          debit += delta
+          r.start -= Math.floor(delta / 2)
+          r.end = r.start + minLength - 1
+          r.length = minLength
+        }
+      })
+      totalLength += debit
+      // Compute screen coordinates
       let dx = 12
       let gap = 2
       let totalGap = dx + gap * (regions.length - 1)
@@ -215,8 +237,10 @@ export default MComponent({
         }])
       } else {
         // Map the reference genome coordinates to region(s) in this genome
+        this.busyStart()
         this.translator().translate(this.context.rGenome, cc.chr.name, cc.start, cc.end, this.genome).then(rs => {
           this.regions = this.layoutRegions(rs)
+          this.busyEnd()
         })
       }
     }
