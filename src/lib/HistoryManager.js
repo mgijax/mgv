@@ -43,6 +43,7 @@ class HistoryManager {
     // FIXME: URLSearchParams API is not supported in all browsers.
     // OK for development but need a fallback eventually.
     let prms = new URLSearchParams(qstring)
+
     // ----- genomes ------------
     let pgenomes = prms.get('genomes') || ''
     pgenomes = pgenomes ? u.removeDups(pgenomes.trim().split(/[ ,]+/)) : []
@@ -51,6 +52,20 @@ class HistoryManager {
     // ----- ref genome ------------
     let ref = prms.get('ref')
     ref && (cfg.ref = ref)
+
+    // ----- regions ------------
+    let regions = prms.get('regions')
+    if (regions) {
+      cfg.regions = regions.split(/,/g).map(r => {
+        const parts = r.split(/\|/g)
+        return {
+          genome: parts[0],
+          chr: parts[1],
+          start: parseInt(parts[2]),
+          end: parseInt(parts[3])
+        }
+      })
+    }
 
     // ----- highlight IDs --------------
     let hls0 = prms.get('highlight')

@@ -210,13 +210,11 @@ export default MComponent({
       rGenome: { name: '' },
       // predefined sets of genomes for easy selections
       genomeSets: [],
-      // absolute coordinates
-      coords: {
-        chr: { name: '1' },
-        start: 1,
-        end: 10000000
-      },
-      // landmark coordinates
+      // ----------------------------------------------------
+      // Three ways to specify which regions to draw.
+      // 1. Specify the regions explicitly. Each region is a genome+chr+start+end
+      regions: [],
+      // 2. Specify regions relative to a landmark.
       lcoords: {
         // alignment landmark
         landmark: null,
@@ -230,6 +228,13 @@ export default MComponent({
         // for defining width as length(landmark) + 2*flank
         flank: 0
       },
+      // 3. Specify a region in the ref genome. Use mapping to find regions in other genomes.
+      coords: {
+        chr: { name: '1' },
+        start: 1,
+        end: 10000000
+      },
+      // ----------------------------------------------------
       // while mouse is over a feature, its ID. Otherwise null.
       currentMouseover: null,
       // while mouse is over a transcript, its ID. Otherwise null.
@@ -282,6 +287,13 @@ export default MComponent({
       let n
       let nc
       //
+      // currentMouseover
+      newc.currentMouseover = cxt.currentMouseover === undefined ? this.currentMouseover : cxt.currentMouseover
+      newc.currentMouseoverT = cxt.currentMouseoverT === undefined ? this.currentMouseoverT : cxt.currentMouseoverT
+      //
+      // current selection
+      newc.currentSelection = cxt.currentSelection || this.currentSelection
+
       // resolve ref genome. If none specified, use current ref
       newc.ref = this.rGenome
       if (cxt.ref) {
@@ -289,45 +301,69 @@ export default MComponent({
         n = cxt.ref.name || cxt.ref
         newc.ref = this.agIndex[n] || this.rGenome
       }
-      // make sure this genome's features have been loaded before continuing
-      return this.dataManager.ensureFeatures(newc.ref).then(() => {
-        //
-        // resolve genomes. Here we assume genomes are given in the desired order.
-        if (cxt.genomes) {
-          if (!Array.isArray(cxt.genomes)) cxt.genomes = [cxt.genomes]
-          cxt.genomes = cxt.genomes.map(g => {
-            return this.allGenomes.filter(a => a.name === (g.name || g))[0]
-          }).filter(x => x)
-        } else {
-          cxt.genomes = this.vGenomes.slice()
-        }
-        // if ref genome not included in genomes list, insert it at the front
-        if (cxt.genomes.indexOf(newc.ref) === -1) cxt.genomes.unshift(newc.ref)
-        newc.genomes = cxt.genomes
 
-        // resolve coordinates
-        if (cxt.chr || cxt.start || cxt.end) {
-          // handle normal coordinates spec
-          n = cxt.chr ? (cxt.chr.name || cxt.chr) : this.coords.chr.name
-          r = newc.ref.chromosomes.filter(c => c.name === n)[0]
-          newc.coords = nc = gc.validate({
-            chr: r,
-            start: cxt.start || this.coords.start,
-            end: cxt.end || this.coords.end
-          }, newc.ref, true)
-          newc.lcoords = {
-            landmark: null,
-            delta: 0,
-            length: nc.end - nc.start + 1
-          }
-        } else if (cxt.landmark === null) {
-          newc.coords = this.coords
-          newc.lcoords = {
-            landmark: null,
-            delta: 0,
-            length: this.lcoords.length
-          }
-        } else if (cxt.landmark || typeof cxt.delta === 'number' || cxt.length) {
+      //
+      newc.regions = (cxt.regions || []).map(r => {
+        // validate region
+        const g = this.agIndex[r.genome]
+        if (!g) return null
+        const rr = gc.validate(r, g, true)
+        rr.genome = g
+        return rr
+      }).filter(x => x)
+      if (newc.regions.length > 0) {
+        newc.genomes = Array.from(new Set(newc.regions.map(r => r.genome)))
+        if (newc.genomes.indexOf(newc.ref) === -1) newc.ref = newc.genomes[0]
+        newc.lcoords = {
+          landmark: null,
+          delta: 0,
+          length: 0
+        }
+        return Promise.resolve(newc)
+      }
+
+      //
+      // resolve genomes. Here we assume genomes are given in the desired order.
+      if (cxt.genomes) {
+        if (!Array.isArray(cxt.genomes)) cxt.genomes = [cxt.genomes]
+        cxt.genomes = cxt.genomes.map(g => {
+          return this.allGenomes.filter(a => a.name === (g.name || g))[0]
+        }).filter(x => x)
+      } else {
+        cxt.genomes = this.vGenomes.slice()
+      }
+      // if ref genome not included in genomes list, insert it at the front
+      if (cxt.genomes.indexOf(newc.ref) === -1) cxt.genomes.unshift(newc.ref)
+      newc.genomes = cxt.genomes
+
+      //
+      if (cxt.chr || cxt.start || cxt.end) {
+        // handle normal coordinates spec
+        n = cxt.chr ? (cxt.chr.name || cxt.chr) : this.coords.chr.name
+        r = newc.ref.chromosomes.filter(c => c.name === n)[0]
+        newc.regions = []
+        newc.coords = nc = gc.validate({
+          chr: r,
+          start: cxt.start || this.coords.start,
+          end: cxt.end || this.coords.end
+        }, newc.ref, true)
+        newc.lcoords = {
+          landmark: null,
+          delta: 0,
+          length: nc.end - nc.start + 1
+        }
+      } else if (cxt.landmark === null) {
+        newc.regions = []
+        newc.coords = this.coords
+        newc.lcoords = {
+          landmark: null,
+          delta: 0,
+          length: this.lcoords.length
+        }
+      } else if (cxt.landmark || typeof cxt.delta === 'number' || cxt.length) {
+        // make sure the ref genome's features have been loaded before continuing
+        // so we can resolve landmarks
+        return this.dataManager.ensureFeatures(newc.ref).then(() => {
           // handle landmark spec
           let lm = this.dataManager.getGenolog(cxt.landmark || this.lcoords.landmark, newc.ref)
           if (lm) {
@@ -348,29 +384,26 @@ export default MComponent({
             newc.coords = this.coords
             newc.lcoords = this.lcoords
           }
-        } else {
-          // no change
-          newc.coords = this.coords
-          newc.lcoords = this.lcoords
-        }
-        //
-        // currentMouseover
-        newc.currentMouseover = cxt.currentMouseover === undefined ? this.currentMouseover : cxt.currentMouseover
-        newc.currentMouseoverT = cxt.currentMouseoverT === undefined ? this.currentMouseoverT : cxt.currentMouseoverT
-        //
-        // current selection
-        newc.currentSelection = cxt.currentSelection || this.currentSelection
-        //
-        return newc
-      })
+          //
+          return newc
+        })
+        
+      } else {
+        // no change
+        newc.regions = this.regions
+        newc.coords = this.coords
+        newc.lcoords = this.lcoords
+      }
+      return Promise.resolve(newc)
     },
     setContext: function (cxt0, quietly) {
       this.sanitizeContext(cxt0).then(cxt => {
         this.rGenome = cxt.ref
         // this.vGenomes.splice(0, this.vGenomes.length, ...cxt.genomes)
         this.vGenomes = cxt.genomes
-        this.coords = cxt.coords
-        this.lcoords = cxt.lcoords
+        if (cxt.regions) this.regions = cxt.regions
+        if (cxt.lcoords) this.lcoords = cxt.lcoords
+        if (cxt.coords) this.coords = cxt.coords
         this.currentMouseover = cxt.currentMouseover
         this.currentMouseoverT = cxt.currentMouseoverT
         this.currentSelection = cxt.currentSelection
@@ -378,22 +411,29 @@ export default MComponent({
       })
     },
     getContextString: function () {
-      let parms = [
-        `ref=${this.rGenome.name}`,
-        `genomes=${this.vGenomes.map(vg => vg.name).join('+')}`
-      ]
-      if (this.lcoords.landmark) {
-        parms = parms.concat([
+      let parms
+      if (this.regions.length > 1) {
+        const rs = regions.map(r => `${r.genome.name}|${r.chr.name}|${r.start}|${end}`).join(',')
+        parms = [
+          `ref=${this.rGenome.name}`,
+          `regions=${rs}`
+        ]
+      } else if (this.lcoords.landmark) {
+        parms = [
+          `ref=${this.rGenome.name}`,
+          `genomes=${this.vGenomes.map(vg => vg.name).join('+')}`,
           `landmark=${this.lcoords.landmark}`,
           `delta=${this.lcoords.delta}`,
           `length=${this.lcoords.length}`
-        ])
+        ]
       } else {
-        parms = parms.concat([
+        parms = [
+          `ref=${this.rGenome.name}`,
+          `genomes=${this.vGenomes.map(vg => vg.name).join('+')}`,
           `chr=${this.coords.chr.name}`,
           `start=${this.coords.start}`,
           `end=${this.coords.end}`
-        ])
+        ]
       }
       if (this.currentSelection.length) {
         parms.push(`highlight=${this.currentSelection.join('+')}`)
@@ -547,13 +587,13 @@ export default MComponent({
       this.allGenomes = genomes // all the genomes (at least one)
       this.rGenome = genomes[0] // current reference genome (always set)
       this.vGenomes = [genomes[0]] // currently visible genomes (always contains reference)
-      const ih = Object.assign({
-          chr: this.coords.chr.name,
-          start: this.coords.start,
-          end: this.coords.end,
-          width: u.wWidth()
-        },
-        this.historyManager.initialHash)
+      const ih = Object.assign({}, this.historyManager.initialHash)
+      ih.width = u.wWidth()
+      if (!ih.chr && !ih.landmark) {
+        ih.chr = this.coords.chr.name
+        ih.start = this.coords.start
+        ih.end = this.coords.end
+      }
       console.log('MGV: setting initial context', ih)
       this.setContext(ih, true)
     })

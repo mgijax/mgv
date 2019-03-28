@@ -35,7 +35,7 @@
       x="0"
       y="0"
       :width="cfg.endCapWidth"
-      :height="height"
+      :height="height + 1"
       :fill="endCapColor"
       />
     <!-- drag handle  -->
@@ -128,21 +128,23 @@ export default MComponent({
       this.$emit('height-changed', this)
     },
     // lay out the regions horizontally
-    layoutRegions (regions) {
-      // Combine regions whose indexes form a sequence
-      regions.sort((a, b) => a.index - b.index)
-      regions = regions.reduce((nrs, r) => {
-        let prev = nrs[nrs.length - 1]
-        if (prev && prev.index === r.index) {
+    layoutRegions (regions, noSort) {
+      if (!noSort) {
+        // Combine regions whose indexes form a sequence
+        regions.sort((a, b) => a.index - b.index)
+        regions = regions.reduce((nrs, r) => {
+          let prev = nrs[nrs.length - 1]
+          if (prev && prev.index === r.index) {
+            return nrs
+          } else if (prev && prev.index + 1 === r.index) {
+            prev.end = r.end
+            prev.index = r.index
+          } else {
+            nrs.push(r)
+          }
           return nrs
-        } else if (prev && prev.index + 1 === r.index) {
-          prev.end = r.end
-          prev.index = r.index
-        } else {
-          nrs.push(r)
-        }
-        return nrs
-      }, [])
+        }, [])
+      }
       // Compute lengths and total
       let totalLength = regions.reduce((tl, r) => {
         r.length = r.end - r.start + 1
@@ -176,9 +178,10 @@ export default MComponent({
       return regions
     },
     computeRegions () {
-      let cc = this.context.coords
-      let lcc = this.context.lcoords
-      let lm = lcc.landmark ? this.dataManager.getGenolog(lcc.landmark, this.genome) : null
+      const cr = this.context.regions
+      const cc = this.context.coords
+      const lcc = this.context.lcoords
+      const lm = lcc.landmark ? this.dataManager.getGenolog(lcc.landmark, this.genome) : null
       if (!this.genome.chromosomes) {
         // if here, this is a very early call before everybody is initialized.
         // IMPORANT: need to touch start/end here so that they register with reactivity system
@@ -190,10 +193,13 @@ export default MComponent({
           landmark: lcc.landmark,
           alignOn: config.ZoomRegion.featureAlignment
         }])
+      } else if (cr.length > 0) {
+        // Regions specified explicitly. 
+        this.regions = this.layoutRegions(cr.filter(r => r.genome === this.genome), true)
       } else if (lm) {
         // landmark mode
-        let delta = lcc.delta
-        let w = cc.end - cc.start + 1
+        const delta = lcc.delta
+        const w = cc.end - cc.start + 1
         const alignOn = config.ZoomRegion.featureAlignment
         let lmp
         switch (alignOn) {
@@ -214,11 +220,11 @@ export default MComponent({
           break
         default:
         }
-        let s = Math.round(lmp - w / 2) + delta
+        const s = Math.round(lmp - w / 2) + delta
         if (this.genome === this.context.rGenome) {
           // if here, I am the ZoomStrip for the reference genome and we have just computed the actual
           // coordinates from the landmark feature. Need to inform the app what those coordinates are.
-          let c = this.app.coords
+          const c = this.app.coords
           c.chr = lm.chr
           c.start = s
           c.end = s + w - 1
