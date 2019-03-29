@@ -142,7 +142,7 @@ class DataManager {
           const exons = this._unpackExons(t)
           const tlen = exons.reduce((l,x) => l + x.end - x.start + 1, 0)
           const cds = this._unpackCds(t[8]['cds'], tlen, exons)
-          return {
+          const tt= {
             gID: t[8]['Parent'],
             ID: t[8]['ID'],
             exons: exons,
@@ -151,12 +151,16 @@ class DataManager {
             length: tlen,
             cds: cds
           }
+          return tt
         })
       })
     })
   }
   _unpackExons (t) {
     const exonsAttr = t[8]['exons']
+    if (!exonsAttr) {
+      return [{start: t[3], end: t[4]}]
+    }
     const ecoords = exonsAttr.split(',').map(s => s.split('_').map(s => parseInt(s)))
     return ecoords.map(ec => { return { start: t[3] + ec[0], end: t[3] + ec[0] + ec[1] - 1 } })
   }
