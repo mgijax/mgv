@@ -8,7 +8,7 @@
     @mouseleave.stop="mouseleave"
     @click="clicked"
     @dblclick="dblClicked"
-    :width="width"
+    :width="region.width"
     >
     <g
       :transform="`translate(${myDelta},${zeroOffset})`"
@@ -24,7 +24,7 @@
           font-family="sans-serif"
           :text-anchor="currRangeAnchor"
           >
-          {{chr.name}}:{{p2b(currRange[0])}}{{currRange[0] !== currRange[1] ? '..' + p2b(currRange[1]) : ''}}
+          {{region.chr.name}}:{{p2b(currRange[0])}}{{currRange[0] !== currRange[1] ? '..' + p2b(currRange[1]) : ''}}
           </text>
         <rect
           :x="b2p(0.5 + p2b(Math.min(currRange[0], currRange[1])))"
@@ -66,9 +66,9 @@
       <!-- ======= axis line ======= -->
       <line
         class="axis"
-        :x1="b2p(start)"
+        :x1="b2p(region.start)"
         :y1="0"
-        :x2="b2p(end)"
+        :x2="b2p(region.end)"
         :y2="0"
         stroke="black"
         :transform="`translate(${-myDelta},0)`"
@@ -84,7 +84,7 @@
         font-size="10px"
         font-family="sans-serif"
         :transform="`translate(${-myDelta},0)`"
-        >{{chr.name}}:{{start + deltaB}}..{{end + deltaB}}</text>
+        >{{region.chr.name}}:{{region.start + deltaB}}..{{region.end + deltaB}}</text>
       <!-- ======= sequence string ======= -->
       <text
         v-if="showSequence"
@@ -218,6 +218,27 @@
       </g> <!-- features -->
     <!--
     -->
+    <g
+      class="deleteBtn"
+      >
+      <rect
+        :x="region.width - 10"
+        :y="-zeroOffset"
+        width="10"
+        height="16"
+        fill="black"
+        fill-opacity="0"
+        />
+      <text
+        :x="region.width"
+        :y="-zeroOffset"
+        fill="white"
+        fill-opacity=0
+        alignment-baseline="hanging"
+        text-anchor="end"
+        @click="remove"
+        >X</text>
+   </g>
   </g>
   </svg>
   </g>
@@ -242,35 +263,13 @@ export default MComponent({
         return {}
       }
     },
-    // my genome
-    genome: {
-      type: Object,
-      default: function () { return { name: '?' } }
-    },
-    // my chromosome
-    chr: {
-      type: Object,
-      default: function () { return { name: '?' } }
-    },
-    // my start coordinate
-    start: {
-      type: Number,
-      default: 1
-    },
-    // my end coordinate
-    end: {
-      type: Number,
-      default: 10000
-    },
-    //
-    regionScrollDelta: {
+    globalScrollDelta: {
       type: Number,
       default: 0
     },
-    // orientation
-    ori: {
-      type: String,
-      default: '+'
+    region: {   // region == { genome, chr, start, end, width }
+      type: Object,
+      default: null
     },
     //
     allMaxLaneP: {
@@ -286,11 +285,6 @@ export default MComponent({
     pad: {
       type: Number,
       default: 0.5
-    },
-    // Width to make myself, in px
-    width: {
-      type: Number,
-      default: 350
     }
   },
   data: function () {
@@ -301,7 +295,8 @@ export default MComponent({
       seqStart: 0,
       dragging: false,
       currRange: null,
-      busy: false
+      busy: false,
+      regionScrollDelta: 0
     }
   },
   computed: {
@@ -309,7 +304,7 @@ export default MComponent({
       return complement(this.sequence)
     },
     myDelta: function () {
-      return (this.dragging || this.context.lcoords.landmark || this.genome === this.context.rGenome) ? this.regionScrollDelta : 0
+      return this.dragging ? this.regionScrollDelta : this.globalScrollDelta
     },
     detailThreshold: function () {
       return Math.min(this.cfg.detailThreshold, this.cfg.detailThresholdLimit)
@@ -322,7 +317,7 @@ export default MComponent({
     },
     currRangeAnchor: function () {
       if (this.currRangeTextX < 25) return 'start'
-      else if (this.width - this.currRangeTextX < 25) return 'end'
+      else if (this.region.width - this.currRangeTextX < 25) return 'end'
       else return 'middle'
     },
     currRangeTextX: function () {
@@ -339,10 +334,12 @@ export default MComponent({
       return this.cfg.showTranscriptLabels
     },
     showDetails: function () {
-      return (this.context.coords.end - this.context.coords.start + 1) < this.detailThreshold
+      return (this.region.end - this.region.start + 1) < this.detailThreshold
+      // return (this.context.coords.end - this.context.coords.start + 1) < this.detailThreshold
     },
     showSequence: function () {
-      return (this.context.coords.end - this.context.coords.start + 1) < this.sequenceThreshold
+      return (this.region.end - this.region.start + 1) < this.sequenceThreshold
+      // return (this.context.coords.end - this.context.coords.start + 1) < this.sequenceThreshold
     },
     showStartStopCodons: function () {
       return this.cfg.showStartStopCodons
@@ -364,7 +361,7 @@ export default MComponent({
     },
     // context string. watch for changes to feature range
     cxtString: function () {
-      return `${this.genome.name}:${this.chr.name}:${this.start}:${this.end}:${this.pad}`
+      return `${this.region.genome.name}:${this.region.chr.name}:${this.region.start}:${this.region.end}:${this.pad}`
     },
     //
     baseFontSize: function () {
@@ -379,11 +376,18 @@ export default MComponent({
       return u.index(this.features, 'ID')
     },
     // pixels per base
-    ppb: function () { return this.width / (this.end - this.start + 1) },
+    ppb: function () {
+      const v = this.region.width / (this.region.end - this.region.start + 1)
+      return v
+    },
     // bases per pixel
-    bpp: function () { return 1 / this.ppb },
+    bpp: function () {
+      return 1 / this.ppb
+    },
     //
-    deltaB: function () { return -Math.round(this.myDelta / this.ppb) },
+    deltaB: function () {
+      return -Math.round(this.myDelta / this.ppb)
+    },
     //
     maxLaneP: function () {
       if (this.showDetails && this.spreadTranscripts) {
@@ -430,6 +434,9 @@ export default MComponent({
     this.spreadText()
   },
   methods: {
+    remove: function () {
+      this.$root.$emit('region-change', { vm: this, op: 'remove' })
+    },
     baseColor: function (b) {
       return this.cfg.baseColors[b] || 'black'
     },
@@ -458,11 +465,12 @@ export default MComponent({
     },
     // converts a pixel position (0-based, within the region) to base position
     p2b (p) {
-      return Math.floor(this.start + this.bpp * p)
+      return Math.floor(this.region.start + this.bpp * p)
     },
     // converts a base position to a pixel position
     b2p (b) {
-      return this.ppb * (b - this.start)
+      const v = this.ppb * (b - this.region.start)
+      return v
     },
     featureX (f) {
       return this.b2p(f.start)
@@ -509,12 +517,12 @@ export default MComponent({
       return s && (s.has(f.cID) || s.has(f.ID))
     },
     featureVisible: function (f) {
-      let overlaps = f.start <= (this.end + this.deltaB) && f.end >= (this.start + this.deltaB)
+      let overlaps = f.start <= (this.region.end + this.deltaB) && f.end >= (this.region.start + this.deltaB)
       return overlaps && this.getFacets().test(f)
     },
     featureTextX: function (f) {
-      let s = Math.max(f.start, this.start + this.deltaB)
-      let e = Math.min(f.end, this.end + this.deltaB)
+      let s = Math.max(f.start, this.region.start + this.deltaB)
+      let e = Math.min(f.end, this.region.end + this.deltaB)
       return this.b2p((s + e) / 2)
     },
     featureStyle (f) {
@@ -539,7 +547,7 @@ export default MComponent({
       return this.b2p(Math.max.apply(null, t.exons.map(e => e.end)))
     },
     transcriptTextX: function (t) {
-      let s = Math.max(t.exons[0].start, this.start + this.deltaB)
+      let s = Math.max(t.exons[0].start, this.region.start + this.deltaB)
       return this.b2p(s)
     },
     transcriptTransform (f, t, ti) {
@@ -594,14 +602,16 @@ export default MComponent({
     // Request features in my range, which will asynchromously cause a redraw.
     getFeatures () {
       //
-      let delta = Math.round((this.end - this.start + 1) / 2)
-      this.seqStart = this.start
+      if (this.region.genome.name === '') return
+      //
+      let delta = Math.round((this.region.end - this.region.start + 1) / 2)
+      this.seqStart = this.region.start
       this.busy = true
       this.$emit('busy-start')
       this.translator()
-          .getBlocksInRange(this.genome, this.chr.name, this.start - delta, this.end + delta, this.context.rGenome)
+          .getBlocksInRange(this.region.genome, this.region.chr.name, this.region.start - delta, this.region.end + delta, this.context.rGenome)
           .then(bs => { this.blocks = bs })
-      this.dataManager.getGenes(this.genome, this.chr, this.start - delta, this.end + delta, this.showDetails).then(feats => {
+      this.dataManager.getGenes(this.region.genome, this.region.chr, this.region.start - delta, this.region.end + delta, this.showDetails).then(feats => {
         this.busy = false
         this.features = feats
         this.nextTick(() => {
@@ -610,7 +620,7 @@ export default MComponent({
         })
         if (this.showSequence) {
           this.$emit('busy-start')
-          this.dataManager.getSequence(this.genome, this.chr, this.start, this.end).then(data => {
+          this.dataManager.getSequence(this.region.genome, this.region.chr, this.region.start, this.region.end).then(data => {
             if (data) {
               this.seqStart = data.start
               this.sequence = data.seq
@@ -698,6 +708,7 @@ export default MComponent({
             let x2 = e.clientX - d.bb.x
             this.currRange = [Math.min(x1, x2), Math.max(x1, x2)]
           } else {
+            this.regionScrollDelta = d.deltaX
             this.$root.$emit('region-drag', d.deltaX)
           }
         },
@@ -710,18 +721,19 @@ export default MComponent({
             }
             this.dragData = null
             this.dragging = false
+            this.regionScrollDelta = 0
             return
           }
-          const b1 = Math.floor(this.start + this.currRange[0] / this.ppb)
-          const b2 = Math.floor(this.start + this.currRange[1] / this.ppb)
+          const b1 = Math.floor(this.region.start + this.currRange[0] / this.ppb)
+          const b2 = Math.floor(this.region.start + this.currRange[1] / this.ppb)
           const start = Math.min(b1, b2)
           const end = Math.max(b1, b2)
           //
           if (d.altDrag) {
             // select genomic sequence
             const region = {
-              genome: this.genome,
-              chr: this.chr,
+              genome: this.region.genome,
+              chr: this.region.chr,
               start: start,
               end: end,
               type: 'dna',
@@ -730,34 +742,21 @@ export default MComponent({
               length: end - start + 1
             }
             this.$root.$emit('region-selected', region)
+            this.regionScrollDelta = 0
           } else if (d.shiftDrag) {
             // zoom in
-            this.translator()
-              .translate(this.genome, this.chr.name, start, end, this.context.rGenome)
-              .then(rs => {
-                const r = rs[0]
-                const nc = {
-                  start: r.start,
-                  end: r.end
-                }
-                this.$root.$emit('context', nc)
-              })
+            // this.region.start = start
+            // this.region.end = end
+            this.$root.$emit('region-change', { vm: this, op: 'zoom', coords: { chr: this.region.chr, start, end }})
+            this.regionScrollDelta = 0
           } else {
-            let nc
-            // drag
-            // pan
-            if (this.context.lcoords.landmark) {
-              nc = {
-                delta: this.context.lcoords.delta + this.deltaB
-              }
-            } else {
-              nc = {
-                start: this.context.coords.start + this.deltaB,
-                end: this.context.coords.end + this.deltaB
-              }
-            }
-            this.$root.$emit('context', nc)
+            // const db = this.deltaB;
+            // this.region.start += db
+            // this.region.end += db
+            this.$root.$emit('region-change', { vm: this, op: 'scroll', delta: this.deltaB })
+            this.regionScrollDelta = 0
           }
+          
           //
           // for some reason, a click event is fired at mouseup, even though dragify handlers call
           // stopPropagation and preventDefault. So here we just set a little flag for ourselves to ignore
@@ -780,6 +779,12 @@ export default MComponent({
 }
 .zoom-region > svg > text {
   transition: y 0.5s;
+}
+.zoom-region .deleteBtn {
+  cursor: pointer;
+}
+.zoom-region .deleteBtn:hover * {
+  fill-opacity: 1;
 }
 .feature .transcript {
   transition: transform 0.5s;

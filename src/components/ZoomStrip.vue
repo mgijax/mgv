@@ -14,18 +14,13 @@
     <zoom-region
       v-for="(zr,zri) in regions"
       :key="zri"
-      :genome="genome"
       :context="context"
-      :chr="zr.chr"
-      :start="zr.start"
-      :end="zr.end"
-      :ori="zr.ori"
-      :pad="cfg.pad"
-      :width="zr.width"
+      :region="zr"
       :allMaxLaneP="allMaxLaneP"
       :allMaxLaneM="allMaxLaneM"
+      :pad="cfg.pad"
       :transform="`translate(${zr.deltaX}, 0)`"
-      :regionScrollDelta="regionScrollDelta"
+      :globalScrollDelta="globalScrollDelta"
       @region-draw="setHeight"
       @busy-start="busyStart"
       @busy-end="busyEnd"
@@ -80,7 +75,8 @@ export default MComponent({
     'context',
     'genome',
     'width',
-    'regionScrollDelta'
+    'globalScrollDelta',
+    'regions'
   ],
   inject: ['translator'],
   data: function () {
@@ -91,7 +87,6 @@ export default MComponent({
       dragging: false,
       featureHeight: 14,
       laneGap: 8,
-      regions: [],
       busyCount: 0,
       busyMessage: 'Busy...'
     }
@@ -100,18 +95,6 @@ export default MComponent({
     endCapColor: function () {
       return this.context.rGenome === this.genome ? this.cfg.refEndCapColor : this.cfg.endCapColor
     },
-    cxtString: function () {
-      return [
-        this.context.rGenome.name,
-        this.genome.name,
-        this.context.coords.chr.name,
-        this.context.coords.start,
-        this.context.coords.end,
-        this.context.lcoords.landmark,
-        this.context.lcoords.delta,
-        this.context.lcoords.length
-      ].join(':')
-    }
   },
   methods: {
     busyStart () {
@@ -126,141 +109,9 @@ export default MComponent({
       this.allMaxLaneM = Math.max.apply(null, this.$children.map(r => r.maxLaneM))
       this.genome.height = this.height
       this.$emit('height-changed', this)
-    },
-    // lay out the regions horizontally
-    layoutRegions (regions, noSort) {
-      if (!noSort) {
-        // Combine regions whose indexes form a sequence
-        regions.sort((a, b) => a.index - b.index)
-        regions = regions.reduce((nrs, r) => {
-          let prev = nrs[nrs.length - 1]
-          if (prev && prev.index === r.index) {
-            return nrs
-          } else if (prev && prev.index + 1 === r.index) {
-            prev.end = r.end
-            prev.index = r.index
-          } else {
-            nrs.push(r)
-          }
-          return nrs
-        }, [])
-      }
-      // Compute lengths and total
-      let totalLength = regions.reduce((tl, r) => {
-        r.length = r.end - r.start + 1
-        return tl + r.length
-      }, 0)
-      // Adjust to expand tiny regions
-      // 'Tiny' === less than 10% of the total length
-      const minLength = totalLength * 0.02
-      let debit = 0
-      regions.forEach(r => {
-        const delta = minLength - r.length
-        if (delta > 0) {
-          debit += delta
-          r.start -= Math.floor(delta / 2)
-          r.end = r.start + minLength - 1
-          r.length = minLength
-        }
-      })
-      totalLength += debit
-      // Compute screen coordinates
-      let dx = 12
-      let gap = 2
-      let totalGap = dx + gap * (regions.length - 1)
-      const ppb = (this.width - totalGap) / totalLength
-      regions.forEach(r => {
-        let w = ppb * (r.end - r.start + 1)
-        r.width = w
-        r.deltaX = dx
-        dx += r.width + gap
-      })
-      return regions
-    },
-    computeRegions () {
-      const cr = this.context.regions
-      const cc = this.context.coords
-      const lcc = this.context.lcoords
-      const lm = lcc.landmark ? this.dataManager.getGenolog(lcc.landmark, this.genome) : null
-      if (!this.genome.chromosomes) {
-        // if here, this is a very early call before everybody is initialized.
-        // IMPORANT: need to touch start/end here so that they register with reactivity system
-        // (Is there a better way??)
-        this.regions = this.layoutRegions([{
-          chr: { name: '?' },
-          start: cc.start,
-          end: cc.end,
-          landmark: lcc.landmark,
-          alignOn: config.ZoomRegion.featureAlignment
-        }])
-      } else if (cr.length > 0) {
-        // Regions specified explicitly. 
-        this.regions = this.layoutRegions(cr.filter(r => r.genome === this.genome), true)
-      } else if (lm) {
-        // landmark mode
-        const delta = lcc.delta
-        const w = cc.end - cc.start + 1
-        const alignOn = config.ZoomRegion.featureAlignment
-        let lmp
-        switch (alignOn) {
-        case '5-prime':
-          lmp = lm.strand === '+' ? lm.start : lm.end
-          break
-        case '3-prime':
-          lmp = lm.strand === '+' ? lm.end : lm.start
-          break
-        case 'proximal':
-          lmp = lm.start
-          break
-        case 'distal':
-          lmp = lm.end
-          break
-        case 'midpoint':
-          lmp = Math.floor((lm.start + lm.end) / 2)
-          break
-        default:
-        }
-        const s = Math.round(lmp - w / 2) + delta
-        if (this.genome === this.context.rGenome) {
-          // if here, I am the ZoomStrip for the reference genome and we have just computed the actual
-          // coordinates from the landmark feature. Need to inform the app what those coordinates are.
-          const c = this.app.coords
-          c.chr = lm.chr
-          c.start = s
-          c.end = s + w - 1
-        }
-        this.regions = this.layoutRegions([{
-          chr: lm.chr,
-          start: s,
-          end: s + w - 1
-        }])
-      } else if (this.genome === this.context.rGenome) {
-        // this is the ref genome. Use the context coordinates
-        this.regions = this.layoutRegions([{
-          chr: cc.chr,
-          start: cc.start,
-          end: cc.end
-        }])
-      } else {
-        // Map the reference genome coordinates to region(s) in this genome
-        this.busyStart()
-        this.translator().translate(this.context.rGenome, cc.chr.name, cc.start, cc.end, this.genome).then(rs => {
-          this.regions = this.layoutRegions(rs)
-          this.busyEnd()
-        })
-      }
-    }
-  },
-  watch: {
-    width: function () {
-      this.regions = this.layoutRegions(this.regions)
     }
   },
   mounted: function () {
-    //
-    this.$watch('cxtString', s => {
-      this.computeRegions()
-    }, { deep: true, immediate: true })
     //
     let self = this
     u.dragify(this.$refs.draghandle, {

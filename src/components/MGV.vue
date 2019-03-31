@@ -158,6 +158,7 @@ import MComponent from '@/components/MComponent'
 import gc from '@/lib/GenomeCoordinates'
 import u from '@/lib/utils'
 import HistoryManager from '@/lib/HistoryManager'
+import RegionManager from '@/lib/RegionManager'
 import ListManager from '@/lib/ListManager'
 import KeyManager from '@/lib/KeyManager'
 import Translator from '@/lib/Translator'
@@ -200,8 +201,6 @@ export default MComponent({
   },
   data: function () {
     return {
-      // is left drawer open
-      drawerOpen: true,
       // all genomes (order not important)
       allGenomes: [],
       // visible genomes (in viewing order)
@@ -211,9 +210,20 @@ export default MComponent({
       // predefined sets of genomes for easy selections
       genomeSets: [],
       // ----------------------------------------------------
+      // drawing mode
+      dmode: 'direct', // one of: direct, landmark, mapped
       // Three ways to specify which regions to draw.
       // 1. Specify the regions explicitly. Each region is a genome+chr+start+end
-      regions: [],
+      strips: [{
+        genome: { name: '' },
+        regions: [{
+          genome: { name: '', height: 0, zoomY: 0 },
+          chr: { name: '' },
+          start: 1,
+          end: 1,
+          width: 1
+        }]
+      }],
       // 2. Specify regions relative to a landmark.
       lcoords: {
         // alignment landmark
@@ -235,6 +245,8 @@ export default MComponent({
         end: 10000000
       },
       // ----------------------------------------------------
+      // is left drawer open
+      drawerOpen: true,
       // while mouse is over a feature, its ID. Otherwise null.
       currentMouseover: null,
       // while mouse is over a transcript, its ID. Otherwise null.
@@ -262,12 +274,12 @@ export default MComponent({
   computed: {
     agIndex: function () {
       return this.allGenomes.reduce((ix, g) => { ix[g.name] = g; return ix }, {})
+    },
+    zoomWidth: function () {
+      return this.$refs.zoomView.$refs.main.width
     }
   },
   methods: {
-    // Returns a promise for the list of genome info objects
-    initializeData: function () {
-    },
     resize: function () {
       const sz = {width: u.wWidth(), height: u.wHeight()}
       this.visHeight = sz.height - 80
@@ -301,18 +313,26 @@ export default MComponent({
         n = cxt.ref.name || cxt.ref
         newc.ref = this.agIndex[n] || this.rGenome
       }
-
       //
-      newc.regions = (cxt.regions || []).map(r => {
-        // validate region
-        const g = this.agIndex[r.genome]
-        if (!g) return null
-        const rr = gc.validate(r, g, true)
-        rr.genome = g
-        return rr
-      }).filter(x => x)
-      if (newc.regions.length > 0) {
-        newc.genomes = Array.from(new Set(newc.regions.map(r => r.genome)))
+      if (cxt.strips) {
+        newc.strips = cxt.strips.map(r => {
+          // validate region
+          r.genome = this.agIndex[r.genome]
+          if (!r.genome) return null
+          r.regions = r.regions.map(rr => {
+            try {
+              rr = gc.validate(rr, r.genome, true)
+            } catch (e) {
+              return null
+            }
+            if (rr) rr.genome = r.genome
+            return rr
+          }).filter(x => x)
+          return r
+        }).filter(x => x)
+        //
+        if (newc.strips.length === 0) newc.strips = this.strips
+        newc.genomes = newc.strips.map(r => r.genome)
         if (newc.genomes.indexOf(newc.ref) === -1) newc.ref = newc.genomes[0]
         newc.lcoords = {
           landmark: null,
@@ -321,7 +341,6 @@ export default MComponent({
         }
         return Promise.resolve(newc)
       }
-
       //
       // resolve genomes. Here we assume genomes are given in the desired order.
       if (cxt.genomes) {
@@ -341,7 +360,6 @@ export default MComponent({
         // handle normal coordinates spec
         n = cxt.chr ? (cxt.chr.name || cxt.chr) : this.coords.chr.name
         r = newc.ref.chromosomes.filter(c => c.name === n)[0]
-        newc.regions = []
         newc.coords = nc = gc.validate({
           chr: r,
           start: cxt.start || this.coords.start,
@@ -353,7 +371,6 @@ export default MComponent({
           length: nc.end - nc.start + 1
         }
       } else if (cxt.landmark === null) {
-        newc.regions = []
         newc.coords = this.coords
         newc.lcoords = {
           landmark: null,
@@ -375,24 +392,15 @@ export default MComponent({
             let x = (lm.strand === '+' ? lm.start : lm.end) + newc.lcoords.delta
             let ns = Math.floor(x - newc.lcoords.length / 2)
             newc.coords = {
+              genome: newc.ref,
               chr: lm.chr,
               start: ns,
               end: ns + newc.lcoords.length - 1
             }
-          } else {
-            // could not resolve the landmark in the ref genome. no change
-            newc.coords = this.coords
-            newc.lcoords = this.lcoords
           }
           //
           return newc
         })
-        
-      } else {
-        // no change
-        newc.regions = this.regions
-        newc.coords = this.coords
-        newc.lcoords = this.lcoords
       }
       return Promise.resolve(newc)
     },
@@ -401,9 +409,22 @@ export default MComponent({
         this.rGenome = cxt.ref
         // this.vGenomes.splice(0, this.vGenomes.length, ...cxt.genomes)
         this.vGenomes = cxt.genomes
-        if (cxt.regions) this.regions = cxt.regions
-        if (cxt.lcoords) this.lcoords = cxt.lcoords
-        if (cxt.coords) this.coords = cxt.coords
+        if (cxt.strips) {
+          this.dmode = 'direct'
+          this.strips = this.regionManager.layout(cxt.strips, this.zoomWidth)
+        } else if (cxt.lcoords && cxt.lcoords.landmark) {
+          this.dmode = 'landmark'
+          this.lcoords = cxt.lcoords
+          this.regionManager.computeLandmarkRegions(cxt.lcoords, this.vGenomes, this.zoomWidth).then(strips => {
+            this.strips = strips
+          })
+        } else if (cxt.coords) {
+          this.dmode = 'mapped'
+          this.coords = cxt.coords
+          this.regionManager.computeMappedRegions(cxt.coords, this.vGenomes, this.zoomWidth).then(strips => {
+            this.strips = strips
+          })
+        }
         this.currentMouseover = cxt.currentMouseover
         this.currentMouseoverT = cxt.currentMouseoverT
         this.currentSelection = cxt.currentSelection
@@ -412,8 +433,11 @@ export default MComponent({
     },
     getContextString: function () {
       let parms
-      if (this.regions.length > 1) {
-        const rs = regions.map(r => `${r.genome.name}|${r.chr.name}|${r.start}|${end}`).join(',')
+      if (this.strips.length > 1) {
+        const rs = this.strips.map(s => {
+          const rs = s.regions.map(r => `${r.chr.name}:${r.start}..${r.end}`).join(',')
+          return `${s.genome.name}::${rs}`
+        }).join('|')
         parms = [
           `ref=${this.rGenome.name}`,
           `regions=${rs}`
@@ -513,6 +537,8 @@ export default MComponent({
     this.listManager = new ListManager(this, this.lists)
     //
     this.translator = new Translator(this)
+    //
+    this.regionManager = new RegionManager(this)
     //
     // listen for context events - how descendant component announce they want to redraw
     this.$root.$on('context', cxt => this.setContext(cxt))

@@ -62,6 +62,7 @@ function validate (c, g, adjust) {
     if (chrom.end > chrom.length) fail('End coordinate larger than chromosome length.')
   }
   if (c.start < 1) fail('Bad start position.')
+  c.genome = g
   return c
 }
 

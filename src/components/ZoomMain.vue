@@ -21,18 +21,19 @@
       ref="fiducials"
       />
     <zoom-strip
-       v-for="g in context.vGenomes"
+       v-for="zs in context.strips"
        ref="strips"
-      :key="g.name"
-      :genome="g"
+      :key="zs.genome.name"
+      :genome="zs.genome"
       :context="context"
+      :regions="zs.regions"
       :width="width"
+      :transform="`translate(0,${zs.genome.zoomY + zs.genome.dragY})`"
+      :globalScrollDelta="globalScrollDelta"
       @height-changed="setYs"
-      :transform="`translate(0,${g.zoomY + g.dragY})`"
       @dragstart="zDragStart"
       @drag="zDrag"
       @dragend="zDragEnd"
-      :regionScrollDelta="regionScrollDelta"
       />
   </svg>
 </template>
@@ -50,7 +51,7 @@ export default MComponent({
     return {
       width: 500,
       height: 200,
-      regionScrollDelta: 0
+      globalScrollDelta: 0
     }
   },
   computed: {
@@ -107,10 +108,10 @@ export default MComponent({
   },
   mounted: function () {
     this.$root.$on('region-drag', d => {
-      this.regionScrollDelta = d
+      // this.globalScrollDelta = d
     })
     this.$root.$on('region-dragend', d => {
-      this.regionScrollDelta = 0
+      this.globalScrollDelta = 0
     })
     //
     this.$root.$on('resize', () => this.resize())

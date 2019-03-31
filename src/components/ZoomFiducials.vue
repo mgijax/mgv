@@ -75,17 +75,10 @@ export default MComponent({
         stacks.push({ cid: fid, rects })
       }
       return stacks
-    },
-    update (n) {
-      u.afterTicks(n || 0, function () { this.stacks = this.getStacks() }, this)
     }
   },
   mounted: function () {
-    this.$root.$on('region-drag', dx => { this.deltaX = dx })
-    this.$root.$on('region-dragend', () => { this.deltaX = 0 })
-    this.$root.$on('facet-state', () => this.update(1))
-    this.$root.$on('list-click', () => this.update(4))
-    this.$watch('$props', () => this.update(3), { deep: true })
+    window.setInterval(() => { this.stacks = this.getStacks(), 500})
   }
 })
 </script>

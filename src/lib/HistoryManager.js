@@ -17,8 +17,8 @@ class HistoryManager {
       this.app.setContext(cxt, true)
     })
     // when app context changes, tell the window
-    this.app.$root.$on('context-changed', (cxt) => {
-      this.setHash(cxt)
+    this.app.$root.$on('context-changed', () => {
+      this.setHash()
     })
     // tell the app about the initial state
     let qstring = window.location.hash.substring(1)
@@ -28,10 +28,9 @@ class HistoryManager {
   // Uses the current app context to set the hash part of the
   // browser's location. This also registers the change in
   // the browser history.
-  setHash (cxt) {
+  setHash () {
     let newHash = this.app.getContextString()
     if ('#' + newHash === window.location.hash) return
-    // console.log('HistoryManager: app context changed. Setting window hash', cxt)
     this.settingHash = true
     window.location.hash = newHash
   }
@@ -54,15 +53,26 @@ class HistoryManager {
     ref && (cfg.ref = ref)
 
     // ----- regions ------------
+    // Regions parameter allows for multiple regions across multiple genomes
+    // Example: "A/J::12:67900000..68800000,X:55622081..101002774|DBA/2J::1:1..1000000"
+    //
     let regions = prms.get('regions')
     if (regions) {
-      cfg.regions = regions.split(/,/g).map(r => {
-        const parts = r.split(/\|/g)
+      cfg.strips = regions.split(/\|/g).map(gr => {
+        const bits = gr.split('::')
+        const genome = bits[0]
+        const gregs = bits[1].split(/,/g).map(gr => {
+          const coords = gr.split(/:|[.][.]|-/g)
+          return {
+            genome: genome,
+            chr: coords[0],
+            start: parseInt(coords[1]),
+            end: parseInt(coords[2])
+          }
+        })
         return {
-          genome: parts[0],
-          chr: parts[1],
-          start: parseInt(parts[2]),
-          end: parseInt(parts[3])
+          genome: genome,
+          regions: gregs
         }
       })
     }
