@@ -92,14 +92,18 @@ class RegionManager {
       this.app.$root.$emit('context', {})
     }
   }
-  scrollAllRegions (delta) {
-    this.app.strips.forEach(s => {
-      s.regions.forEach(r => {
-        r.start += delta
-        r.end += delta
-      })
-    })
+  //--------------------------------------
+  moveBorder (r1, amt) {
+    const rr = this.findRegion(r1)
+    const si = rr[0], ri = rr[1]
+    if (ri === -1) return
+    const r2 = this.app.strips[si].regions[ri + 1]
+    if (!r2) return
+    r1.width += amt
+    r2.width -= amt
+    r2.deltaX += amt
   }
+  //--------------------------------------
   removeRegion (r) {
     const rr = this.findRegion(r)
     const si = rr[0], ri = rr[1]
@@ -107,6 +111,35 @@ class RegionManager {
     this.app.strips[si].regions.splice(ri, 1)
     this.layout()
   }
+  //--------------------------------------
+  zoomAllRegions (delta) {
+    this.app.strips.forEach(s => {
+      s.regions.forEach(r => this.zoomRegion(r, delta))
+    })
+  }
+  //--------------------------------------
+  zoomRegion (r, factor) {
+    factor = factor || 2
+    const mid = (r.start + r.end) / 2
+    const len = r.end - r.start + 1
+    const newlen = Math.round(len / factor)
+    const newstart = Math.floor(mid - newlen / 2)
+    const newend = newstart + newlen - 1
+    r.start = newstart
+    r.end = newend
+  }
+  //--------------------------------------
+  scrollAllRegions (delta) {
+    this.app.strips.forEach(s => {
+      s.regions.forEach(r => this.scrollRegion(r, delta))
+    })
+  }
+  //--------------------------------------
+  scrollRegion (r, delta) {
+    r.start += delta
+    r.end += delta
+  }
+  //--------------------------------------
   splitRegion (r) {
     const rr = this.findRegion(r)
     const si = rr[0], ri = rr[1]

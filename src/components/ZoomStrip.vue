@@ -25,6 +25,19 @@
       @busy-start="busyStart"
       @busy-end="busyEnd"
       />
+    <!-- region resize handles -->
+    <rect
+      class="border-handle"
+      v-for="(zr, zri) in regions"
+      :key="zri+'-2'"
+      v-show="zri > 0"
+      :transform="`translate(${zr.deltaX - 2.5}, 0)`"
+      :x="0"
+      :y="0"
+      :width="5"
+      :height="height"
+      fill="gray"
+      />
     <!-- end cap -->
     <rect name="endcap"
       x="0"
@@ -145,6 +158,9 @@ export default MComponent({
 }
 .zoom-strip text[name="label"] {
   transition: y 0.5s;
+}
+.border-handle {
+  cursor: ew-resize;
 }
 .zoom-strip > [name="draghandle"] {
   cursor: grab;

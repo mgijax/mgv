@@ -12,7 +12,7 @@ function getRegionMenu (thisObj) {
         this.$root.$emit('region-change', { vm: cxt.vm, op: 'remove' })
       }).bind(thisObj)
     }, {
-      icon: '',
+      icon: 'compare',
       label: 'Split',
       helpText: 'Split this region.',
       handler: (function (cxt) {
