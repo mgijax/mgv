@@ -16,12 +16,11 @@
       :features="context.currentSelection"
       :currentMouseover="context.currentMouseover"
       :currentMouseoverT="context.currentMouseoverT"
-      :vGenomes="context.vGenomes"
       :height="height"
       ref="fiducials"
       />
     <zoom-strip
-       v-for="zs in context.strips"
+       v-for="(zs,i) in context.strips"
        ref="strips"
       :key="zs.genome.name"
       :genome="zs.genome"
@@ -45,7 +44,7 @@ import ZoomFiducials from '@/components/ZoomFiducials'
 import svg2png from '@/lib/Svg2Png'
 export default MComponent({
   name: 'ZoomMain',
-  props: ['context'],
+  props: ['context','lockStepScrolling'],
   components: { ZoomStrip, ZoomFiducials },
   data: function () {
     return {
@@ -56,7 +55,7 @@ export default MComponent({
   },
   computed: {
     vgs: function () {
-      return this.context.vGenomes.map(g => g.name).join(' ')
+      return this.context.strips.map(s => s.genome.name).join(' ')
     }
   },
   watch: {
@@ -74,9 +73,9 @@ export default MComponent({
     },
     setYs () {
       let dy = 0
-      this.context.vGenomes.forEach(vg => {
-        vg.zoomY = dy
-        dy += vg.height + 34
+      this.context.strips.forEach(s => {
+        s.genome.zoomY = dy
+        dy += s.genome.height + 34
       })
       this.height = dy
     },
@@ -108,7 +107,7 @@ export default MComponent({
   },
   mounted: function () {
     this.$root.$on('region-drag', d => {
-      // this.globalScrollDelta = d
+      if (this.lockStepScrolling) this.globalScrollDelta = d
     })
     this.$root.$on('region-dragend', d => {
       this.globalScrollDelta = 0

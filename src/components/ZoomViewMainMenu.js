@@ -17,7 +17,7 @@ function getMenu (thisObj) {
         let chrArg = `selectedChromosome=${c.chr.name}`
         let coordArg = `coordinate=${c.start}-${c.end}`
         let unitArg = 'coordinateUnit=bp'
-        let csArgs = this.context.vGenomes.map(g => `selectedStrains=${g.name}`)
+        let csArgs = this.context.strips.map(s => `selectedStrains=${s.genome.name}`)
         let rsArg = `referenceStrain=${this.context.rGenome.name}`
         let linkUrl = `${urlBase}?${tabArg}&${searchByArg}&${chrArg}&${coordArg}&${unitArg}&${rsArg}&${csArgs.join('&')}`
         window.open(linkUrl, '_blank')

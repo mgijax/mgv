@@ -203,8 +203,6 @@ export default MComponent({
     return {
       // all genomes (order not important)
       allGenomes: [],
-      // visible genomes (in viewing order)
-      vGenomes: [],
       // current reference genome
       rGenome: { name: '' },
       // predefined sets of genomes for easy selections
@@ -214,16 +212,7 @@ export default MComponent({
       dmode: 'direct', // one of: direct, landmark, mapped
       // Three ways to specify which regions to draw.
       // 1. Specify the regions explicitly. Each region is a genome+chr+start+end
-      strips: [{
-        genome: { name: '' },
-        regions: [{
-          genome: { name: '', height: 0, zoomY: 0 },
-          chr: { name: '' },
-          start: 1,
-          end: 1,
-          width: 1
-        }]
-      }],
+      strips: [],
       // 2. Specify regions relative to a landmark.
       lcoords: {
         // alignment landmark
@@ -277,6 +266,9 @@ export default MComponent({
     },
     zoomWidth: function () {
       return this.$refs.zoomView.$refs.main.width
+    },
+    vGenomes: function () {
+      return this.strips.map(s => s.genome)
     }
   },
   methods: {
@@ -298,15 +290,12 @@ export default MComponent({
       let r
       let n
       let nc
-      //
-      // currentMouseover
-      newc.currentMouseover = cxt.currentMouseover === undefined ? this.currentMouseover : cxt.currentMouseover
-      newc.currentMouseoverT = cxt.currentMouseoverT === undefined ? this.currentMouseoverT : cxt.currentMouseoverT
-      //
-      // current selection
-      newc.currentSelection = cxt.currentSelection || this.currentSelection
 
-      // resolve ref genome. If none specified, use current ref
+      //
+      newc.currentMouseover = cxt.currentMouseover
+      newc.currentMouseoverT = cxt.currentMouseoverT
+      newc.currentSelection = cxt.currentSelection
+
       newc.ref = this.rGenome
       if (cxt.ref) {
         // get specified ref genome name and look it up
@@ -332,6 +321,7 @@ export default MComponent({
         }).filter(x => x)
         //
         if (newc.strips.length === 0) newc.strips = this.strips
+        //
         newc.genomes = newc.strips.map(r => r.genome)
         if (newc.genomes.indexOf(newc.ref) === -1) newc.ref = newc.genomes[0]
         newc.lcoords = {
@@ -342,14 +332,21 @@ export default MComponent({
         return Promise.resolve(newc)
       }
       //
-      // resolve genomes. Here we assume genomes are given in the desired order.
+      if (cxt.landmark === null) {
+        // explicit null means stop aligning on the landmark
+        newc.strips = this.strips
+        return Promise.resolve(newc)
+      }
+      // If here, the new context specifes either mapped or landmark coordinates
+      //
+      // Resolve genomes. Assume genomes are given in the desired order.
       if (cxt.genomes) {
         if (!Array.isArray(cxt.genomes)) cxt.genomes = [cxt.genomes]
         cxt.genomes = cxt.genomes.map(g => {
           return this.allGenomes.filter(a => a.name === (g.name || g))[0]
         }).filter(x => x)
       } else {
-        cxt.genomes = this.vGenomes.slice()
+        cxt.genomes = u.removeDups(this.strips.map(s => s.genome))
       }
       // if ref genome not included in genomes list, insert it at the front
       if (cxt.genomes.indexOf(newc.ref) === -1) cxt.genomes.unshift(newc.ref)
@@ -369,13 +366,6 @@ export default MComponent({
           landmark: null,
           delta: 0,
           length: nc.end - nc.start + 1
-        }
-      } else if (cxt.landmark === null) {
-        newc.coords = this.coords
-        newc.lcoords = {
-          landmark: null,
-          delta: 0,
-          length: this.lcoords.length
         }
       } else if (cxt.landmark || typeof cxt.delta === 'number' || cxt.length) {
         // make sure the ref genome's features have been loaded before continuing
@@ -401,39 +391,50 @@ export default MComponent({
           //
           return newc
         })
+      } else if (cxt.landmark === null) {
+        newc.coords = this.coords
+        newc.lcoords = {
+          landmark: null,
+          delta: 0,
+          length: this.lcoords.length
+        }
       }
       return Promise.resolve(newc)
     },
     setContext: function (cxt0, quietly) {
       this.sanitizeContext(cxt0).then(cxt => {
-        this.rGenome = cxt.ref
-        // this.vGenomes.splice(0, this.vGenomes.length, ...cxt.genomes)
-        this.vGenomes = cxt.genomes
+        if (cxt.ref) this.rGenome = cxt.ref
         if (cxt.strips) {
           this.dmode = 'direct'
           this.strips = this.regionManager.layout(cxt.strips, this.zoomWidth)
         } else if (cxt.lcoords && cxt.lcoords.landmark) {
           this.dmode = 'landmark'
           this.lcoords = cxt.lcoords
-          this.regionManager.computeLandmarkRegions(cxt.lcoords, this.vGenomes, this.zoomWidth).then(strips => {
+          this.coords = cxt.coords
+          this.regionManager.computeLandmarkRegions(cxt.lcoords, cxt.genomes).then(strips => {
             this.strips = strips
           })
         } else if (cxt.coords) {
           this.dmode = 'mapped'
           this.coords = cxt.coords
-          this.regionManager.computeMappedRegions(cxt.coords, this.vGenomes, this.zoomWidth).then(strips => {
+          this.regionManager.computeMappedRegions(cxt.coords, cxt.genomes).then(strips => {
             this.strips = strips
           })
         }
-        this.currentMouseover = cxt.currentMouseover
-        this.currentMouseoverT = cxt.currentMouseoverT
-        this.currentSelection = cxt.currentSelection
-        if (!quietly) this.$root.$emit('context-changed', cxt)
+        if (cxt.currentMouseover) this.currentMouseover = cxt.currentMouseover
+        if (cxt.currentMouseoverT) this.currentMouseoverT = cxt.currentMouseoverT
+        if (cxt.currentSelection) this.currentSelection = cxt.currentSelection
+        if (!quietly) this.$root.$emit('context-changed')
       })
+    },
+    unAlign: function () {
+      this.dmode = 'direct'
+      this.lcoords.landmark = null
+      this.$root.$emit('context-changed')
     },
     getContextString: function () {
       let parms
-      if (this.strips.length > 1) {
+      if (this.dmode === 'direct') {
         const rs = this.strips.map(s => {
           const rs = s.regions.map(r => `${r.chr.name}:${r.start}..${r.end}`).join(',')
           return `${s.genome.name}::${rs}`
@@ -442,7 +443,7 @@ export default MComponent({
           `ref=${this.rGenome.name}`,
           `regions=${rs}`
         ]
-      } else if (this.lcoords.landmark) {
+      } else if (this.dmode === 'landmark') {
         parms = [
           `ref=${this.rGenome.name}`,
           `genomes=${this.vGenomes.map(vg => vg.name).join('+')}`,
@@ -450,7 +451,7 @@ export default MComponent({
           `delta=${this.lcoords.delta}`,
           `length=${this.lcoords.length}`
         ]
-      } else {
+      } else if (this.dmode === 'mapped') {
         parms = [
           `ref=${this.rGenome.name}`,
           `genomes=${this.vGenomes.map(vg => vg.name).join('+')}`,
@@ -458,7 +459,10 @@ export default MComponent({
           `start=${this.coords.start}`,
           `end=${this.coords.end}`
         ]
+      } else {
+        u.fail('Internal error: dmode = ' + dmode)
       }
+
       if (this.currentSelection.length) {
         parms.push(`highlight=${this.currentSelection.join('+')}`)
       }
@@ -540,6 +544,8 @@ export default MComponent({
     //
     this.regionManager = new RegionManager(this)
     //
+    //
+    this.$root.$on('no-align', () => this.unAlign())
     // listen for context events - how descendant component announce they want to redraw
     this.$root.$on('context', cxt => this.setContext(cxt))
     //
@@ -610,15 +616,24 @@ export default MComponent({
     // (names and lengths).
     //
     this.dataManager.getGenomes().then(genomes => {
+      // now set up the initial state
       this.allGenomes = genomes // all the genomes (at least one)
       this.rGenome = genomes[0] // current reference genome (always set)
-      this.vGenomes = [genomes[0]] // currently visible genomes (always contains reference)
+      // initial hash from page URL
       const ih = Object.assign({}, this.historyManager.initialHash)
       ih.width = u.wWidth()
-      if (!ih.chr && !ih.landmark) {
-        ih.chr = this.coords.chr.name
-        ih.start = this.coords.start
-        ih.end = this.coords.end
+      if (!ih.strips && !ih.chr && !ih.landmark) {
+        const g = this.rGenome
+        const c = g.chromosomes[0]
+        ih.strips = [{
+          genome: g.name,
+          regions: [{
+            genome: g.name,
+            chr: c.name,
+            start: 1,
+            end: Math.min(10000000, c.length)
+          }]
+        }]
       }
       console.log('MGV: setting initial context', ih)
       this.setContext(ih, true)

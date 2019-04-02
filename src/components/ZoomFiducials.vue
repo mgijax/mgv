@@ -30,7 +30,7 @@ import MComponent from '@/components/MComponent'
 import u from '@/lib/utils'
 export default MComponent({
   name: 'ZoomFiducials',
-  props: ['features', 'currentMouseover',  'currentMouseoverT', 'vGenomes', 'height'],
+  props: ['features', 'currentMouseover',  'currentMouseoverT', 'height'],
   data: function () {
     return {
       deltaX: 0,
@@ -47,7 +47,7 @@ export default MComponent({
       return `${r1.x},${r1.y + r1.height} ${r2.x},${r2.y} ${r2.x + r2.width},${r2.y} ${r1.x + r1.width},${r1.y + r1.height}`
     },
     // Returns highlighted feature DOM nodes, grouped by canonical id and sorted by y-position
-    getStacks (features, vGenomes) {
+    getStacks (features) {
       if (!this.$parent.$el) return []
       // all visible highlighted feature nodes
       let hnodes = []

@@ -11,12 +11,13 @@
     <zoom-main
       ref="main"
       :context="context"
+      :lockStepScrolling="context.dmode === 'landmark'"
       />
     <m-menu
       :menuItems="contextMenu"
       ref="contextMenu"
       :title="menuTitle"
-      :contextObject="contextFeature"
+      :contextObject="contextObject"
       :closeButton="true"
       />
   </div>
@@ -30,6 +31,7 @@ import MMenu from '@/components/MMenu'
 import { connections } from '@/lib/InterMineServices'
 import getMainMenu from '@/components/ZoomViewMainMenu'
 import getFeatureMenus from '@/components/ZoomViewContextMenu'
+import getRegionMenu from '@/components/ZoomViewRegionMenu'
 export default MComponent({
   name: 'ZoomView',
   props: ['context'],
@@ -37,36 +39,53 @@ export default MComponent({
   data: function () {
     return {
       contextMenu: [],
-      contextFeature: null,
-      backgroundMenu: [],
+      contextObject: null,
       // main menu in the ZoomView
       mainMenu: getMainMenu(this),
+      // context menu for a region
+      backgroundMenu: getRegionMenu(this),
       // taxonid -> feature context menu
       featureMenu: getFeatureMenus(this),
     }
   },
   computed: {
     menuTitle: function () {
-      const cxt = this.contextFeature
-      const lbl = cxt ? cxt.feature.label : ''
-      const glbl = cxt ? cxt.feature.ID : ''
-      const tlbl = cxt && cxt.transcript ? cxt.transcript.ID : ''
-      const plbl = cxt && cxt.transcript && cxt.transcript.cds ? cxt.transcript.cds.ID : ''
-      return [lbl, glbl, tlbl, plbl]
+      const cxt = this.contextObject
+      if (cxt && cxt.feature) {
+        return [
+          cxt.feature.label,
+          cxt.feature.ID, 
+          cxt.transcript ? cxt.transcript.ID : '',
+          cxt.transcript && cxt.transcript.cds ? cxt.transcript.cds.ID : ''
+        ]
+      } else if (cxt && cxt.vm) {
+        const r = cxt.vm.region
+        return [
+        'Region',
+        `${r.genome.name}::${r.chr.name}:${r.start}..${r.end}`
+        ]
+      } else {
+        return ['']
+      }
     }
   },
   methods: {
     showContextMenu: function (evt) {
+      const rnode = evt.target.closest('.zoom-region')
       const fnode = evt.target.closest('.feature')
-      if (!fnode) return
-      const f = fnode ? this.dataManager.getFeatureById(fnode.getAttribute('name')) : null
-
-      const tnode = evt.target.closest('.transcript')
-      const tid = tnode ? tnode.getAttribute('name') : ''
-      const t = tnode ? f.transcripts.filter(t => t.ID === tid)[0] : null
-      
-      this.contextFeature = { feature: f, transcript: t }
-      this.contextMenu = f ? (this.featureMenu[f.genome.taxonid] || this.featureMenu['default']) : this.backgroundMenu
+      const vm = rnode ? rnode.__vue__ : null
+      if (!vm) return
+      if (fnode) {
+        const f = this.dataManager.getFeatureById(fnode.getAttribute('name'))
+        const tnode = evt.target.closest('.transcript')
+        const tid = tnode ? tnode.getAttribute('name') : ''
+        const t = tnode ? f.transcripts.filter(t => t.ID === tid)[0] : null
+        this.contextObject = { vm: vm, feature: f, transcript: t }
+        this.contextMenu = (this.featureMenu[f.genome.taxonid] || this.featureMenu['default'])
+      } else {
+        this.contextObject = { vm: vm }
+        this.contextMenu = this.backgroundMenu
+      }
       const cm = this.$refs.contextMenu
       const cbb = this.$el.getBoundingClientRect()
       const x = evt.clientY - cbb.y

@@ -26,7 +26,7 @@
             >
             <m-button
               icon="highlight_off"
-              @click="noAlign"
+              @click="$root.$emit('no-align')"
               color="red"
               title="Stop aligning on this feature."
               style="font-size: 14px;"
@@ -150,9 +150,6 @@ export default MComponent({
   methods: {
     copyProps () {
       return Object.assign({rGenome: this.context.rGenome}, this.context.coords, this.context.lcoords)
-    },
-    noAlign () {
-      this.$root.$emit('context', { landmark: null })
     },
     blurOnEnter (e) {
       if (e.keyCode === 13) e.target.blur()
