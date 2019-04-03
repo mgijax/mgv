@@ -48,50 +48,6 @@ class RegionManager {
       this.app.strips.splice(i, 1)
     }
   }
-  // Handler for region-change events
-  // Args:
-  //  d (object) event data, which includes:
-  //    vm    The ZoomRegion component
-  //    op    Operation. One of: scroll, zoom, remove
-  //
-  //    Other fields depend on the op.
-  //    delta (When op = scroll) Amount to scroll.
-  //    coords (When op = zoom) New coordinates to use.
-  //
-  regionChange (d) {
-    if (d.op === 'scroll') {
-      // scroll
-      if (this.app.dmode === 'landmark') {
-        const lmc = Object.assign({}, this.app.lcoords)
-        lmc.delta += d.delta
-        this.app.$root.$emit('context', lmc)
-      } else {
-        d.vm.region.start += d.delta
-        d.vm.region.end += d.delta
-        this.app.$root.$emit('context', {})
-      }
-    } else if (d.op === 'zoom') {
-      // zoom/set
-      if (this.app.dmode === 'landmark') {
-        const midOld = (d.vm.region.start + d.vm.region.end) / 2
-        const mid = (d.coords.start + d.coords.end) / 2
-        const lmc = Object.assign({}, this.app.lcoords)
-        lmc.delta += Math.floor(mid - midOld)
-        lmc.length = d.coords.end - d.coords.start + 1
-        this.app.$root.$emit('context', lmc)
-      } else {
-        d.vm.region.start = d.coords.start
-        d.vm.region.end = d.coords.end
-        this.app.$root.$emit('context', {})
-      }
-    } else if (d.op === 'remove') {
-      this.removeRegion(d.vm.region)
-      this.app.$root.$emit('context', {})
-    } else if (d.op === "split") {
-      this.splitRegion(d.vm.region)
-      this.app.$root.$emit('context', {})
-    }
-  }
   //--------------------------------------
   // Moves the border between r1 and its righthand neighbor by the specified amt (in pixels)
   moveBorder (r1, amt) {
@@ -105,6 +61,14 @@ class RegionManager {
     r2.deltaX += amt
   }
   //--------------------------------------
+  setRegion(r, coords) {
+    const rr = this.findRegion(r)
+    if (rr[1] === -1) return
+    if (r.chr !== coords.chr) r.chr = coords.chr
+    if (r.start !== coords.start) r.start = coords.start
+    if (r.end !== coords.end) r.end = coords.end
+  }
+  //--------------------------------------
   removeRegion (r) {
     const rr = this.findRegion(r)
     const si = rr[0], ri = rr[1]
@@ -113,17 +77,17 @@ class RegionManager {
     this.layout()
   }
   //--------------------------------------
-  zoomAllRegions (delta) {
+  zoomAllRegions (amt) {
     this.app.strips.forEach(s => {
-      s.regions.forEach(r => this.zoomRegion(r, delta))
+      s.regions.forEach(r => this.zoomRegion(r, amt))
     })
   }
   //--------------------------------------
-  zoomRegion (r, factor) {
-    factor = factor || 2
+  zoomRegion (r, amt) {
+    amt = amt || 2
     const mid = (r.start + r.end) / 2
     const len = r.end - r.start + 1
-    const newlen = Math.round(len / factor)
+    const newlen = Math.round(len / amt)
     const newstart = Math.floor(mid - newlen / 2)
     const newend = newstart + newlen - 1
     r.start = newstart
@@ -137,21 +101,26 @@ class RegionManager {
   }
   //--------------------------------------
   scrollRegion (r, delta) {
+    if (Math.abs(delta) <= 1) {
+      delta = delta * (r.end - r.start + 1)
+    }
     r.start += delta
     r.end += delta
   }
   //--------------------------------------
-  splitRegion (r) {
+  splitRegion (r, frac) {
     const rr = this.findRegion(r)
     const si = rr[0], ri = rr[1]
     if (ri === -1) return
-    const l = Math.floor((r.end - r.start + 1) / 2)
-    if (l < 1) return
     const r2 = Object.assign({}, r)
-    r.end = r.start + l - 1
-    r.length = l
-    r2.start = r.end + 1
-    r2.length = r2.end - r2.start + 1
+    const w = r.width
+    const l = r.end - r.start + 1
+    const ll = frac * l
+
+    r.width = frac * w
+    r.end = r.start + ll - 1
+    r2.width = (1 - frac) * w
+    r2.start = r.start + ll
     this.app.strips[si].regions.splice(ri + 1, 0, r2)
     this.layout()
   }
@@ -289,14 +258,64 @@ class RegionManager {
     })
     return strips
   }
+  // 
   layoutStrip (strip, width) {
-    // Compute lengths and total
-    let totalLength = strip.regions.reduce((tl, r) => {
+    // x-offset in pixels from left side of strip. Init to 12 to skip over endcap.
+    let dx = 12
+    // Number of pixels between regions 
+    let gap = 2
+    // total gap space for the strip
+    let totalGap = dx + gap * (strip.regions.length - 1)
+    // width available for the regions 
+    let availWidth = width - totalGap
+
+    // total length in bp of the regions
+    let totalLength = 0
+    // total width
+    let totalWidth = 0
+    //
+    let wcount = 0
+    let no_wcount = 0
+    let minWidth = 45 // minimum width of a region in pixels
+
+    // Compute normalized widths. First count widths and region lengths
+    strip.regions.forEach(r => {
       const l = r.end - r.start + 1
-      // only update the length if needed
+      if(l !== r.length) r.length = l   // set length if needed
+      totalLength += l
+      if (r.width) {
+        totalWidth += r.width
+        wcount += 1
+      } else {
+        no_wcount += 1
+      }
+    })
+    totalWidth += (minWidth * no_wcount)
+
+    // scale all widths
+    strip.regions.forEach(r=> {
+      const w = availWidth * ((r.width || minWidth) / totalWidth)
+      if (w !== r.width) r.width = w
+      if(dx !== r.delta) r.deltaX = dx
+      dx += r.width + gap
+    })
+  }
+  xlayoutStrip (strip, width) {
+    let totalLength = 0
+    let totalWidth = 0
+    let wcount = 0
+    let no_wcount = 0
+    strip.regions.forEach(r => {
+      const l = r.end - r.start + 1
       if(l !== r.length) r.length = l
-      return tl + l
-    }, 0)
+      totalLength += l
+      if (r.width) {
+        totalWidth += r.width
+        wcount += 1
+      } else {
+        no_wcount += 1
+      }
+    })
     // Adjust to expand tiny regions
     // 'Tiny' === less than some % of the total length
     const minLength = totalLength * 0.02
@@ -323,6 +342,34 @@ class RegionManager {
       if(dx !== r.delta) r.deltaX = dx
       dx += r.width + gap
     })
+  }
+  // Handler for region-change events
+  // Args:
+  //  d (object) event data, which includes:
+  //    vm    The ZoomRegion component
+  //    op    Operation. One of: scroll, zoom, remove
+  //
+  //    Other fields depend on the op.
+  //    delta (When op = scroll) Amount to scroll.
+  //    coords (When op = zoom) New coordinates to use.
+  //
+  regionChange (d, quietly) {
+    if (d.op === 'scroll') {
+      this.scrollRegion(d.vm.region, d.delta)
+    } else if (d.op === 'zoom') {
+      this.zoomRegion(d.vm.region, d.amt)
+    } else if (d.op === 'set') {
+      this.setRegion(d.vm.region, d.coords)
+    } else if (d.op === 'remove') {
+      this.removeRegion(d.vm.region)
+    } else if (d.op === "split") {
+      this.splitRegion(d.vm.region, d.pos)
+    }
+    if (!quietly) this.announce()
+  }
+  //
+  announce () {
+    this.app.$root.$emit('context-changed')
   }
 }
 

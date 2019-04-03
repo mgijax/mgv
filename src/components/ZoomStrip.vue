@@ -127,6 +127,7 @@ export default MComponent({
           d.prevX = e.clientX
         },
         dragend: function (e, d) {
+          this.$root.$emit('context-changed')
         }
       }, this.$el, this)
       handle.setAttribute('active','true')

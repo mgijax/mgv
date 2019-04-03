@@ -434,6 +434,12 @@ export default MComponent({
     this.spreadText()
   },
   methods: {
+    clientXtoBase: function (x) {  
+      const rx = this.$refs.underlay.getBoundingClientRect().left
+      const baseOffset = (x - rx) * this.bpp
+      const pos = Math.round(this.region.start + baseOffset)
+      return pos
+    },
     remove: function () {
       this.$root.$emit('region-change', { vm: this, op: 'remove' })
     },
@@ -686,6 +692,10 @@ export default MComponent({
       if (f) {
         this.$root.$emit('feature-dblclick', { feature: f.feature, transcript: f.transcript, event: e })
         e.stopPropagation()
+      } else {
+        const regionRect = this.$refs.underlay.getBoundingClientRect()
+        const px = e.clientX - regionRect.left
+        this.$root.$emit('region-change', { vm: this, op: 'split', pos: px / regionRect.width })
       }
     },
     initDrag () {
@@ -744,10 +754,31 @@ export default MComponent({
             this.$root.$emit('region-selected', region)
             this.regionScrollDelta = 0
           } else if (d.shiftDrag) {
-            // zoom in
-            // this.region.start = start
-            // this.region.end = end
-            this.$root.$emit('region-change', { vm: this, op: 'zoom', coords: { chr: this.region.chr, start, end }})
+            if (e.metaKey) {
+              // zoom out
+              const r = this.region
+              const f = (r.end - r.start + 1) / (end - start + 1)
+              const A = f * (start - r.start + 1)
+              const B = f * (r.end - end + 1)
+              this.$root.$emit('region-change', {
+                vm: this,
+                op: 'set',
+                coords: {
+                  chr: this.region.chr,
+                  start: Math.floor(r.start - A),
+                  end: Math.floor(r.end + B)
+                }})
+            } else {
+              // zoom in
+              this.$root.$emit('region-change', {
+                vm: this,
+                op: 'set',
+                coords: {
+                  chr: this.region.chr,
+                  start: Math.floor(start),
+                  end: Math.floor(end)
+                }})
+            }
             this.regionScrollDelta = 0
           } else {
             // const db = this.deltaB;

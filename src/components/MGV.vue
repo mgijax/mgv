@@ -439,7 +439,7 @@ export default MComponent({
       let parms
       if (this.dmode === 'direct') {
         const rs = this.strips.map(s => {
-          const rs = s.regions.map(r => `${r.chr.name}:${r.start}..${r.end}`).join(',')
+          const rs = s.regions.map(r => `${r.chr.name}:${r.start}..${r.end}/${Math.floor(r.width)}`).join(',')
           return `${s.genome.name}::${rs}`
         }).join('|')
         parms = [

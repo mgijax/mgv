@@ -80,10 +80,10 @@ export default MComponent({
         const tnode = evt.target.closest('.transcript')
         const tid = tnode ? tnode.getAttribute('name') : ''
         const t = tnode ? f.transcripts.filter(t => t.ID === tid)[0] : null
-        this.contextObject = { vm: vm, feature: f, transcript: t }
+        this.contextObject = { event: evt, vm: vm, feature: f, transcript: t }
         this.contextMenu = (this.featureMenu[f.genome.taxonid] || this.featureMenu['default'])
       } else {
-        this.contextObject = { vm: vm }
+        this.contextObject = { event: evt, vm: vm }
         this.contextMenu = this.backgroundMenu
       }
       const cm = this.$refs.contextMenu
