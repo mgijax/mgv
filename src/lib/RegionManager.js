@@ -93,6 +93,7 @@ class RegionManager {
     }
   }
   //--------------------------------------
+  // Moves the border between r1 and its righthand neighbor by the specified amt (in pixels)
   moveBorder (r1, amt) {
     const rr = this.findRegion(r1)
     const si = rr[0], ri = rr[1]

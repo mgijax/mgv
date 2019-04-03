@@ -196,6 +196,9 @@ export default MComponent({
       }.bind(this),
       listManager: function () {
         return this.listManager
+      }.bind(this),
+      regionManager: function () {
+        return this.regionManager
       }.bind(this)
     }
   },

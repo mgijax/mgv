@@ -62,7 +62,7 @@ function removeDups (lst) {
 //      drag: called during the drag (on mousemove)
 //      dragend: called at the end of the drag (on mouseup)
 //   root (SVG node) - the root of 'draggification' where drag and
-//      dragend events are detected. Must elt or an ancestor. Optional.
+//      dragend events are detected. Must be elt or an ancestor. Optional.
 //      Default is elt. (FIXME: should be document.body)
 //
 // All handlers are passed two arguments:

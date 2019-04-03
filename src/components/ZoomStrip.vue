@@ -27,16 +27,18 @@
       />
     <!-- region resize handles -->
     <rect
-      class="border-handle"
-      v-for="(zr, zri) in regions"
+      v-for="(zr,zri) in regions"
       :key="zri+'-2'"
+      class="border-handle"
       v-show="zri > 0"
       :transform="`translate(${zr.deltaX - 2.5}, 0)`"
-      :x="0"
-      :y="0"
-      :width="5"
+      :i="zri"
+      x="0"
+      y="0"
+      width="5"
       :height="height"
       fill="gray"
+      @mouseenter="activateHandle"
       />
     <!-- end cap -->
     <rect name="endcap"
@@ -91,7 +93,7 @@ export default MComponent({
     'globalScrollDelta',
     'regions'
   ],
-  inject: ['translator'],
+  inject: ['translator', 'regionManager'],
   data: function () {
     return {
       height: 60,
@@ -110,6 +112,25 @@ export default MComponent({
     },
   },
   methods: {
+    activateHandle: function (e) {
+      const handle = e.target
+      if (handle.getAttribute('active')) return
+      u.dragify(handle, {
+        dragstart: function (e, d) {
+          const i = parseInt(handle.getAttribute('i'))
+          const r = this.regions[i-1]
+          d.region = r
+          d.prevX = d.startX
+        },
+        drag: function (e, d) {
+          this.regionManager().moveBorder(d.region, e.clientX - d.prevX)
+          d.prevX = e.clientX
+        },
+        dragend: function (e, d) {
+        }
+      }, this.$el, this)
+      handle.setAttribute('active','true')
+    },
     busyStart () {
       this.busyCount += 1
     },
@@ -159,9 +180,6 @@ export default MComponent({
 .zoom-strip text[name="label"] {
   transition: y 0.5s;
 }
-.border-handle {
-  cursor: ew-resize;
-}
 .zoom-strip > [name="draghandle"] {
   cursor: grab;
   -webkit-touch-callout: none;
@@ -173,5 +191,8 @@ export default MComponent({
 }
 .zoom-strip.dragging > [name="draghandle"] {
   cursor: grabbing;
+}
+.border-handle {
+  cursor: ew-resize;
 }
 </style>
