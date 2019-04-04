@@ -82,7 +82,6 @@
         class="flexcolumn">
         <!--
         ============ Genome View ==============
-        -->
         <page-box label="GenomeView">
           <genome-view
             :context="$data"
@@ -90,6 +89,7 @@
             title="When open, shows the reference genome's chromosomes as vertical lines. When closed, shows the current chromosome as a horizontal line. Click (drag) on a chromosome to jump (zoom) to that location. Red circles show current list items (if any). Click on a circle to jump to that feature."
             />
         </page-box>
+        -->
         <!--
         ============ Feature Details ==========
         -->
@@ -208,9 +208,13 @@ export default MComponent({
       allGenomes: [],
       // current reference genome
       rGenome: { name: '' },
+      // current reference region
+      rRegion: null,
       // predefined sets of genomes for easy selections
       genomeSets: [],
       // ----------------------------------------------------
+      //
+      lockstep: false,
       // drawing mode
       dmode: 'direct', // one of: direct, landmark, mapped
       // Three ways to specify which regions to draw.
@@ -436,40 +440,11 @@ export default MComponent({
       this.$root.$emit('context-changed')
     },
     getContextString: function () {
-      let parms
-      if (this.dmode === 'direct') {
-        const rs = this.strips.map(s => {
-          const rs = s.regions.map(r => `${r.chr.name}:${r.start}..${r.end}/${Math.floor(r.width)}`).join(',')
-          return `${s.genome.name}::${rs}`
-        }).join('|')
-        parms = [
-          `ref=${this.rGenome.name}`,
-          `regions=${rs}`
-        ]
-      } else if (this.dmode === 'landmark') {
-        parms = [
-          `ref=${this.rGenome.name}`,
-          `genomes=${this.vGenomes.map(vg => vg.name).join('+')}`,
-          `landmark=${this.lcoords.landmark}`,
-          `delta=${this.lcoords.delta}`,
-          `length=${this.lcoords.length}`
-        ]
-      } else if (this.dmode === 'mapped') {
-        parms = [
-          `ref=${this.rGenome.name}`,
-          `genomes=${this.vGenomes.map(vg => vg.name).join('+')}`,
-          `chr=${this.coords.chr.name}`,
-          `start=${this.coords.start}`,
-          `end=${this.coords.end}`
-        ]
-      } else {
-        u.fail('Internal error: dmode = ' + dmode)
-      }
-
+      let cs = this.regionManager.getParameterString()
       if (this.currentSelection.length) {
-        parms.push(`highlight=${this.currentSelection.join('+')}`)
+        cs = cs + '&' + `highlight=${this.currentSelection.join('+')}`
       }
-      return parms.join('&')
+      return cs
     },
     toggleDrawer: function () {
       this.drawerOpen = !this.drawerOpen
@@ -555,7 +530,7 @@ export default MComponent({
     this.$root.$on('feature-over', arg => this.featureOver(arg.feature, arg.transcript, arg.event))
     this.$root.$on('feature-out', arg => this.featureOff(arg.feature, arg.transcript, arg.event))
     this.$root.$on('feature-click', arg => this.featureClick(arg.feature, arg.transcript, arg.event))
-    this.$root.$on('feature-dblclick', arg => this.featureDblClick(arg.feature, arg.transcript, arg.event))
+    //this.$root.$on('feature-dblclick', arg => this.featureDblClick(arg.feature, arg.transcript, arg.event))
     //
     this.$root.$on('list-click', data => {
       let lst = data.list || data

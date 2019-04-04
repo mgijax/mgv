@@ -671,16 +671,16 @@ export default MComponent({
     },
     mouseover: function (e) {
       let f = this.getEventObjects(e)
-      if (f) this.$root.$emit('feature-over', { feature: f.feature, transcript: f.transcript, event: e })
+      if (f) this.$root.$emit('feature-over', { vm: this, feature: f.feature, transcript: f.transcript, event: e })
     },
     mouseout: function (e) {
       let f = this.getEventObjects(e)
-      if (f) this.$root.$emit('feature-out', { feature: f.feature, transcript: f.transcript, event: e })
+      if (f) this.$root.$emit('feature-out', { vm: this, feature: f.feature, transcript: f.transcript, event: e })
     },
     clicked: function (e) {
       let f = this.getEventObjects(e)
       if (f) {
-        this.$root.$emit('feature-click', { feature: f.feature, transcript: f.transcript, event: e })
+        this.$root.$emit('feature-click', { vm: this, feature: f.feature, transcript: f.transcript, event: e })
         e.stopPropagation()
       } else if (this.absorbNextClick) {
         e.stopPropagation()
@@ -690,9 +690,12 @@ export default MComponent({
     dblClicked: function (e) {
       let f = this.getEventObjects(e)
       if (f) {
-        this.$root.$emit('feature-dblclick', { feature: f.feature, transcript: f.transcript, event: e })
+        // double clicked on a feature
+        this.$root.$emit('feature-align', { vm: this, feature: f.feature, transcript: f.transcript, event: e })
         e.stopPropagation()
       } else {
+        // double clicked on region background
+        // split region at that point
         const regionRect = this.$refs.underlay.getBoundingClientRect()
         const px = e.clientX - regionRect.left
         this.$root.$emit('region-change', { vm: this, op: 'split', pos: px / regionRect.width })

@@ -83,6 +83,7 @@ function dragify (elt, behavior, root, dragThis) {
   root = root || elt
   let dragging
   function startDrag (evt) {
+    if (evt.ctrlKey) return
     dragging = {
       target: evt.target,
       startX: evt.clientX,

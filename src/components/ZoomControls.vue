@@ -9,7 +9,14 @@
         :label="menuData.label"
         :menuItems="menuData.menuItems"
         />
-      <!-- coordinates box -->
+      <!-- lockstep button -->
+      <m-button
+        :icon="context.lockstep ? 'lock' : 'lock_open'"
+        @click="context.lockstep = !context.lockstep"
+        :title="context.lockstep ? 'Lockstep scrolling is ON. Click to turn OFF.' : 'Lockstep scrolling is OFF. Click to turn ON'"
+        />
+
+      <!-- coordinates box
       <div class="flexrow" name="coords">
         <label>{{my.rGenome.name}} coords</label>
         <div class="flexcolumn" style="align-items: flex-start;">
@@ -35,7 +42,8 @@
           </span>
         </div>
       </div>
-      <!-- width box -->
+      -->
+      <!-- width box
       <div class="flexrow">
         <label>Showing</label>
         <input
@@ -47,7 +55,8 @@
           />
         <span>bp</span>
       </div>
-      <!-- zoom buttons -->
+      -->
+      <!-- zoom buttons
       <div class="flexrow">
         <label>Zoom</label>
         <m-button
@@ -69,7 +78,8 @@
           style="font-weight:bold;"
           title="Zoom out more."/>
       </div>
-      <!-- pan buttons -->
+      -->
+      <!-- pan buttons
       <div class="flexrow">
         <label>Pan</label>
         <m-button
@@ -91,6 +101,7 @@
           style="font-weight:bold;"
           title="Pan right more."/>
       </div>
+      -->
       <m-button
         icon="camera_alt"
         @click="$root.$emit('camera-click','zoomview')"

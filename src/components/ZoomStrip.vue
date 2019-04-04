@@ -108,7 +108,8 @@ export default MComponent({
   },
   computed: {
     endCapColor: function () {
-      return this.context.rGenome === this.genome ? this.cfg.refEndCapColor : this.cfg.endCapColor
+      const isref = this.context.rRegion && this.context.rRegion.genome === this.genome
+      return isref ? this.cfg.refEndCapColor : this.cfg.endCapColor
     },
   },
   methods: {

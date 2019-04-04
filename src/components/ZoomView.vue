@@ -11,7 +11,6 @@
     <zoom-main
       ref="main"
       :context="context"
-      :lockStepScrolling="context.dmode === 'landmark'"
       />
     <m-menu
       :menuItems="contextMenu"
@@ -29,9 +28,9 @@ import ZoomControls from '@/components/ZoomControls'
 import ZoomMain from '@/components/ZoomMain'
 import MMenu from '@/components/MMenu'
 import { connections } from '@/lib/InterMineServices'
-import getMainMenu from '@/components/ZoomViewMainMenu'
-import getFeatureMenus from '@/components/ZoomViewContextMenu'
-import getRegionMenu from '@/components/ZoomViewRegionMenu'
+import getMainMenu from '@/lib/ZoomViewMainMenu'
+import getFeatureMenus from '@/lib/ZoomViewContextMenu'
+import getRegionMenu from '@/lib/ZoomViewRegionMenu'
 export default MComponent({
   name: 'ZoomView',
   props: ['context'],

@@ -44,7 +44,7 @@ import ZoomFiducials from '@/components/ZoomFiducials'
 import svg2png from '@/lib/Svg2Png'
 export default MComponent({
   name: 'ZoomMain',
-  props: ['context','lockStepScrolling'],
+  props: ['context'],
   components: { ZoomStrip, ZoomFiducials },
   data: function () {
     return {
@@ -107,7 +107,7 @@ export default MComponent({
   },
   mounted: function () {
     this.$root.$on('region-drag', d => {
-      if (this.lockStepScrolling) this.globalScrollDelta = d
+      if (this.context.lockstep) this.globalScrollDelta = d
     })
     this.$root.$on('region-dragend', d => {
       this.globalScrollDelta = 0

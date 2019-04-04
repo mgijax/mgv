@@ -6,6 +6,7 @@ function getMenu (thisObj) {
   return {
     icon: 'menu',
     menuItems: [{
+      /*
       icon: 'open_in_new',
       label: 'SNPs@MGI',
       helpText: 'View SNPs at MGI for the current strains in the current region. (Some strains not available.)',
@@ -52,6 +53,7 @@ function getMenu (thisObj) {
         window.open(linkUrl, '_blank')
       }).bind(thisObj)
     }, {
+      */
       icon: 'cached',
       label: 'Clear cache and reload',
       helpText: 'Clears data and preferences caches, and reloads the page.',

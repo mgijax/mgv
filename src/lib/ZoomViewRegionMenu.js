@@ -41,6 +41,14 @@ function getRegionMenu (thisObj) {
         this.$root.$emit('region-change', { vm: cxt.vm, op: 'scroll', delta: amt })
       }).bind(thisObj)
     }, {
+      // make reference
+      icon: 'check',
+      label: 'Reference region',
+      helpText: 'Make this the reference region.',
+      handler: (function (cxt) {
+        this.$root.$emit('region-change', { vm: cxt.vm, op: 'make-reference' })
+      }).bind(thisObj)
+    }, {
       // split
       icon: 'compare',
       label: 'Split',

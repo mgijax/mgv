@@ -12,7 +12,7 @@ function getMenus(thisObj) {
       helpText: 'Aligns the displayed genomes around this feature.',
       handler: (function (cxt) {
         const f = cxt.feature
-        this.$root.$emit('context', { landmark: f.id, delta: 0, currentSelection: [f.cID], ref: f.genome })
+        this.$root.$emit('feature-align', cxt)
       }).bind(thisObj)
     }
   }
