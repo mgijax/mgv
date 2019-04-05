@@ -51,6 +51,16 @@
       :height="height + 1"
       :fill="endCapColor"
       />
+    <!-- delete button  -->
+    <text name="deleteBtn"
+      :x="cfg.endCapWidth / 2"
+      :y="2"
+      alignment-baseline="hanging"
+      text-anchor="middle"
+      style="font-size: 10px; font-weight: bold;"
+      fill="gray"
+      @click="deleteClicked"
+      >X<title>Click to remove this strip.</title></text>
     <!-- drag handle  -->
     <text name="draghandle"
       ref="draghandle"
@@ -130,7 +140,7 @@ export default MComponent({
           d.prevX = d.startX
         },
         drag: function (e, d) {
-          this.regionManager().moveBorder(d.region, e.clientX - d.prevX)
+          this.regionManager().moveBorder(d.region, e.clientX - d.prevX, true)
           d.prevX = e.clientX
         },
         dragend: function (e, d) {
@@ -150,6 +160,9 @@ export default MComponent({
       this.allMaxLaneP = Math.max.apply(null, this.$children.map(r => r.maxLaneP))
       this.allMaxLaneM = Math.max.apply(null, this.$children.map(r => r.maxLaneM))
       this.$emit('height-changed', this)
+    },
+    deleteClicked () {
+      this.$root.$emit('region-change', { vm: this, op: 'delete-strip' })
     }
   },
   mounted: function () {
@@ -201,6 +214,9 @@ export default MComponent({
 }
 .zoom-strip.dragging > [name="draghandle"] {
   cursor: grabbing;
+}
+[name="deleteBtn"] {
+  cursor: pointer;
 }
 .border-handle {
   cursor: ew-resize;

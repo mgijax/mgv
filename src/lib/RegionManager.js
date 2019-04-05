@@ -11,10 +11,11 @@ class RegionManager {
     this.app.$root.$on('resize', () => this.layout())
     this.app.$root.$on('feature-align', d => {
       const f = d.feature
+      const r = d.vm.region
       const lcoords = {
         landmark: f.symbol || f.cID || f.ID,
         delta: 0,
-        length: d.vm.region.length
+        length: r.end - r.start + 1
       }
       this.alignOnLandmark(lcoords)
     })
@@ -39,20 +40,21 @@ class RegionManager {
   }
   //--------------------------------------
   //
-  setStrips (genomes) {
+  setStrips (genomes, quietly) {
    const current = this.app.strips.map(s => s.genome)
    const curset = new Set(current)
    const newset = new Set(genomes)
    const toRemove = current.filter(g => !newset.has(g))
    const toAdd = genomes.filter(g => !curset.has(g))
-   toRemove.forEach(g => this.removeStrip(g))
-   toAdd.forEach(g => this.addStrip(g))
+   toRemove.forEach(g => this.deleteStrip(g, true))
+   toAdd.forEach(g => this.addStrip(g, true))
    this.layout()
+   if (!quietly) this.announce()
   }
 
   //--------------------------------------
   // Add a strip to the display for genome g.
-  addStrip (g) {
+  addStrip (g, quietly) {
     const chr = g.chromosomes[0]
     const defaultRegion = {
       genome: g,
@@ -66,19 +68,21 @@ class RegionManager {
     }
     this.app.strips.push(strip)
     this.layout()
+    if (!quietly) this.announce()
     return strip
   }
   //--------------------------------------
   //
-  removeStrip (g) {
+  deleteStrip (g, quietly) {
     const i = this.findStrip(g)
     if (i >= 0) {
       this.app.strips.splice(i, 1)
+      if (!quietly) this.announce()
     }
   }
   //--------------------------------------
   // Moves the border between r1 and its righthand neighbor by the specified amt (in pixels)
-  moveBorder (r1, amt) {
+  moveBorder (r1, amt, quietly) {
     const rr = this.findRegion(r1)
     const si = rr[0], ri = rr[1]
     if (ri === -1) return
@@ -87,14 +91,15 @@ class RegionManager {
     r1.width += amt
     r2.width -= amt
     r2.deltaX += amt
+    if (!quietly) this.announce()
   }
   //--------------------------------------
   setRegion(r, coords) {
     const rr = this.findRegion(r)
     if (rr[1] === -1) return
     if (r.chr !== coords.chr) r.chr = coords.chr
-    if (r.start !== coords.start) r.start = coords.start
-    if (r.end !== coords.end) r.end = coords.end
+    if (r.start !== coords.start) r.start = Math.floor(coords.start)
+    if (r.end !== coords.end) r.end = Math.floor(coords.end)
   }
   //--------------------------------------
   removeRegion (r) {
@@ -132,8 +137,8 @@ class RegionManager {
     if (Math.abs(delta) <= 1) {
       delta = delta * (r.end - r.start + 1)
     }
-    r.start += delta
-    r.end += delta
+    r.start = Math.floor(r.start + delta)
+    r.end = Math.floor(r.end + delta)
   }
   //--------------------------------------
   splitRegion (r, frac) {
@@ -143,7 +148,7 @@ class RegionManager {
     const r2 = Object.assign({}, r)
     const w = r.width
     const l = r.end - r.start + 1
-    const ll = frac * l
+    const ll = Math.floor(frac * l)
 
     r.width = frac * w
     r.end = r.start + ll - 1
@@ -162,6 +167,8 @@ class RegionManager {
     const promises = this.currentGenomes().map(g => this.mapRegionToGenome(r, g))
     return Promise.all(promises).then(strips => {
       this.app.rRegion = r
+      this.app.lockstep = false
+      this.app.lcoords = null
       this.app.strips = this.layout(strips)
     })
   }
@@ -353,6 +360,8 @@ class RegionManager {
       this.splitRegion(r, d.pos)
     } else if (d.op === "make-reference") {
       this.computeMappedRegions(r)
+    } else if (d.op === 'delete-strip') {
+      this.deleteStrip(d.vm.genome)
     }
     if (!quietly) this.announce()
   }
@@ -366,13 +375,24 @@ class RegionManager {
   getParameterString () {
     let parms
     const app = this.app
+    const strips = app.strips.concat()
+    strips.sort((a,b) => a.order - b.order)
+    const rs = strips.map(s => {
+      const rs = s.regions.map(r => `${r.chr.name}:${r.start}..${r.end}/${Math.floor(r.width)}`).join(',')
+      return `${s.genome.name}::${rs}`
+    }).join('|')
+    parms = [
+      `regions=${rs}`
+    ]
+    /*
     if (app.dmode === 'direct') {
-      const rs = app.strips.map(s => {
+      const strips = app.strips.concat()
+      strips.sort((a,b) => a.order - b.order)
+      const rs = strips.map(s => {
         const rs = s.regions.map(r => `${r.chr.name}:${r.start}..${r.end}/${Math.floor(r.width)}`).join(',')
         return `${s.genome.name}::${rs}`
       }).join('|')
       parms = [
-        `ref=${app.rGenome.name}`,
         `regions=${rs}`
       ]
     } else if (app.dmode === 'landmark') {
@@ -394,6 +414,7 @@ class RegionManager {
     } else {
       u.fail('Internal error: dmode = ' + app.dmode)
     }
+    */
     return parms.join('&')
   }
 }

@@ -41,6 +41,11 @@ export default MComponent({
     changed: function () {
       this.regionManager().setStrips(this.vGs.map(g => this.dataManager.lookupGenome(g)))
     }
+  },
+  watch: {
+    strips: function () {
+      this.reset()
+    }
   }
 })
 </script>

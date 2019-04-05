@@ -44,6 +44,7 @@ import ZoomFiducials from '@/components/ZoomFiducials'
 import svg2png from '@/lib/Svg2Png'
 export default MComponent({
   name: 'ZoomMain',
+  inject: ['regionManager'],
   props: ['context'],
   components: { ZoomStrip, ZoomFiducials },
   data: function () {
@@ -82,8 +83,9 @@ export default MComponent({
     // Sets the y coordinate of each zoom strip.
     setYs () {
       let dy = 0
-      this.getYs().map(y => y.strip).forEach(s => {
+      this.getYs().map(y => y.strip).forEach((s,i) => {
         if(!s.dragging) s.zoomY = dy
+        s.strip.order = i
         dy += s.height + 34
       })
       this.height = dy
@@ -100,6 +102,7 @@ export default MComponent({
       d.data.vm.dragY = 0
       this.dragging = null
       this.setYs()
+      this.$root.$emit('context-changed')
     },
     backgroundClick: function (e) {
       if (e.target.closest('.zoom-region')) {
@@ -119,6 +122,12 @@ export default MComponent({
     window.setTimeout(() => this.resize(), 1000)
     //
     this.$root.$on('camera-click', (v) => v === 'zoomview' && this.downloadImage())
+    //
+    this.$root.$on('region-change', d => {
+      if (d.op === 'delete-strip') {
+        window.setTimeout(() => this.setYs(), 250)
+      }
+    })
   }
 })
 </script>

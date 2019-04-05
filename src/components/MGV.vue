@@ -497,7 +497,7 @@ export default MComponent({
     //
     this.preferencesManager = new PreferencesManager(this)
   },
-  mounted: function () {
+  created: function () {
     //
     this.keyManager = new KeyManager(this)
     this.keyManager.register({
@@ -505,6 +505,17 @@ export default MComponent({
      ctrlKey: true,
      handler: () => this.toggleDrawer()
     })
+    this.keyManager.register({
+     key: '+',
+     shiftKey: true,
+     handler: () => this.toggleDrawer()
+    })
+    this.keyManager.register({
+     key: '-',
+     handler: () => this.toggleDrawer()
+    })
+  },
+  mounted: function () {
     //
     this.genomeSets = this.cfg.genomeSets
     // a global handle for debugging
