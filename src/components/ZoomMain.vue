@@ -23,11 +23,12 @@
        v-for="(zs,i) in context.strips"
        ref="strips"
       :key="zs.genome.name"
+      :strip="zs"
       :genome="zs.genome"
       :context="context"
       :regions="zs.regions"
       :width="width"
-      :transform="`translate(0,${zs.genome.zoomY + zs.genome.dragY})`"
+      :transform="`translate(0,${zs.zoomY + zs.dragY})`"
       :globalScrollDelta="globalScrollDelta"
       @height-changed="setYs"
       @dragstart="zDragStart"
@@ -74,8 +75,8 @@ export default MComponent({
     setYs () {
       let dy = 0
       this.context.strips.forEach(s => {
-        s.genome.zoomY = dy
-        dy += s.genome.height + 34
+        s.zoomY = dy
+        dy += s.height + 34
       })
       this.height = dy
     },
@@ -89,15 +90,14 @@ export default MComponent({
       this.dragging = d
     },
     zDrag (d) {
-      d.data.genome.dragY = d.data.deltaY
+      d.data.vm.strip.dragY = d.data.deltaY
     },
     zDragEnd (d) {
-      d.data.genome.dragY = 0
+      d.data.vm.strip.dragY = 0
       this.dragging = null
       let ys = this.getYs()
       ys.sort((a, b) => a.y - b.y)
-      let gs = ys.map(d => d.strip.genome.name)
-      this.$root.$emit('context', { genomes: gs })
+      let gs = ys.map(d => d.data.vm.genome.name)
     },
     backgroundClick: function (e) {
       if (e.target.closest('.zoom-region')) {

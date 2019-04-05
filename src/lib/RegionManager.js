@@ -248,8 +248,13 @@ class RegionManager {
   layout (strips, width) {
     strips = strips || this.app.strips
     width = width || this.app.zoomWidth
+    let dy = 0
     strips.forEach(strip => {
       this.layoutStrip(strip, width)
+      strip.zoomY = dy
+      strip.dragY = 0
+      strip.height = strip.height || 60
+      dy += strip.height
     })
     return strips
   }

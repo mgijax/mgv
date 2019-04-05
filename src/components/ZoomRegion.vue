@@ -406,7 +406,7 @@ export default MComponent({
     },
     height: function () {
       let h = (this.allMaxLaneP + this.allMaxLaneM) * (this.featureHeight + this.laneGap) + this.laneGap + 4
-      return h
+      return Math.max(h, this.cfg.minHeight)
     },
     zeroOffset: function () {
       return this.allMaxLaneP * (this.featureHeight + this.laneGap) + Math.max(this.laneGap, 10)

@@ -5,7 +5,7 @@
     <text
       name="label"
       :x="cfg.endCapWidth"
-      :y="height + 10"
+      :y="strip.height + 10"
       alignment-baseline="hanging"
       stroke="none"
       font-family= "sans-serif"
@@ -36,7 +36,7 @@
       x="0"
       y="0"
       width="5"
-      :height="height"
+      :height="strip.height"
       fill="gray"
       @mouseenter="activateHandle"
       />
@@ -45,14 +45,14 @@
       x="0"
       y="0"
       :width="cfg.endCapWidth"
-      :height="height + 1"
+      :height="strip.height + 1"
       :fill="endCapColor"
       />
     <!-- drag handle  -->
     <text name="draghandle"
       ref="draghandle"
       :x="cfg.endCapWidth / 2"
-      :y="height / 2 + 10"
+      :y="strip.height / 2 + 10"
       text-anchor="middle"
       style="font-size: 20px; font-weight: bold;"
       fill="gray"
@@ -64,13 +64,13 @@
       <rect 
         x=0
         y=0
-        :height="height"
+        :height="strip.height"
         :width="width"
         :style="{ fillOpacity: 0.3 }"
         />
       <text
         :x="width / 2"
-        :y="height / 2"
+        :y="strip.height / 2"
         fill="white"
         >{{busyMessage}}</text>
     </g>
@@ -91,12 +91,13 @@ export default MComponent({
     'genome',
     'width',
     'globalScrollDelta',
+    'strip',
     'regions'
   ],
   inject: ['translator', 'regionManager'],
   data: function () {
     return {
-      height: 60,
+      // height: 60,
       allMaxLaneP: 0,
       allMaxLaneM: 0,
       dragging: false,
@@ -140,10 +141,9 @@ export default MComponent({
       this.busyCount -= 1
     },
     setHeight () {
-      this.height = Math.max.apply(null, this.$children.map(r => r.height))
+      this.strip.height = Math.max.apply(null, this.$children.map(r => r.height))
       this.allMaxLaneP = Math.max.apply(null, this.$children.map(r => r.maxLaneP))
       this.allMaxLaneM = Math.max.apply(null, this.$children.map(r => r.maxLaneM))
-      this.genome.height = this.height
       this.$emit('height-changed', this)
     }
   },
@@ -156,7 +156,7 @@ export default MComponent({
       // real action happens.
       dragstart: function (evt, data) {
         self.dragging = true
-        data.strip = self
+        data.vm = self
         data.genome = self.genome
         self.$emit('dragstart', { evt, data })
       },
