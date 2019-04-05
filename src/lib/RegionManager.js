@@ -37,11 +37,23 @@ class RegionManager {
   currentGenomes () {
     return u.removeDups(this.app.strips.map(s => s.genome))
   }
+  //--------------------------------------
+  //
+  setStrips (genomes) {
+   const current = this.app.strips.map(s => s.genome)
+   const curset = new Set(current)
+   const newset = new Set(genomes)
+   const toRemove = current.filter(g => !newset.has(g))
+   const toAdd = genomes.filter(g => !curset.has(g))
+   toRemove.forEach(g => this.removeStrip(g))
+   toAdd.forEach(g => this.addStrip(g))
+   this.layout()
+  }
 
   //--------------------------------------
   // Add a strip to the display for genome g.
   addStrip (g) {
-    const chr = g.chromosome[0]
+    const chr = g.chromosomes[0]
     const defaultRegion = {
       genome: g,
       chr: chr,
@@ -58,8 +70,8 @@ class RegionManager {
   }
   //--------------------------------------
   //
-  removeStrip (strip) {
-    const i = this.app.strips.indexOf(strip)
+  removeStrip (g) {
+    const i = this.findStrip(g)
     if (i >= 0) {
       this.app.strips.splice(i, 1)
     }
@@ -248,13 +260,8 @@ class RegionManager {
   layout (strips, width) {
     strips = strips || this.app.strips
     width = width || this.app.zoomWidth
-    let dy = 0
     strips.forEach(strip => {
       this.layoutStrip(strip, width)
-      strip.zoomY = dy
-      strip.dragY = 0
-      strip.height = strip.height || 60
-      dy += strip.height
     })
     return strips
   }
@@ -385,7 +392,7 @@ class RegionManager {
         `end=${app.coords.end}`
       ]
     } else {
-      u.fail('Internal error: dmode = ' + dmode)
+      u.fail('Internal error: dmode = ' + app.dmode)
     }
     return parms.join('&')
   }

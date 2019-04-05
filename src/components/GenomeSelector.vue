@@ -1,22 +1,10 @@
 <template>
   <div class="genomeSelector flexcolumn">
-  <label>Reference</label>
-  <select
-    v-model="rG"
-    @change="changeRef"
-    >
-    <option
-      v-for="genome in allGenomes"
-      :key="genome.name"
-      :value="genome.name"
-      >{{genome.name}}</option>
-  </select>
-  <label>Comparison</label>
   <select
     multiple
     size=10
     v-model="vGs"
-    @change="changeComps"
+    @change="changed"
     >
     <option
       v-for="genome in allGenomes"
@@ -24,12 +12,6 @@
       :value="genome.name"
       >{{genome.name}}</option>
   </select>
-  <button
-   v-for="(gs,i) in genomeSets"
-   :key="i"
-   type="button"
-   @click="selectedGenomeSet(gs)"
-   >{{gs.label}}</button>
   </div>
 </template>
 
@@ -38,49 +20,26 @@ import MComponent from '@/components/MComponent'
 import u from '@/lib/utils'
 export default MComponent({
   name: 'GenomeSelector',
-  props: ['allGenomes', 'vGenomes', 'rGenome', 'genomeSets'],
+  props: ['allGenomes', 'strips'],
+  inject: ['regionManager'],
   data: function () {
     return {
-      vGs: this.vGenomes.map(g => g.name),
-      rG: this.rGenome.name
+      vGs: []
     }
   },
   mounted: function () {
-    this.$watch('$props', () => {
-      this.reset()
-    }, { 'deep': true })
+    this.reset()
+    this.$root.$on('context-changed', () => this.reset())
   },
   methods: {
-    changeRef: function () {
-      let newRefAlreadyVisible = this.vGenomes.filter(vg => vg.name === this.rG).length !== 0
-      if (newRefAlreadyVisible) {
-        this.$root.$emit('context', { ref: this.rG })
-      } else {
-        let vgs = this.vGenomes.filter(vg => vg !== this.rGenome)
-        this.$root.$emit('context', { ref: this.rG, genomes: vgs })
-      }
+    reset: function () {
+      this.vGs = this.strips.map(s => s.genome.name)
     },
-    changeComps: function () {
-      // here we want to preserve current vGenomes order as much as possible.
-      // index the selected list
-      let vgxmy = u.index(this.vGs)
-      // list containing selected genomes, in current vGenomes order
-      let lst = this.vGenomes.filter(vg => vg.name in vgxmy).map(vg => vg.name)
-      // selected lists not in current vGenomes are to the end
-      let vgx = u.index(this.vGenomes, 'name')
-      let xtra = this.vGs.reduce((lst, vg) => { if (!(vg in vgx)) lst.push(vg); return lst }, [])
-      //
-      this.$root.$emit('context', { genomes: lst.concat(xtra) })
+    getGenomeByName: function (n) {
+      return this.app
     },
-    reset () {
-      this.rG = this.rGenome.name
-      this.vGs = this.vGenomes.map(g => g.name)
-    },
-    selectedGenomeSet: function (gs) {
-      this.$root.$emit('context', {
-        ref: gs.ref,
-        genomes: gs.genomes.split(',')
-      })
+    changed: function () {
+      this.regionManager().setStrips(this.vGs.map(g => this.dataManager.lookupGenome(g)))
     }
   }
 })

@@ -28,9 +28,8 @@
       :context="context"
       :regions="zs.regions"
       :width="width"
-      :transform="`translate(0,${zs.zoomY + zs.dragY})`"
       :globalScrollDelta="globalScrollDelta"
-      @height-changed="setYs"
+      @height-changed="setYs()"
       @dragstart="zDragStart"
       @drag="zDrag"
       @dragend="zDragEnd"
@@ -61,7 +60,7 @@ export default MComponent({
   },
   watch: {
     vgs: function () {
-      this.setYs()
+      if (this.$refs.strips) this.setYs()
     }
   },
   methods: {
@@ -72,32 +71,35 @@ export default MComponent({
     resize: function () {
       this.width = this.$el.parentNode.getBoundingClientRect().width
     },
+    // Returns the y coordinate of each zoom strip
+    getYs () {
+      const ys = this.$refs.strips.map(s => {
+        return { strip: s, y: s.$el.getBoundingClientRect().y }
+      })
+      ys.sort((a, b) => a.y - b.y)
+      return ys
+    },
+    // Sets the y coordinate of each zoom strip.
     setYs () {
       let dy = 0
-      this.context.strips.forEach(s => {
-        s.zoomY = dy
+      this.getYs().map(y => y.strip).forEach(s => {
+        if(!s.dragging) s.zoomY = dy
         dy += s.height + 34
       })
       this.height = dy
-    },
-    getYs () {
-      return this.$refs.strips.map(z => {
-        return { strip: z, y: z.$el.getBoundingClientRect().y }
-      })
     },
     // Handlers for dragging ZoomStrips to change their Y-order.
     zDragStart (d) {
       this.dragging = d
     },
     zDrag (d) {
-      d.data.vm.strip.dragY = d.data.deltaY
+      d.data.vm.dragY = d.data.deltaY
+      this.setYs()
     },
     zDragEnd (d) {
-      d.data.vm.strip.dragY = 0
+      d.data.vm.dragY = 0
       this.dragging = null
-      let ys = this.getYs()
-      ys.sort((a, b) => a.y - b.y)
-      let gs = ys.map(d => d.data.vm.genome.name)
+      this.setYs()
     },
     backgroundClick: function (e) {
       if (e.target.closest('.zoom-region')) {

@@ -17,10 +17,10 @@
         -->
         <page-box label="Genomes">
           <genome-selector
+            ref="genomeSelector"
             title="Select one genome as the reference and any number of genomes as comparisons."
             :allGenomes="allGenomes"
-            :vGenomes="vGenomes"
-            :rGenome="rGenome"
+            :strips="strips"
             :genomeSets="genomeSets"
             />
         </page-box>

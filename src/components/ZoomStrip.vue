@@ -1,11 +1,13 @@
 <template>
-  <g class="zoom-strip" :class="{ dragging: dragging }"
+  <g class="zoom-strip"
+    :class="{ dragging: dragging }"
+    :transform="`translate(0,${zoomY + dragY})`"
   >
     <!-- genome label -->
     <text
       name="label"
       :x="cfg.endCapWidth"
-      :y="strip.height + 10"
+      :y="height + 10"
       alignment-baseline="hanging"
       stroke="none"
       font-family= "sans-serif"
@@ -22,6 +24,7 @@
       :transform="`translate(${zr.deltaX}, 0)`"
       :globalScrollDelta="globalScrollDelta"
       @region-draw="setHeight"
+      @region-delete="setHeight"
       @busy-start="busyStart"
       @busy-end="busyEnd"
       />
@@ -36,7 +39,7 @@
       x="0"
       y="0"
       width="5"
-      :height="strip.height"
+      :height="height"
       fill="gray"
       @mouseenter="activateHandle"
       />
@@ -45,14 +48,14 @@
       x="0"
       y="0"
       :width="cfg.endCapWidth"
-      :height="strip.height + 1"
+      :height="height + 1"
       :fill="endCapColor"
       />
     <!-- drag handle  -->
     <text name="draghandle"
       ref="draghandle"
       :x="cfg.endCapWidth / 2"
-      :y="strip.height / 2 + 10"
+      :y="height / 2 + 10"
       text-anchor="middle"
       style="font-size: 20px; font-weight: bold;"
       fill="gray"
@@ -64,13 +67,13 @@
       <rect 
         x=0
         y=0
-        :height="strip.height"
+        :height="height"
         :width="width"
         :style="{ fillOpacity: 0.3 }"
         />
       <text
         :x="width / 2"
-        :y="strip.height / 2"
+        :y="height / 2"
         fill="white"
         >{{busyMessage}}</text>
     </g>
@@ -97,7 +100,9 @@ export default MComponent({
   inject: ['translator', 'regionManager'],
   data: function () {
     return {
-      // height: 60,
+      height: 60,
+      dragY: 0,
+      zoomY: 0,
       allMaxLaneP: 0,
       allMaxLaneM: 0,
       dragging: false,
@@ -141,7 +146,7 @@ export default MComponent({
       this.busyCount -= 1
     },
     setHeight () {
-      this.strip.height = Math.max.apply(null, this.$children.map(r => r.height))
+      this.height = Math.max.apply(null, this.$children.map(r => r.height))
       this.allMaxLaneP = Math.max.apply(null, this.$children.map(r => r.maxLaneP))
       this.allMaxLaneM = Math.max.apply(null, this.$children.map(r => r.maxLaneM))
       this.$emit('height-changed', this)
@@ -176,11 +181,14 @@ export default MComponent({
 </script>
 
 <style>
+.zoom-strip:not(.dragging) {
+  transition: transform 0.3s;
+}
 .zoom-strip [name="endcap"] {
-  transition: height 0.5s;
+  transition: height 0.3s;
 }
 .zoom-strip text[name="label"] {
-  transition: y 0.5s;
+  transition: y 0.3s;
 }
 .zoom-strip > [name="draghandle"] {
   cursor: grab;

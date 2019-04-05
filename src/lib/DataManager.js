@@ -50,16 +50,6 @@ class DataManager {
   // Returns a promise for all the genomes we know about.
   getGenomes () {
     return this.genomes
-    /*
-    return this.genomes.then(genomes => {
-      genomes.forEach((g, i) => {
-        g.height = 60
-        g.zoomY = i * g.height
-        g.dragY = 0
-      })
-      return genomes
-    })
-    */
   }
   // Returns a promise that resolves when all features of genome g have been loaded and registered.
   // After resolution, one may access the features of chromosome c of genome g via this.cache[g.name][c.name]
