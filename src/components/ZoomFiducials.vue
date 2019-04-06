@@ -12,12 +12,11 @@
     >
     <polygon
       class="fiducial"
-      v-for="(p, i) in s.rects"
+      v-for="(p, i) in s.pairs"
       :key="i"
-      v-if="i > 0"
-      :points="points(s.rects[i - 1].rect, s.rects[i].rect)"
+      :points="points(p[0], p[1])"
       fill="black"
-      fill-opacity="0.15"
+      :fill-opacity="cfg.fillOpacity"
       stroke="black"
       stroke-opacity="0.3"
       />
@@ -46,8 +45,54 @@ export default MComponent({
     points: function (r1, r2) {
       return `${r1.x},${r1.y + r1.height} ${r2.x},${r2.y} ${r2.x + r2.width},${r2.y} ${r1.x + r1.width},${r1.y + r1.height}`
     },
+    getStacks () {
+      if (!this.cfg.showConnectors) return []
+      if (this.cfg.connectorStyle === 'linear') {
+        return this.getStacks_linear()
+      } else if (this.cfg.connectorStyle === 'combinatorial') {
+        return this.getStacks_combinatorial()
+      } else {
+        return []
+      }
+    },
+    //
+    getStacks_combinatorial () {
+      const pel = this.$parent.$el
+      if (!pel) return []
+      // build index from canonical id -> lists (one per strip) of features with that cid
+      //   { cid -> { cid, strips: [ [ fetaures in strip with that cid ] ] }
+      const ix = {}
+      pel.querySelectorAll('.zoom-strip').forEach((zel, zi) => {
+        zel.querySelectorAll('.feature.highlight.visible').forEach(fel => {
+          const cid = fel.getAttribute('canonical')
+          if (!cid) return
+          const cdata = ix[cid] ? ix[cid] : { cid:cid, strips: [] }
+          const rects = cdata.strips[zi] || []
+          rects.push(fel.querySelector('.feature > rect').getBoundingClientRect())
+          cdata.strips[zi] = rects
+          ix[cid] = cdata
+        })
+      })
+      //
+      const result = []
+      for (let cid in ix) {
+        const currRec = { cid: cid, pairs: [] }
+        const cdata = ix[cid]
+        // generate every pairing of features between successive rows
+        cdata.strips.sort((a, b) => a[0].y - b[0].y)
+        cdata.strips.forEach((rects, i) => {
+          if (i === 0) return
+          const prevRects = cdata.strips[i - 1]
+          prevRects.forEach(r1 => rects.forEach(r2 => {
+            currRec.pairs.push([r1, r2])
+          }))
+        })
+        result.push(currRec)
+      }
+      return result
+    },
     // Returns highlighted feature DOM nodes, grouped by canonical id and sorted by y-position
-    getStacks (features) {
+    getStacks_linear () {
       if (!this.$parent.$el) return []
       // all visible highlighted feature nodes
       let hnodes = []
@@ -66,13 +111,19 @@ export default MComponent({
           }
         }
       })
+      // 
       let stacks = []
       for (let fid in ix) {
         let rects = ix[fid].map(fn => {
           return { fn, rect: fn.querySelector('.feature > rect').getBoundingClientRect() }
         })
         rects.sort((a, b) => a.rect.y - b.rect.y)
-        stacks.push({ cid: fid, rects })
+        const pairs = rects.reduce((prs, r, i) => {
+          if (i === 0) return prs
+          prs.push([rects[i - 1].rect, r.rect])
+          return prs
+        }, [])
+        stacks.push({ cid: fid, pairs })
       }
       return stacks
     }

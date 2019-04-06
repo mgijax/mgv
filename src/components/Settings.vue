@@ -1,6 +1,7 @@
 <template>
   <div class="settings flexcolumn">
   <form>
+  <!-- ============== FEATURES section  ============== -->
   <label>Features</label>
   <div
     title="Display all feature labels when view width is below display threshold."
@@ -61,6 +62,7 @@
       <option value="midpoint">midpoint</option>
     </select>
   </div>
+  <!-- ============== TRANSCRIPTS section  ============== -->
   <label>Transcripts</label>
   <!--
     WARNING: Making these threshold values editable gives the unwary user a VERY EASY way to
@@ -120,6 +122,7 @@
         v-model="ZoomRegion.spreadTranscripts"
         />
   </div>
+  <!-- ============== SEQUENCES section  ============== -->
   <label>Sequences</label>
   <div
     title="Display DNA sequence when view width is below this value."
@@ -145,6 +148,41 @@
         max="24"
         />
   </div>
+  <!-- ============== FIDUCIALS section  ============== -->
+  <label>Fiducials</label>
+  <div
+    title="For highlighted features, show connectors between genologs."
+    class="flexrow"
+    >
+    <label>Show connectors</label>
+    <input
+        type="checkbox"
+        v-model="ZoomFiducials.showConnectors"
+        />
+  </div>
+  <div
+    title="The opacity of the connector interior."
+    class="flexrow"
+    >
+    <label>Fill opacity</label>
+    <input
+        type="range"
+        v-model="ZoomFiducials.fillOpacity"
+        min="0"
+        max="0.7"
+        step="0.01"
+        />
+  </div>
+  <div
+    class="flexrow"
+    >
+    <label>Connector style</label>
+    <select v-model="ZoomFiducials.connectorStyle">
+      <option value="linear">linear</option>
+      <option value="combinatorial">combinatorial</option>
+    </select>
+  </div>
+  <!-- ============== MISC section  ============== -->
   <label>Misc</label>
   <div
     title="When checked, shows a vertical reference line indicating the base position that follows the mouse around. When unchecked, only shows during drag operations."

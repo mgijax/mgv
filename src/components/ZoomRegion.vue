@@ -123,7 +123,7 @@
         :name="f.ID"
         :canonical="f.cID"
         class="feature"
-        :class="{ highlight: featureHighlighted(f) || featureSelected(f) || featureInList(f) }"
+        :class="{ highlight: featureHighlighted(f) || featureSelected(f) || featureInList(f), visible: featureVisible(f)}"
         :transform="featureTransform(f)"
         v-show="featureVisible(f)"
         >
