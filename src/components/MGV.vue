@@ -489,6 +489,26 @@ export default MComponent({
     featureDblClick: function (f, t, e) {
       let id = f.symbol || f.cID || f.ID
       this.setContext({ landmark: id, delta: 0, currentSelection: [f.cID], ref: f.genome })
+    },
+    initKeyBindings () {
+      this.keyManager.register({
+       key: 'o',
+       ctrlKey: true,
+       handler: () => this.toggleDrawer()
+      })
+      this.keyManager.register({
+       key: '+',
+       shiftKey: true,
+       handler: () => {
+         this.regionManager.zoom(2)
+       }
+      })
+      this.keyManager.register({
+       key: '-',
+       handler: () => {
+         this.regionManager.zoom(0.5)
+       }
+      })
     }
   },
   beforeCreate: function () {
@@ -500,20 +520,16 @@ export default MComponent({
   created: function () {
     //
     this.keyManager = new KeyManager(this)
-    this.keyManager.register({
-     key: 'o',
-     ctrlKey: true,
-     handler: () => this.toggleDrawer()
-    })
-    this.keyManager.register({
-     key: '+',
-     shiftKey: true,
-     handler: () => this.toggleDrawer()
-    })
-    this.keyManager.register({
-     key: '-',
-     handler: () => this.toggleDrawer()
-    })
+    //
+    this.historyManager = new HistoryManager(this)
+    //
+    this.listManager = new ListManager(this, this.lists)
+    //
+    this.translator = new Translator(this)
+    //
+    this.regionManager = new RegionManager(this)
+    //
+    this.initKeyBindings()
   },
   mounted: function () {
     //
@@ -524,14 +540,6 @@ export default MComponent({
     window.addEventListener('resize', () => this.resize())
     this.$nextTick(() => this.resize())
 
-    //
-    this.historyManager = new HistoryManager(this)
-    //
-    this.listManager = new ListManager(this, this.lists)
-    //
-    this.translator = new Translator(this)
-    //
-    this.regionManager = new RegionManager(this)
     //
     //
     this.$root.$on('no-align', () => this.unAlign())

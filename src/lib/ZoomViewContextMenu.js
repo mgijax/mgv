@@ -12,6 +12,8 @@ function getMenus(thisObj) {
       helpText: 'Aligns the displayed genomes around this feature.',
       handler: (function (cxt) {
         const f = cxt.feature
+        const rvm = cxt.event.target.closest('.zoom-region').__vue__
+        cxt.basePos = rvm.clientXtoBase(cxt.event.clientX)
         this.$root.$emit('feature-align', cxt)
       }).bind(thisObj)
     }

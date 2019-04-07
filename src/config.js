@@ -13,7 +13,7 @@ export default {
   // Timestamp used at page load to determine whether to flush user's setting cache.
   //
   // IMPORTANT!!! You MUST update this value whenever this config file changes!!!
-  TIMESTAMP: 'Tue Mar  14 05:56:39 EST 2019',
+  TIMESTAMP: 'Tue Mar  15 05:56:39 EST 2019',
   ///////////////////////////////////////////
 
   //
@@ -79,7 +79,6 @@ export default {
     minWidth: 0.02, // minimum region width, as a fraction of total width
     minHeight: 60,  // minimum region height in pixels
     pad: 3,
-    featureAlignment: '5-prime', // one of: '5-prime', '3-prime', 'proximal', 'distal', 'midpoint'
     featureHeight: 10,
     laneGap: 6,
     featureFontSize: 10,

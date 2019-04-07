@@ -49,19 +49,6 @@
         max="24"
         />
   </div>
-  <div
-    title="Reference point when aligned on a feature."
-    class="flexrow"
-    >
-    <label>Align on</label>
-    <select v-model="ZoomRegion.featureAlignment">
-      <option value="5-prime">5-prime end</option>
-      <option value="3-prime">3-prime end</option>
-      <option value="proximal">proximal end</option>
-      <option value="distal">distal end</option>
-      <option value="midpoint">midpoint</option>
-    </select>
-  </div>
   <!-- ============== TRANSCRIPTS section  ============== -->
   <label>Transcripts</label>
   <!--

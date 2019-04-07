@@ -7,6 +7,8 @@ class RegionManager {
   //--------------------------------------
   constructor (app) {
     this.app = app
+    this.currRegion = null
+    this.app.$root.$on('region-current', r => { this.currRegion = r })
     this.app.$root.$on('region-change', d => this.regionChange(d))
     this.app.$root.$on('resize', () => this.layout())
     this.app.$root.$on('feature-align', d => {
@@ -14,6 +16,7 @@ class RegionManager {
       const r = d.vm.region
       const lcoords = {
         landmark: f.symbol || f.cID || f.ID,
+        anchor: d.basePos ? ((d.basePos - f.start + 1) / (f.end - f.start + 1)) : null,
         delta: 0,
         length: r.end - r.start + 1
       }
@@ -60,7 +63,8 @@ class RegionManager {
       genome: g,
       chr: chr,
       start: 1,
-      end: Math.min(10000000, chr.length)
+      end: Math.min(10000000, chr.length),
+      width: 1 // value doesn't matter here
     }
     const strip = {
       genome: g,
@@ -76,6 +80,10 @@ class RegionManager {
   deleteStrip (g, quietly) {
     const i = this.findStrip(g)
     if (i >= 0) {
+      const rr = this.app.rRegion
+      if (this.app.strips[i].regions.indexOf(rr) !== -1) {
+        this.app.rRegion = null
+      }
       this.app.strips.splice(i, 1)
       if (!quietly) this.announce()
     }
@@ -125,6 +133,10 @@ class RegionManager {
     const newend = newstart + newlen - 1
     r.start = newstart
     r.end = newend
+  }
+  //--------------------------------------
+  zoom (amt, quietly) {
+    this.regionChange({ vm: this.currRegion, op: 'zoom', amt: amt }, quietly)
   }
   //--------------------------------------
   scrollAllRegions (delta) {
@@ -233,23 +245,27 @@ class RegionManager {
     const alignOn = config.ZoomRegion.featureAlignment
     const lm = this.app.dataManager.getGenolog(lcoords.landmark, genome)
     let lmp
-    switch (alignOn) {
-    case '5-prime':
-      lmp = lm.strand === '+' ? lm.start : lm.end
-      break
-    case '3-prime':
-      lmp = lm.strand === '+' ? lm.end : lm.start
-      break
-    case 'proximal':
-      lmp = lm.start
-      break
-    case 'distal':
-      lmp = lm.end
-      break
-    case 'midpoint':
-      lmp = Math.floor((lm.start + lm.end) / 2)
-      break
-    default:
+    if (typeof(lcoords.anchor) === 'number') {
+      lmp = lm.start + lcoords.anchor * (lm.end - lm.start + 1)
+    } else {
+      switch (alignOn) {
+      case '5-prime':
+        lmp = lm.strand === '+' ? lm.start : lm.end
+        break
+      case '3-prime':
+        lmp = lm.strand === '+' ? lm.end : lm.start
+        break
+      case 'proximal':
+        lmp = lm.start
+        break
+      case 'distal':
+        lmp = lm.end
+        break
+      case 'midpoint':
+      default:
+        lmp = Math.floor((lm.start + lm.end) / 2)
+        break
+      }
     }
     const s = Math.round(lmp - w / 2) + delta
     return {
@@ -325,14 +341,16 @@ class RegionManager {
   //
   //    Other fields depend on the op.
   //    delta (When op = scroll) Amount to scroll.
-  //    coords (When op = zoom) New coordinates to use.
+  //    coords (When op = set) New coordinates to use.
+  //    amt (When op = zoom) Zoom factor 
+  //    pos (when op = split) Position of the split. (0..1)
   //
   regionChange (d, quietly) {
     const r = d.vm.region
     if (d.op === 'scroll') {
       if (this.app.lockstep) {
         this.scrollAllRegions(d.delta)
-      } else if (this.app.rRegion && r === this.app.rRegion) {
+      } else if (r === this.app.rRegion) {
         this.scrollRegion(r, d.delta)
         this.computeMappedRegions(r)
       } else {
@@ -341,7 +359,7 @@ class RegionManager {
     } else if (d.op === 'zoom') {
       if (this.app.lockstep) {
         this.zoomAllRegions(d.amt)
-      } else if (this.app.region && r === this.app.rRegion) {
+      } else if (r === this.app.rRegion) {
         this.zoomRegion(r, d.amt)
         this.computeMappedRegions(r)
       } else {
@@ -349,11 +367,11 @@ class RegionManager {
       }
     } else if (d.op === 'set') {
       this.setRegion(r, d.coords)
-      if (this.app.rRegion && r === this.app.rRegion) {
+      if (r === this.app.rRegion) {
         this.computeMappedRegions(r)
       }
     } else if (d.op === 'remove') {
-      if (this.app.rRegion && r === this.app.rRegion) this.app.rRegion = null
+      if (r === this.app.rRegion) this.app.rRegion = null
       this.removeRegion(r)
     } else if (d.op === "split") {
       if (r === this.app.rRegion) this.app.rRegion = null
@@ -384,37 +402,6 @@ class RegionManager {
     parms = [
       `regions=${rs}`
     ]
-    /*
-    if (app.dmode === 'direct') {
-      const strips = app.strips.concat()
-      strips.sort((a,b) => a.order - b.order)
-      const rs = strips.map(s => {
-        const rs = s.regions.map(r => `${r.chr.name}:${r.start}..${r.end}/${Math.floor(r.width)}`).join(',')
-        return `${s.genome.name}::${rs}`
-      }).join('|')
-      parms = [
-        `regions=${rs}`
-      ]
-    } else if (app.dmode === 'landmark') {
-      parms = [
-        `ref=${app.rGenome.name}`,
-        `genomes=${app.vGenomes.map(vg => vg.name).join('+')}`,
-        `landmark=${app.lcoords.landmark}`,
-        `delta=${app.lcoords.delta}`,
-        `length=${app.lcoords.length}`
-      ]
-    } else if (app.dmode === 'mapped') {
-      parms = [
-        `ref=${app.rGenome.name}`,
-        `genomes=${app.vGenomes.map(vg => vg.name).join('+')}`,
-        `chr=${app.coords.chr.name}`,
-        `start=${app.coords.start}`,
-        `end=${app.coords.end}`
-      ]
-    } else {
-      u.fail('Internal error: dmode = ' + app.dmode)
-    }
-    */
     return parms.join('&')
   }
 }

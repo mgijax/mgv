@@ -1,17 +1,35 @@
 <template>
-  <div class="genomeSelector flexcolumn">
-  <select
-    multiple
-    size=10
-    v-model="vGs"
-    @change="changed"
+  <div
+    class="genomeSelector flexcolumn"
     >
-    <option
+    <!--
+    <select
+      multiple
+      size=10
+      v-model="vGs"
+      @change="changed"
+      >
+      <option
+        v-for="genome in allGenomes"
+        :key="genome.name"
+        :value="genome.name"
+        >{{genome.name}}</option>
+    </select>
+    -->
+    <div
       v-for="genome in allGenomes"
       :key="genome.name"
-      :value="genome.name"
-      >{{genome.name}}</option>
-  </select>
+      class="flexrow"
+      >
+      <input
+        type="checkbox"
+        :id="genome.name"
+        :value="genome.name"
+        v-model="vGs"
+        @change="changed"
+        />
+      <label :for="genome.name">{{genome.name}}</label>
+    </div>
   </div>
 </template>
 
@@ -20,7 +38,7 @@ import MComponent from '@/components/MComponent'
 import u from '@/lib/utils'
 export default MComponent({
   name: 'GenomeSelector',
-  props: ['allGenomes', 'strips'],
+  props: ['allGenomes', 'strips', 'genomeSets'],
   inject: ['regionManager'],
   data: function () {
     return {
@@ -52,6 +70,9 @@ export default MComponent({
 
 <style scoped>
 .genomeSelector label {
-    align-self: flex-start;
+  align-self: flex-start;
+}
+.genomeSelector .flexrow {
+  justify-content: flex-start;
 }
 </style>

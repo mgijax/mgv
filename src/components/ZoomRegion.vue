@@ -667,8 +667,10 @@ export default MComponent({
       this.currRange = [px, px]
     },
     mouseenter: function (e) {
+      this.$root.$emit('region-current', this)
     },
     mouseleave: function (e) {
+      this.$root.$emit('region-current', null)
       if (this.dragging) return
       this.currRange = null
     },
@@ -694,7 +696,7 @@ export default MComponent({
       let f = this.getEventObjects(e)
       if (f) {
         // double clicked on a feature
-        this.$root.$emit('feature-align', { vm: this, feature: f.feature, transcript: f.transcript, event: e })
+        this.$root.$emit('feature-align', { vm: this, feature: f.feature, transcript: f.transcript, event: e, basePos: this.clientXtoBase(e.clientX) })
         e.stopPropagation()
       } else {
         // double clicked on region background
