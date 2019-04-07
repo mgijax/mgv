@@ -4,25 +4,26 @@ class KeyManager {
     document.addEventListener('keydown', e => this.keydown(e))
     this.handlers = {}
   }
-  makeKey (d) {
-    const ctrl = d.ctrlKey ? 'ctrl-' : ''
-    const shift = d.shiftKey ? 'shift-' : ''
-    const alt = d.altKey ? 'alt-' : ''
-    const meta = d.metaKey ? 'meta-' : ''
-    return ctrl + shift + alt + meta + d.key
-  }
   register (d) {
-    const k = this.makeKey(d)
-    const prev = this.handlers[k]
-    this.handlers[k] = d
-    return prev
+    if (this.handlers[d.key]) {
+      this.handlers[d.key].push(d)
+    } else {
+      this.handlers[d.key] = [ d ]
+    }
+  }
+  findHandlers (e) {
+    return (this.handlers[e.key] || []).filter(d => {
+      if ('ctrlKey' in d && d.ctrlKey !== e.ctrlKey) return false
+      if ('shiftKey' in d && d.shiftKey !== e.shiftKey) return false
+      if ('altKey' in d && d.altKey !== e.altKey) return false
+      if ('metaKey' in d && d.metaKey !== e.metaKey) return false
+      return true
+    })
   }
   keydown (e) {
-    const k = this.makeKey(e)
-    const d = this.handlers[k]
-    if (d && e.target.tagName !== 'INPUT' && e.target.tagName !== 'TEXTAREA' ) {
-      d.handler.call(d.thisObj, e)
-    }
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return
+    const handlers = this.findHandlers(e)
+    handlers.forEach(d => d.handler.call(d.thisObj, e))
   }
 }
 
