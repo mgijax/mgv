@@ -8,6 +8,9 @@
       :context="context"
       :menuData="mainMenu"
       />
+    <zoom-region-controls
+      ref="regionControls"
+      />
     <zoom-main
       ref="main"
       :context="context"
@@ -25,24 +28,22 @@
 <script>
 import MComponent from '@/components/MComponent'
 import ZoomControls from '@/components/ZoomControls'
+import ZoomRegionControls from '@/components/ZoomRegionControls'
 import ZoomMain from '@/components/ZoomMain'
 import MMenu from '@/components/MMenu'
 import { connections } from '@/lib/InterMineServices'
 import getMainMenu from '@/lib/ZoomViewMainMenu'
 import getFeatureMenus from '@/lib/ZoomViewContextMenu'
-import getRegionMenu from '@/lib/ZoomViewRegionMenu'
 export default MComponent({
   name: 'ZoomView',
   props: ['context'],
-  components: { ZoomControls, ZoomMain, MMenu },
+  components: { ZoomControls, ZoomRegionControls, ZoomMain, MMenu },
   data: function () {
     return {
       contextMenu: [],
       contextObject: null,
       // main menu in the ZoomView
       mainMenu: getMainMenu(this),
-      // context menu for a region
-      backgroundMenu: getRegionMenu(this),
       // taxonid -> feature context menu
       featureMenu: getFeatureMenus(this),
     }
@@ -74,6 +75,9 @@ export default MComponent({
       const fnode = evt.target.closest('.feature')
       const vm = rnode ? rnode.__vue__ : null
       if (!vm) return
+      const cbb = this.$el.getBoundingClientRect()
+      const y = evt.clientY - cbb.y
+      const x = evt.clientX - cbb.x
       if (fnode) {
         const f = this.dataManager.getFeatureById(fnode.getAttribute('name'))
         const tnode = evt.target.closest('.transcript')
@@ -81,15 +85,11 @@ export default MComponent({
         const t = tnode ? f.transcripts.filter(t => t.ID === tid)[0] : null
         this.contextObject = { event: evt, vm: vm, feature: f, transcript: t }
         this.contextMenu = (this.featureMenu[f.genome.taxonid] || this.featureMenu['default'])
+        const cm = this.$refs.contextMenu
+        cm.open(y, x)
       } else {
-        this.contextObject = { event: evt, vm: vm }
-        this.contextMenu = this.backgroundMenu
+        this.$refs.regionControls.open(vm.region, y, x)
       }
-      const cm = this.$refs.contextMenu
-      const cbb = this.$el.getBoundingClientRect()
-      const x = evt.clientY - cbb.y
-      const y = evt.clientX - cbb.x
-      cm.open(x, y)
     }
   }
 })

@@ -4,17 +4,6 @@
     :class="{ brushing: brushing }"
     :orientation="orientation"
     >
-    <rect
-      name="underlay"
-      ref="underlay"
-      :x="x"
-      :y="y"
-      :width="width"
-      :height="height"
-      fill="white"
-      fill-opacity="0"
-      stroke="none"
-      />
     <g name="tabgroup"
       :style="{ display: current || brushing ? 'inherit' : 'none' }"
       >
@@ -34,7 +23,7 @@
         ref="tabhandleup"
         class="tabhandle"
         :x="tabX"
-        :y="tabY-5"
+        :y="tabY-9"
         :width="tabW"
         :height="10"
         :fill="fill"
@@ -46,7 +35,7 @@
         ref="tabhandledn"
         class="tabhandle"
         :x="tabX"
-        :y="tabY + tabH - 5"
+        :y="tabY + tabH - 1"
         :width="tabW"
         :height="10"
         :fill="fill"
@@ -63,7 +52,19 @@ import Vue from 'vue'
 import u from '@/lib/utils'
 export default MComponent({
   name: 'MBrush',
-  props: ['x', 'y', 'width', 'height', 'fill', 'orientation', 'range', 'tabRange', 'current'],
+  props: [
+    'region',
+    'underlay',
+    'x',
+    'y',
+    'width',
+    'height',
+    'fill',
+    'orientation',
+    'range',
+    'tabRange',
+    'current'
+  ],
   data: function () {
     return {
       currentRange: this.tabRange.slice(),
@@ -170,35 +171,6 @@ export default MComponent({
           self.brushing = false
         }
       }, self.app.$el)
-      // Drag handlers for the background
-      u.dragify(this.$refs.underlay, {
-        dragstart: function (evt, data) {
-          let ebb = evt.target.getBoundingClientRect()
-          data.length = self.currentRange[1] - self.currentRange[0] + 1
-          let b = self.p2b(self.orientation === 'h' ? data.startX - ebb.x : data.startY - ebb.y)
-          self.currentRange = self.clamp([b, b])
-          self.brushing = true
-        },
-        drag: function (evt, data) {
-          let db = self.p2b(self.orientation === 'h' ? data.deltaX : data.deltaY)
-          let nc
-          if (db < 0) {
-            nc = [self.currentRange[1] + db, self.currentRange[1]]
-          } else {
-            nc = [self.currentRange[0], self.currentRange[0] + db]
-          }
-          self.currentRange = self.clamp(nc)
-        },
-        dragend: function (evt, data) {
-          if ((self.orientation === 'h' ? data.deltaX : data.deltaY) === 0) {
-            let len = data.length
-            let newstart = Math.round(self.currentRange[0] - len / 2)
-            self.currentRange = self.clamp([ newstart, newstart + len - 1 ])
-          }
-          self.notify()
-          self.brushing = false
-        }
-      }, this.app.$el)
     },
     notify: function () {
       this.$emit('brush', this.currentRange)

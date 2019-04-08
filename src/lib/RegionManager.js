@@ -7,8 +7,8 @@ class RegionManager {
   //--------------------------------------
   constructor (app) {
     this.app = app
-    this.currRegion = null
-    this.app.$root.$on('region-current', r => { this.currRegion = r })
+    this.currRegionVm = null
+    this.app.$root.$on('region-current', r => { this.currRegionVm = r })
     this.app.$root.$on('region-change', d => this.regionChange(d))
     this.app.$root.$on('resize', () => this.layout())
     this.app.$root.$on('feature-align', d => {
@@ -38,6 +38,15 @@ class RegionManager {
   }
   //--------------------------------------
   //
+  getRegions (g, c) {
+    let rs = this.app.strips.filter(s => s.genome === g).reduce((rs, s) => rs.concat(s.regions), [])
+    if (c) {
+      rs = rs.filter(r => r.chr === c)
+    }
+    return rs
+  }
+  //--------------------------------------
+  //
   currentGenomes () {
     return u.removeDups(this.app.strips.map(s => s.genome))
   }
@@ -57,7 +66,7 @@ class RegionManager {
 
   //--------------------------------------
   // Add a strip to the display for genome g.
-  addStrip (g, quietly) {
+  addStrip (g, quietly, r) {
     const chr = g.chromosomes[0]
     const defaultRegion = {
       genome: g,
@@ -68,7 +77,7 @@ class RegionManager {
     }
     const strip = {
       genome: g,
-      regions: [ defaultRegion ]
+      regions: [ r || defaultRegion ]
     }
     this.app.strips.push(strip)
     this.layout()
@@ -100,6 +109,19 @@ class RegionManager {
     r2.width -= amt
     r2.deltaX += amt
     if (!quietly) this.announce()
+  }
+  //--------------------------------------
+  addRegion (r) {
+    const si = this.findStrip(r.genome)
+    if (si === -1) {
+      r.width = 1
+      this.addStrip(r.genome, true, r)
+    } else {
+      const s = this.app.strips[si]
+      r.width = s.regions.length ? s.regions[0].width : 1
+      s.regions.push(r)
+    }
+    this.layout()
   }
   //--------------------------------------
   setRegion(r, coords) {
@@ -136,7 +158,7 @@ class RegionManager {
   }
   //--------------------------------------
   zoom (amt, quietly) {
-    this.regionChange({ vm: this.currRegion, op: 'zoom', amt: amt }, quietly)
+    this.regionChange({ vm: this.currRegionVm, op: 'zoom', amt: amt }, quietly)
   }
   //--------------------------------------
   scrollAllRegions (delta) {
@@ -151,6 +173,10 @@ class RegionManager {
     }
     r.start = Math.floor(r.start + delta)
     r.end = Math.floor(r.end + delta)
+  }
+  //--------------------------------------
+  scroll (delta, quietly) {
+    this.regionChange({ vm: this.currRegionVm, op: 'scroll', delta: delta }, quietly)
   }
   //--------------------------------------
   splitRegion (r, frac) {
@@ -380,6 +406,8 @@ class RegionManager {
       this.computeMappedRegions(r)
     } else if (d.op === 'delete-strip') {
       this.deleteStrip(d.vm.genome)
+    } else if (d.op === 'new') {
+      this.addRegion(d.region)
     }
     if (!quietly) this.announce()
   }

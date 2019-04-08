@@ -20,11 +20,25 @@
           ></line>
       <!-- background -->
       <rect
+        ref="background"
         :x="-width / 2"
         :width="width"
         :y="0"
         :height="chrLen"
         fill="white"
+        fill-opacity=0.5
+        stroke="none"
+        />
+      <!-- curr drag region -->
+      <rect
+        v-if="dragging"
+        ref="dragrect"
+        name="dragrect"
+        :x="-width / 2"
+        :width="width"
+        :y="dragRectY"
+        :height="dragRectHeight"
+        fill="red"
         fill-opacity=0.5
         stroke="none"
         />
@@ -63,16 +77,20 @@
           >{{f.symbol || f.ID}}</text>
       </g>
       <m-brush
+        v-for="(r, ri) in regions"
+        :key="'region'+ri"
+        :underlay="$refs.background"
         :x="-width / 2"
         :y="0"
         :width="width"
         :height="chrLen"
         fill="blue"
+        :region="r"
         :range="[1, chromosome.length]"
-        :tabRange="[coords.start, coords.end]"
-        :current="chromosome.name === coords.chr.name"
+        :tabRange="[r.start, r.end]"
+        :current="chromosome.name === r.chr.name"
         :orientation="orientation"
-        @brush="brushed($event)"
+        @brush="brushed($event, r)"
         />
     </g>
   </g>
@@ -81,6 +99,7 @@
 <script>
 import MComponent from '@/components/MComponent'
 import gc from '@/lib/GenomeCoordinates'
+import u from '@/lib/utils'
 import MBrush from '@/components/MBrush'
 
 export default MComponent({
@@ -94,22 +113,25 @@ export default MComponent({
     'font-size',
     'font-family',
     'font-color',
-    'coords',
     'width',
     'currentList',
     'currentListColor',
     'showLabels',
     'glyphRadius'
   ],
+  data: function () {
+    return {
+      dragging: false,
+      dragRectY: 0,
+      dragRectHeight: 10
+    }
+  },
   computed: {
+    regions: function () {
+      return this.app.regionManager.getRegions(this.genome, this.chromosome)
+    },
     ppb: function () {
       return this.height / this.chromosome.length
-    },
-    rstart: function () {
-      return this.coords.start * this.ppb
-    },
-    rheight: function () {
-      return (this.coords.end - this.coords.start + 1) * this.ppb
     },
     chrLen: function () {
       return this.chromosome.length * this.ppb
@@ -127,13 +149,11 @@ export default MComponent({
     }
   },
   methods: {
-    brushed: function (coords) {
-      let nc = gc.validate({
-        chr: this.chromosome.name,
-        start: coords[0],
-        end: coords[1]
-      }, this.genome, true)
-      this.$root.$emit('context', nc)
+    brushed: function (coords, rr) {
+      if (!rr) return
+      rr.start = coords[0]
+      rr.end = coords[1]
+      console.log(coords, rr)
     },
     clickedGlyph: function (f) {
       let id = f.cID || f.ID
@@ -151,7 +171,54 @@ export default MComponent({
     },
     glyphTextY: function (f) {
       return this.glyphY(f) - (this.orientation === 'h' ? 0 : this.glyphRadius)
+    },
+    clientXYtoBase: function (e) {
+      const bcr = this.$refs.background.getBoundingClientRect()
+      const px = this.orientation === 'v' ? e.clientY - bcr.top : e.clientX - bcr.left
+      const b = Math.floor(px / this.ppb)
+      return b
+    },
+  },
+  mounted: function () {
+    const self = this
+    const convert = function (e, d) {
+      return self.orientation === 'v' ? e.clientY - d.bcr.top : e.clientX - d.bcr.left
     }
+    // User can drag on chromosome to create a new region to view
+    u.dragify(this.$refs.background, {
+      dragstart: function (e, d) {
+        // on drag start, init the start/end pix coords of the drag (p1, p2).
+        // these will be used to compute the rect height and y-coord.
+        d.bcr = e.target.getBoundingClientRect()
+        d.p1 = convert(e, d)
+        d.p2 = d.p1
+        this.dragRectY = d.p1
+        this.dragRectHeight = 1
+        this.dragging = true
+      },
+      drag: function (e, d) {
+        d.p2 = Math.min(this.chrLen, Math.max(0, convert(e, d)))
+        this.dragRectY = Math.min(d.p1, d.p2)
+        this.dragRectHeight = Math.abs(d.p1 - d.p2) + 1
+      },
+      dragend: function (e, d) {
+        this.dragging = false
+        // on drag end, turn the dragged region into a coordinate region
+        const r = {
+          genome: this.genome,
+          chr: this.chromosome,
+          start: Math.floor(Math.min(d.p1, d.p2) / this.ppb),
+          end: Math.floor(Math.max(d.p1, d.p2) / this.ppb)
+        }
+        if (d.p1 === d.p2) {
+          // user just clicked. Set the region size to a minimum of 10 MB.
+          r.start -= 5000000
+          r.end += 5000000
+        }
+        this.$root.$emit('region-change', { vm: this, op: 'new', region: r })
+        console.log(r)
+      }
+    }, this.$parent.$el, this)
   }
 })
 </script>
@@ -160,7 +227,7 @@ export default MComponent({
 .glyph {
   cursor: pointer;
 }
-.genome-view-chromosome * {
+.genome-view-chromosome *:not([name="dragrect"]) {
   transition: height 0.5s;
 }
 </style>

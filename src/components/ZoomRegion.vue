@@ -246,14 +246,12 @@
 
 <script>
 import MComponent from '@/components/MComponent'
-import MBrush from '@/components/MBrush'
 import u from '@/lib/utils'
 import { TextSpreader } from '@/lib/Layout'
 import { complement } from '@/lib/genetic_code'
 //
 export default MComponent({
   name: 'ZoomRegion',
-  components: { MBrush },
   inject: ['featureColorMap', 'getFacets', 'translator'],
   props: {
     // the app context

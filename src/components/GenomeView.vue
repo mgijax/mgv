@@ -4,7 +4,16 @@
 <template>
   <div class="flexcolumn">
     <div class="flexrow" >
-      <div>{{genomeName}}</div>
+      <div>
+        <select
+          v-model="genome"
+          >
+          <option
+            v-for="g in context.allGenomes"
+            :value="g"
+            >{{g.name}}</option>
+        </select>
+      </div>
       <div
         class="flexrow" 
         style="justify-content: flex-start; flex-grow: unset;"
@@ -54,16 +63,15 @@
         :height="height"
         fill="#e1e1e1"
         />
-      <g :transform="`translate(0,${titleHeight})`">
+      <g v-if="genome" :transform="`translate(0,${titleHeight})`">
         <genome-view-chromosome
-           v-for="(c,i) in context.rGenome.chromosomes"
+           v-for="(c,i) in genome.chromosomes"
           :transform="transformChr(c,i)"
           :key="c.name"
-          :genome="context.rGenome"
+          :genome="genome"
           :chromosome="c"
           :orientation="orientation"
           :height="chrLen(c)"
-          :coords="context.coords"
           :width="chrWidth"
           :currentList="currentListGenologs"
           :currentListColor="context.currentList ? context.currentList.color : 'gray'"
@@ -74,7 +82,6 @@
     </svg>
     <div class="flexrow" style="justify-content: space-between;">
       <div>
-        {{currChr.name}}:{{this.context.coords.start}}..{{this.context.coords.end}}
       </div>
       <div>
         <span v-if="context.currentList" class="listGlyph" :style="{ backgroundColor: context.currentList.color }"/>{{context.currentList ? ' ' + context.currentList.name : ''}}
@@ -95,16 +102,17 @@ export default MComponent({
   props: ['context'],
   data: function () {
     return {
-      isOpen: true,
-      width: 600,
-      chrWidth: 20,
+      genome: null, // the genome to show
+      isOpen: true, // when open, shows all chrs (vertical); when closed, shows 1 chr (horiz).
+      width: 600, // view width
+      chrWidth: 20, // how wide to make each chr
       padding: 10,
-      openHeight: 250,
-      closedHeight: 70,
+      openHeight: 250, // view height when open
+      closedHeight: 70, // view height when closed
       titleHeight: 30,
       scrollDelta: 0,
-      fixedHeight: false,
-      showLabels: true
+      fixedHeight: false, // if true, all chrs drawn same length; else, drawn proportional
+      showLabels: true // if true, show current list feature labels
     }
   },
   computed: {
@@ -112,7 +120,7 @@ export default MComponent({
       return `${this.genomeName}:${this.currChr.name}:${this.currStart}:${this.currEnd}`
     },
     genomeName: function () {
-      return this.context.rGenome.name
+      return this.genome ? this.genome.name : ''
     },
     currChr: function () {
       return this.context.coords.chr
@@ -130,7 +138,7 @@ export default MComponent({
       return this.isOpen ? 'v' : 'h'
     },
     maxChrLen: function () {
-      return Math.max.apply(null, this.context.rGenome.chromosomes.map(c => c.length))
+      return Math.max.apply(null, this.genome.chromosomes.map(c => c.length))
     },
     innerHeight: function () {
       return this.height - this.titleHeight - this.padding
@@ -146,7 +154,7 @@ export default MComponent({
     currentListGenologs: function () {
       if (!this.context.currentList) return []
       return this.context.currentList.items.map(id => {
-        return this.dataManager.getGenolog(id, this.context.rGenome)
+        return this.dataManager.getGenolog(id, this.genome)
       }).filter(x => x)
     }
   },
@@ -168,15 +176,15 @@ export default MComponent({
     },
     scrollChromosomes (inc) {
       let v = this.scrollDelta + inc
-      let currI = this.context.rGenome.chromosomes.indexOf(this.currChr)
-      this.scrollDelta = Math.max(-currI, Math.min(v, this.context.rGenome.chromosomes.length - currI - 1))
+      let currI = this.genome.chromosomes.indexOf(this.currChr)
+      this.scrollDelta = Math.max(-currI, Math.min(v, this.genome.chromosomes.length - currI - 1))
     },
     transformChr: function (c, i) {
       if (this.orientation === 'v') {
-        let dx = (this.width - 2 * this.padding) / this.context.rGenome.chromosomes.length
+        let dx = (this.width - 2 * this.padding) / this.genome.chromosomes.length
         return `translate(${this.padding + (i + 0.5) * dx},0)`
       } else {
-        let currI = this.context.rGenome.chromosomes.indexOf(this.currChr)
+        let currI = this.genome.chromosomes.indexOf(this.currChr)
         let dy = (currI - i + this.scrollDelta) * this.chrWidth * 5
         return `translate(${this.padding},${dy})`
       }
@@ -202,6 +210,10 @@ export default MComponent({
       this.resize()
     })
     this.$root.$on('camera-click', (v) => v === 'genomeview' && this.downloadImage())
+    this.$root.$on('region-change', d => {
+      const r = d.vm.region
+      if (r && r.genome) this.genome = r.genome
+    })
   }
 })
 </script>

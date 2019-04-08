@@ -7,7 +7,7 @@
     <a href="https://vuejs.org/" target="_blank">Vue.js</a>,
     <a href="https://material.io/icons/" target="_blank">Material Icons</a>
     </span>
-    <span><a tabindex="-1" href="https://github.com/JoelRichardson/mgv">MGV@GitHub</a></span>
+    <span><a tabindex="-1" target="_blank" href="https://github.com/JoelRichardson/mgv">MGV@GitHub</a></span>
   </div>
 
 </template>

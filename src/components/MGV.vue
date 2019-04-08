@@ -82,6 +82,7 @@
         class="flexcolumn">
         <!--
         ============ Genome View ==============
+        -->
         <page-box label="GenomeView">
           <genome-view
             :context="$data"
@@ -89,7 +90,6 @@
             title="When open, shows the reference genome's chromosomes as vertical lines. When closed, shows the current chromosome as a horizontal line. Click (drag) on a chromosome to jump (zoom) to that location. Red circles show current list items (if any). Click on a circle to jump to that feature."
             />
         </page-box>
-        -->
         <!--
         ============ Feature Details ==========
         -->
@@ -210,6 +210,8 @@ export default MComponent({
       rGenome: { name: '' },
       // current reference region
       rRegion: null,
+      //
+      currRegion: null,
       // predefined sets of genomes for easy selections
       genomeSets: [],
       // ----------------------------------------------------
@@ -494,20 +496,37 @@ export default MComponent({
       this.keyManager.register({
        key: 'o',
        ctrlKey: true,
-       handler: () => this.toggleDrawer()
+       handler: () => this.toggleDrawer(),
+       thisObj: this
       })
       this.keyManager.register({
        key: '+',
        shiftKey: true,
        handler: () => {
          this.regionManager.zoom(2)
-       }
+       },
+       thisObj: this
       })
       this.keyManager.register({
        key: '-',
        handler: () => {
          this.regionManager.zoom(0.5)
-       }
+       },
+       thisObj: this
+      })
+      this.keyManager.register({
+       key: 'ArrowRight',
+       handler: () => {
+         this.regionManager.scroll(0.5)
+       },
+       thisObj: this
+      })
+      this.keyManager.register({
+       key: 'ArrowLeft',
+       handler: () => {
+         this.regionManager.scroll(-0.5)
+       },
+       thisObj: this
       })
     }
   },
@@ -545,6 +564,8 @@ export default MComponent({
     this.$root.$on('no-align', () => this.unAlign())
     // listen for context events - how descendant component announce they want to redraw
     this.$root.$on('context', cxt => this.setContext(cxt))
+    //
+    this.app.$root.$on('region-current', r => { this.currRegion = r ? r.region : null })
     //
     this.$root.$on('feature-over', arg => this.featureOver(arg.feature, arg.transcript, arg.event))
     this.$root.$on('feature-out', arg => this.featureOff(arg.feature, arg.transcript, arg.event))
