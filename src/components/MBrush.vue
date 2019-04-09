@@ -5,7 +5,6 @@
     :orientation="orientation"
     >
     <g name="tabgroup"
-      :style="{ display: current || brushing ? 'inherit' : 'none' }"
       >
       <rect
         name="tab"
@@ -63,12 +62,12 @@ export default MComponent({
     'orientation',
     'range',
     'tabRange',
-    'current'
   ],
   data: function () {
     return {
       currentRange: this.tabRange.slice(),
-      brushing: false
+      brushing: false,
+      dragX: 0
     }
   },
   computed: {
@@ -79,7 +78,7 @@ export default MComponent({
       return this.height / (this.range[1] - this.range[0] + 1)
     },
     tabX: function () {
-      return this.x
+      return this.x + this.dragX
     },
     tabY: function () {
       return this.ppb * (this.currentRange[0] - this.range[0])
@@ -132,45 +131,47 @@ export default MComponent({
       return [s, e]
     },
     initDrag () {
-      let self = this
       // Drag handlers for the tab
       u.dragify(this.$refs.tab, {
         drag: function (evt, data) {
-          let b = self.p2b(self.orientation === 'h' ? data.deltaX : data.deltaY)
-          let nc = [self.tabRange[0] + b, self.tabRange[1] + b]
-          self.currentRange = self.clamp(nc)
-          self.brushing = true
+          let b = this.p2b(this.orientation === 'h' ? data.deltaX : data.deltaY)
+          let nc = [this.tabRange[0] + b, this.tabRange[1] + b]
+          this.currentRange = this.clamp(nc)
+          this.brushing = true
+          // this.dragX = data.deltaX
         },
         dragend: function (evt, data) {
-          self.notify()
-          self.brushing = false
+          this.notify()
+          this.brushing = false
+          this.dragX = 0
         }
-      }, self.app.$el)
-      // Drag handlers for the tabhandles
+      }, this.app.$el, this)
+      // Drag handlers for the up tabhandle
       u.dragify(this.$refs.tabhandleup, {
         drag: function (evt, data) {
-          let b = self.p2b(self.orientation === 'h' ? data.deltaX : data.deltaY)
-          let nc = [self.tabRange[0] + b, self.tabRange[1]]
-          self.currentRange = self.chop(nc)
-          self.brushing = true
+          let b = this.p2b(this.orientation === 'h' ? data.deltaX : data.deltaY)
+          let nc = [this.tabRange[0] + b, this.tabRange[1]]
+          this.currentRange = this.chop(nc)
+          this.brushing = true
         },
         dragend: function (evt, data) {
-          self.notify()
-          self.brushing = false
+          this.notify()
+          this.brushing = false
         }
-      }, self.app.$el)
+      }, this.app.$el, this)
+      // Drag handlers for the down tabhandle
       u.dragify(this.$refs.tabhandledn, {
         drag: function (evt, data) {
-          let b = self.p2b(self.orientation === 'h' ? data.deltaX : data.deltaY)
-          let nc = [self.tabRange[0], self.tabRange[1] + b]
-          self.currentRange = self.chop(nc)
-          self.brushing = true
+          let b = this.p2b(this.orientation === 'h' ? data.deltaX : data.deltaY)
+          let nc = [this.tabRange[0], this.tabRange[1] + b]
+          this.currentRange = this.chop(nc)
+          this.brushing = true
         },
         dragend: function (evt, data) {
-          self.notify()
-          self.brushing = false
+          this.notify()
+          this.brushing = false
         }
-      }, self.app.$el)
+      }, this.app.$el, this)
     },
     notify: function () {
       this.$emit('brush', this.currentRange)

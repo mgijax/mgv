@@ -13,7 +13,7 @@ export default {
   // Timestamp used at page load to determine whether to flush user's setting cache.
   //
   // IMPORTANT!!! You MUST update this value whenever this config file changes!!!
-  TIMESTAMP: 'Tue Mar  15 05:56:39 EST 2019',
+  TIMESTAMP: 'Tue Mar  16 05:56:39 EST 2019',
   ///////////////////////////////////////////
 
   //
@@ -28,17 +28,14 @@ export default {
   MGV: {
     genomeSets: [{
       label: 'DO/CC founders',
-      ref: 'C57BL/6J',
       genomes: '129S1/SvImJ,A/J,C57BL/6J,CAST/EiJ,NOD/ShiLtJ,NZO/HlLtJ,PWK/PhJ,WSB/EiJ',
       description: 'View the 8 collaborative cross founder strains'
     }, {
       label: 'B6 vs non-musculus',
-      ref: 'C57BL/6J',
       genomes: 'C57BL/6J,CAROLI/EiJ,PAHARI/EiJ,SPRET/EiJ',
       description: 'View C57BL/6J versus the non-musculus strains.'
     }, {
       label: 'All',
-      ref: 'C57BL/6J',
       genomes: '129S1/SvImJ,A/J,AKR/J,BALB/cJ,C3H/HeJ,C57BL/6J,C57BL/6NJ,CAROLI/EiJ,CAST/EiJ,CBA/J,DBA/2J,FVB/NJ,LP/J,PAHARI/EiJ,NOD/ShiLtJ,NZO/HlLtJ,PWK/PhJ,SPRET/EiJ,WSB/EiJ,C57BL/6J',
       description: 'View all 19 strains (WARNING: may take a while to load and will be sluggish drawing large regions.)'
     }]

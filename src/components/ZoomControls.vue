@@ -4,104 +4,28 @@
       :class="{ fixed: fixed }"
       :style="{ top: offset + 'px' }"
       >
+      <!-- main menu -->
       <toolbar-menu
         :icon="menuData.icon"
         :label="menuData.label"
         :menuItems="menuData.menuItems"
         />
+      <!-- Search box -->
+      <span>Find:
+        <input
+          ref="searchBox"
+          size="24"
+          @keypress="blurOnEnter"
+          @blur="findLandmark($event.target.value)"
+          />
+      </span>
       <!-- lockstep button -->
       <m-button
         :icon="context.lockstep ? 'lock' : 'lock_open'"
         @click="context.lockstep = !context.lockstep"
         :title="context.lockstep ? 'Lockstep scrolling is ON. Click to turn OFF.' : 'Lockstep scrolling is OFF. Click to turn ON'"
         />
-
-      <!-- coordinates box
-      <div class="flexrow" name="coords">
-        <label>{{my.rGenome.name}} coords</label>
-        <div class="flexcolumn" style="align-items: flex-start;">
-          <input
-            size="24"
-            v-model="formattedCoords"
-            @keypress="blurOnEnter"
-            @blur="setFormatted($event.target.value)"
-            title="Enter coordinates (chr:start..end) or landmark (symbol or ID). Coordinates are relative to the reference genome and are mapped to corresponding region(s) in each comparison genome. Enter a landmark to find that feature and line up the displays."
-            />
-          <span
-            name="alignedText"
-            v-show="my.landmark"
-            >
-            <m-button
-              icon="highlight_off"
-              @click="$root.$emit('no-align')"
-              color="red"
-              title="Stop aligning on this feature."
-              style="font-size: 14px;"
-              />
-            {{alignedText}}
-          </span>
-        </div>
-      </div>
-      -->
-      <!-- width box
-      <div class="flexrow">
-        <label>Showing</label>
-        <input
-          size="12"
-          :value="width"
-          @keypress="blurOnEnter"
-          @blur="setWidth(parseInt($event.target.value))"
-          title="Shows the width in bp of the currently displayed reference genome region. Enter a smaller value to zoom in, larger to zoom out (or just click the zoom buttons)."
-          />
-        <span>bp</span>
-      </div>
-      -->
-      <!-- zoom buttons
-      <div class="flexrow">
-        <label>Zoom</label>
-        <m-button
-          icon="zoom_in"
-          @click="zoom(2 * cfg.defaultZoom)"
-          style="font-weight:bold;"
-          title="Zoom in more."/>
-        <m-button
-          icon="zoom_in"
-          @click="zoom(cfg.defaultZoom)"
-          title="Zoom in."/>
-        <m-button
-          icon="zoom_out"
-          @click="zoom(1 / cfg.defaultZoom)"
-          title="Zoom out."/>
-        <m-button
-          icon="zoom_out"
-          @click="zoom(1 / (2 * cfg.defaultZoom))"
-          style="font-weight:bold;"
-          title="Zoom out more."/>
-      </div>
-      -->
-      <!-- pan buttons
-      <div class="flexrow">
-        <label>Pan</label>
-        <m-button
-          icon="chevron_left"
-          @click="pan(-5 * cfg.defaultPan)"
-          style="font-weight:bold;"
-          title="Pan left more."/>
-        <m-button
-          icon="chevron_left"
-          @click="pan(-cfg.defaultPan)"
-          title="Pan left."/>
-        <m-button
-          icon="chevron_right"
-          @click="pan(cfg.defaultPan)"
-          title="Pan right."/>
-        <m-button
-          icon="chevron_right"
-          @click="pan(5 * cfg.defaultPan)"
-          style="font-weight:bold;"
-          title="Pan right more."/>
-      </div>
-      -->
+      <!-- camera button -->
       <m-button
         icon="camera_alt"
         @click="$root.$emit('camera-click','zoomview')"
@@ -176,6 +100,16 @@ export default MComponent({
       } catch (e) {
         this.reset(e)
       }
+    },
+    findLandmark (n) {
+      const f = this.dataManager.getFeaturesBy(n)[0]
+      if (f) {
+        const lm = f.symbol || f.cID || f.ID
+        this.$root.$emit('context', { landmark: lm, currentSelection: [f.cID || f.ID] })
+      } else {
+        alert('Landmark not found: ' + n)
+      }
+      this.$refs.searchBox.value = ''
     },
     setFormatted (c) {
       let coords = gc.parse(c)

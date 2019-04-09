@@ -206,6 +206,7 @@ class RegionManager {
       this.app.rRegion = r
       this.app.lockstep = false
       this.app.lcoords = null
+      strips.forEach(s => s.regions.forEach( r => { r.width = r.end - r.start + 1 }))
       this.app.strips = this.layout(strips)
     })
   }
@@ -257,10 +258,6 @@ class RegionManager {
     })
   }
   //--------------------------------------
-  xcomputeLandmarkRegions (lcoords, genomes) {
-    const p = Promise.all(genomes.map(g => this.app.dataManager.ensureFeatures(g)))
-    return p.then(() => genomes.map(g => this.computeLandmarkRegion(lcoords, g))).then(strips => this.layout(strips))
-  }
   computeLandmarkRegions (lcoords, genomes) {
     const ps = genomes.map(g => {
       return this.app.dataManager.ensureFeatures(g).then(() => {
@@ -330,7 +327,7 @@ class RegionManager {
 
   //--------------------------------------
   // 
-  layoutStrip (strip, width) {
+  xlayoutStrip (strip, width) {
     //
     width = width || this.app.zoomWidth
     // x-offset in pixels from left side of strip. Init to 12 to skip over endcap.
@@ -354,7 +351,7 @@ class RegionManager {
     // Compute normalized widths. First count widths and region lengths
     strip.regions.forEach(r => {
       const l = r.end - r.start + 1
-      if(l !== r.length) r.length = l   // set length if needed
+      if (l !== r.length) r.length = l   // set length if needed
       totalLength += l
       if (r.width) {
         totalWidth += r.width
@@ -372,6 +369,50 @@ class RegionManager {
       if(dx !== r.delta) r.deltaX = dx
       dx += r.width + gap
     })
+  }
+  layoutStrip (strip, width) {
+    //
+    width = width || this.app.zoomWidth
+    // x-offset in pixels from left side of strip. Init to 12 to skip over endcap.
+    let dx = 12
+    // Number of pixels between regions 
+    const gap = 2
+    // total gap space for the strip
+    const totalGap = dx + gap * (strip.regions.length - 1)
+    // width available for the regions 
+    const availWidth = width - totalGap
+    const minWidth = 45 // minimum width of a region in pixels
+    const widths0 = strip.regions.map(r => r.width || minWidth)
+    const widths = this.scaleAdjust(widths0, availWidth, minWidth)
+    strip.regions.forEach((r, i) => {
+      r.width = widths[i]
+      r.length = r.end - r.start + 1
+      r.deltaX = dx
+      dx += r.width + gap
+    })
+  }
+  //--------------------------------------
+  scaleAdjust (nums, width, mWidth) {
+    const sum = nums.reduce((t, n) => t + n, 0)
+    const f = width / sum
+    // Scale the nums, but impose a minimum width.
+    // Tally the deficit.
+    let deficit = 0
+    const scaled = nums.map(n => {
+      const n2 = f * n
+      if (n2 < mWidth) {
+        deficit += (mWidth - n2)
+        return mWidth
+      } else {
+        return n2
+      }
+    })
+    if (deficit === 0) return scaled
+    const width2 = width - deficit
+    const sum2 = scaled.reduce((t,n) => t + (n > mWidth ? n : 0), 0)
+    const f2 = width2 / sum2
+    const scaled2 = scaled.map(n => n > mWidth ? n * f2 : n)
+    return scaled2
   }
   //--------------------------------------
   // Handler for region-change events

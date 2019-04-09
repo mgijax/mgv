@@ -2,7 +2,6 @@
   <div
     class="genomeSelector flexcolumn"
     >
-    <!--
     <select
       multiple
       size=10
@@ -15,21 +14,12 @@
         :value="genome.name"
         >{{genome.name}}</option>
     </select>
-    -->
-    <div
-      v-for="genome in allGenomes"
-      :key="genome.name"
-      class="flexrow"
-      >
-      <input
-        type="checkbox"
-        :id="genome.name"
-        :value="genome.name"
-        v-model="vGs"
-        @change="changed"
-        />
-      <label :for="genome.name">{{genome.name}}</label>
-    </div>
+    <button
+      v-for="(gs, i) in genomeSets"
+      :key="i"
+      :title="gs.description"
+      @click="selectGenomeSet(gs)"
+      >{{gs.label}}</button>
   </div>
 </template>
 
@@ -42,7 +32,7 @@ export default MComponent({
   inject: ['regionManager'],
   data: function () {
     return {
-      vGs: []
+      vGs: [] // list of visible genome names
     }
   },
   mounted: function () {
@@ -53,8 +43,9 @@ export default MComponent({
     reset: function () {
       this.vGs = this.strips.map(s => s.genome.name)
     },
-    getGenomeByName: function (n) {
-      return this.app
+    selectGenomeSet (gs) {
+      this.vGs = gs.genomes.split(/,/g)
+      this.changed()
     },
     changed: function () {
       this.regionManager().setStrips(this.vGs.map(g => this.dataManager.lookupGenome(g)))

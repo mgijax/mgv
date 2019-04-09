@@ -157,6 +157,7 @@ import FeatureColorMap from '@/lib/FeatureColorMap'
 import MComponent from '@/components/MComponent'
 import gc from '@/lib/GenomeCoordinates'
 import u from '@/lib/utils'
+import config from '@/config'
 import HistoryManager from '@/lib/HistoryManager'
 import RegionManager from '@/lib/RegionManager'
 import ListManager from '@/lib/ListManager'
@@ -494,9 +495,13 @@ export default MComponent({
     },
     initKeyBindings () {
       this.keyManager.register({
-       key: 'o',
-       ctrlKey: true,
+       key: 't',
        handler: () => this.toggleDrawer(),
+       thisObj: this
+      })
+      this.keyManager.register({
+       key: 'x',
+       handler: () => { config.ZoomRegion.spreadTranscripts = !config.ZoomRegion.spreadTranscripts },
        thisObj: this
       })
       this.keyManager.register({

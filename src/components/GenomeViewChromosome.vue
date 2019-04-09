@@ -88,7 +88,6 @@
         :region="r"
         :range="[1, chromosome.length]"
         :tabRange="[r.start, r.end]"
-        :current="chromosome.name === r.chr.name"
         :orientation="orientation"
         @brush="brushed($event, r)"
         />
