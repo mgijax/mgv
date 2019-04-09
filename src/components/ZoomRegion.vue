@@ -790,7 +790,8 @@ export default MComponent({
             // const db = this.deltaB;
             // this.region.start += db
             // this.region.end += db
-            this.$root.$emit('region-change', { vm: this, op: 'scroll', delta: this.deltaB })
+            const amt = this.deltaB / (this.region.end - this.region.start + 1)
+            this.$root.$emit('region-change', { vm: this, op: 'scroll', amt: amt })
             this.regionScrollDelta = 0
           }
           

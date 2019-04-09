@@ -16,6 +16,7 @@ class RegionManager {
       const r = d.vm.region
       const lcoords = {
         landmark: f.symbol || f.cID || f.ID,
+        lgenome: f.genome,
         anchor: d.basePos ? ((d.basePos - f.start + 1) / (f.end - f.start + 1)) : null,
         delta: 0,
         length: r.end - r.start + 1
@@ -161,16 +162,14 @@ class RegionManager {
     this.regionChange({ vm: this.currRegionVm, op: 'zoom', amt: amt }, quietly)
   }
   //--------------------------------------
-  scrollAllRegions (delta) {
+  scrollAllRegions (amt) {
     this.app.strips.forEach(s => {
-      s.regions.forEach(r => this.scrollRegion(r, delta))
+      s.regions.forEach(r => this.scrollRegion(r, amt))
     })
   }
   //--------------------------------------
-  scrollRegion (r, delta) {
-    if (Math.abs(delta) <= 1) {
-      delta = delta * (r.end - r.start + 1)
-    }
+  scrollRegion (r, amt) {
+    const delta = amt * (r.end - r.start + 1)
     r.start = Math.floor(r.start + delta)
     r.end = Math.floor(r.end + delta)
   }
@@ -258,9 +257,17 @@ class RegionManager {
     })
   }
   //--------------------------------------
-  computeLandmarkRegions (lcoords, genomes) {
+  xcomputeLandmarkRegions (lcoords, genomes) {
     const p = Promise.all(genomes.map(g => this.app.dataManager.ensureFeatures(g)))
     return p.then(() => genomes.map(g => this.computeLandmarkRegion(lcoords, g))).then(strips => this.layout(strips))
+  }
+  computeLandmarkRegions (lcoords, genomes) {
+    const ps = genomes.map(g => {
+      return this.app.dataManager.ensureFeatures(g).then(() => {
+        return this.computeLandmarkRegion(lcoords, g)
+      })
+    })
+    return Promise.all(ps).then(strips => this.layout(strips))
   }
   //
   //--------------------------------------
@@ -270,6 +277,13 @@ class RegionManager {
     const w = lcoords.length
     const alignOn = config.ZoomRegion.featureAlignment
     const lm = this.app.dataManager.getGenolog(lcoords.landmark, genome)
+    if (!lm) {
+      // Landmark does not exist in this genome! Fallback: first compute the
+      // landmark region in the landmark's own genome, then map that region 
+      // to this genome.
+      const r0 = this.computeLandmarkRegion(lcoords, lcoords.lgenome)
+      return this.mapRegionToGenome(r0.regions[0], genome)
+    }
     let lmp
     if (typeof(lcoords.anchor) === 'number') {
       lmp = lm.start + lcoords.anchor * (lm.end - lm.start + 1)
@@ -308,7 +322,6 @@ class RegionManager {
   //
   layout (strips, width) {
     strips = strips || this.app.strips
-    width = width || this.app.zoomWidth
     strips.forEach(strip => {
       this.layoutStrip(strip, width)
     })
@@ -318,6 +331,8 @@ class RegionManager {
   //--------------------------------------
   // 
   layoutStrip (strip, width) {
+    //
+    width = width || this.app.zoomWidth
     // x-offset in pixels from left side of strip. Init to 12 to skip over endcap.
     let dx = 12
     // Number of pixels between regions 
@@ -375,12 +390,12 @@ class RegionManager {
     const r = d.vm.region
     if (d.op === 'scroll') {
       if (this.app.lockstep) {
-        this.scrollAllRegions(d.delta)
+        this.scrollAllRegions(d.amt)
       } else if (r === this.app.rRegion) {
-        this.scrollRegion(r, d.delta)
+        this.scrollRegion(r, d.amt)
         this.computeMappedRegions(r)
       } else {
-        this.scrollRegion(r, d.delta)
+        this.scrollRegion(r, d.amt)
       }
     } else if (d.op === 'zoom') {
       if (this.app.lockstep) {

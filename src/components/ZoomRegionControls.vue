@@ -104,7 +104,7 @@ export default MComponent({
       this.$root.$emit('region-change', { vm: this, op: 'zoom', amt: amt })
     },
     pan: function (amt) {
-      this.$root.$emit('region-change', { vm: this, op: 'scroll', delta: amt })
+      this.$root.$emit('region-change', { vm: this, op: 'scroll', amt: amt })
     },
     split: function () {
       this.$root.$emit('region-change', { vm: this, op: 'split', pos: 0.5 })
