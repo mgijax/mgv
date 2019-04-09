@@ -636,7 +636,8 @@ export default MComponent({
     this.dataManager.getGenomes().then(genomes => {
       // now set up the initial state
       this.allGenomes = genomes // all the genomes (at least one)
-      this.rGenome = genomes[0] // current reference genome (always set)
+      this.rGenome = genomes[0] 
+      this.$refs.genomeView.genome = this.allGenomes[0]
       // initial hash from page URL
       const ih = Object.assign({}, this.historyManager.initialHash)
       ih.width = u.wWidth()
