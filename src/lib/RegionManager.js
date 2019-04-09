@@ -174,8 +174,8 @@ class RegionManager {
     r.end = Math.floor(r.end + delta)
   }
   //--------------------------------------
-  scroll (delta, quietly) {
-    this.regionChange({ vm: this.currRegionVm, op: 'scroll', delta: delta }, quietly)
+  scroll (amt, quietly) {
+    this.regionChange({ vm: this.currRegionVm, op: 'scroll', amt: amt }, quietly)
   }
   //--------------------------------------
   splitRegion (r, frac) {
@@ -398,9 +398,7 @@ class RegionManager {
         this.scrollRegion(r, d.amt)
       }
     } else if (d.op === 'zoom') {
-      if (this.app.lockstep) {
-        this.zoomAllRegions(d.amt)
-      } else if (r === this.app.rRegion) {
+      if (r === this.app.rRegion) {
         this.zoomRegion(r, d.amt)
         this.computeMappedRegions(r)
       } else {
