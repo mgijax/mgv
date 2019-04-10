@@ -204,7 +204,7 @@ class RegionManager {
     const promises = this.currentGenomes().map(g => this.mapRegionToGenome(r, g))
     return Promise.all(promises).then(strips => {
       this.app.rRegion = r
-      this.app.lockstep = false
+      this.app.scrollLock = false
       this.app.lcoords = null
       strips.forEach(s => s.regions.forEach( r => { r.width = r.end - r.start + 1 }))
       this.app.strips = this.layout(strips)
@@ -252,7 +252,7 @@ class RegionManager {
   alignOnLandmark (lcoords) {
     this.computeLandmarkRegions(lcoords, this.currentGenomes()).then(strips => {
       this.app.strips = strips
-      this.app.lockstep = true
+      this.app.scrollLock = true
       this.app.lcoords = lcoords
       this.app.rRegion = null
     })
@@ -430,7 +430,7 @@ class RegionManager {
   regionChange (d, quietly) {
     const r = d.vm.region
     if (d.op === 'scroll') {
-      if (this.app.lockstep) {
+      if (this.app.scrollLock) {
         this.scrollAllRegions(d.amt)
       } else if (r === this.app.rRegion) {
         this.scrollRegion(r, d.amt)

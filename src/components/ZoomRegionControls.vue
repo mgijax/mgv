@@ -11,6 +11,8 @@
         class="material-icons"
         style="font-size: 14px; color: gray; cursor: grab;"
         >drag_indicator</i>
+      <!-- genome name -->
+      <span style="font-size: 12px">{{region ? region.genome.name : ''}}</span>
       <!-- coordinates box -->
       <input
         size="24"

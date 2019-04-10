@@ -112,7 +112,7 @@ export default MComponent({
   },
   mounted: function () {
     this.$root.$on('region-drag', d => {
-      if (this.context.lockstep) this.globalScrollDelta = d
+      if (this.context.scrollLock) this.globalScrollDelta = d
     })
     this.$root.$on('region-dragend', d => {
       this.globalScrollDelta = 0

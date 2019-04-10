@@ -55,7 +55,7 @@
     <text name="deleteBtn"
       :x="cfg.endCapWidth / 2"
       :y="2"
-      alignment-baseline="hanging"
+      dominant-baseline="hanging"
       text-anchor="middle"
       style="font-size: 10px; font-weight: bold;"
       fill="gray"

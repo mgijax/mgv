@@ -11,20 +11,24 @@
         :menuItems="menuData.menuItems"
         />
       <!-- Search box -->
-      <span>Find:
+      <div class="flexrow">
+        <label>Find</label>
         <input
           ref="searchBox"
           size="24"
           @keypress="blurOnEnter"
           @blur="findLandmark($event.target.value)"
           />
-      </span>
-      <!-- lockstep button -->
-      <m-button
-        :icon="context.lockstep ? 'lock' : 'lock_open'"
-        @click="context.lockstep = !context.lockstep"
-        :title="context.lockstep ? 'Lockstep scrolling is ON. Click to turn OFF.' : 'Lockstep scrolling is OFF. Click to turn ON'"
-        />
+      </div>
+      <!-- scroll lock button -->
+      <div class="flexrow">
+        <m-button
+          :icon="context.scrollLock ? 'lock' : 'lock_open'"
+          @click="context.scrollLock = !context.scrollLock"
+          :title="context.scrollLock ? 'Lockstep scrolling is ON. Click to turn OFF.' : 'Lockstep scrolling is OFF. Click to turn ON'"
+          />
+        <label>Scroll</label>
+        </div>
       <!-- camera button -->
       <m-button
         icon="camera_alt"
@@ -102,6 +106,7 @@ export default MComponent({
       }
     },
     findLandmark (n) {
+      if (!n) return
       const f = this.dataManager.getFeaturesBy(n)[0]
       if (f) {
         const lm = f.symbol || f.cID || f.ID
@@ -172,11 +177,6 @@ export default MComponent({
 }
 .zoom-controls > .flexrow {
     justify-content: flex-start;
-}
-.zoom-controls [name="alignedText"] {
-  position: absolute;
-  top: -16px;
-  font-size: 12px;
-  white-space: nowrap;
+    flex-grow: 0;
 }
 </style>

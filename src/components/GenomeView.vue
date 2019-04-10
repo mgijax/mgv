@@ -4,6 +4,7 @@
 <template>
   <div class="flexcolumn">
     <div class="flexrow" >
+      <!-- Genome selector -->
       <div>
         <select
           v-model="genome"
@@ -14,22 +15,26 @@
             >{{g.name}}</option>
         </select>
       </div>
+      <!-- -->
       <div
         class="flexrow" 
         style="justify-content: flex-start; flex-grow: unset;"
         >
+        <!-- Scroll chromosome down button -->
         <m-button
           title="Scroll chromosomes down."
           icon="keyboard_arrow_down"
           @click="scrollChromosomes(-1)"
           v-show="!isOpen"
           />
+        <!-- Scroll chromosome down button -->
         <m-button
           title="Scroll chromosomes up."
           icon="keyboard_arrow_up"
           @click="scrollChromosomes(+1)"
           v-show="!isOpen"
           />
+        <!-- Proportional/fixed toggle -->
         <m-button
           :title="fixedHeight ?
             'Showing chromosomes with fixed length. Click to show proportional.'
@@ -38,11 +43,13 @@
           @click="toggleHeight"
           class="rotate90"
           />
+        <!-- Show list item labels on/off toggle -->
         <m-button
           :title="showLabels ? 'Hide labels' : 'Show labels'"
           icon="title"
           @click="showLabels = !showLabels"
           />
+        <!-- Camera button -->
         <m-button
           title="Download image."
           @click="downloadImage"
@@ -50,6 +57,7 @@
           />
       </div>
     </div>
+    <!-- The view -->
     <svg
       class="genome-view"
       ref="svg"
@@ -80,10 +88,12 @@
           />
         </g>
     </svg>
+    <!-- view footer -->
     <div class="flexrow" style="justify-content: space-between;">
       <div>
       </div>
       <div>
+        <!-- current list -->
         <span v-if="context.currentList" class="listGlyph" :style="{ backgroundColor: context.currentList.color }"/>{{context.currentList ? ' ' + context.currentList.name : ''}}
       </div>
     </div>

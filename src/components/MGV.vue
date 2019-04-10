@@ -217,7 +217,7 @@ export default MComponent({
       genomeSets: [],
       // ----------------------------------------------------
       //
-      lockstep: false,
+      scrollLock: false,
       // drawing mode
       dmode: 'direct', // one of: direct, landmark, mapped
       // Three ways to specify which regions to draw.

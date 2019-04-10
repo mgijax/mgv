@@ -220,6 +220,7 @@
     -->
     <g
       class="deleteBtn"
+      @click="remove"
       >
       <rect
         :x="region.width - 10"
@@ -234,9 +235,8 @@
         :y="-zeroOffset"
         fill="white"
         fill-opacity=0
-        alignment-baseline="hanging"
+        dominant-baseline="hanging"
         text-anchor="end"
-        @click="remove"
         >X</text>
    </g>
   </g>
