@@ -34,12 +34,21 @@
           @click="scrollChromosomes(+1)"
           v-show="!isOpen"
           />
+        <!-- horiz/vert toggle -->
+        <m-button
+          :title="isOpen ?
+            'Showing chromosomes whole genome view. Click for single chromosome view.'
+           :'Showing single chromosome view. Click to show whole genome view.'"
+          icon="dehaze"
+          :class="isOpen ? 'rotate90' : ''"
+          @click="isOpen = !isOpen"
+          />
         <!-- Proportional/fixed toggle -->
         <m-button
           :title="fixedHeight ?
             'Showing chromosomes with fixed length. Click to show proportional.'
            :'Showing chromosomes with proportional lengths. Click to show fixed.'"
-          icon="sort"
+          :icon="fixedHeight ? 'dehaze' : 'sort'"
           @click="toggleHeight"
           class="rotate90"
           />
@@ -122,18 +131,16 @@ export default MComponent({
       titleHeight: 30,
       scrollDelta: 0,
       fixedHeight: false, // if true, all chrs drawn same length; else, drawn proportional
-      showLabels: true // if true, show current list feature labels
+      showLabels: true, // if true, show current list feature labels
+      currRegion: null
     }
   },
   computed: {
-    cString: function () {
-      return `${this.genomeName}:${this.currChr.name}:${this.currStart}:${this.currEnd}`
-    },
     genomeName: function () {
       return this.genome ? this.genome.name : ''
     },
     currChr: function () {
-      return this.context.coords.chr
+      return this.currRegion ? this.currRegion.chr : (this.genome ? this.genome.chromosomes[0] : { name: '' })
     },
     currStart: function () {
       return this.context.coords.start
@@ -181,7 +188,7 @@ export default MComponent({
       this.width = this.$el.getBoundingClientRect().width
       this.openHeight = this.cfg.openHeight
     },
-    setDisplay: function (v) {
+    xsetDisplay: function (v) {
       this.isOpen = v
     },
     scrollChromosomes (inc) {
@@ -210,8 +217,8 @@ export default MComponent({
     isOpen: function (v0, v1) {
       this.scrollDelta = 0
     },
-    cString: function (v0, v1) {
-      this.scrollDelta = 0
+    genome: function () {
+      if (this.currRegion && this.currRegion !== this.genome) this.currRegion = null
     }
   },
   mounted: function () {
@@ -219,7 +226,12 @@ export default MComponent({
     Vue.nextTick(() => {
       this.resize()
     })
+    this.$watch('currRegion', () => { this.scrollDelta = 0 }, { deep: true })
     this.$root.$on('camera-click', (v) => v === 'genomeview' && this.downloadImage())
+    this.$root.$on('region-click', d => {
+      this.genome = d.vm.region.genome
+      this.currRegion = d.vm.region      
+    })
     this.$root.$on('region-change', d => {
       const r = d.vm.region
       if (r && r.genome) this.genome = r.genome

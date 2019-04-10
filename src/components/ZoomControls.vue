@@ -27,7 +27,6 @@
           @click="context.scrollLock = !context.scrollLock"
           :title="context.scrollLock ? 'Lockstep scrolling is ON. Click to turn OFF.' : 'Lockstep scrolling is OFF. Click to turn ON'"
           />
-        <label>Scroll</label>
         </div>
       <!-- camera button -->
       <m-button

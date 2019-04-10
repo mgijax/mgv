@@ -101,14 +101,41 @@ class RegionManager {
   //--------------------------------------
   // Moves the border between r1 and its righthand neighbor by the specified amt (in pixels)
   moveBorder (r1, amt, quietly) {
+    //
+    const _move = function (regions, i, amt, min) {
+      const a = regions[i]
+      const b = regions[i + 1]
+      if (!a || !b) return 0
+      
+      if (amt > 0) {
+        const shove = Math.max(0, amt - (b.width - min))
+        if (shove > 0) {
+          const shoved = _move(regions, i + 1, shove, min)
+          amt -= (shove - shoved)
+        }
+        a.width += amt
+        b.width -= amt
+        b.deltaX += amt
+        return amt
+      } else if (amt < 0) {
+        const shove = Math.min(0, amt + (a.width - min))
+        if (shove < 0) {
+          const shoved = _move(regions, i - 1, shove, min)
+          amt -= (shove - shoved)
+        }
+        a.width += amt
+        b.width -= amt
+        b.deltaX += amt
+        return amt
+      } else {
+        return 0
+      }
+    }
+    //
     const rr = this.findRegion(r1)
     const si = rr[0], ri = rr[1]
     if (ri === -1) return
-    const r2 = this.app.strips[si].regions[ri + 1]
-    if (!r2) return
-    r1.width += amt
-    r2.width -= amt
-    r2.deltaX += amt
+    _move(this.app.strips[si].regions, ri, amt, 45)
     if (!quietly) this.announce()
   }
   //--------------------------------------

@@ -681,6 +681,7 @@ export default MComponent({
       if (f) this.$root.$emit('feature-out', { vm: this, feature: f.feature, transcript: f.transcript, event: e })
     },
     clicked: function (e) {
+      this.$root.$emit('region-click', { vm: this, event: e })
       let f = this.getEventObjects(e)
       if (f) {
         this.$root.$emit('feature-click', { vm: this, feature: f.feature, transcript: f.transcript, event: e })
