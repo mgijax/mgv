@@ -152,7 +152,6 @@ export default MComponent({
       if (!rr) return
       rr.start = coords[0]
       rr.end = coords[1]
-      console.log(coords, rr)
     },
     clickedGlyph: function (f) {
       let id = f.cID || f.ID

@@ -140,7 +140,9 @@ class RegionManager {
   }
   //--------------------------------------
   addRegion (r) {
+    r = Object.assign({}, r)
     const si = this.findStrip(r.genome)
+    if (!r.deltaX) r.deltaX = 0
     if (si === -1) {
       r.width = 1
       this.addStrip(r.genome, true, r)
