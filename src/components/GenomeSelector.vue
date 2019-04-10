@@ -41,7 +41,7 @@ export default MComponent({
   },
   methods: {
     reset: function () {
-      this.vGs = this.strips.map(s => s.genome.name)
+      this.vGs = this.strips ? this.strips.map(s => s.genome.name) : []
     },
     selectGenomeSet (gs) {
       this.vGs = gs.genomes.split(/,/g)

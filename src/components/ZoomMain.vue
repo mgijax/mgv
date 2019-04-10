@@ -56,7 +56,7 @@ export default MComponent({
   },
   computed: {
     vgs: function () {
-      return this.context.strips.map(s => s.genome.name).join(' ')
+      return this.context.strips ? this.context.strips.map(s => s.genome.name).join(' ') : ''
     }
   },
   watch: {

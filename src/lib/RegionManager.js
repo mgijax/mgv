@@ -229,8 +229,8 @@ class RegionManager {
   //
   // Maps a given region (genome+chr+start+end) to the equivalent regions in the given list of genomes
   // Returns a promise for the list of strips
-  computeMappedRegions (r) {
-    const promises = this.currentGenomes().map(g => this.mapRegionToGenome(r, g))
+  computeMappedRegions (r, genomes) {
+    const promises = (genomes || this.currentGenomes()).map(g => this.mapRegionToGenome(r, g))
     return Promise.all(promises).then(strips => {
       this.app.rRegion = r
       this.app.scrollLock = false
@@ -278,8 +278,8 @@ class RegionManager {
   }
   //
   //--------------------------------------
-  alignOnLandmark (lcoords) {
-    this.computeLandmarkRegions(lcoords, this.currentGenomes()).then(strips => {
+  alignOnLandmark (lcoords, genomes) {
+    this.computeLandmarkRegions(lcoords, (genomes || this.currentGenomes())).then(strips => {
       this.app.strips = strips
       this.app.scrollLock = true
       this.app.lcoords = lcoords

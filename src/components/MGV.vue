@@ -421,15 +421,11 @@ export default MComponent({
           this.dmode = 'landmark'
           this.lcoords = cxt.lcoords
           this.coords = cxt.coords
-          this.regionManager.computeLandmarkRegions(cxt.lcoords, cxt.genomes).then(strips => {
-            this.strips = strips
-          })
+          this.regionManager.alignOnLandmark(cxt.lcoords, cxt.genomes)
         } else if (cxt.coords) {
           this.dmode = 'mapped'
           this.coords = cxt.coords
-          this.regionManager.computeMappedRegions(cxt.coords, cxt.genomes).then(strips => {
-            this.strips = strips
-          })
+          this.regionManager.computeMappedRegions(cxt.coords, cxt.genomes)
         }
         if (cxt.currentMouseover) this.currentMouseover = cxt.currentMouseover
         if (cxt.currentMouseoverT) this.currentMouseoverT = cxt.currentMouseoverT
