@@ -14,7 +14,6 @@
         >
         <!--
         ============ Genomes ==============
-        -->
         <page-box label="Genomes">
           <genome-selector
             ref="genomeSelector"
@@ -24,6 +23,7 @@
             :genomeSets="genomeSets"
             />
         </page-box>
+        -->
         <!--
         ============ Find Genes ==============
         -->
@@ -158,6 +158,7 @@ import MComponent from '@/components/MComponent'
 import gc from '@/lib/GenomeCoordinates'
 import u from '@/lib/utils'
 import config from '@/config'
+import KeyStore from '@/lib/KeyStore'
 import HistoryManager from '@/lib/HistoryManager'
 import RegionManager from '@/lib/RegionManager'
 import ListManager from '@/lib/ListManager'
@@ -529,6 +530,16 @@ export default MComponent({
        },
        thisObj: this
       })
+    },
+    //
+    clearCacheAndReload () {
+      const kstore = new KeyStore(config.CachingFetcher.dbName)
+      kstore.clear().then(() => {
+        const kstore2 = new KeyStore(config.PreferencesManager.dbName)
+        return kstore2.clear()
+      }).then(() => {
+        window.location.reload()
+      })
     }
   },
   beforeCreate: function () {
@@ -561,6 +572,7 @@ export default MComponent({
     this.$nextTick(() => this.resize())
 
     //
+    this.$root.$on('clear-cache-and-reload', () => this.clearCacheAndReload())
     //
     this.$root.$on('no-align', () => this.unAlign())
     // listen for context events - how descendant component announce they want to redraw

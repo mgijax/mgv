@@ -58,8 +58,10 @@ export default MComponent({
       let p = this.$el
       state.forEach(cs => {
         let child = this.$refs[cs.label]
-        child[cs.isOpen ? 'open' : 'close']()
-        p.appendChild(child.$el)
+        if (child) {
+          child[cs.isOpen ? 'open' : 'close']()
+          p.appendChild(child.$el)
+        }
       })
       this.saveChildState()
     },

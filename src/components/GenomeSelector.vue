@@ -1,6 +1,6 @@
 <template>
   <div
-    class="genomeSelector flexcolumn"
+    class="genome-selector flexcolumn"
     >
     <select
       multiple
@@ -60,10 +60,10 @@ export default MComponent({
 </script>
 
 <style scoped>
-.genomeSelector label {
+.genome-selector label {
   align-self: flex-start;
 }
-.genomeSelector .flexrow {
+.genome-selector .flexrow {
   justify-content: flex-start;
 }
 </style>

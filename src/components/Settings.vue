@@ -13,6 +13,7 @@
         v-model="ZoomRegion.showFeatureLabels"
         />
   </div>
+  <!-- =================== -->
   <div
     title="Set the font size of displayed feature labels."
     class="flexrow"
@@ -25,6 +26,7 @@
         max="24"
         />
   </div>
+  <!-- =================== -->
   <div
     title="Set the thickness of rectangles used to represent features."
     class="flexrow"
@@ -37,6 +39,7 @@
         max="24"
         />
   </div>
+  <!-- =================== -->
   <div
     title="Set the amount of space separating feature swim lanes."
     class="flexrow"
@@ -67,6 +70,7 @@
         v-model="ZoomRegion.detailThreshold"
         />Mb
   </div>
+  <!-- =================== -->
   <div
     class="flexrow"
     title="Display all transcript labels when view width is below display threshold and 'Spread transcripts' is checked."
@@ -77,6 +81,7 @@
         v-model="ZoomRegion.showTranscriptLabels"
         />
   </div>
+  <!-- =================== -->
   <div
     class="flexrow"
     title="Sets the font size of displayed transcript labels."
@@ -89,6 +94,7 @@
         max="24"
         />
   </div>
+  <!-- =================== -->
   <div
     class="flexrow"
     title="Show locations of start/stop codons."
@@ -99,6 +105,7 @@
         v-model="ZoomRegion.showStartStopCodons"
         />
   </div>
+  <!-- =================== -->
   <div
     title="When checked, spreads transcripts so you can see them all. When unchecked, piles them on top of one another for a compact view. In spread view, strand is indicated by arrows. In the collapsed view, strand is indicated by position above (+) or below (-) the axis line."
     class="flexrow"
@@ -123,6 +130,7 @@
         v-model="ZoomRegion.sequenceThreshold"
         />bp
   </div>
+  <!-- =================== -->
   <div
     title="Set the font size of displayed sequences."
     class="flexrow"
@@ -147,6 +155,7 @@
         v-model="ZoomFiducials.showConnectors"
         />
   </div>
+  <!-- =================== -->
   <div
     title="The opacity of the connector interior."
     class="flexrow"
@@ -160,6 +169,7 @@
         step="0.01"
         />
   </div>
+  <!-- =================== -->
   <div
     class="flexrow"
     >
@@ -181,18 +191,31 @@
         v-model="ZoomRegion.trackMouse"
         />
   </div>
-
+  <!-- =================== -->
+  <div
+    title="Clears local data and preferences caches and reloads the page. Your lists and sequence basket are not affected."
+    class="flexrow"
+    >
+    <label>Clear cache and reload</label>
+    <m-button
+      icon="refresh"
+      @click="$root.$emit('clear-cache-and-reload')"
+      color="#3a99fc"
+      />
+  </div>
   </form>
   </div>
 </template>
 
 <script>
 import MComponent from '@/components/MComponent'
+import MButton from '@/components/MButton'
 import KeyStore from '@/lib/KeyStore'
 import config from '@/config'
 import u from '@/lib/utils'
 export default MComponent({
   name: 'Settings',
+  components: { MButton },
   data: function () {
     return config
   },

@@ -4,12 +4,14 @@
       :class="{ fixed: fixed }"
       :style="{ top: offset + 'px' }"
       >
-      <!-- main menu -->
-      <toolbar-menu
-        :icon="menuData.icon"
-        :label="menuData.label"
-        :menuItems="menuData.menuItems"
-        />
+      <div class="selector-container">
+        <i class="material-icons">list</i>
+        <genome-selector
+          :allGenomes="context.allGenomes"
+          :strips="context.strips"
+          :genomeSets="context.genomeSets"
+          />
+      </div>
       <!-- Search box -->
       <div class="flexrow">
         <label>Find</label>
@@ -40,15 +42,15 @@
 import MComponent from '@/components/MComponent'
 import MButton from '@/components/MButton'
 import MMenuItem from '@/components/MMenuItem'
+import GenomeSelector from '@/components/GenomeSelector'
 import ToolbarMenu from '@/components/ToolbarMenu'
 import gc from '@/lib/GenomeCoordinates'
 import u from '@/lib/utils'
 export default MComponent({
   name: 'ZoomControls',
-  components: { MButton, MMenuItem, ToolbarMenu },
+  components: { MButton, MMenuItem, GenomeSelector, ToolbarMenu },
   props: [
-    'context',
-    'menuData'
+    'context'
   ],
   data: function () {
     return {
@@ -177,5 +179,17 @@ export default MComponent({
 .zoom-controls > .flexrow {
     justify-content: flex-start;
     flex-grow: 0;
+}
+.genome-selector {
+  position: absolute;
+  top: 15px;
+  left: 15px;
+  flex-grow: 0;
+  width: 140px;
+  background-color: #e0e0e0;
+  display: none;
+}
+.selector-container:hover .genome-selector {
+  display: flex;
 }
 </style>

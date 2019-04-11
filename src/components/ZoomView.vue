@@ -6,7 +6,6 @@
     <zoom-controls
       ref="controls"
       :context="context"
-      :menuData="mainMenu"
       />
     <zoom-region-controls
       ref="regionControls"
@@ -32,7 +31,6 @@ import ZoomRegionControls from '@/components/ZoomRegionControls'
 import ZoomMain from '@/components/ZoomMain'
 import MMenu from '@/components/MMenu'
 import { connections } from '@/lib/InterMineServices'
-import getMainMenu from '@/lib/ZoomViewMainMenu'
 import getFeatureMenus from '@/lib/ZoomViewContextMenu'
 export default MComponent({
   name: 'ZoomView',
@@ -42,8 +40,6 @@ export default MComponent({
     return {
       contextMenu: [],
       contextObject: null,
-      // main menu in the ZoomView
-      mainMenu: getMainMenu(this),
       // taxonid -> feature context menu
       featureMenu: getFeatureMenus(this),
     }
