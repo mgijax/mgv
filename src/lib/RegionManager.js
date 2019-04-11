@@ -10,7 +10,6 @@ class RegionManager {
     this.currRegionVm = null
     this.app.$root.$on('region-current', r => { this.currRegionVm = r })
     this.app.$root.$on('region-change', d => this.regionChange(d))
-    this.app.$root.$on('resize', () => this.layout())
     this.app.$root.$on('feature-align', d => {
       const f = d.feature
       const r = d.vm.region

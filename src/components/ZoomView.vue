@@ -58,12 +58,6 @@ export default MComponent({
           cxt.transcript ? cxt.transcript.ID : '',
           cxt.transcript && cxt.transcript.cds ? cxt.transcript.cds.ID : ''
         ]
-      } else if (cxt && cxt.vm) {
-        const r = cxt.vm.region
-        return [
-        'Region',
-        `${r.genome.name}::${r.chr.name}:${r.start}..${r.end}`
-        ]
       } else {
         return ['']
       }

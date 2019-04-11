@@ -195,6 +195,7 @@
             :x="transcriptTextX(t)"
             :y="featureHeight"
             :font-weight="t.cds ? 'bold' : 'normal'"
+            font-family="sans-serif"
             :font-size="transcriptFontSize"
             dominant-baseline="hanging"
             >{{t.cds ? t.cds.ID : t.ID}}</text>

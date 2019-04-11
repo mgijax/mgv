@@ -71,6 +71,7 @@ export default MComponent({
     },
     resize: function () {
       this.width = this.$el.parentNode.getBoundingClientRect().width
+      this.regionManager().layout()
     },
     // Returns the y coordinate of each zoom strip
     getYs () {
@@ -110,7 +111,7 @@ export default MComponent({
       }
     }
   },
-  mounted: function () {
+  created: function () {
     this.$root.$on('region-drag', d => {
       if (this.context.scrollLock) this.globalScrollDelta = d
     })
