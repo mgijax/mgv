@@ -8,7 +8,7 @@
       name="label"
       :x="cfg.endCapWidth"
       :y="height + 10"
-      alignment-baseline="hanging"
+      dominant-baseline="hanging"
       stroke="none"
       font-family= "sans-serif"
       fill="black">{{ genome.name }}</text>

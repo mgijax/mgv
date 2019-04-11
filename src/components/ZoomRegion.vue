@@ -79,7 +79,7 @@
         x="50%"
         :y="height - zeroOffset + 10"
         text-align="center"
-        alignment-baseline="hanging"
+        dominant-baseline="hanging"
         fill="black"
         font-size="10px"
         font-family="sans-serif"
@@ -196,7 +196,7 @@
             :y="featureHeight"
             :font-weight="t.cds ? 'bold' : 'normal'"
             :font-size="transcriptFontSize"
-            alignment-baseline="hanging"
+            dominant-baseline="hanging"
             >{{t.cds ? t.cds.ID : t.ID}}</text>
         </g>
         </g>
