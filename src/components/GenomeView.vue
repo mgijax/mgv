@@ -192,9 +192,6 @@ export default MComponent({
       this.width = this.$el.getBoundingClientRect().width
       this.openHeight = this.cfg.openHeight
     },
-    xsetDisplay: function (v) {
-      this.isOpen = v
-    },
     scrollChromosomes (inc) {
       let v = this.scrollDelta + inc
       let currI = this.genome.chromosomes.indexOf(this.currChr)

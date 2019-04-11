@@ -60,6 +60,10 @@ export default MComponent({
 </script>
 
 <style scoped>
+.genome-selector {
+  padding: 4px;
+  z-index: 100;
+}
 .genome-selector label {
   align-self: flex-start;
 }

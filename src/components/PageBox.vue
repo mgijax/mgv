@@ -34,7 +34,7 @@
       :title="message"
       >warning</i>
   </div>
-  <div name="content" v-show="isOpen || childHandlesOpenClose">
+  <div name="content" v-show="isOpen">
     <slot></slot>
   </div>
   <canvas ref="canvas" width=1 height=1 />
@@ -89,7 +89,6 @@ export default MComponent({
         dx: 0, // current drag translation X amount
         dy: 0 // current drag translation Y amount
       },
-      childHandlesOpenClose: false,
       helpText: 'Heeeeelp!!',
     }
   },
@@ -100,9 +99,6 @@ export default MComponent({
     toggleOpen: function () {
       this.isOpen = !this.isOpen
       this.$emit('pagebox-' + (this.isOpen ? 'open' : 'close'), this)
-      if (this.childHandlesOpenClose) {
-        this.$refs.content.setDisplay(this.isOpen)
-      }
     },
     open: function () {
       if (!this.isOpen) this.toggleOpen()
@@ -172,8 +168,6 @@ export default MComponent({
       // move help text from component to this box's info button
       this.helpText = htext
       lc.$el.title = ''
-      // if the child has a setDisplay
-      this.childHandlesOpenClose = typeof lc.setDisplay === 'function'
       //
       this.$parent.$refs[this.label] = this
     })
