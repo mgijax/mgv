@@ -52,8 +52,6 @@ import u from '@/lib/utils'
 export default MComponent({
   name: 'MBrush',
   props: [
-    'region',
-    'underlay',
     'x',
     'y',
     'width',
@@ -66,6 +64,7 @@ export default MComponent({
   data: function () {
     return {
       currentRange: this.tabRange.slice(),
+      maxLength: this.range[1] - this.range[0] + 1,
       brushing: false,
       dragX: 0
     }
@@ -88,9 +87,6 @@ export default MComponent({
     },
     tabH: function () {
       return this.ppb * (this.currentRange[1] - this.currentRange[0] + 1)
-    },
-    maxLength: function () {
-      return this.range[1] - this.range[0] + 1
     }
   },
   mounted: function () {
@@ -133,6 +129,9 @@ export default MComponent({
     initDrag () {
       // Drag handlers for the tab
       u.dragify(this.$refs.tab, {
+        dragstart: function (evt, data) {
+          this.$emit('dragstart', { vm: this })
+        },
         drag: function (evt, data) {
           let b = this.p2b(this.orientation === 'h' ? data.deltaX : data.deltaY)
           let nc = [this.tabRange[0] + b, this.tabRange[1] + b]
@@ -141,6 +140,7 @@ export default MComponent({
           // this.dragX = data.deltaX
         },
         dragend: function (evt, data) {
+          this.$emit('dragend', { vm: this })
           this.notify()
           this.brushing = false
           this.dragX = 0
@@ -174,7 +174,7 @@ export default MComponent({
       }, this.app.$el, this)
     },
     notify: function () {
-      this.$emit('brush', this.currentRange)
+      this.$emit('brush', { vm: this, range: this.currentRange.slice() })
     }
   }
 })
@@ -183,9 +183,6 @@ export default MComponent({
 <style scoped>
 .m-brush rect[name="tab"] {
   cursor: move;
-}
-.m-brush rect[name="underlay"] {
-  cursor: crosshair;
 }
 .m-brush .tabhandle {
   cursor: ns-resize;

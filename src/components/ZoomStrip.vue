@@ -112,7 +112,7 @@ export default MComponent({
     return {
       height: 60,
       dragY: 0,
-      zoomY: 0,
+      zoomY: -1, // causes new strips to add to the top of the view
       allMaxLaneP: 0,
       allMaxLaneM: 0,
       dragging: false,

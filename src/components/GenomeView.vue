@@ -94,8 +94,11 @@
           :currentListColor="context.currentList ? context.currentList.color : 'gray'"
           :showLabels="showLabels"
           :glyphRadius="5"
+          @dragstart="dragstart"
+          @dragend="dragend"
+          :currMBrush="currMBrush"
           />
-        </g>
+      </g>
     </svg>
     <!-- view footer -->
     <div class="flexrow" style="justify-content: space-between;">
@@ -122,6 +125,7 @@ export default MComponent({
   data: function () {
     return {
       genome: null, // the genome to show
+      currentListGenologs: [],
       isOpen: true, // when open, shows all chrs (vertical); when closed, shows 1 chr (horiz).
       width: 600, // view width
       chrWidth: 20, // how wide to make each chr
@@ -132,7 +136,8 @@ export default MComponent({
       scrollDelta: 0,
       fixedHeight: false, // if true, all chrs drawn same length; else, drawn proportional
       showLabels: true, // if true, show current list feature labels
-      currRegion: null
+      currRegion: null,
+      currMBrush: null // while user is dragging a region tab, the MBrush component
     }
   },
   computed: {
@@ -166,16 +171,15 @@ export default MComponent({
     // pixels per base
     ppb: function () {
       return (this.isOpen ? this.innerHeight : this.innerWidth) / this.maxChrLen
-    },
-    // Returns the genologs from the current ref genome of the canonical IDs in the currently displayed list.
-    currentListGenologs: function () {
-      if (!this.context.currentList) return []
-      return this.context.currentList.items.map(id => {
-        return this.dataManager.getGenolog(id, this.genome)
-      }).filter(x => x)
     }
   },
   methods: {
+    dragstart: function (d) {
+      this.currMBrush = d.vm
+    },
+    dragend: function (d) {
+      this.currMBrush = null
+    },
     downloadImage: function () {
       svg2png(this.$refs.svg, this.width, this.height, 'mgv.genomeview.png')
     },
@@ -208,6 +212,17 @@ export default MComponent({
     },
     toggleHeight: function () {
       this.fixedHeight = !this.fixedHeight
+    },
+    computeCurrentListGenologs () {
+      if (!this.context.currentList) {
+        this.currentListGenologs = []
+      } else {
+        this.dataManager.ensureFeatures(this.genome).then(() => {
+          this.currentListGenologs = this.context.currentList.items.map(id => {
+            return this.dataManager.getGenolog(id, this.genome)
+          }).filter(x => x)
+        })
+      }
     }
   },
   watch: {
@@ -219,6 +234,7 @@ export default MComponent({
     },
     genome: function () {
       if (this.currRegion && this.currRegion !== this.genome) this.currRegion = null
+      this.computeCurrentListGenologs()
     }
   },
   mounted: function () {
@@ -226,7 +242,14 @@ export default MComponent({
     Vue.nextTick(() => {
       this.resize()
     })
-    this.$watch('currRegion', () => { this.scrollDelta = 0 }, { deep: true })
+    this.$watch(
+      'currRegion',
+      () => { this.scrollDelta = 0 },
+      { deep: true })
+    this.$watch(
+      'context.currentList',
+      () => this.computeCurrentListGenologs(),
+      { deep: true })
     this.$root.$on('camera-click', (v) => v === 'genomeview' && this.downloadImage())
     this.$root.$on('region-click', d => {
       this.genome = d.vm.region.genome

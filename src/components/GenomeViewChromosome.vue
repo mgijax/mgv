@@ -1,5 +1,8 @@
 <template>
-  <g class="genome-view-chromosome" >
+  <g
+    class="genome-view-chromosome"
+    @mouseenter="mouseenter"
+    >
     <g :transform="transform" >
       <!-- chromosome label -->
       <text
@@ -79,17 +82,17 @@
       <m-brush
         v-for="(r, ri) in regions"
         :key="'region'+ri"
-        :underlay="$refs.background"
         :x="-width / 2"
         :y="0"
         :width="width"
         :height="chrLen"
         fill="blue"
-        :region="r"
         :range="[1, chromosome.length]"
         :tabRange="[r.start, r.end]"
         :orientation="orientation"
-        @brush="brushed($event, r)"
+        @brush="data => brushed(data, r)"
+        @dragstart="data => $emit('dragstart', data)"
+        @dragend="data => $emit('dragend', data)"
         />
     </g>
   </g>
@@ -116,7 +119,8 @@ export default MComponent({
     'currentList',
     'currentListColor',
     'showLabels',
-    'glyphRadius'
+    'glyphRadius',
+    'currMBrush'
   ],
   data: function () {
     return {
@@ -148,10 +152,25 @@ export default MComponent({
     }
   },
   methods: {
-    brushed: function (coords, rr) {
+    mouseenter: function () {
+      if (this.currMBrush) {
+        // The user has dragged a region tab over this chromosome.
+        // Capture it!
+        this.$el.childNodes[0].append(this.currMBrush.$el)
+        // This doesnt work...
+        // this.currMBrush.range = [1, this.chromosome.length]
+        this.currMBrush.capturedBy = this.chromosome
+        this.currMBrush.maxLength = this.chromosome.length
+      }
+    },
+    brushed: function (data, rr) {
       if (!rr) return
-      rr.start = coords[0]
-      rr.end = coords[1]
+      rr.start = data.range[0]
+      rr.end = data.range[1]
+      if (data.vm.capturedBy) {
+        rr.chr = data.vm.capturedBy
+        data.vm.capturedBy = null
+      }
     },
     clickedGlyph: function (f) {
       let id = f.cID || f.ID
