@@ -101,12 +101,12 @@
       </g>
     </svg>
     <!-- view footer -->
-    <div class="flexrow" style="justify-content: space-between;">
+    <div class="flexrow" style="justify-content: space-between; min-height: 30px;">
       <div>
       </div>
       <div>
         <!-- current list -->
-        <span v-if="context.currentList" class="listGlyph" :style="{ backgroundColor: context.currentList.color }"/>{{context.currentList ? ' ' + context.currentList.name : ''}}
+        <span v-if="context.currentList" class="listGlyph" :style="{ backgroundColor: context.currentList.color }"/>{{context.currentList ? ' ' + context.currentList.name : ''}}</span>
       </div>
     </div>
   </div>

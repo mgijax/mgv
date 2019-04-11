@@ -616,9 +616,13 @@ export default MComponent({
       this.seqStart = this.region.start
       this.busy = true
       this.$emit('busy-start')
+      /*
+      FIXME how can we draw synteny blocks in the background without a ref genome? 
+
       this.translator()
           .getBlocksInRange(this.region.genome, this.region.chr.name, this.region.start - delta, this.region.end + delta, this.context.rGenome)
           .then(bs => { this.blocks = bs })
+      */
       this.dataManager.getGenes(this.region.genome, this.region.chr, this.region.start - delta, this.region.end + delta, this.showDetails).then(feats => {
         this.busy = false
         this.features = feats
