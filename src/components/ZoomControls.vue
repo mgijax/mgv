@@ -110,10 +110,14 @@ export default MComponent({
       if (!n) return
       const f = this.dataManager.getFeaturesBy(n)[0]
       if (f) {
-        const lm = f.symbol || f.cID || f.ID
-        this.$root.$emit('context', { landmark: lm, currentSelection: [f.cID || f.ID] })
+        this.$root.$emit('feature-align', { feature: f })
       } else {
-        alert('Landmark not found: ' + n)
+        const c = gc.parse(n)
+        if (c) {
+          this.$root.$emit('jump-to', { coords: c })
+        } else {
+          alert('Landmark not found: ' + n)
+        }
       }
       this.$refs.searchBox.value = ''
     },

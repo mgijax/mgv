@@ -2,6 +2,7 @@
   <div
     class="genome-selector flexcolumn"
     >
+    <label style="font-weight: bold; align-self: center;">Genomes</label>
     <select
       multiple
       size=10
@@ -63,6 +64,7 @@ export default MComponent({
 .genome-selector {
   padding: 4px;
   z-index: 100;
+  border: thin solid gray;
 }
 .genome-selector label {
   align-self: flex-start;

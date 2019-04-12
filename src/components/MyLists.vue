@@ -11,7 +11,7 @@
      </div>
      <button
        @click="newlist"
-       title="Create a new list by entering/pasting identifiers."
+       title="Create a new list by entering/pasting identifiers. Shift-click to create a new list from the currently selected features."
        >New</button>
   </div>
 </template>
@@ -24,8 +24,8 @@ export default MComponent({
   props: ['lists', 'currentList'],
   components: { MyListItem },
   methods: {
-    newlist: function () {
-      this.$root.$emit('list-edit-new')
+    newlist: function (e) {
+      this.$root.$emit(e.shiftKey ? 'list-edit-newfromselected' : 'list-edit-new')
     }
   }
 })

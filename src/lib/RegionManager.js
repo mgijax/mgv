@@ -1,6 +1,7 @@
 
 import config from '@/config'
 import u from '@/lib/utils'
+import gc from '@/lib/GenomeCoordinates'
 
 // The RegionManager maintains the set of genomic regions that specify what to display in the ZoomView.
 class RegionManager {
@@ -10,15 +11,23 @@ class RegionManager {
     this.currRegionVm = null
     this.app.$root.$on('region-current', r => { this.currRegionVm = r })
     this.app.$root.$on('region-change', d => this.regionChange(d))
+    this.app.$root.$on('jump-to', d => this.jumpTo(d.coords))
     this.app.$root.$on('feature-align', d => {
       const f = d.feature
-      const r = d.vm.region
+      const r = d.vm ? d.vm.region : {}
+      const anchor = d.basePos ? ((d.basePos - f.start + 1) / (f.end - f.start + 1)) : null
+      let l
+      if (d.vm) {
+        l = d.vm.region.end - d.vm.region.start + 1
+      } else {
+        l = 3 * (f.end - f.start + 1)
+      }
       const lcoords = {
         landmark: f.symbol || f.cID || f.ID,
         lgenome: f.genome,
-        anchor: d.basePos ? ((d.basePos - f.start + 1) / (f.end - f.start + 1)) : null,
+        anchor: anchor,
         delta: 0,
-        length: r.end - r.start + 1
+        length: l
       }
       this.alignOnLandmark(lcoords)
     })
@@ -184,6 +193,25 @@ class RegionManager {
     const newend = newstart + newlen - 1
     r.start = newstart
     r.end = newend
+  }
+  //--------------------------------------
+  jumpTo (coords, quietly) {
+    let strips = this.app.strips
+    if (!this.app.scrollLock) {
+      const s = this.app.strips.filter(s => s.order === 0)[0] || this.app.strips[0]
+      strips = [s]
+    }
+    strips.forEach(s => {
+      const g = s.genome
+      const r = s.regions[0]
+      if (!r) return
+      const cc = gc.validate(coords, g, true)
+      if (!cc) return
+      s.regions.splice(1, s.regions.length - 1)
+      this.setRegion(r, cc)
+    })
+    this.layout()
+    if (!quietly) this.announce()
   }
   //--------------------------------------
   zoom (amt, quietly) {
@@ -355,49 +383,6 @@ class RegionManager {
 
   //--------------------------------------
   // 
-  xlayoutStrip (strip, width) {
-    //
-    width = width || this.app.zoomWidth
-    // x-offset in pixels from left side of strip. Init to 12 to skip over endcap.
-    let dx = 12
-    // Number of pixels between regions 
-    let gap = 2
-    // total gap space for the strip
-    let totalGap = dx + gap * (strip.regions.length - 1)
-    // width available for the regions 
-    let availWidth = width - totalGap
-
-    // total length in bp of the regions
-    let totalLength = 0
-    // total width
-    let totalWidth = 0
-    //
-    let wcount = 0
-    let no_wcount = 0
-    let minWidth = 45 // minimum width of a region in pixels
-
-    // Compute normalized widths. First count widths and region lengths
-    strip.regions.forEach(r => {
-      const l = r.end - r.start + 1
-      if (l !== r.length) r.length = l   // set length if needed
-      totalLength += l
-      if (r.width) {
-        totalWidth += r.width
-        wcount += 1
-      } else {
-        no_wcount += 1
-      }
-    })
-    totalWidth += (minWidth * no_wcount)
-
-    // scale all widths
-    strip.regions.forEach(r=> {
-      const w = availWidth * ((r.width || minWidth) / totalWidth)
-      if (w !== r.width) r.width = w
-      if(dx !== r.delta) r.deltaX = dx
-      dx += r.width + gap
-    })
-  }
   layoutStrip (strip, width) {
     //
     width = width || this.app.zoomWidth
@@ -409,7 +394,7 @@ class RegionManager {
     const totalGap = dx + gap * (strip.regions.length - 1)
     // width available for the regions 
     const availWidth = width - totalGap
-    const minWidth = 45 // minimum width of a region in pixels
+    const minWidth = 25 // minimum width of a region in pixels
     const widths0 = strip.regions.map(r => r.width || minWidth)
     const widths = this.scaleAdjust(widths0, availWidth, minWidth)
     strip.regions.forEach((r, i) => {
