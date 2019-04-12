@@ -3,6 +3,7 @@
   <form>
   <!-- ============== FEATURES section  ============== -->
   <label>Features</label>
+  <!-- =================== -->
   <div
     title="Display all feature labels when view width is below display threshold."
     class="flexrow"
@@ -11,6 +12,20 @@
     <input
         type="checkbox"
         v-model="ZoomRegion.showFeatureLabels"
+        />
+  </div>
+  <!-- =================== -->
+  <div
+    title="Make selected features stand out more by fading unselected features."
+    class="flexrow"
+    >
+    <label>Contrast</label>
+    <input
+        type="range"
+        v-model="ZoomRegion.contrast"
+        min="0"
+        max="1"
+        step=".1"
         />
   </div>
   <!-- =================== -->
@@ -54,6 +69,7 @@
   </div>
   <!-- ============== TRANSCRIPTS section  ============== -->
   <label>Transcripts</label>
+  <!-- =================== -->
   <!--
     WARNING: Making these threshold values editable gives the unwary user a VERY EASY way to
     crash their brower! Need to place appropriate restrictions/safeguards.
@@ -145,6 +161,7 @@
   </div>
   <!-- ============== FIDUCIALS section  ============== -->
   <label>Fiducials</label>
+  <!-- =================== -->
   <div
     title="For highlighted features, show connectors between genologs."
     class="flexrow"
@@ -181,6 +198,7 @@
   </div>
   <!-- ============== MISC section  ============== -->
   <label>Misc</label>
+  <!-- =================== -->
   <div
     title="When checked, shows a vertical reference line indicating the base position that follows the mouse around. When unchecked, only shows during drag operations."
     class="flexrow"

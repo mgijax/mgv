@@ -123,8 +123,9 @@
         :name="f.ID"
         :canonical="f.cID"
         class="feature"
-        :class="{ highlight: featureHighlighted(f) || featureSelected(f) || featureInList(f), visible: featureVisible(f)}"
+        :class="{ highlight: featureHighlighted(f), visible: featureVisible(f)}"
         :transform="featureTransform(f)"
+        :style="{ opacity: featureOpacity(f) }"
         v-show="featureVisible(f)"
         >
         <rect
@@ -204,14 +205,14 @@
         <!-- feature label -->
         <text
           class="symbol"
-          v-if="(showDetails && showFeatureLabels) || featureSelected(f) || featureHighlighted(f) || featureInList(f)"
+          v-if="(showDetails && showFeatureLabels) || featureSelected(f) || featureMouseover(f) || featureInList(f)"
           :x="featureTextX(f)"
           :y="0"
           :font-size="featureFontSize"
           :style="{
             textAnchor: 'middle',
             fontFamily: 'sans-serif',
-            fontWeight: featureHighlighted(f) ? 'bold' : 'normal'
+            fontWeight: featureMouseover(f) ? 'bold' : 'normal'
           }"
           >
           {{f.symbol || f.ID}}
@@ -510,7 +511,15 @@ export default MComponent({
     featureColor (f) {
       return this.featureColorMap.getColor(f)
     },
+    featureOpacity (f) {
+      const nobodyHighlighted = !(this.context.currentMouseover || this.selectedSet.size || this.context.currentListSet)
+      if (nobodyHighlighted) return 1
+      return this.featureHighlighted(f) ? 1 : 1 - this.cfg.contrast
+    },
     featureHighlighted: function (f) {
+      return this.featureMouseover(f) || this.featureSelected(f) || this.featureInList(f)
+    },
+    featureMouseover: function (f) {
       let c = this.context.currentMouseover
       return c && (c.ID === f.ID || (c.cID && c.cID === f.cID))
     },
@@ -542,7 +551,7 @@ export default MComponent({
         strokeWidth = this.cfg.selectedFeature.strokeWidth
         stroke = this.cfg.selectedFeature.stroke
       }
-      if (this.featureHighlighted(f)) {
+      if (this.featureMouseover(f)) {
         strokeWidth = this.cfg.currentFeature.strokeWidth
         stroke = this.cfg.currentFeature.stroke
       }

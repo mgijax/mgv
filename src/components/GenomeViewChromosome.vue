@@ -46,8 +46,8 @@
         stroke="none"
         />
       <!-- Glyphs for current list items -->
-      <g
-        v-if="currentList"
+      <g v-if="currentList">
+        <g
           v-for="f in currentList"
           :key="f.ID"
         >
@@ -61,7 +61,7 @@
           />
         <circle
           class="glyph"
-          v-if="f.chr === chromosome"
+          v-if="f.chr === chromosome && currentList.length <= 250"
           :cx="glyphX(f)"
           :cy="glyphY(f)"
           :r="glyphRadius"
@@ -72,12 +72,13 @@
           <title>{{ f.symbol || f.ID }}</title>
         </circle>
         <text
-          v-if="f.chr === chromosome && showLabels"
+          v-if="f.chr === chromosome && showLabels && currentList.length <= 250"
           :x="0"
           :y="0"
           :transform="`translate(${glyphTextX(f)},${glyphTextY(f)})rotate(${orientation === 'h' ? 90 : 0})`"
           style="font-size: 10px; fill: black; text-anchor: middle;"
           >{{f.symbol || f.ID}}</text>
+        </g>
       </g>
       <m-brush
         v-for="(r, ri) in regions"
