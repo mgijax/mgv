@@ -37,8 +37,8 @@
         <!-- horiz/vert toggle -->
         <m-button
           :title="isOpen ?
-            'Showing chromosomes whole genome view. Click for single chromosome view.'
-           :'Showing single chromosome view. Click to show whole genome view.'"
+            'Showing whole genome view. Click for single chromosome view.'
+           :'Showing single chromosome view. Click for whole genome view.'"
           icon="dehaze"
           :class="isOpen ? 'rotate90' : ''"
           @click="isOpen = !isOpen"
@@ -54,8 +54,8 @@
           />
         <!-- Show list item labels on/off toggle -->
         <m-button
-          :title="showLabels ? 'Hide labels' : 'Show labels'"
-          icon="title"
+          :title="showLabels ? 'Showing list item labels. Click to hide.' : 'Hiding list item labels. Click to show.'"
+          :icon="showLabels ? 'title' : 'format_strikethrough'"
           @click="showLabels = !showLabels"
           />
         <!-- Camera button -->
@@ -106,7 +106,12 @@
       </div>
       <div>
         <!-- current list -->
-        <span v-if="context.currentList" class="listGlyph" :style="{ backgroundColor: context.currentList.color }"/>{{context.currentList ? ' ' + context.currentList.name : ''}}</span>
+        <span
+          v-if="context.currentList"
+          class="listGlyph"
+          :style="{ backgroundColor: context.currentList.color, marginRight: '5px' }"
+          />
+        <span>{{currListTitle}}</span>
       </div>
     </div>
   </div>
@@ -137,10 +142,19 @@ export default MComponent({
       fixedHeight: false, // if true, all chrs drawn same length; else, drawn proportional
       showLabels: true, // if true, show current list feature labels
       currRegion: null,
-      currMBrush: null // while user is dragging a region tab, the MBrush component
+      currMBrush: null, // while user is dragging a region tab, the MBrush component
+      maxListLength: 250 // max number of list items we'll draw
     }
   },
   computed: {
+    currListTitle: function () {
+      const clist = this.context.currentList
+      if (!clist) return 'No current list.'
+      if (clist.items.length > this.maxListLength) {
+        return `${clist.name} (${this.maxListLength} of ${clist.items.length} shown)`
+      }
+      return clist.name
+    },
     genomeName: function () {
       return this.genome ? this.genome.name : ''
     },
