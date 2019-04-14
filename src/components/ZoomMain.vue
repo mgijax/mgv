@@ -70,7 +70,7 @@ export default MComponent({
       svg2png(this.$el, this.width, this.height, fname)
     },
     resize: function () {
-      this.width = this.$el.parentNode.getBoundingClientRect().width
+      this.width = this.$el.parentNode.getBoundingClientRect().width - 5
       this.regionManager().layout()
     },
     // Returns the y coordinate of each zoom strip

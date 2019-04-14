@@ -4,7 +4,7 @@
       name="settingBtn"
       @click="$emit('gear-clicked')"
       icon="settings"
-      title="Show/hide left column."
+      title="Show/hide tool drawer."
       color="white"
       hoverColor="rgb(31, 119, 180)"
       hoverBackgroundColor="white"

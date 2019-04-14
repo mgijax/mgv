@@ -20,12 +20,14 @@ class Translator {
     }
     return this.app.dataManager.getAllFeatures(aGenome).then(afeats => {
       return this.app.dataManager.getAllFeatures(bGenome).then(bfeats => {
+        console.log("Translator: generating synteny blocks for ", aGenome.name, bGenome.name)
         let blocks = generateSyntenyBlocks(aGenome.name, afeats, bGenome.name, bfeats)
         let n2bks = this.n2block
         let a2b = n2bks[aGenome.name] = n2bks[aGenome.name] || {}
         let b2a = n2bks[bGenome.name] = n2bks[bGenome.name] || {}
         a2b[bGenome.name] = blocks[0]
         b2a[aGenome.name] = blocks[1]
+        console.log("Translator: done. ", aGenome.name, bGenome.name)
         return blocks[0]
       })
     })

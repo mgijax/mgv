@@ -16,17 +16,16 @@
   </div>
   <!-- =================== -->
   <div
-    title="Make selected features stand out more by fading unselected features."
-    class="flexrow"
-    >
-    <label>Contrast</label>
+    title="Above this threshold, features are simply boxes. Below this threshold, exon structure becomes visible."
+    class="flexrow">
+    <label>Details threshold</label>
     <input
-        type="range"
-        v-model="ZoomRegion.contrast"
-        min="0"
-        max="1"
-        step=".1"
-        />
+        min=0
+        max=10000000
+        step=1000000
+        type="number"
+        v-model="ZoomRegion.detailThreshold"
+        />bp
   </div>
   <!-- =================== -->
   <div
@@ -67,25 +66,22 @@
         max="24"
         />
   </div>
+  <!-- =================== -->
+  <div
+    title="Make selected features stand out more by fading unselected features."
+    class="flexrow"
+    >
+    <label>Contrast</label>
+    <input
+        type="range"
+        v-model="ZoomRegion.contrast"
+        min="0"
+        max="1"
+        step=".1"
+        />
+  </div>
   <!-- ============== TRANSCRIPTS section  ============== -->
   <label>Transcripts</label>
-  <!-- =================== -->
-  <!--
-    WARNING: Making these threshold values editable gives the unwary user a VERY EASY way to
-    crash their brower! Need to place appropriate restrictions/safeguards.
-  -->
-  <div
-    title="Display exon structure when view width is below this value."
-    class="flexrow">
-    <label>Display threshold</label>
-    <input
-        min=0
-        max=10000000
-        step=1000000
-        type="number"
-        v-model="ZoomRegion.detailThreshold"
-        />Mb
-  </div>
   <!-- =================== -->
   <div
     class="flexrow"
@@ -100,7 +96,7 @@
   <!-- =================== -->
   <div
     class="flexrow"
-    title="Sets the font size of displayed transcript labels."
+    title="Set the font size of displayed transcript labels."
     >
     <label>Font size</label>
     <input

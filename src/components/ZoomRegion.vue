@@ -588,7 +588,7 @@ export default MComponent({
         pos = t.cds.end
       }
       const x = this.b2p(pos + 0.5)
-      const h = 9
+      const h = 8
       if (which === 'start') {
         // triangle pointing in transcription direction
         return `m${x},0 l0,${-h} l${dir * h},${h / 2} Z`
