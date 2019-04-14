@@ -48,7 +48,7 @@
       <!-- Glyphs for current list items -->
       <g v-if="currentList">
         <g
-          v-for="f in currentList"
+          v-for="f in currentList.slice(0,250)"
           :key="f.ID"
         >
         <line
@@ -61,7 +61,7 @@
           />
         <circle
           class="glyph"
-          v-if="f.chr === chromosome && currentList.length <= 250"
+          v-if="f.chr === chromosome"
           :cx="glyphX(f)"
           :cy="glyphY(f)"
           :r="glyphRadius"
@@ -72,7 +72,7 @@
           <title>{{ f.symbol || f.ID }}</title>
         </circle>
         <text
-          v-if="f.chr === chromosome && showLabels && currentList.length <= 250"
+          v-if="f.chr === chromosome && showLabels"
           :x="0"
           :y="0"
           :transform="`translate(${glyphTextX(f)},${glyphTextY(f)})rotate(${orientation === 'h' ? 90 : 0})`"
@@ -175,7 +175,7 @@ export default MComponent({
     },
     clickedGlyph: function (f) {
       let id = f.cID || f.ID
-      this.$root.$emit('context', { landmark: id, currentSelection: [id] })
+      this.$root.$emit('feature-align', { feature: f })
     },
     glyphX: function (f) {
       return (this.width/2 + this.glyphRadius) * (f.strand === '-' ? -1 : 1)
