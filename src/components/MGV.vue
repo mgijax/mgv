@@ -27,7 +27,10 @@
         <!--
         ============ Find Genes ==============
         -->
-        <page-box label="Find genes">
+        <page-box
+          label="Find genes"
+          icon="search"
+          >
           <find-genes
             ref="findGenes"
             title="Search MouseMine for genes annotated to specified diseases, pathways, etc. Pick a search type, enter a search term and hit enter. Results are returned in a new list (see MyLists)."
@@ -36,7 +39,10 @@
         <!--
         ============ My Lists ==============
         -->
-        <page-box label="My lists">
+        <page-box
+          label="My lists"
+          icon="list"
+          >
           <my-lists
             title="Shows your current lists. A list simply contains identifiers. Click on a list to show its items in the genome view; click again to hide them. Click on the 'x' to delete a list. Click on the pencil to edit the list (see ListEditor)."
             :lists="lists"
@@ -48,7 +54,9 @@
         -->
         <page-box
           :message="activeFacets ? 'There are active filters. Some features may not be visible.' : ''"
-          label="Filters">
+          label="Filters"
+          icon="filter_list"
+          >
           <facets
             title="Limit what feature are displayed by different criteria."
             ref="facets"
@@ -57,18 +65,24 @@
         <!--
         ============ Settings ==============
         -->
-        <page-box label="Settings">
+        <page-box
+          label="Settings"
+          icon="settings"
+          >
           <settings
-            title="Settings."
+            title="Provides numerous ways to customize the display. Settings are remembered between sessions."
             ref="settings"
             />
         </page-box>
         <!--
         ============ Sequence Cart ==============
         -->
-        <page-box label="SequenceCart">
+        <page-box
+          label="SequenceCart"
+          icon="shopping_cart"
+          >
           <sequence-cart
-            title="Your shopping cart of selected sequences."
+            title="Your basket of selected sequences."
             ref="sequenceCart"
             />
         </page-box>
@@ -83,17 +97,23 @@
         <!--
         ============ Genome View ==============
         -->
-        <page-box label="GenomeView">
+        <page-box
+          label="GenomeView"
+          icon="language"
+          >
           <genome-view
             :context="$data"
             ref="genomeView"
-            title="When open, shows the reference genome's chromosomes as vertical lines. When closed, shows the current chromosome as a horizontal line. Click (drag) on a chromosome to jump (zoom) to that location. Red circles show current list items (if any). Click on a circle to jump to that feature."
+            title="Shows a whole genome view. Colored tabs indicate any regions currently displayed in the ZoomView. Lollipop glyphs indicate current list items (if any). Drag tab to change the viewed region. Click or drag on a chromosome to open a new region."
             />
         </page-box>
         <!--
         ============ Feature Details ==========
         -->
-        <page-box label="FeatureDetails">
+        <page-box
+          label="FeatureDetails"
+          icon="description"
+          >
           <feature-details
             ref="featureDetails"
             title="Shows details of a feature you click on. When open, shows details for genologs in all currently displayed genomes. When closed, shows only the feature in the genome that was clicked."
@@ -106,7 +126,9 @@
         -->
         <page-box
           :message="activeFacets ? 'There are active filters. Some features may not be visible.' : ''"
-          label="ZoomView">
+          label="ZoomView"
+          icon="view_agenda"
+          >
           <zoom-view
             :context="$data"
             ref="zoomView"
@@ -572,7 +594,11 @@ export default MComponent({
     this.$nextTick(() => this.resize())
 
     //
-    this.$root.$on('clear-cache-and-reload', () => this.clearCacheAndReload())
+    this.$root.$on('clear-cache-and-reload', () => {
+      if (confirm('Clear data cache and reload this page. Are you sure?')) {
+        this.clearCacheAndReload()
+      }
+    })
     //
     this.$root.$on('no-align', () => this.unAlign())
     // listen for context events - how descendant component announce they want to redraw

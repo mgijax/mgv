@@ -27,6 +27,10 @@
       />
   </div>
   <div name="label">
+    <i
+      v-if="icon"
+      class="material-icons"
+      >{{ icon }}</i>
     {{label}}
     <i
       v-if="message"
@@ -49,6 +53,7 @@ export default MComponent({
   name: 'PageBox',
   components: { MButton },
   props: {
+    icon: String,
     label: String,
     message: String,
     floating: Boolean,
@@ -143,7 +148,7 @@ export default MComponent({
       let d = this.ddData
       if (this.floating) {
         this.x = Math.max(0, this.x + d.dx)
-        this.y = Math.max(0, this.y + d.dy)
+        this.y = Math.max(-1, this.y + d.dy)
       }
       d.dx = d.dy = 0
     }
@@ -196,6 +201,9 @@ export default MComponent({
   font-weight: bold;
   text-align: start;
 }
+.pagebox > [name="label"] .material-icons {
+  font-size: 14px;
+}
 .pagebox:hover {
   outline: thin solid black;
 }
@@ -229,5 +237,11 @@ export default MComponent({
   cursor: pointer;
   position: relative;
   top: 2px;
+}
+.pagebox [name="buttonBox"] {
+  display: none;
+}
+.pagebox:hover [name="buttonBox"] {
+  display: inherit;
 }
 </style>
