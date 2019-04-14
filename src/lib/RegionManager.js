@@ -14,7 +14,6 @@ class RegionManager {
     this.app.$root.$on('jump-to', d => this.jumpTo(d.coords))
     this.app.$root.$on('feature-align', d => {
       const f = d.feature
-      const r = d.vm ? d.vm.region : {}
       const anchor = d.basePos ? ((d.basePos - f.start + 1) / (f.end - f.start + 1)) : null
       let l
       if (d.vm) {
@@ -174,7 +173,12 @@ class RegionManager {
     const rr = this.findRegion(r)
     const si = rr[0], ri = rr[1]
     if (ri === -1) return
-    this.app.strips[si].regions.splice(ri, 1)
+    const s = this.app.strips[si]
+    if (s.regions.length === 1) {
+      this.deleteStrip(s.genome, true)
+    } else {
+      s.regions.splice(ri, 1)
+    }
     this.layout()
   }
   //--------------------------------------
