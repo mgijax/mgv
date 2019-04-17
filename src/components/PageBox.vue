@@ -26,7 +26,10 @@
       @dragend="dragEnd"
       />
   </div>
-  <div name="label">
+  <div
+    name="label"
+    @click.prevent.stop="toggleOpen"
+    >
     <i
       v-if="icon"
       class="material-icons"

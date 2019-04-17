@@ -5,7 +5,10 @@
       :style="{ top: offset + 'px' }"
       >
       <div class="selector-container">
-        <i class="material-icons">list</i>
+        <div class="flexrow">
+          <span>Genomes</span>
+          <i class="material-icons">arrow_drop_down</i>
+        </div>
         <genome-selector
           :allGenomes="context.allGenomes"
           :strips="context.strips"
