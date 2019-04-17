@@ -51,6 +51,7 @@
 <script>
 import MComponent from '@/components/MComponent'
 import MButton from '@/components/MButton'
+import u from '@/lib/utils'
 import Vue from 'vue'
 export default MComponent({
   name: 'PageBox',
@@ -107,6 +108,7 @@ export default MComponent({
     toggleOpen: function () {
       this.isOpen = !this.isOpen
       this.$emit('pagebox-' + (this.isOpen ? 'open' : 'close'), this)
+      u.unselectAllText()
     },
     open: function () {
       if (!this.isOpen) this.toggleOpen()

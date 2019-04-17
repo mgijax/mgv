@@ -238,6 +238,15 @@ function wScrollTop () {
   return window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop || 0;
 }
 // ---------------------------------------------
+// https://stackoverflow.com/questions/6562727/is-there-a-function-to-deselect-all-text-using-javascript
+function unselectAllText () {
+ if (window.getSelection) {
+   window.getSelection().removeAllRanges()
+ } else if (document.selection) {
+   document.selection.empty()
+ }
+}
+// ---------------------------------------------
 export default {
   fail,
   concatAll,
@@ -254,5 +263,6 @@ export default {
   deepCopy,
   wWidth,
   wHeight,
-  wScrollTop
+  wScrollTop,
+  unselectAllText
 }
