@@ -17,7 +17,7 @@
       <input
         size="24"
         v-model="formattedCoords"
-        title="Enter coordinates (chr:start..end) or landmark (symbol or ID). Coordinates are relative to the reference genome and are mapped to corresponding region(s) in each comparison genome. Enter a landmark to find that feature and line up the displays."
+        title="Enter coordinates (chr:start..end) or feature symbol or ID."
         @change="setCoords"
         />
       <!-- zoom in -->
@@ -118,9 +118,22 @@ export default MComponent({
       this.$root.$emit('region-change', { vm: this, op: 'remove' })
     },
     setCoords: function () {
-      const r = gc.parse(this.formattedCoords)
+      const val = this.formattedCoords
+      const r = gc.parse(val)
       if (!r) {
-        this.reset()
+        const f = this.dataManager.getGenologs(val, [this.region.genome])[0]
+        if (f) {
+          const l = f.end - f.start + 1
+          const rr = {
+            genome: this.region.genome,
+            chr: f.chr,
+            start: f.start - l,
+            end: f.end + l
+          }
+          this.$root.$emit('region-change', { vm: this, op: 'set', coords: rr })
+        } else {
+          this.reset()
+        }
       } else {
         const rr = gc.validate(r, this.region.genome, true)
         this.$root.$emit('region-change', { vm: this, op: 'set', coords: rr })
