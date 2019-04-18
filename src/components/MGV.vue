@@ -507,6 +507,7 @@ export default MComponent({
         this.currentSelection = [fid]
       }
       this.detailFeatures = this.dataManager.getGenologs(f, this.vGenomes)
+      this.$root.$emit('context-changed')
     },
     featureDblClick: function (f, t, e) {
       let id = f.symbol || f.cID || f.ID

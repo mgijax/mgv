@@ -222,7 +222,8 @@
     -->
     <g
       class="deleteBtn"
-      @click="remove"
+      @click.stop="remove"
+      @mousedown.stop=""
       >
       <rect
         :x="region.width - 10"
