@@ -103,19 +103,19 @@ export default MComponent({
       this.isOpen = false
     },
     zoom: function (amt) {
-      this.$root.$emit('region-change', { vm: this, op: 'zoom', amt: amt })
+      this.$root.$emit('region-change', { region: this.region, vm: this, op: 'zoom', amt: amt })
     },
     pan: function (amt) {
-      this.$root.$emit('region-change', { vm: this, op: 'scroll', amt: amt })
+      this.$root.$emit('region-change', { region: this.region, vm: this, op: 'scroll', amt: amt })
     },
     split: function () {
-      this.$root.$emit('region-change', { vm: this, op: 'split', pos: 0.5 })
+      this.$root.$emit('region-change', { region: this.region, vm: this, op: 'split', pos: 0.5 })
     },
     makeRef: function () {
-      this.$root.$emit('region-change', { vm: this, op: 'make-reference' })
+      this.$root.$emit('region-change', { region: this.region, vm: this, op: 'make-reference' })
     },
     remove: function () {
-      this.$root.$emit('region-change', { vm: this, op: 'remove' })
+      this.$root.$emit('region-change', { region: this.region, vm: this, op: 'remove' })
     },
     setCoords: function () {
       const val = this.formattedCoords
@@ -130,13 +130,13 @@ export default MComponent({
             start: f.start - l,
             end: f.end + l
           }
-          this.$root.$emit('region-change', { vm: this, op: 'set', coords: rr })
+          this.$root.$emit('region-change', { region: this.region, vm: this, op: 'set', coords: rr })
         } else {
           this.reset()
         }
       } else {
         const rr = gc.validate(r, this.region.genome, true)
-        this.$root.$emit('region-change', { vm: this, op: 'set', coords: rr })
+        this.$root.$emit('region-change', { region: this.region, vm: this, op: 'set', coords: rr })
       }
     },
     reset: function () {

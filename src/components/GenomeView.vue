@@ -92,6 +92,7 @@
           :width="chrWidth"
           :currentList="currentListGenologs"
           :currentListColor="context.currentList ? context.currentList.color : 'gray'"
+          :currRegion="context.currRegion"
           :showLabels="showLabels"
           :glyphRadius="5"
           @dragstart="dragstart"
@@ -126,7 +127,9 @@ import svg2png from '@/lib/Svg2Png'
 export default MComponent({
   name: 'GenomeView',
   components: { GenomeViewChromosome, MButton },
-  props: ['context'],
+  props: [
+    'context'
+  ],
   data: function () {
     return {
       genome: null, // the genome to show

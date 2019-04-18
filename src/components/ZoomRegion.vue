@@ -1,5 +1,9 @@
 <template>
-  <g transform="translate(0,0)" class="zoom-region">
+  <g
+    transform="translate(0,0)"
+    class="zoom-region"
+    :class="{ current: isCurrent }"
+    >
   <svg
     @mouseover.stop="mouseover"
     @mouseout.stop="mouseout"
@@ -45,7 +49,7 @@
         fill="white"
         fill-opacity="0"
         stroke="black"
-        stroke-opacity="0.5"
+        :stroke-opacity="isCurrent ? 1.0 : 0.5"
         class="underlay"
         ref="underlay"
         :transform="`translate(${-myDelta},0)`"
@@ -71,6 +75,7 @@
         :x2="b2p(region.end)"
         :y2="0"
         stroke="black"
+        stroke-opacity="0.3"
         :transform="`translate(${-myDelta},0)`"
         v-show="!spreadTranscripts || !showDetails"
         />
@@ -301,6 +306,9 @@ export default MComponent({
     }
   },
   computed: {
+    isCurrent: function () {
+      return this.region === this.context.currRegion
+    },
     scomplement: function () {
       return complement(this.sequence)
     },
@@ -445,7 +453,7 @@ export default MComponent({
       return pos
     },
     remove: function () {
-      this.$root.$emit('region-change', { vm: this, op: 'remove' })
+      this.$root.$emit('region-change', { region: this.region, vm: this, op: 'remove' })
     },
     baseColor: function (b) {
       return this.cfg.baseColors[b] || 'black'
@@ -680,7 +688,7 @@ export default MComponent({
       this.currRange = [px, px]
     },
     mouseenter: function (e) {
-      this.$root.$emit('region-current', this)
+      this.$root.$emit('region-current', this.region)
     },
     mouseleave: function (e) {
       this.$root.$emit('region-current', null)
@@ -717,7 +725,7 @@ export default MComponent({
         // split region at that point
         const regionRect = this.$refs.underlay.getBoundingClientRect()
         const px = e.clientX - regionRect.left
-        this.$root.$emit('region-change', { vm: this, op: 'split', pos: px / regionRect.width })
+        this.$root.$emit('region-change', { region: this.region, vm: this, op: 'split', pos: px / regionRect.width })
       }
     },
     initDrag () {
@@ -783,6 +791,7 @@ export default MComponent({
               const A = f * (start - r.start + 1)
               const B = f * (r.end - end + 1)
               this.$root.$emit('region-change', {
+                region: this.region,
                 vm: this,
                 op: 'set',
                 coords: {
@@ -793,6 +802,7 @@ export default MComponent({
             } else {
               // zoom in
               this.$root.$emit('region-change', {
+                region: this.region,
                 vm: this,
                 op: 'set',
                 coords: {
@@ -807,7 +817,7 @@ export default MComponent({
             // this.region.start += db
             // this.region.end += db
             const amt = this.deltaB / (this.region.end - this.region.start + 1)
-            this.$root.$emit('region-change', { vm: this, op: 'scroll', amt: amt })
+            this.$root.$emit('region-change', { region: this.region, vm: this, op: 'scroll', amt: amt })
             this.regionScrollDelta = 0
           }
           

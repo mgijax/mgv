@@ -32,7 +32,7 @@
         fill-opacity=0.5
         stroke="none"
         />
-      <!-- curr drag region -->
+      <!-- drag area when creating a new region -->
       <rect
         v-if="dragging"
         ref="dragrect"
@@ -87,13 +87,15 @@
         :y="0"
         :width="width"
         :height="chrLen"
-        fill="blue"
+        :fill="r === currRegion ? 'red' : 'blue'"
         :range="[1, chromosome.length]"
         :tabRange="[r.start, r.end]"
         :orientation="orientation"
         @brush="data => brushed(data, r)"
         @dragstart="data => $emit('dragstart', data)"
         @dragend="data => $emit('dragend', data)"
+        @mouseenter="brushenter(r)"
+        @mouseleave="brushleave(r)"
         />
     </g>
   </g>
@@ -119,9 +121,10 @@ export default MComponent({
     'width',
     'currentList',
     'currentListColor',
+    'currRegion',
     'showLabels',
     'glyphRadius',
-    'currMBrush'
+    'currMBrush' // if the user is currently dragging an MBrush
   ],
   data: function () {
     return {
@@ -163,6 +166,12 @@ export default MComponent({
         this.currMBrush.capturedBy = this.chromosome
         this.currMBrush.maxLength = this.chromosome.length
       }
+    },
+    brushenter: function (r) {
+      this.$root.$emit('region-current', r)
+    },
+    brushleave: function (r) {
+      this.$root.$emit('region-current', null)
     },
     brushed: function (data, rr) {
       if (!rr) return

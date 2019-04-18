@@ -162,7 +162,7 @@ export default MComponent({
       this.$emit('height-changed', this)
     },
     deleteClicked () {
-      this.$root.$emit('region-change', { vm: this, op: 'delete-strip' })
+      this.$root.$emit('region-change', { region: { genome: this.genome }, op: 'delete-strip' })
     }
   },
   mounted: function () {

@@ -8,16 +8,16 @@ class RegionManager {
   //--------------------------------------
   constructor (app) {
     this.app = app
-    this.currRegionVm = null
-    this.app.$root.$on('region-current', r => { this.currRegionVm = r })
+    this.currRegion = null
+    this.app.$root.$on('region-current', r => { this.currRegion = r })
     this.app.$root.$on('region-change', d => this.regionChange(d))
     this.app.$root.$on('jump-to', d => this.jumpTo(d.coords))
     this.app.$root.$on('feature-align', d => {
       const f = d.feature
       const anchor = d.basePos ? ((d.basePos - f.start + 1) / (f.end - f.start + 1)) : null
       let l
-      if (d.vm) {
-        l = d.vm.region.end - d.vm.region.start + 1
+      if (d.region) {
+        l = d.region.end - d.region.start + 1
       } else {
         l = 3 * (f.end - f.start + 1)
       }
@@ -219,7 +219,7 @@ class RegionManager {
   }
   //--------------------------------------
   zoom (amt, quietly) {
-    this.regionChange({ vm: this.currRegionVm, op: 'zoom', amt: amt }, quietly)
+    this.regionChange({ region: this.currRegion, op: 'zoom', amt: amt }, quietly)
   }
   //--------------------------------------
   scrollAllRegions (amt) {
@@ -235,7 +235,7 @@ class RegionManager {
   }
   //--------------------------------------
   scroll (amt, quietly) {
-    this.regionChange({ vm: this.currRegionVm, op: 'scroll', amt: amt }, quietly)
+    this.regionChange({ region: this.currRegion, op: 'scroll', amt: amt }, quietly)
   }
   //--------------------------------------
   splitRegion (r, frac) {
@@ -445,7 +445,7 @@ class RegionManager {
   //    pos (when op = split) Position of the split. (0..1)
   //
   regionChange (d, quietly) {
-    const r = d.vm.region
+    const r = d.region
     if (d.op === 'scroll') {
       if (this.app.scrollLock) {
         this.scrollAllRegions(d.amt)
@@ -476,7 +476,7 @@ class RegionManager {
     } else if (d.op === "make-reference") {
       this.computeMappedRegions(r)
     } else if (d.op === 'delete-strip') {
-      this.deleteStrip(d.vm.genome)
+      this.deleteStrip(r.genome)
     } else if (d.op === 'new') {
       this.addRegion(d.region)
     }

@@ -3,6 +3,8 @@
     class="m-brush"
     :class="{ brushing: brushing }"
     :orientation="orientation"
+    @mouseenter="$emit('mouseenter', $event)"
+    @mouseleave="$emit('mouseleave', $event)"
     >
     <g name="tabgroup"
       >
