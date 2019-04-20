@@ -212,6 +212,7 @@
           class="symbol"
           v-if="(showDetails && showFeatureLabels) || featureSelected(f) || featureMouseover(f) || featureInList(f)"
           :x="featureTextX(f)"
+          :x0="featureTextX(f)"
           :y="0"
           :font-size="featureFontSize"
           :style="{
@@ -255,7 +256,7 @@
 <script>
 import MComponent from '@/components/MComponent'
 import u from '@/lib/utils'
-import { TextSpreader } from '@/lib/Layout'
+import { SegmentLayout } from '@/lib/Layout'
 import { complement } from '@/lib/genetic_code'
 //
 export default MComponent({
@@ -435,7 +436,7 @@ export default MComponent({
     }
   },
   mounted: function () {
-    this.textSpreader = new TextSpreader()
+    this.segLayout = new SegmentLayout()
     this.initDrag()
     this.getFeatures()
   },
@@ -464,20 +465,20 @@ export default MComponent({
       // get each symbol's bounding rect. Partition into lists at the same y-coordinate
       let y2rects = {}
       symbols.forEach(t => {
-        let x = parseFloat(t.getAttribute('x'))
-        let r = t.getBoundingClientRect()
+        const x = parseFloat(t.getAttribute('x0')) // midpoint of text
+        const r = t.getBoundingClientRect()
+        const start = x - r.width / 2
         if (!(r.y in y2rects)) y2rects[r.y] = []
-        y2rects[r.y].push({text: t, rect: { width: r.width, x: x }})
+        y2rects[r.y].push({text: t, rect: { width: r.width, start: start, end: start + r.width - 1 }})
       })
       // spread text within each tier
       for (let y in y2rects) {
         let rects = y2rects[y]
-        rects.sort((a, b) => a.rect.x - b.rect.x)
         let rs = rects.map(r => r.rect)
-        this.textSpreader.spread(rs)
+        this.segLayout.layout(rs)
         rs.forEach((r, i) => {
           let t = rects[i].text
-          t.setAttribute('x', r.x)
+          t.setAttribute('x', r.start + r.width / 2)
         })
       }
     },

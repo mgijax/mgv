@@ -78,59 +78,72 @@ class FeaturePacker {
   }
 }
 
-/*
- * Given a line of overlapping pieces of text (eg the feature symbols in a swim lane) spreads them
- * out in the x dimension to remove overlaps while minimizing total displacement.
- */
-class TextSpreader {
-  // spreads the words in the given contig
-  // Arg:
-  //   words - List of 'word' objects, each having two fields: x, width
-  _spreadContig (words) {
-    let end
-    let total
-    words.forEach((w, i) => {
-      if (i === 0) {
-        end = w.x + w.width + 1
-        total = 0
+//
+// Spreads out one-dimensional segments to remove overlaps while
+// minimizing overall displacement.
+//
+class SegmentLayout {
+  // Finds 
+  findContigs (segments) {
+    return segments.reduce((contigs, s) => {
+      const slen = s.end - s.start + 1
+      const ccontig = contigs[contigs.length - 1]
+      if (!ccontig || ccontig.end < s.start) {
+        // s starts a new contig
+        contigs.push({
+          start: s.start, // min start
+          end: s.end, // max end
+          members: [s], // the contig members
+          mlength: slen // sum of length of all members
+        })
       } else {
-        total += end - w.x
-        w.x = end
-        end += w.width + 1
+        // s is part of current contig
+        ccontig.end = Math.max(ccontig.end, s.end)
+        ccontig.members.push(s)
+        ccontig.mlength += slen
+      }
+      return contigs
+    }, [])
+  }
+  layoutContigMembers (c, start) {
+    c.members.forEach(m => {
+      if (m.members) {
+        // m is itself a contig. recurse
+        this.layoutContigMembers(m, start)
+        start += m.mlength
+      } else {
+        // m is a base segment
+        const mlen = m.end - m.start + 1
+        m.start = start
+        m.end = start + mlen - 1
+        start += mlen
       }
     })
-    let dx = total / words.length
-    words.forEach(w => { w.x -= dx })
-    return dx
+    c.start = c.members[0].start
+    c.end = c.start + c.mlength - 1
   }
-  // perform a single pass over the list.
-  // identify contigs and spread each one.
-  // return true iff a contig was found.
-  _spread1 (words) {
-    let buffer = []
-    let hwm = -Infinity
-    let contigFound = false
-    for (let i = 0; i < words.length; i += 1) {
-      let w = words[i]
-      if (w.x > hwm) {
-        if (buffer.length > 1) {
-          let dx = this._spreadContig(buffer)
-          contigFound = dx > 0
+  spreadContig (c) {
+    const midpt = (c.start + c.end) / 2
+    let start = midpt - c.mlength / 2
+    this.layoutContigMembers(c, start)
+  }
+  // List of one-dimensional segments. Each segment has a start and end position, both integers,
+  // where end is >= start. The length of a segment is end - start + 1.
+  layout (segments) {
+    let again
+    do {
+      again = false
+      segments.sort((s1,s2) => s1.start - s2.start)
+      const contigs = this.findContigs(segments)
+      contigs.forEach(c => {
+        if (c.members.length > 1) {
+          this.spreadContig(c)
+          again = true
         }
-        buffer = []
-      }
-      buffer.push(w)
-      hwm = Math.max(hwm, w.x + w.width)
-    }
-    return contigFound
-  }
-  //
-  spread (words) {
-    let i = 0
-    while (i <= 100 && this._spread1(words)) {
-      i += 1
-    }
+      })
+      segments = contigs
+    } while (again);
   }
 }
 
-export { ContigAssigner, SwimLaneAssigner, FeaturePacker, TextSpreader }
+export { ContigAssigner, SwimLaneAssigner, FeaturePacker, SegmentLayout }

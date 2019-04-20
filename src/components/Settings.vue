@@ -76,7 +76,7 @@
         type="range"
         v-model="ZoomRegion.contrast"
         min="0"
-        max="1"
+        max=".9"
         step=".1"
         />
   </div>
@@ -156,7 +156,7 @@
         />
   </div>
   <!-- ============== FIDUCIALS section  ============== -->
-  <label>Fiducials</label>
+  <label>Connectors</label>
   <!-- =================== -->
   <div
     title="For highlighted features, show connectors between genologs."

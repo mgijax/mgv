@@ -46,39 +46,37 @@
         stroke="none"
         />
       <!-- Glyphs for current list items -->
-      <g v-if="currentList">
-        <g
-          v-for="f in currentList.slice(0,250)"
-          :key="f.ID"
+      <g
+        v-for="g in myGlyphs"
+        :key="g.f.ID"
+        :name="g.f.ID"
+        class="list-item"
         >
         <line
-          v-if="f.chr === chromosome"
-          :x1="glyphX(f) - (f.strand === '+' ? glyphRadius : -glyphRadius)"
-          :y1="glyphY(f)"
-          :x2="0"
-          :y2="glyphY(f)"
+          :x1="g.gPoint[0]"
+          :y1="g.gPoint[1]"
+          :x2="g.aPoint[0]"
+          :y2="g.aPoint[1]"
           stroke="black"
           />
         <circle
           class="glyph"
-          v-if="f.chr === chromosome"
-          :cx="glyphX(f)"
-          :cy="glyphY(f)"
+          :cx="g.gPoint[0]"
+          :cy="g.gPoint[1]"
           :r="glyphRadius"
           stroke="black"
           :fill="currentListColor"
-          @click="clickedGlyph(f)"
+          @click="clickedGlyph(g.f)"
           >
-          <title>{{ f.symbol || f.ID }}</title>
+          <title>{{ g.f.symbol || g.f.ID }}</title>
         </circle>
         <text
-          v-if="f.chr === chromosome && showLabels"
-          :x="0"
-          :y="0"
-          :transform="`translate(${glyphTextX(f)},${glyphTextY(f)})rotate(${orientation === 'h' ? 90 : 0})`"
+          v-if="showLabels"
+          :x="g.gPoint[0]"
+          :y="g.gPoint[1] - glyphRadius"
+          :ransform="`translate(${glyphTextX(g.f)},${glyphTextY(g.f)})rotate(${orientation === 'h' ? 90 : 0})`"
           style="font-size: 10px; fill: black; text-anchor: middle;"
-          >{{f.symbol || f.ID}}</text>
-        </g>
+          >{{g.f.symbol || g.f.ID}}</text>
       </g>
       <m-brush
         v-for="(r, ri) in regions"
@@ -105,6 +103,7 @@
 import MComponent from '@/components/MComponent'
 import gc from '@/lib/GenomeCoordinates'
 import u from '@/lib/utils'
+import { SegmentLayout } from '@/lib/Layout'
 import MBrush from '@/components/MBrush'
 
 export default MComponent({
@@ -153,6 +152,38 @@ export default MComponent({
     labelTransform: function () {
       if (this.orientation === 'v') return 'rotate(0)'
       return `rotate(90)translate(-10,8)`
+    },
+    myList: function () {
+      return (this.currentList.slice(0,250) || []).filter(f => f.chr === this.chromosome)
+    },
+    myGlyphs: function () {
+      const gs = this.myList.map(f => {
+        return {
+          f: f,
+          gPoint: [this.glyphX(f), this.glyphY(f)], // where glyph is centered
+          aPoint: [0, this.glyphY(f)] // where connector line attaces to axis
+        }
+      })
+      const gsByStrand = gs.reduce((a,g) => {
+        a[g.f.strand].push(g)
+        return a
+      }, {'+':[], '-': [] })
+      const th = this.showLabels ? 12 : 0
+      for (let strand in gsByStrand) {
+        const sgs = gsByStrand[strand]
+        const segs = sgs.map(g => {
+          return {
+            start: g.gPoint[1],
+            end: g.gPoint[1] + 2 * this.glyphRadius + th,
+            g: g
+          }
+        })
+        this.spreader.layout(segs)
+        segs.forEach(s => {
+          s.g.gPoint[1] = s.start
+        })
+      }
+      return gs
     }
   },
   methods: {
@@ -204,7 +235,13 @@ export default MComponent({
       const px = this.orientation === 'v' ? e.clientY - bcr.top : e.clientX - bcr.left
       const b = Math.floor(px / this.ppb)
       return b
-    },
+    }
+  },
+  updated: function () {
+    //this.spreadGlyphs()
+  },
+  created: function () {
+    this.spreader = new SegmentLayout()
   },
   mounted: function () {
     const self = this
