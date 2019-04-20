@@ -88,6 +88,7 @@
         fill="black"
         font-size="10px"
         font-family="sans-serif"
+        :font-weight="isCurrent ? 'bold' : 'normal'"
         :transform="`translate(${-myDelta},0)`"
         >{{region.chr.name}}:{{region.start + deltaB}}..{{region.end + deltaB}}</text>
       <!-- ======= sequence string ======= -->

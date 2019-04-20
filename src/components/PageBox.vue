@@ -191,7 +191,11 @@ export default MComponent({
   padding: 6px;
   margin: 3px;
   background-color: #e1e1e1;
-  border-radius: 2px;
+  border-radius: 3px;
+  border: thin solid #e1e1e1;
+}
+.pagebox:hover {
+  border-color: black;
 }
 .pagebox.floating {
   position: absolute;
@@ -208,9 +212,6 @@ export default MComponent({
 }
 .pagebox > [name="label"] .material-icons {
   font-size: 14px;
-}
-.pagebox:hover {
-  outline: thin solid black;
 }
 .pagebox [name="buttonBox"] {
   position: absolute;
