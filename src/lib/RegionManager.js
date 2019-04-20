@@ -435,7 +435,6 @@ class RegionManager {
   // Handler for region-change events
   // Args:
   //  d (object) event data, which includes:
-  //    vm    The ZoomRegion component
   //    op    Operation. One of: scroll, zoom, remove
   //
   //    Other fields depend on the op.

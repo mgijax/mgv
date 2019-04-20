@@ -457,7 +457,7 @@ export default MComponent({
       return pos
     },
     remove: function () {
-      this.$root.$emit('region-change', { region: this.region, vm: this, op: 'remove' })
+      this.$root.$emit('region-change', { region: this.region, op: 'remove' })
     },
     baseColor: function (b) {
       return this.cfg.baseColors[b] || 'black'
@@ -706,17 +706,17 @@ export default MComponent({
     },
     mouseover: function (e) {
       let f = this.getEventObjects(e)
-      if (f) this.$root.$emit('feature-over', { vm: this, feature: f.feature, transcript: f.transcript, event: e })
+      if (f) this.$root.$emit('feature-over', { region: this.region, feature: f.feature, transcript: f.transcript, event: e })
     },
     mouseout: function (e) {
       let f = this.getEventObjects(e)
-      if (f) this.$root.$emit('feature-out', { vm: this, feature: f.feature, transcript: f.transcript, event: e })
+      if (f) this.$root.$emit('feature-out', { region: this.region, feature: f.feature, transcript: f.transcript, event: e })
     },
     clicked: function (e) {
-      this.$root.$emit('region-click', { vm: this, event: e })
+      this.$root.$emit('region-click', { region: this.region, event: e })
       let f = this.getEventObjects(e)
       if (f) {
-        this.$root.$emit('feature-click', { vm: this, feature: f.feature, transcript: f.transcript, event: e })
+        this.$root.$emit('feature-click', { region: this.region, feature: f.feature, transcript: f.transcript, event: e })
         e.stopPropagation()
       } else if (this.absorbNextClick) {
         e.stopPropagation()
@@ -727,14 +727,14 @@ export default MComponent({
       let f = this.getEventObjects(e)
       if (f) {
         // double clicked on a feature
-        this.$root.$emit('feature-align', { vm: this, feature: f.feature, transcript: f.transcript, event: e, basePos: this.clientXtoBase(e.clientX) })
+        this.$root.$emit('feature-align', { region: this.region, feature: f.feature, transcript: f.transcript, event: e, basePos: this.clientXtoBase(e.clientX) })
         e.stopPropagation()
       } else {
         // double clicked on region background
         // split region at that point
         const regionRect = this.$refs.underlay.getBoundingClientRect()
         const px = e.clientX - regionRect.left
-        this.$root.$emit('region-change', { region: this.region, vm: this, op: 'split', pos: px / regionRect.width })
+        this.$root.$emit('region-change', { region: this.region, op: 'split', pos: px / regionRect.width })
       }
     },
     initDrag () {
@@ -801,7 +801,6 @@ export default MComponent({
               const B = f * (r.end - end + 1)
               this.$root.$emit('region-change', {
                 region: this.region,
-                vm: this,
                 op: 'set',
                 coords: {
                   chr: this.region.chr,
@@ -812,7 +811,6 @@ export default MComponent({
               // zoom in
               this.$root.$emit('region-change', {
                 region: this.region,
-                vm: this,
                 op: 'set',
                 coords: {
                   chr: this.region.chr,
@@ -826,7 +824,7 @@ export default MComponent({
             // this.region.start += db
             // this.region.end += db
             const amt = this.deltaB / (this.region.end - this.region.start + 1)
-            this.$root.$emit('region-change', { region: this.region, vm: this, op: 'scroll', amt: amt })
+            this.$root.$emit('region-change', { region: this.region, op: 'scroll', amt: amt })
             this.regionScrollDelta = 0
           }
           
