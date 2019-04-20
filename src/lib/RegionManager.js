@@ -9,7 +9,7 @@ class RegionManager {
   constructor (app) {
     this.app = app
     this.currRegion = null
-    this.app.$root.$on('region-current', r => { this.currRegion = r })
+    this.app.$root.$on('region-current', r => { this.currRegion = r ? r.region : null })
     this.app.$root.$on('region-change', d => this.regionChange(d))
     this.app.$root.$on('jump-to', d => this.jumpTo(d.coords))
     this.app.$root.$on('feature-align', d => {

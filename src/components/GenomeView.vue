@@ -265,12 +265,14 @@ export default MComponent({
       () => this.computeCurrentListGenologs(),
       { deep: true })
     this.$root.$on('camera-click', (v) => v === 'genomeview' && this.downloadImage())
-    this.$root.$on('region-click', d => {
-      this.genome = d.vm.region.genome
-      this.currRegion = d.vm.region      
+    this.$root.$on('region-current', d => {
+      if (d) {
+        this.genome = d.region.genome
+        this.currRegion = d.region      
+      }
     })
     this.$root.$on('region-change', d => {
-      const r = d.vm.region
+      const r = d.region
       if (r && r.genome) this.genome = r.genome
     })
   }

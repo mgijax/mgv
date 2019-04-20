@@ -697,7 +697,7 @@ export default MComponent({
       this.currRange = [px, px]
     },
     mouseenter: function (e) {
-      this.$root.$emit('region-current', this.region)
+      this.$root.$emit('region-current', { region: this.region })
     },
     mouseleave: function (e) {
       this.$root.$emit('region-current', null)

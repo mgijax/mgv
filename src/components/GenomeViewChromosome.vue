@@ -199,7 +199,7 @@ export default MComponent({
       }
     },
     brushenter: function (r) {
-      this.$root.$emit('region-current', r)
+      this.$root.$emit('region-current', { region : r })
     },
     brushleave: function (r) {
       this.$root.$emit('region-current', null)
