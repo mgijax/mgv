@@ -23,6 +23,7 @@
       :pad="cfg.pad"
       :transform="`translate(${zr.deltaX}, 0)`"
       :globalScrollDelta="globalScrollDelta"
+      :synGenome="synGenome"
       @region-draw="setHeight"
       @region-delete="setHeight"
       @busy-start="busyStart"
@@ -105,7 +106,8 @@ export default MComponent({
     'width',
     'globalScrollDelta',
     'strip',
-    'regions'
+    'regions',
+    'synGenome'
   ],
   inject: ['translator', 'regionManager'],
   data: function () {

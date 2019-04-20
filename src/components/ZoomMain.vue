@@ -27,6 +27,7 @@
       :genome="zs.genome"
       :context="context"
       :regions="zs.regions"
+      :synGenome="synGenome(i)"
       :width="width"
       :globalScrollDelta="globalScrollDelta"
       @height-changed="setYs()"
@@ -65,6 +66,10 @@ export default MComponent({
     }
   },
   methods: {
+    synGenome: function (i) {
+      if (this.context.strips.length !== 2) return null
+      return this.context.strips[1-i].genome
+    },
     downloadImage: function () {
       const fname = `mgv.zoomview.png`
       svg2png(this.$el, this.width, this.height, fname)
