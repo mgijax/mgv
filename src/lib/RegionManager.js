@@ -106,6 +106,17 @@ class RegionManager {
     }
   }
   //--------------------------------------
+  swap (r, quietly) {
+    const rr = this.findRegion(r)
+    const si = rr[0], ri = rr[1]
+    if (ri === -1) return
+    const s = this.app.strips[si]
+    s.regions.splice(ri, 1)
+    s.regions.splice(ri + 1, 0, r)
+    this.layout()
+    if (!quietly) this.announce()
+  }
+  //--------------------------------------
   // Moves the border between r1 and its righthand neighbor by the specified amt (in pixels)
   moveBorder (r1, amt, quietly) {
     //

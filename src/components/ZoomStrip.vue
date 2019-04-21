@@ -21,20 +21,22 @@
       :allMaxLaneP="allMaxLaneP"
       :allMaxLaneM="allMaxLaneM"
       :pad="cfg.pad"
-      :transform="`translate(${zr.deltaX}, 0)`"
       :globalScrollDelta="globalScrollDelta"
       :synGenome="synGenome"
       @region-draw="setHeight"
       @region-delete="setHeight"
       @busy-start="busyStart"
       @busy-end="busyEnd"
+      @region-rdragstart="regionRdragstart"
+      @region-rdrag="regionRdrag"
+      @region-rdragend="regionRdragend"
       />
     <!-- region resize handles -->
     <rect
       v-for="(zr,zri) in regions"
       :key="zri+'-2'"
       class="border-handle"
-      v-show="zri > 0"
+      v-show="zri > 0 && !rDragging"
       :transform="`translate(${zr.deltaX - 2.5}, 0)`"
       :i="zri"
       x="0"
@@ -118,6 +120,7 @@ export default MComponent({
       allMaxLaneP: 0,
       allMaxLaneM: 0,
       dragging: false,
+      rDragging: false,
       featureHeight: 14,
       laneGap: 8,
       busyCount: 0,
@@ -131,6 +134,33 @@ export default MComponent({
     },
   },
   methods: {
+    regionRdragstart: function (d) {
+      this.rDragging = true
+    },
+    regionRdrag: function (d) {
+      const drs = d.region.deltaX + d.deltaX
+      const dre = drs + d.region.width - 1
+      let dir = 1
+      this.$children.forEach(zr => {
+        const r = zr.region
+        if (r === d.region) {
+          dir = -1
+        } else {
+          let displace = (dir === 1 && drs < r.deltaX) || (dir === -1 && drs > r.deltaX)
+          zr.regionDragDelta = displace ? dir * d.region.width : 0
+        }
+      })
+    },
+    regionRdragend: function (d) {
+      this.rDragging = false
+      this.$children.forEach(zr => {
+        zr.regionDragDelta = 0
+        zr.region.sortKey = zr.$el.getBoundingClientRect().x
+      })
+      this.strip.regions.sort((a,b) => a.sortKey - b.sortKey)
+      this.app.regionManager.layout()
+      this.$root.$emit('context-changed')
+    },
     activateHandle: function (e) {
       const handle = e.target
       if (handle.getAttribute('active')) return

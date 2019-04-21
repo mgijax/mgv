@@ -247,7 +247,9 @@ export default MComponent({
 .pagebox [name="buttonBox"] {
   display: none;
 }
-.pagebox:hover [name="buttonBox"] {
+.pagebox:hover [name="buttonBox"],
+.pagebox.dragging [name="buttonBox"]
+{
   display: inherit;
 }
 </style>

@@ -1,8 +1,8 @@
 <template>
   <g
-    transform="translate(0,0)"
     class="zoom-region"
-    :class="{ current: isCurrent }"
+    :class="{ current: isCurrent, dragging: dragging || rDragging }"
+    :transform="`translate(${region.deltaX + regionDragDelta}, 0)`"
     >
   <svg
     @mouseover.stop="mouseover"
@@ -225,10 +225,9 @@
           {{f.symbol || f.ID}}
           </text>
       </g> <!-- features -->
-    <!--
-    -->
+    <!-- Region delete button -->
     <g
-      class="deleteBtn"
+      class="zrBtn delete"
       @click.stop="remove"
       @mousedown.stop=""
       >
@@ -248,7 +247,28 @@
         dominant-baseline="hanging"
         text-anchor="end"
         >X</text>
-   </g>
+     </g>
+    <!-- Region drag button -->
+    <g
+      class="zrBtn drag"
+      ref="draghandle"
+      >
+      <rect
+        :x="2"
+        :y="-zeroOffset"
+        width="10"
+        height="16"
+        fill="black"
+        fill-opacity="0"
+        />
+      <text
+        :x="2"
+        :y="-zeroOffset"
+        fill="white"
+        fill-opacity=0
+        dominant-baseline="hanging"
+        >::</text>
+     </g>
   </g>
   </svg>
   </g>
@@ -306,10 +326,12 @@ export default MComponent({
       blocks: [], // the synteny blocks to draw
       sequence: '', // the sequence to display
       seqStart: 0,
-      dragging: false,
+      dragging: false, // true while dragging within a region
+      rDragging: false, // true while dragging region within its strip
       currRange: null,
       busy: false,
-      regionScrollDelta: 0
+      regionScrollDelta: 0,
+      regionDragDelta: 0
     }
   },
   computed: {
@@ -738,7 +760,32 @@ export default MComponent({
         this.$root.$emit('region-change', { region: this.region, op: 'split', pos: px / regionRect.width })
       }
     },
+    // Initialize all drag behaviors for this region
     initDrag () {
+      this.initScrollDrag()
+      this.initRegionDrag()
+    },
+    // Initializes handler for dragging a region L/R within its strip.
+    initRegionDrag () {
+      this.rDragging = false
+      u.dragify(this.$refs.draghandle, {
+        dragstart: function (e, d) {
+          this.rDragging = true
+          this.$emit('region-rdragstart', { region: this.region, vm: this })
+        },
+        drag: function (e, d) {
+          this.regionDragDelta = d.deltaX
+          this.$emit('region-rdrag', { region: this.region, vm: this, deltaX: d.deltaX })
+        },
+        dragend: function (e, d) {
+          this.rDragging = false
+          this.$emit('region-rdragend', { region: this.region, vm: this })
+          this.regionDragDelta = 0
+        }
+      }, document.body, this)
+    },
+    // Initializes handler for dragging within a region (scroll, zoom, etc)
+    initScrollDrag () {
       this.dragging = false
       // For lockstep dragging across regions, broadcast the drag deltas
       u.dragify(this.$el, {
@@ -846,16 +893,28 @@ export default MComponent({
 </script>
 
 <style>
+.zoom-region {
+  transition: transform 0.2s;
+}
+.zoom-region.dragging {
+  transition: transform 0s;
+}
 .zoom-region .underlay {
   transition: height 0.5s;
 }
 .zoom-region > svg > text {
   transition: y 0.5s;
 }
-.zoom-region .deleteBtn {
+.zoom-region .zrBtn.delete {
   cursor: pointer;
 }
-.zoom-region .deleteBtn:hover * {
+.zoom-region .zrBtn.drag {
+  cursor: grab;
+}
+.zoom-region.dragging .zrBtn.drag {
+  cursor: grabbing;
+}
+.zoom-region .zrBtn:hover * {
   fill-opacity: 1;
 }
 .feature .transcript {
