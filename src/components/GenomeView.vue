@@ -144,7 +144,6 @@ export default MComponent({
       scrollDelta: 0,
       fixedHeight: false, // if true, all chrs drawn same length; else, drawn proportional
       showLabels: true, // if true, show current list feature labels
-      currRegion: null,
       currMBrush: null, // while user is dragging a region tab, the MBrush component
       maxListLength: 250 // max number of list items we'll draw
     }
@@ -162,7 +161,10 @@ export default MComponent({
       return this.genome ? this.genome.name : ''
     },
     currChr: function () {
-      return this.currRegion ? this.currRegion.chr : (this.genome ? this.genome.chromosomes[0] : { name: '' })
+      const cr = this.context.currRegion
+      const cc = cr ? cr.chr : this.prevChr ? this.prevChr : (this.genome ? this.genome.chromosomes[0] : { name: '' })
+      this.prevChr = cc
+      return cc
     },
     currStart: function () {
       return this.context.coords.start
@@ -247,7 +249,6 @@ export default MComponent({
       this.scrollDelta = 0
     },
     genome: function () {
-      if (this.currRegion && this.currRegion !== this.genome) this.currRegion = null
       this.computeCurrentListGenologs()
     }
   },
@@ -257,7 +258,7 @@ export default MComponent({
       this.resize()
     })
     this.$watch(
-      'currRegion',
+      'context.currRegion',
       () => { this.scrollDelta = 0 },
       { deep: true })
     this.$watch(
@@ -268,7 +269,6 @@ export default MComponent({
     this.$root.$on('region-current', d => {
       if (d) {
         this.genome = d.region.genome
-        this.currRegion = d.region      
       }
     })
     this.$root.$on('region-change', d => {
