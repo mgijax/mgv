@@ -418,6 +418,7 @@ class RegionManager {
       r.deltaX = dx
       dx += r.width + gap
     })
+    console.log(strip.regions)
   }
   //--------------------------------------
   scaleAdjust (nums, width, mWidth) {
@@ -436,10 +437,8 @@ class RegionManager {
       }
     })
     if (deficit === 0) return scaled
-    const width2 = width - deficit
     const sum2 = scaled.reduce((t,n) => t + (n > mWidth ? n : 0), 0)
-    const f2 = width2 / sum2
-    const scaled2 = scaled.map(n => n > mWidth ? n * f2 : n)
+    const scaled2 = scaled.map(n => n - deficit * (n > mWidth ? n / sum2 : 0))
     return scaled2
   }
   //--------------------------------------
