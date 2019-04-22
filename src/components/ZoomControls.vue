@@ -4,17 +4,11 @@
       :class="{ fixed: fixed }"
       :style="{ top: offset + 'px' }"
       >
-      <div class="selector-container">
-        <div class="flexrow">
-          <span>Genomes</span>
-          <i class="material-icons">arrow_drop_down</i>
-        </div>
-        <genome-selector
-          :allGenomes="context.allGenomes"
-          :strips="context.strips"
-          :genomeSets="context.genomeSets"
-          />
-      </div>
+      <genome-selector
+        :allGenomes="context.allGenomes"
+        :strips="context.strips"
+        :genomeSets="context.genomeSets"
+        />
       <!-- Search box -->
       <div class="flexrow">
         <label>Find</label>
@@ -186,17 +180,5 @@ export default MComponent({
 .zoom-controls > .flexrow {
     justify-content: flex-start;
     flex-grow: 0;
-}
-.genome-selector {
-  position: absolute;
-  top: 15px;
-  left: 15px;
-  flex-grow: 0;
-  width: 140px;
-  background-color: #e0e0e0;
-  display: none;
-}
-.selector-container:hover .genome-selector {
-  display: flex;
 }
 </style>
