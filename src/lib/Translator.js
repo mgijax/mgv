@@ -14,7 +14,7 @@ class Translator {
   // for mapping coordinates in aGenome to coordinates in bGenome.
   // Since creating a translator is expensive, the results are cached. 
   // Creating a translator from A to B simultaneously creates a translator from B to A (which is also cached).
-  getTranslator (aGenome, bGenome) {
+  etTranslator (aGenome, bGenome) {
     if (this.n2block[aGenome.name] && this.n2block[aGenome.name][bGenome.name]) {
       return Promise.resolve(this.n2block[aGenome.name][bGenome.name])
     }
@@ -31,6 +31,25 @@ class Translator {
         return blocks[0]
       })
     })
+  }
+  getTranslator (aGenome, bGenome) {
+    const n2bks = this.n2block
+    const aName = aGenome.name
+    const bName = bGenome.name
+    if (n2bks[aName] && n2bks[aName][bName]) {
+      return n2bks[aName][bName]
+    }
+    console.log("Translator: generating synteny blocks for ", aName, bName)
+    const p = this.app.dataManager.getAllFeatures(aGenome).then(afeats => {
+      return this.app.dataManager.getAllFeatures(bGenome).then(bfeats => {
+        return generateSyntenyBlocks(aName, afeats, bName, bfeats)
+      })
+    })
+    const a2b = n2bks[aName] = n2bks[aName] || {}
+    const b2a = n2bks[bName] = n2bks[bName] || {}
+    a2b[bName] = p.then(blocks => blocks[0])
+    b2a[aName] = p.then(blocks => blocks[1])
+    return a2b[bName]
   }
   // Translates a coordinate range from aGenome to the 'equivalent' coordinate range(s) in bGenome.
   // Returns a list of coordinate ranges in bGenome.

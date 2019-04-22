@@ -178,7 +178,7 @@
         type="range"
         v-model="ZoomFiducials.fillOpacity"
         min="0"
-        max="0.7"
+        max="0.4"
         step="0.01"
         />
   </div>
