@@ -439,7 +439,7 @@ export default MComponent({
         if (cxt.ref) this.rGenome = cxt.ref
         if (cxt.strips) {
           this.dmode = 'direct'
-          this.strips = this.regionManager.layout(cxt.strips, this.zoomWidth)
+          this.regionManager.initializeRegions(cxt.strips)
         } else if (cxt.lcoords && cxt.lcoords.landmark) {
           this.dmode = 'landmark'
           this.lcoords = cxt.lcoords

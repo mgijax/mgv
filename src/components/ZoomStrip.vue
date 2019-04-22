@@ -15,7 +15,7 @@
     <!-- list of ZoomRegions -->
     <zoom-region
       v-for="(zr,zri) in regions"
-      :key="zri"
+      :key="zr.id"
       :context="context"
       :region="zr"
       :allMaxLaneP="allMaxLaneP"
@@ -44,7 +44,7 @@
       width="5"
       :height="height"
       fill="gray"
-      fill-opacity=0
+      fill-opacity=1
       @mouseenter="activateHandle"
       />
     <!-- end cap -->
@@ -144,6 +144,7 @@ export default MComponent({
       let dir = 1
       this.$children.forEach(zr => {
         const r = zr.region
+        dir = d.region.deltaX > zr.region.deltaX ? 1 : -1
         if (r === d.region) {
           dir = -1
         } else {

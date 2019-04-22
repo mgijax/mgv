@@ -9,6 +9,8 @@ class RegionManager {
   constructor (app) {
     this.app = app
     this.currRegion = null
+    this.rCount = 0
+    //
     this.app.$root.$on('region-current', r => { this.currRegion = r ? r.region : null })
     this.app.$root.$on('region-change', d => this.regionChange(d))
     this.app.$root.$on('jump-to', d => this.jumpTo(d.coords))
@@ -32,20 +34,31 @@ class RegionManager {
     })
   }
   //--------------------------------------
+  makeRegion (r) {
+    const rr = r ? Object.assign({}, r) : {}
+    rr.id = this.rCount++
+    rr.width = rr.width === undefined ? 1 : rr.width
+    rr.deltaX = rr.deltaX === undefined ? 0 : rr.deltaX
+    return rr
+  }
+  //--------------------------------------
   // Returns the index of the strip for genome g, or -1 if no such strip exists.
   findStrip (g) {
     return this.app.strips.map(s => s.genome).indexOf(g)
   }
   //--------------------------------------
-  // Returns the index of the specified region along with the index of the strip it was found in.
-  // 
+  // Returns the index of the specified region along with the 
+  // index of the strip it was found in.
+  // Returns:
+  //  [si, ri] where si is the index of the strip containing r, and ri is
+  //  the index of r within the strip
   findRegion (r) {
     const i = this.findStrip(r.genome)
     const j = (i === -1 ? -1 : this.app.strips[i].regions.indexOf(r))
     return [i, j]
   }
   //--------------------------------------
-  //
+  // Returns the current regions that are for genome g on chromosome c.
   getRegions (g, c) {
     let rs = this.app.strips.filter(s => s.genome === g).reduce((rs, s) => rs.concat(s.regions), [])
     if (c) {
@@ -54,12 +67,14 @@ class RegionManager {
     return rs
   }
   //--------------------------------------
-  //
+  // Returns the unique genomes from all regions.
   currentGenomes () {
     return u.removeDups(this.app.strips.map(s => s.genome))
   }
   //--------------------------------------
-  //
+  // Sets the strips to be for the given list of genomes.
+  // Removes strips for genomes not in the list,
+  // adds strips (if needed) for those that are.
   setStrips (genomes, quietly) {
    const current = this.app.strips.map(s => s.genome)
    const curset = new Set(current)
@@ -93,7 +108,7 @@ class RegionManager {
     return strip
   }
   //--------------------------------------
-  //
+  // Removes the strip for genome g.
   deleteStrip (g, quietly) {
     const i = this.findStrip(g)
     if (i >= 0) {
@@ -106,6 +121,7 @@ class RegionManager {
     }
   }
   //--------------------------------------
+  // Swaps the positions of r and its righthand neighbor.
   swap (r, quietly) {
     const rr = this.findRegion(r)
     const si = rr[0], ri = rr[1]
@@ -117,7 +133,8 @@ class RegionManager {
     if (!quietly) this.announce()
   }
   //--------------------------------------
-  // Moves the border between r1 and its righthand neighbor by the specified amt (in pixels)
+  // Moves the border between r1 and its righthand neighbor by the specified amt (in pixels).
+  // Preserves a minimum region width.
   moveBorder (r1, amt, quietly) {
     //
     const _move = function (regions, i, amt, min) {
@@ -157,12 +174,19 @@ class RegionManager {
     if (!quietly) this.announce()
   }
   //--------------------------------------
+  initializeRegions (strips) {
+    strips.forEach(s => {
+      s.regions = s.regions.map(r => this.makeRegion(r))
+    })
+    this.app.strips = this.layout(strips)
+  }
+  //--------------------------------------
+  // Adds a new region. Adds a new strip if necessary, or adds r to the
+  // end of existing strip, based on r's genome.
   addRegion (r) {
-    r = Object.assign({}, r)
+    r = this.makeRegion(r)
     const si = this.findStrip(r.genome)
-    if (!r.deltaX) r.deltaX = 0
     if (si === -1) {
-      r.width = 1
       this.addStrip(r.genome, true, r)
     } else {
       const s = this.app.strips[si]
@@ -253,7 +277,7 @@ class RegionManager {
     const rr = this.findRegion(r)
     const si = rr[0], ri = rr[1]
     if (ri === -1) return
-    const r2 = Object.assign({}, r)
+    const r2 = this.makeRegion(r)
     const w = r.width
     const l = r.end - r.start + 1
     const ll = Math.floor(frac * l)
@@ -277,7 +301,10 @@ class RegionManager {
       this.app.rRegion = r
       this.app.scrollLock = false
       this.app.lcoords = null
-      strips.forEach(s => s.regions.forEach( r => { r.width = r.end - r.start + 1 }))
+      strips.forEach(s => {
+        s.regions.forEach(r => { r.width = r.end - r.start + 1 })
+        s.regions = s.regions.map(r => this.makeRegion(r))
+      })
       this.app.strips = this.layout(strips)
     })
   }
@@ -378,12 +405,12 @@ class RegionManager {
     const s = Math.round(lmp - w / 2) + delta
     return {
       genome: genome,
-      regions: [{
+      regions: [this.makeRegion({
         genome: genome,
         chr: lm.chr,
         start: s,
         end: s + w - 1,
-      }]
+      })]
     }
   }
   //--------------------------------------
