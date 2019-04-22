@@ -44,6 +44,7 @@
       width="5"
       :height="height"
       fill="gray"
+      fill-opacity=0
       @mouseenter="activateHandle"
       />
     <!-- end cap -->

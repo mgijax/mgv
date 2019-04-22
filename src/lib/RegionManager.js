@@ -153,7 +153,7 @@ class RegionManager {
     const rr = this.findRegion(r1)
     const si = rr[0], ri = rr[1]
     if (ri === -1) return
-    _move(this.app.strips[si].regions, ri, amt, 45)
+    _move(this.app.strips[si].regions, ri, amt, 25)
     if (!quietly) this.announce()
   }
   //--------------------------------------

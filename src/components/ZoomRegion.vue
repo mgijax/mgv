@@ -83,7 +83,6 @@
       <text
         x="50%"
         :y="height - zeroOffset + 10"
-        text-align="center"
         dominant-baseline="hanging"
         fill="black"
         font-size="10px"
@@ -894,7 +893,7 @@ export default MComponent({
 
 <style>
 .zoom-region {
-  transition: transform 0.2s;
+  transition: transform 0s;
 }
 .zoom-region.dragging {
   transition: transform 0s;
