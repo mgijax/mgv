@@ -418,7 +418,6 @@ class RegionManager {
       r.deltaX = dx
       dx += r.width + gap
     })
-    console.log(strip.regions)
   }
   //--------------------------------------
   scaleAdjust (nums, width, mWidth) {

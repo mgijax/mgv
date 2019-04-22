@@ -156,7 +156,7 @@ export default MComponent({
       this.rDragging = false
       this.$children.forEach(zr => {
         zr.regionDragDelta = 0
-        zr.region.sortKey = zr.$el.getBoundingClientRect().x
+        zr.region.sortKey = zr.$refs.underlay.getBoundingClientRect().x
       })
       this.strip.regions.sort((a,b) => a.sortKey - b.sortKey)
       this.app.regionManager.layout()
