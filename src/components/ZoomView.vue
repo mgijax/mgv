@@ -6,6 +6,7 @@
     <zoom-controls
       ref="controls"
       :context="context"
+      @camera-click="cameraClick"
       />
     <zoom-region-controls
       ref="regionControls"
@@ -60,6 +61,9 @@ export default MComponent({
     }
   },
   methods: {
+    cameraClick: function (e) {
+      this.$refs.main.downloadImage(e)
+    },
     showContextMenu: function (evt) {
       const rnode = evt.target.closest('.zoom-region')
       const fnode = evt.target.closest('.feature')

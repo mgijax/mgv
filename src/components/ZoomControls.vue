@@ -30,8 +30,8 @@
       <!-- camera button -->
       <m-button
         icon="camera_alt"
-        @click="$root.$emit('camera-click','zoomview')"
-        title="Download image."/>
+        @click="$emit('camera-click', $event)"
+        title="Click to download PNG image. Shift-click to download SVG."/>
     </div>
 </template>
 

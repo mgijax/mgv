@@ -42,7 +42,7 @@
 import MComponent from '@/components/MComponent'
 import ZoomStrip from '@/components/ZoomStrip'
 import ZoomFiducials from '@/components/ZoomFiducials'
-import svg2png from '@/lib/Svg2Png'
+import { svg2png, svg2file } from '@/lib/SvgDownload'
 export default MComponent({
   name: 'ZoomMain',
   inject: ['regionManager'],
@@ -70,9 +70,12 @@ export default MComponent({
       if (this.context.strips.length !== 2) return null
       return this.context.strips[1-i].genome
     },
-    downloadImage: function () {
-      const fname = `mgv.zoomview.png`
-      svg2png(this.$el, this.width, this.height, fname)
+    downloadImage: function (e) {
+      if (e.shiftKey) {
+        svg2file(this.$el, 'mgv.zoomview.svg')
+      } else {
+        svg2png(this.$el, this.width, this.height, 'mgv.zoomview.png')
+      }
     },
     resize: function () {
       this.width = this.$el.parentNode.getBoundingClientRect().width - 5
@@ -126,8 +129,6 @@ export default MComponent({
     //
     this.$root.$on('resize', () => this.resize())
     window.setTimeout(() => this.resize(), 1000)
-    //
-    this.$root.$on('camera-click', (v) => v === 'zoomview' && this.downloadImage())
     //
     this.$root.$on('region-change', d => {
       if (d.op === 'delete-strip') {

@@ -60,7 +60,7 @@
           />
         <!-- Camera button -->
         <m-button
-          title="Download image."
+          title="Click to download PNG image. Shift-click to download SVG."
           @click="downloadImage"
           icon="camera_alt"
           />
@@ -123,7 +123,7 @@ import Vue from 'vue'
 import MComponent from '@/components/MComponent'
 import GenomeViewChromosome from '@/components/GenomeViewChromosome'
 import MButton from '@/components/MButton'
-import svg2png from '@/lib/Svg2Png'
+import { svg2png, svg2file } from '@/lib/SvgDownload'
 export default MComponent({
   name: 'GenomeView',
   components: { GenomeViewChromosome, MButton },
@@ -199,8 +199,12 @@ export default MComponent({
     dragend: function (d) {
       this.currMBrush = null
     },
-    downloadImage: function () {
-      svg2png(this.$refs.svg, this.width, this.height, 'mgv.genomeview.png')
+    downloadImage: function (e) {
+      if (e.shiftKey) {
+        svg2file(this.$refs.svg, 'mgv.genomeview.svg')
+      } else {
+        svg2png(this.$refs.svg, this.width, this.height, 'mgv.genomeview.png')
+      }
     },
     // Returns the length in pixels to draw chromosome c
     chrLen: function (c) {
@@ -265,7 +269,6 @@ export default MComponent({
       'context.currentList',
       () => this.computeCurrentListGenologs(),
       { deep: true })
-    this.$root.$on('camera-click', (v) => v === 'genomeview' && this.downloadImage())
     this.$root.$on('region-current', d => {
       if (d) {
         this.genome = d.region.genome
