@@ -70,7 +70,11 @@ export default MComponent({
       this.item.selected = !this.item.selected
     },
     prettyPrint (len) {
-      return u.prettyPrintBases(len)
+      if (this.item.translate) {
+        return Math.floor(len / 3) + ' aa'
+      } else {
+        return u.prettyPrintBases(len)
+      }
     }
   },
   computed: {
