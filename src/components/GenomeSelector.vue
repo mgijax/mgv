@@ -91,6 +91,7 @@ export default MComponent({
   padding: 4px;
   z-index: 100;
   border: thin solid gray;
+  border-radius: 3px;
 }
 .genome-selector-drop label {
   align-self: flex-start;

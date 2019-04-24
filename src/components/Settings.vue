@@ -84,6 +84,17 @@
   <label>Transcripts</label>
   <!-- =================== -->
   <div
+    title="When checked, spreads transcripts so you can see them all. When unchecked, piles them on top of one another for a compact view. In spread view, strand is indicated by arrows. In the collapsed view, strand is indicated by position above (+) or below (-) the axis line."
+    class="flexrow"
+    >
+    <label>Spread transcripts</label>
+    <input
+        type="checkbox"
+        v-model="ZoomRegion.spreadTranscripts"
+        />
+  </div>
+  <!-- =================== -->
+  <div
     class="flexrow"
     title="Display all transcript labels when view width is below display threshold and 'Spread transcripts' is checked."
     >
@@ -115,17 +126,6 @@
     <input
         type="checkbox"
         v-model="ZoomRegion.showStartStopCodons"
-        />
-  </div>
-  <!-- =================== -->
-  <div
-    title="When checked, spreads transcripts so you can see them all. When unchecked, piles them on top of one another for a compact view. In spread view, strand is indicated by arrows. In the collapsed view, strand is indicated by position above (+) or below (-) the axis line."
-    class="flexrow"
-    >
-    <label>Spread transcripts</label>
-    <input
-        type="checkbox"
-        v-model="ZoomRegion.spreadTranscripts"
         />
   </div>
   <!-- ============== SEQUENCES section  ============== -->
@@ -208,7 +208,7 @@
   </div>
   <!-- =================== -->
   <div
-    title="Clears local data and preferences caches and reloads the page. Your lists and sequence basket are not affected."
+    title="Clears local data and preferences caches and reloads the page. Your lists and sequence cart are not affected."
     class="flexrow"
     >
     <label>Clear cache and reload</label>

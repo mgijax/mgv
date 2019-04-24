@@ -114,4 +114,7 @@ export default MComponent({
 .seqheader {
   font-size: 10px;
 }
+.m-button {
+  font-size: 10px;
+}
 </style>

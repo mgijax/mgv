@@ -199,7 +199,7 @@ export default MComponent({
 }
 .pagebox.floating {
   position: absolute;
-  outline: thin solid black;
+  border: thin solid black;
   z-index: 100;
   min-width: 250px;
 }

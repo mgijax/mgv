@@ -28,19 +28,19 @@
         ============ Find Genes ==============
         -->
         <page-box
-          label="Find genes"
+          label="NewList"
           icon="search"
           >
           <find-genes
             ref="findGenes"
-            title="Search MouseMine for genes annotated to specified diseases, pathways, etc. Pick a search type, enter a search term and hit enter. Results are returned in a new list (see MyLists)."
+            title="Creates a new list of genes having the specified annotations. Select criterion (eg by pathway), enter a term (eg apoptosis), and hit enter. Results appear in MyLists"
             />
         </page-box>
         <!--
         ============ My Lists ==============
         -->
         <page-box
-          label="My lists"
+          label="MyLists"
           icon="list"
           >
           <my-lists
@@ -143,7 +143,7 @@
       ============ List Editor ==============
       -->
       <page-box
-        label="List editor"
+        label="ListEditor"
         :floating="true"
         :initialX="250"
         :initialY="100"

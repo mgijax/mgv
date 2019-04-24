@@ -62,6 +62,7 @@
       dominant-baseline="hanging"
       text-anchor="middle"
       style="font-size: 10px; font-weight: bold;"
+      font-family="sans-serif"
       fill="gray"
       @click="deleteClicked"
       >X<title>Click to remove this strip.</title></text>

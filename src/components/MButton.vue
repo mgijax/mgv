@@ -1,6 +1,6 @@
 <template>
   <i
-    class="button"
+    class="m-button"
     :class="{ 'material-icons' : isMaterialIcon }"
     v-on="$listeners"
     :style="style"
@@ -52,15 +52,15 @@ export default MComponent({
 </script>
 
 <style scoped>
-.material-icons.button {
+.m-button {
   cursor: pointer;
   font-size: 18px;
   border-radius: 4px;
 }
-.material-icons.button[disabled] {
+.m-button[disabled] {
   cursor: default;
   opacity: 0.5;
 }
-.material-icons.button:hover:not([disabled]) {
+.m-button:hover:not([disabled]) {
 }
 </style>
