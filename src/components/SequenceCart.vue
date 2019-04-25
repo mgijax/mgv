@@ -41,15 +41,16 @@
          method="POST"
          download>
          <input type="hidden" name="descriptors" v-model="descriptors"></textarea>
-         <input :disabled="cartEmpty" type="text" placeholder="Enter file name." name="filename"></input>
-
-         <!-- Download button -->
-         <m-button
-           icon="cloud_download"
-           title="Download selected sequences in Fasta format."
-           @click="downloadSelected"
-           :disabled="cartEmpty"
-           />
+         <div class="flexrow">
+           <input :disabled="cartEmpty" type="text" placeholder="Enter file name." name="filename"></input>
+           <!-- Download button -->
+           <m-button
+             icon="cloud_download"
+             title="Download selected sequences in Fasta format."
+             @click="downloadSelected"
+             :disabled="cartEmpty"
+             />
+         </div>
        </form>
 
        <!-- spacer -->

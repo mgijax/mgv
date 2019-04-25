@@ -50,6 +50,21 @@ function getMenus(thisObj) {
     }
   }
   //
+  function makeDescriptor (stype, f, t) {
+    const id = t ? (stype === 'cds' ? t.cds.ID : t.ID) : f.ID
+    const len = t ? (stype === 'cds' ? t.cds.length : t.length) : f.length
+    const sym = f.symbol || ''
+    const gn = f.genome.name
+    return {
+      selected: true,
+      genome: f.genome,
+      type: stype,
+      ID: id,
+      length: len,
+      header: `${gn}::${id} ${sym} (${stype})`
+    }
+  }
+  //
   function sequenceSelectionOption (type) {
     const lbl = `All ${type} sequences`
     const hlp = `Adds all ${type} sequences to your cart for this feature from currently displayed genomes.`
@@ -64,35 +79,14 @@ function getMenus(thisObj) {
         const genologs = this.dataManager.getGenologs(f, this.context.strips.map(s => s.genome)).filter(x => x)
         const seqs = genologs.map(f => {
           if (seqtype === 'dna') {
-            return {
-              selected: true,
-              genome: f.genome,
-              type: seqtype,
-              ID: f.ID,
-              length: f.length,
-              header: `${f.genome.name}::${f.symbol || f.ID} (genomic)`
-            }
+            return makeDescriptor(seqtype, f)
           } else if (seqtype === 'transcript') {
             return f.transcripts.map(t => {
-              return {
-                selected: true,
-                genome: f.genome,
-                type: seqtype,
-                ID: t.ID,
-                length: t.length,
-                header: `${f.genome.name}::${t.ID} ${f.symbol || f.ID} (cDNA)`
-              }
+              return makeDescriptor(seqtype, f, t)
             })
           } else if (seqtype === 'cds') {
             return f.transcripts.filter(t => t.cds).map(t => {
-              return {
-                selected: true,
-                genome: f.genome,
-                type: seqtype,
-                ID: t.cds.ID,
-                length: t.cds.length,
-                header: `${f.genome.name}::${t.cds.ID} ${f.symbol || f.ID} (CDS)`
-              }
+              return makeDescriptor(seqtype, f, t)
             })
           } else {
             u.fail('Unknown sequence type: ' + seqtype)
@@ -131,13 +125,7 @@ function getMenus(thisObj) {
         handler: (function (cxt) {
           const f = cxt.feature
           if (!f) return
-          this.$root.$emit('sequence-selected', [{
-            genome: f.genome,
-            ID: f.ID,
-            type: 'dna',
-            length: f.length,
-            selected: true
-          }])
+          this.$root.$emit('sequence-selected', [makeDescriptor('dna', f)])
         }).bind(thisObj)
       }, {
         icon: 'shopping_cart',
@@ -145,15 +133,10 @@ function getMenus(thisObj) {
         helpText: cxt => `Transcript ${cxt.transcript ? cxt.transcript.ID : ''}.`,
         disabled: cxt => !cxt.transcript,
         handler: (function (cxt) {
+          const f = cxt.feature
           const t = cxt.transcript
           if (!t) return
-          this.$root.$emit('sequence-selected', [{
-            genome: cxt.feature.genome,
-            ID: t.ID,
-            type: 'transcript',
-            length: t.length,
-            selected: true
-          }])
+          this.$root.$emit('sequence-selected', [makeDescriptor('transcript', f, t)])
         }).bind(thisObj)
       }, {
         icon: 'shopping_cart',
@@ -161,15 +144,10 @@ function getMenus(thisObj) {
         helpText: cxt => `CDS ${cxt.transcript && cxt.transcript.cds ? cxt.transcript.cds.ID : ''}.`,
         disabled: cxt => !cxt.transcript || !cxt.transcript.cds,
         handler: (function (cxt) {
+          const f = cxt.feature
           const t = cxt.transcript
           if (!t) return
-          this.$root.$emit('sequence-selected', [{
-            genome: cxt.feature.genome,
-            ID: t.cds.ID,
-            type: 'cds',
-            length: t.cds.length,
-            selected: true
-          }])
+          this.$root.$emit('sequence-selected', [makeDescriptor('cds', f, t)])
         }).bind(thisObj)
       },
       sequenceSelectionOption('dna'),
