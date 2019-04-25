@@ -656,6 +656,7 @@ export default MComponent({
     //
     this.$root.$on('list-edit-open', data => {
       this.currentEditList = data.list
+      this.$refs.listEditor.open()
     })
     //
     this.$root.$on('list-edit-cancel', data => {
