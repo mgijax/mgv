@@ -573,7 +573,7 @@ export default MComponent({
   },
   created: function () {
     //
-    this.keyManager = new KeyManager(this)
+    this.keyManager = new KeyManager(document.body)
     //
     this.historyManager = new HistoryManager(this)
     //

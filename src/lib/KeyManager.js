@@ -1,7 +1,7 @@
 
 class KeyManager {
-  constructor () {
-    document.addEventListener('keydown', e => this.keydown(e))
+  constructor (el) {
+    el.addEventListener('keydown', e => this.keydown(e))
     this.handlers = {}
   }
   register (d) {

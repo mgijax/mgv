@@ -719,6 +719,7 @@ export default MComponent({
       this.currRange = [px, px]
     },
     mouseenter: function (e) {
+      document.body.focus()
       this.$root.$emit('region-current', { region: this.region })
     },
     mouseleave: function (e) {
