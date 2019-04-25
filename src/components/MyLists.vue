@@ -1,13 +1,13 @@
 <template>
   <div class="my-lists">
      <div class="flexcolumn">
+     <span>{{ lists.length }} list{{ lists.length === 1 ? '' : 's' }}</span>
      <my-list-item
          v-for="item in lists"
          :key="item.name"
          :item="item"
          :class="{ current: item === currentList }"
          />
-     <span v-if="lists.length == 0">No lists</span>
      </div>
      <button
        @click="newlist"

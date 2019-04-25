@@ -2,6 +2,7 @@
   <div class="sequence-cart">
      <!-- Cart items -->
      <div class="sequence-cart-items">
+       <span>{{ cart.length }} sequence{{ cart.length === 1 ? '' : 's' }}</span>
        <sequence-cart-item
          v-for="item in cart"
          :key="item.name"
@@ -11,7 +12,6 @@
          @item-changed="save"
          />
      </div>
-     <span v-show="cart.length === 0">Cart is empty.</span>
      <!-- row of buttons -->
      <div class="flexrow">
        <!-- Select all button -->

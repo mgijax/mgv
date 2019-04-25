@@ -28,7 +28,7 @@
         ============ Find Genes ==============
         -->
         <page-box
-          label="NewList"
+          label="FindGenes"
           icon="search"
           >
           <find-genes
