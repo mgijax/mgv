@@ -152,10 +152,12 @@ export default MComponent({
     currListTitle: function () {
       const clist = this.context.currentList
       if (!clist) return 'No current list.'
-      if (clist.items.length > this.maxListLength) {
-        return `${clist.name} (${this.maxListLength} of ${clist.items.length} shown)`
-      }
-      return clist.name
+      const clen = clist.items.length 
+      const cglen = this.currentListGenologs.length
+      const s = clen === 1 ? '' : 's'
+      const sz = cglen === clen ? `${clen} item${s}` : `${cglen} of ${clen} item${s} found in this genome`
+      const lim = cglen > this.maxListLength ? ` ${this.maxListLength} shown` : ''
+      return `${clist.name} (${sz}${lim})`
     },
     genomeName: function () {
       return this.genome ? this.genome.name : ''
