@@ -18,6 +18,7 @@
               <color-picker
                 v-show="pickerOpen"
                 v-model="pickerColor"
+                style="max-width: 200px;"
                 />
             </div>
           </td>
