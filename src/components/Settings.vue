@@ -245,8 +245,10 @@ export default MComponent({
     restore: function (timestamp) {
       return this.kstore.get('settings').then(settings => {
         if (settings === undefined || settings.TIMESTAMP !== timestamp) {
+          // save settings to cache
           return this.save()
         } else {
+          // restore settings from cache
           Object.assign(this.$data, settings)
         }
       })

@@ -160,11 +160,17 @@ function eachTick (nTicks, fcn, thisObj, ...args) {
 }
 //
 // ---------------------------------------------
-// Returns the given basepair amount "pretty printed" to an apporpriate scale, precision, and units.
+// Returns the given basepair amount "pretty printed". 
+// If the second arg, commas, is true, returns the number as a string using commas as separator.
+// Otherwise, formats the number to an apporpriate scale, precision, and units.
 // Eg,
 //    127 => '127 bp'
 //    123456789 => '123.5 Mb'
-function prettyPrintBases (n) {
+function prettyPrintBases (n, commas) {
+  if (commas) {
+    // https://stackoverflow.com/questions/2901102/how-to-print-a-number-with-commas-as-thousands-separators-in-javascript
+    return n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+  }
   let absn = Math.abs(n)
   if (absn < 1000) {
     return `${n} bp`
@@ -247,6 +253,59 @@ function unselectAllText () {
  }
 }
 // ---------------------------------------------
+// https://stackoverflow.com/questions/4947682/intelligently-calculating-chart-tick-positions
+function niceNumber(value, round_){
+    //default value for round_ is false
+    round_ = round_ || false;
+    // :latex: \log_y z = \frac{\log_x z}{\log_x y}
+    const exponent = Math.floor(Math.log(value) / Math.log(10));
+    const fraction = value / Math.pow(10, exponent);
+    let nice_fraction
+
+    if (round_)
+        if (fraction < 1.5)
+            nice_fraction = 1.
+        else if (fraction < 3.)
+            nice_fraction = 2.
+        else if (fraction < 7.)
+            nice_fraction = 5.
+        else
+            nice_fraction = 10.
+    else
+        if (fraction <= 1)
+            nice_fraction = 1.
+        else if (fraction <= 2)
+            nice_fraction = 2.
+        else if (fraction <= 5)
+            nice_fraction = 5.
+        else
+            nice_fraction = 10.
+
+    return nice_fraction * Math.pow(10, exponent)
+}
+
+function niceBounds(axis_start, axis_end, num_ticks){
+    //default value is 10
+    num_ticks = num_ticks || 10;
+    const axis_width = axis_end - axis_start;
+
+    if (axis_width == 0){
+        axis_start -= .5
+        axis_end += .5
+        axis_width = axis_end - axis_start
+    }
+
+    const nice_range = niceNumber(axis_width);
+    const nice_tick = niceNumber(nice_range / (num_ticks -1), true);
+    axis_start = Math.floor(axis_start / nice_tick) * nice_tick;
+    axis_end = Math.ceil(axis_end / nice_tick) * nice_tick;
+    return {
+        "min": axis_start,
+        "max": axis_end,
+        "steps": nice_tick
+    }
+}
+// ---------------------------------------------
 export default {
   fail,
   concatAll,
@@ -264,5 +323,6 @@ export default {
   wWidth,
   wHeight,
   wScrollTop,
-  unselectAllText
+  unselectAllText,
+  niceBounds
 }

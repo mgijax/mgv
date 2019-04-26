@@ -17,29 +17,6 @@
     <g
       :transform="`translate(${myDelta},${zeroOffset})`"
       >
-      <!-- ======= current range box ======= -->
-      <g
-        v-if="(dragging || trackMouse) && currRange"
-        >
-        <text
-          :x="currRangeTextX"
-          :y="-zeroOffset + Math.max(height, 10) + 10"
-          font-size="10"
-          font-family="sans-serif"
-          :text-anchor="currRangeAnchor"
-          >
-          {{region.chr.name}}:{{p2b(currRange[0])}}{{currRange[0] !== currRange[1] ? '..' + p2b(currRange[1]) : ''}}
-          </text>
-        <rect
-          :x="b2p(0.5 + p2b(Math.min(currRange[0], currRange[1])))"
-          :y="-zeroOffset"
-          :width="ppb * Math.floor(bpp * Math.abs(currRange[1] - currRange[0])) + 1"
-          :height="Math.max(height, 10)"
-          fill-opacity="0.3"
-          stroke="black"
-          stroke-opacity="0.5"
-          />
-      </g>
       <!-- ======= underlay ======= -->
       <rect
         x=0
@@ -79,6 +56,60 @@
         :transform="`translate(${-myDelta},0)`"
         v-show="!spreadTranscripts || !showDetails"
         />
+      <!-- ======= tick marks ======= -->
+      <g class="tickmarks">
+        <g
+          v-for="(x,ti) in tickPositions"
+          :key="ti"
+          >
+          <line
+            class="tick"
+            :x1="x.px"
+            :y1="-zeroOffset"
+            :x2="x.px"
+            :y2="-zeroOffset + Math.max(height, 10)"
+            stroke="black"
+            stroke-opacity="0.1"
+            />
+          <text
+            :x="x.px"
+            :y="height - zeroOffset + 8"
+            font-family="sans-serif"
+            font-size="8px"
+            fill="black"
+            >{{x.label}}</text>
+        </g>
+      </g>
+      <!-- ======= current range box ======= -->
+      <g
+        v-if="(dragging || trackMouse) && currRange"
+        >
+        <rect
+          :x="currRangeTextX - (currRange[0] !== currRange[1] ? 55 : 30)"
+          :y="-zeroOffset + Math.max(height, 10) + 2"
+          :width="currRange[0] !== currRange[1] ? 110 : 60"
+          height="10"
+          fill="white"
+          />
+        <text
+          :x="currRangeTextX"
+          :y="-zeroOffset + Math.max(height, 10) + 10"
+          font-size="10"
+          font-family="sans-serif"
+          :text-anchor="currRangeAnchor"
+          >
+          {{region.chr.name}}:{{p2b(currRange[0])}}{{currRange[0] !== currRange[1] ? '..' + p2b(currRange[1]) : ''}}
+          </text>
+        <rect
+          :x="b2p(0.5 + p2b(Math.min(currRange[0], currRange[1])))"
+          :y="-zeroOffset"
+          :width="ppb * Math.floor(bpp * Math.abs(currRange[1] - currRange[0])) + 1"
+          :height="Math.max(height, 10)"
+          fill-opacity="0.3"
+          stroke="black"
+          stroke-opacity="0.5"
+          />
+      </g>
       <!-- ======= coordinates label ======= -->
       <text
         x="50%"
@@ -334,6 +365,20 @@ export default MComponent({
     }
   },
   computed: {
+    tickPositions: function () {
+      const r = this.region
+      const nticks = Math.floor(r.width / 20)
+      const l = r.end - r.start + 1
+      const bounds = u.niceBounds(r.start - l/2, r.end + l/2, nticks)
+      const ticks = []
+      for (let x = bounds.min; x <= bounds.max; x += bounds.steps) ticks.push(x)
+      return ticks.map((x,i) => {
+        return {
+          label: i%2 ? '' : u.prettyPrintBases(x, true),
+          px: this.b2p(x)
+        }
+      })
+    },
     isCurrent: function () {
       return this.region === this.context.currRegion
     },
