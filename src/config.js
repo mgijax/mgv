@@ -13,7 +13,7 @@ export default {
   // Timestamp used at page load to determine whether to flush user's setting cache.
   //
   // IMPORTANT!!! You MUST update this value whenever this config file changes!!!
-  TIMESTAMP: 'Tue Mar  20 06:56:39 EST 2019',
+  TIMESTAMP: 'Tue Mar  21 06:56:39 EST 2019',
   ///////////////////////////////////////////
 
   //
@@ -134,7 +134,8 @@ export default {
     dbName: DATACACHE_PREFIX + 'blocks'
   },
   SequenceCart: {
-    dbName: DATACACHE_PREFIX + 'user-seqs'
+    dbName: DATACACHE_PREFIX + 'user-seqs',
+    fetchUrl: "http://proto.informatics.jax.org/prototypes/sequenceHound/sequenceHound.cgi"
   },
   DataManager: {
     // when loading transcripts+exons from DataSource, the size block to chop the chromosome into

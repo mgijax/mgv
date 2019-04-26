@@ -36,7 +36,7 @@
        <!-- Download form -->
        <form
          ref="sequenceDownloadForm"
-         action="http://proto.informatics.jax.org/prototypes/sequenceHound/sequenceHound.cgi"
+         :action="cfg.fetchUrl"
          target="_blank"
          method="POST"
          download>
