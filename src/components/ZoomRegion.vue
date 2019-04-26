@@ -17,20 +17,6 @@
     <g
       :transform="`translate(${myDelta},${zeroOffset})`"
       >
-      <!-- ======= underlay ======= -->
-      <rect
-        x=0
-        :y="-zeroOffset"
-        width="100%"
-        :height="Math.max(height, 20)"
-        fill="white"
-        fill-opacity="0"
-        stroke="black"
-        :stroke-opacity="isCurrent ? 1.0 : 0.5"
-        class="underlay"
-        ref="underlay"
-        :transform="`translate(${-myDelta},0)`"
-        />
       <!-- ======= synteny blocks ======= -->
       <g class="sblocks">
         <rect
@@ -80,6 +66,20 @@
             >{{x.label}}</text>
         </g>
       </g>
+      <!-- ======= underlay ======= -->
+      <rect
+        x=0
+        :y="-zeroOffset"
+        width="100%"
+        :height="Math.max(height, 20)"
+        fill="white"
+        fill-opacity="0"
+        stroke="black"
+        :stroke-opacity="isCurrent ? 1.0 : 0.5"
+        class="underlay"
+        ref="underlay"
+        :transform="`translate(${-myDelta},0)`"
+        />
       <!-- ======= current range box ======= -->
       <g
         v-if="(dragging || trackMouse) && currRange"
