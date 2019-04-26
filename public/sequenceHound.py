@@ -42,7 +42,10 @@ def doOneSequence (desc) :
     seq = translate(seq)
   seq = '\n'.join(chunkString(seq, 60))
   dfltHdr = defaultHeader(desc)
-  return desc.get('header', dfltHdr) + '\n' + seq + '\n'
+  hdr = desc.get('header', dfltHdr)
+  if not hdr.startswith('>'):
+    hdr = '>' + hdr
+  return hdr + '\n' + seq + '\n'
 
 def translate (rna) :
   rna = rna.upper().replace('T', 'U')
