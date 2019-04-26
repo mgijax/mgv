@@ -66,8 +66,8 @@ function getMenus(thisObj) {
   }
   //
   function sequenceSelectionOption (type) {
-    const lbl = `All ${type} sequences`
-    const hlp = `Adds all ${type} sequences to your cart for this feature from currently displayed genomes.`
+    const lbl = `All genolog ${type} sequences`
+    const hlp = `Adds ${type} sequences to your cart for this feature from all currently displayed genomes.`
     return {
       icon: 'shopping_cart',
       label: lbl,
