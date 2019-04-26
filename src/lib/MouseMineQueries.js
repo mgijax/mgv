@@ -38,14 +38,14 @@ class MouseMineQueries {
     return (this.isIdentifier(q) || q.indexOf('*') >= 0) ? q : `*${q}*`
   }
   //
-  // do a LOOKUP query for SequenceFeatures from MouseMine
+  // do a LOOKUP query for Genes from MouseMine
   queryByLookup (qryString) {
     let q = `<query name="" model="genomic"
-        view="SequenceFeature.primaryIdentifier SequenceFeature.symbol"
+        view="Gene.primaryIdentifier Gene.symbol"
         constraintLogic="A and B and C">
-            <constraint code="A" path="SequenceFeature" op="LOOKUP" value="${qryString}"/>
-            <constraint code="B" path="SequenceFeature.organism.taxonId" op="=" value="10090"/>
-            <constraint code="C" path="SequenceFeature.sequenceOntologyTerm.name" op="!=" value="transgene"/>
+            <constraint code="A" path="Gene" op="LOOKUP" value="${qryString}"/>
+            <constraint code="B" path="Gene.organism.taxonId" op="=" value="10090"/>
+            <constraint code="C" path="Gene.sequenceOntologyTerm.name" op="!=" value="transgene"/>
         </query>`
     return this.cxn.query(q, r => r[0])
   }
@@ -63,11 +63,11 @@ class MouseMineQueries {
   queryByOntologyTerm (qryString, termTypes) {
     qryString = this.addWildcards(qryString)
     let q = `<query name="" model="genomic"
-        view="SequenceFeature.primaryIdentifier SequenceFeature.symbol" constraintLogic="A and B and C and D">
-        <constraint code="A" path="SequenceFeature.ontologyAnnotations.ontologyTerm.parents" op="LOOKUP" value="${qryString}"/>
-        <constraint code="B" path="SequenceFeature.organism.taxonId" op="=" value="10090"/>
-        <constraint code="C" path="SequenceFeature.sequenceOntologyTerm.name" op="!=" value="transgene"/>
-        <constraint code="D" path="SequenceFeature.ontologyAnnotations.ontologyTerm.ontology.name" op="ONE OF">
+        view="Gene.primaryIdentifier Gene.symbol" constraintLogic="A and B and C and D">
+        <constraint code="A" path="Gene.ontologyAnnotations.ontologyTerm.parents" op="LOOKUP" value="${qryString}"/>
+        <constraint code="B" path="Gene.organism.taxonId" op="=" value="10090"/>
+        <constraint code="C" path="Gene.sequenceOntologyTerm.name" op="!=" value="transgene"/>
+        <constraint code="D" path="Gene.ontologyAnnotations.ontologyTerm.ontology.name" op="ONE OF">
             ${termTypes.map(tt => '<value>' + tt + '</value>').join('')}
         </constraint>
     </query>`
