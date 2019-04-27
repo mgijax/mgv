@@ -235,8 +235,8 @@ class DataManager {
     } else {
       feats = [f]
     }
-    let fix = u.index(feats, f => f.genome.name)
-    let genologs = genomes.map(g => fix[g.name])
+    let fix = u.index(feats, f => f.genome.name, false)
+    let genologs = genomes.map(g => fix[g.name]).reduce((a,v) => a.concat(v), [])
     return genologs
   }
   // Returns the genolog of feature f from genome g, or undefined if none exists

@@ -241,8 +241,8 @@ export default MComponent({
       } else {
         this.dataManager.ensureFeatures(this.genome).then(() => {
           this.currentListGenologs = this.context.currentList.items.map(id => {
-            return this.dataManager.getGenolog(id, this.genome)
-          }).filter(x => x)
+            return this.dataManager.getGenologs(id, [this.genome])
+          }).reduce((a,v) => a.concat(v), [])
         })
       }
     }

@@ -371,46 +371,49 @@ class RegionManager {
     const delta = lcoords.delta
     const w = lcoords.length
     const alignOn = config.ZoomRegion.featureAlignment
-    const lm = this.app.dataManager.getGenolog(lcoords.landmark, genome)
-    if (!lm) {
+    const lms = this.app.dataManager.getGenologs(lcoords.landmark, [genome])
+    if (lms.length === 0) {
       // Landmark does not exist in this genome! Fallback: first compute the
       // landmark region in the landmark's own genome, then map that region 
       // to this genome.
       const r0 = this.computeLandmarkRegion(lcoords, lcoords.lgenome)
       return this.mapRegionToGenome(r0.regions[0], genome)
     }
-    let lmp
-    if (typeof(lcoords.anchor) === 'number') {
-      lmp = lm.start + lcoords.anchor * (lm.end - lm.start + 1)
-    } else {
-      switch (alignOn) {
-      case '5-prime':
-        lmp = lm.strand === '+' ? lm.start : lm.end
-        break
-      case '3-prime':
-        lmp = lm.strand === '+' ? lm.end : lm.start
-        break
-      case 'proximal':
-        lmp = lm.start
-        break
-      case 'distal':
-        lmp = lm.end
-        break
-      case 'midpoint':
-      default:
-        lmp = Math.floor((lm.start + lm.end) / 2)
-        break
+    const regions = lms.map(lm => {
+      let lmp
+      if (typeof(lcoords.anchor) === 'number') {
+        lmp = lm.start + lcoords.anchor * (lm.end - lm.start + 1)
+      } else {
+        switch (alignOn) {
+        case '5-prime':
+          lmp = lm.strand === '+' ? lm.start : lm.end
+          break
+        case '3-prime':
+          lmp = lm.strand === '+' ? lm.end : lm.start
+          break
+        case 'proximal':
+          lmp = lm.start
+          break
+        case 'distal':
+          lmp = lm.end
+          break
+        case 'midpoint':
+        default:
+          lmp = Math.floor((lm.start + lm.end) / 2)
+          break
+        }
       }
-    }
-    const s = Math.round(lmp - w / 2) + delta
-    return {
-      genome: genome,
-      regions: [this.makeRegion({
+      const s = Math.round(lmp - w / 2) + delta
+      return this.makeRegion({
         genome: genome,
         chr: lm.chr,
         start: s,
         end: s + w - 1,
-      })]
+      })
+    })
+    return {
+      genome: genome,
+      regions: regions
     }
   }
   //--------------------------------------
