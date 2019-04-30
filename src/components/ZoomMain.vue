@@ -29,7 +29,6 @@
       :regions="zs.regions"
       :synGenome="synGenome(i)"
       :width="width"
-      :globalScrollDelta="globalScrollDelta"
       @height-changed="setYs()"
       @dragstart="zDragStart"
       @drag="zDrag"
@@ -52,7 +51,6 @@ export default MComponent({
     return {
       width: 500,
       height: 200,
-      globalScrollDelta: 0
     }
   },
   computed: {
@@ -120,12 +118,6 @@ export default MComponent({
     }
   },
   created: function () {
-    this.$root.$on('region-drag', d => {
-      if (this.context.scrollLock) this.globalScrollDelta = d
-    })
-    this.$root.$on('region-dragend', d => {
-      this.globalScrollDelta = 0
-    })
     //
     this.$root.$on('resize', () => this.resize())
     window.setTimeout(() => this.resize(), 1000)

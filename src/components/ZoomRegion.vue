@@ -356,12 +356,12 @@ export default MComponent({
       blocks: [], // the synteny blocks to draw
       sequence: '', // the sequence to display
       seqStart: 0,
+      busy: false,
+      currRange: null,
       dragging: false, // true while dragging within a region
       rDragging: false, // true while dragging region within its strip
-      currRange: null,
-      busy: false,
-      regionScrollDelta: 0,
-      regionDragDelta: 0
+      regionScrollDelta: 0, // while a region is being scrolled, the scroll amount (in px)
+      regionDragDelta: 0 // while a region is being moved, the drag amount (in px)
     }
   },
   computed: {
@@ -386,7 +386,7 @@ export default MComponent({
       return complement(this.sequence)
     },
     myDelta: function () {
-      return this.dragging ? this.regionScrollDelta : this.globalScrollDelta
+      return this.regionScrollDelta
     },
     detailThreshold: function () {
       return Math.min(this.cfg.detailThreshold, this.cfg.detailThresholdLimit)
@@ -504,6 +504,21 @@ export default MComponent({
     height: function () {
       this.$nextTick(() => this.$emit('region-draw', this))
     }
+  },
+  created: function () {
+    this.$root.$on('region-drag', d => {
+      if (this.context.scrollLock && !this.dragging) this.regionScrollDelta = d
+    })
+    this.$root.$on('region-drag-modified', crd => {
+      if (!this.context.scrollLock || this.dragging) return
+      const s = this.region.width * crd.start
+      const e = s + this.region.width * crd.length
+      this.currRange = [s, e]
+    })
+    this.$root.$on('region-dragend', d => {
+      this.regionScrollDelta = 0
+      this.currRange = null
+    })
   },
   mounted: function () {
     this.segLayout = new SegmentLayout()
@@ -832,7 +847,6 @@ export default MComponent({
     // Initializes handler for dragging within a region (scroll, zoom, etc)
     initScrollDrag () {
       this.dragging = false
-      // For lockstep dragging across regions, broadcast the drag deltas
       u.dragify(this.$el, {
         dragstart: function (e, d) {
           this.dragging = true
@@ -849,13 +863,19 @@ export default MComponent({
             let x1 = d.startX - d.bb.x
             let x2 = e.clientX - d.bb.x
             this.currRange = [Math.min(x1, x2), Math.max(x1, x2)]
+            const crd = {
+              start: this.currRange[0] / d.bb.width,
+              length: (this.currRange[1] - this.currRange[0]) / d.bb.width,
+              shiftDrag: d.shiftDrag,
+              altDrag: d.altDrag
+            }
+            this.$root.$emit('region-drag-modified', crd)
           } else {
             this.regionScrollDelta = d.deltaX
             this.$root.$emit('region-drag', d.deltaX)
           }
         },
         dragend: function (e, d) {
-          this.$root.$emit('region-dragend')
           if (!d.dragged) {
             // this was actually just a click. If it was on the background, clear current selection
             if (!e.target.closest('.feature')) {
@@ -930,6 +950,7 @@ export default MComponent({
           this.dragData = null
           this.dragging = false
           this.currRange = null
+          this.$root.$emit('region-dragend')
         }
       }, this.$root.$el, this)
     }

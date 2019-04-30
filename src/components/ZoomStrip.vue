@@ -21,7 +21,6 @@
       :allMaxLaneP="allMaxLaneP"
       :allMaxLaneM="allMaxLaneM"
       :pad="cfg.pad"
-      :globalScrollDelta="globalScrollDelta"
       :synGenome="synGenome"
       @region-draw="setHeight"
       @region-delete="setHeight"
@@ -108,7 +107,6 @@ export default MComponent({
     'context',
     'genome',
     'width',
-    'globalScrollDelta',
     'strip',
     'regions',
     'synGenome'

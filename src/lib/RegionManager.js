@@ -494,7 +494,9 @@ class RegionManager {
         this.scrollRegion(r, d.amt)
       }
     } else if (d.op === 'zoom') {
-      if (r === this.app.rRegion) {
+      if (this.app.scrollLock) {
+        this.zoomAllRegions(d.amt)
+      } else if (r === this.app.rRegion) {
         this.zoomRegion(r, d.amt)
         this.computeMappedRegions(r)
       } else {
