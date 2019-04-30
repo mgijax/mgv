@@ -520,6 +520,11 @@ export default MComponent({
        thisObj: this
       })
       this.keyManager.register({
+       key: 'l',
+       handler: () => { this.scrollLock = !this.scrollLock },
+       thisObj: this
+      })
+      this.keyManager.register({
        key: 'x',
        handler: () => { config.ZoomRegion.spreadTranscripts = !config.ZoomRegion.spreadTranscripts },
        thisObj: this
@@ -542,14 +547,14 @@ export default MComponent({
       this.keyManager.register({
        key: 'ArrowRight',
        handler: () => {
-         this.regionManager.scroll(0.5)
+         this.regionManager.scroll(0.2)
        },
        thisObj: this
       })
       this.keyManager.register({
        key: 'ArrowLeft',
        handler: () => {
-         this.regionManager.scroll(-0.5)
+         this.regionManager.scroll(-0.2)
        },
        thisObj: this
       })
