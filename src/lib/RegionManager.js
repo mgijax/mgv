@@ -11,7 +11,7 @@ class RegionManager {
     this.currRegion = null
     this.rCount = 0
     //
-    this.app.$root.$on('region-current', r => { this.currRegion = r ? r.region : null })
+    this.app.$root.$on('region-current', r => { if (r) this.currRegion = r.region })
     this.app.$root.$on('region-change', d => this.regionChange(d))
     this.app.$root.$on('jump-to', d => this.jumpTo(d.coords))
     this.app.$root.$on('feature-align', d => {
@@ -470,7 +470,7 @@ class RegionManager {
   //    pos (when op = split) Position of the split. (0..1)
   //
   regionChange (d, quietly) {
-    const r = d.region || this.currRegion
+    const r = d.region || this.currRegion || this.app.strips[0].regions[0]
     if (d.op === 'scroll') {
       if (this.app.scrollLock) {
         this.zoomScrollAllRegions(1, d.amt)

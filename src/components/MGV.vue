@@ -543,7 +543,7 @@ export default MComponent({
        handler: () => {
          this.$root.$emit('region-change', {
            op: 'scroll',
-           amt: .2,
+           amt: -.2,
          })
        },
        thisObj: this
@@ -553,7 +553,7 @@ export default MComponent({
        handler: () => {
          this.$root.$emit('region-change', {
            op: 'scroll',
-           amt: -.2,
+           amt: .2,
          })
        },
        thisObj: this

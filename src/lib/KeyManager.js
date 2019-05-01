@@ -1,4 +1,4 @@
-
+// KeyManager class. Register handlers for keydown events on a specified element.
 class KeyManager {
   constructor (el) {
     el.addEventListener('keydown', e => this.keydown(e))
