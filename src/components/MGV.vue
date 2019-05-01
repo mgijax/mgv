@@ -13,18 +13,6 @@
         :style="{ height: visHeight + 'px', overflow: 'scroll' }"
         >
         <!--
-        ============ Genomes ==============
-        <page-box label="Genomes">
-          <genome-selector
-            ref="genomeSelector"
-            title="Select one genome as the reference and any number of genomes as comparisons."
-            :allGenomes="allGenomes"
-            :strips="strips"
-            :genomeSets="genomeSets"
-            />
-        </page-box>
-        -->
-        <!--
         ============ Find Genes ==============
         -->
         <page-box
@@ -533,28 +521,40 @@ export default MComponent({
        key: '+',
        shiftKey: true,
        handler: () => {
-         this.regionManager.zoom(2)
+         this.$root.$emit('region-change', {
+           op: 'zoom',
+           amt: 0.5,
+         })
        },
        thisObj: this
       })
       this.keyManager.register({
        key: '-',
        handler: () => {
-         this.regionManager.zoom(0.5)
+         this.$root.$emit('region-change', {
+           op: 'zoom',
+           amt: 2,
+         })
        },
        thisObj: this
       })
       this.keyManager.register({
        key: 'ArrowRight',
        handler: () => {
-         this.regionManager.scroll(0.2)
+         this.$root.$emit('region-change', {
+           op: 'scroll',
+           amt: .2,
+         })
        },
        thisObj: this
       })
       this.keyManager.register({
        key: 'ArrowLeft',
        handler: () => {
-         this.regionManager.scroll(-0.2)
+         this.$root.$emit('region-change', {
+           op: 'scroll',
+           amt: -.2,
+         })
        },
        thisObj: this
       })

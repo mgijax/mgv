@@ -505,32 +505,6 @@ export default MComponent({
       this.$nextTick(() => this.$emit('region-draw', this))
     }
   },
-  created: function () {
-    this.$root.$on('region-drag', d => {
-      if (this.context.scrollLock && !this.dragging) this.regionScrollDelta = d
-    })
-    this.$root.$on('region-drag-modified', crd => {
-      if (!this.context.scrollLock || this.dragging) return
-      const s = this.region.width * crd.start
-      const e = s + this.region.width * crd.length
-      this.currRange = [s, e]
-    })
-    this.$root.$on('region-dragend', d => {
-      this.regionScrollDelta = 0
-      this.currRange = null
-    })
-  },
-  mounted: function () {
-    this.segLayout = new SegmentLayout()
-    this.initDrag()
-    this.getFeatures()
-  },
-  updated: function () {
-    this.spreadText()
-  },
-  destroyed: function () {
-    this.$emit('region-delete')
-  },
   methods: {
     clientXtoBase: function (x) {  
       const rx = this.$refs.underlay.getBoundingClientRect().left
@@ -871,7 +845,6 @@ export default MComponent({
             }
             this.$root.$emit('region-drag-modified', crd)
           } else {
-            this.regionScrollDelta = d.deltaX
             this.$root.$emit('region-drag', d.deltaX)
           }
         },
@@ -886,59 +859,34 @@ export default MComponent({
             this.regionScrollDelta = 0
             return
           }
-          const b1 = Math.floor(this.region.start + this.currRange[0] / this.ppb)
-          const b2 = Math.floor(this.region.start + this.currRange[1] / this.ppb)
-          const start = Math.min(b1, b2)
-          const end = Math.max(b1, b2)
+          //
+          const cr = this.currRange
+          const crs = Math.min(cr[0], cr[1])
+          const cre = Math.max(cr[0], cr[1])
+          const pstart = crs / this.region.width
+          const plength = (cre - crs + 1) / this.region.width
           //
           if (d.altDrag) {
-            // select genomic sequence
-            const region = {
-              genome: this.region.genome,
-              chr: this.region.chr,
-              start: start,
-              end: end,
-              type: 'dna',
-              reverseComplement: e.clientX < d.startX,
-              selected: true,
-              length: end - start + 1
-            }
-            this.$root.$emit('region-selected', region)
-            this.regionScrollDelta = 0
+            // selecting genomic sequence
+            this.$root.$emit('region-selected', {
+              region: this.region,
+              pstart: pstart,
+              plength: plength,
+              reverseComplement: e.clientX < d.startX
+            })
           } else if (d.shiftDrag) {
-            if (e.metaKey) {
-              // zoom out
-              const r = this.region
-              const f = (r.end - r.start + 1) / (end - start + 1)
-              const A = f * (start - r.start + 1)
-              const B = f * (r.end - end + 1)
-              this.$root.$emit('region-change', {
-                region: this.region,
-                op: 'set',
-                coords: {
-                  chr: this.region.chr,
-                  start: Math.floor(r.start - A),
-                  end: Math.floor(r.end + B)
-                }})
-            } else {
-              // zoom in
-              this.$root.$emit('region-change', {
-                region: this.region,
-                op: 'set',
-                coords: {
-                  chr: this.region.chr,
-                  start: Math.floor(start),
-                  end: Math.floor(end)
-                }})
-            }
-            this.regionScrollDelta = 0
+            // zoom in/out
+            this.$root.$emit('region-change', {
+              region: this.region,
+              op: 'zoomscroll',
+              pstart: pstart,
+              plength: plength,
+              out: e.metaKey
+            })
           } else {
-            // const db = this.deltaB;
-            // this.region.start += db
-            // this.region.end += db
+            // scroll
             const amt = this.deltaB / (this.region.end - this.region.start + 1)
             this.$root.$emit('region-change', { region: this.region, op: 'scroll', amt: amt })
-            this.regionScrollDelta = 0
           }
           
           //
@@ -947,6 +895,8 @@ export default MComponent({
           // the next click event (see method clicked() above).
           //
           this.absorbNextClick = true
+          //
+          this.regionScrollDelta = 0
           this.dragData = null
           this.dragging = false
           this.currRange = null
@@ -954,6 +904,63 @@ export default MComponent({
         }
       }, this.$root.$el, this)
     }
+  },
+  created: function () {
+    // create callbacks for the various events and save them so we can unregister them
+    // in the destroyed hook
+    this.cbRegionDrag = d => {
+      if (this.context.scrollLock || this.dragging) this.regionScrollDelta = d
+    }  
+    this.cbRegionDragModified = crd => {
+      if (!this.context.scrollLock || this.dragging) return
+      const s = this.region.width * crd.start
+      const e = s + this.region.width * crd.length
+      this.currRange = [s, e]
+    }
+    this.cbRegionDragEnd = d => {
+      this.regionScrollDelta = 0
+      this.currRange = null
+    }
+    this.cbRegionSelected = d => {
+      if (this.context.scrollLock || this.region === d.region) {
+        const r = this.region
+        const L = r.end - r.start + 1
+        const start = Math.floor(r.start + d.pstart * L)
+        const end = Math.floor(start + d.plength * L - 1)
+        const seq = {
+          genome: this.region.genome,
+          chr: this.region.chr,
+          start: start,
+          end: end,
+          type: 'dna',
+          reverseComplement: d.reverseComplement,
+          selected: true,
+          length: end - start + 1
+        }
+        this.$root.$emit('sequence-selected', [seq])
+      }
+    }
+    //
+    this.$root.$on('region-drag', this.cbRegionDrag)
+    this.$root.$on('region-drag-modified', this.cbRegionDragModified)
+    this.$root.$on('region-dragend', this.cbRegionDragEnd)
+    this.$root.$on('region-selected', this.cbRegionSelected)
+  },
+  destroyed: function () {
+    this.$root.$off('region-drag', this.cbRegionDrag)
+    this.$root.$off('region-drag-modified', this.cbRegionDragModified)
+    this.$root.$off('region-dragend', this.cbRegionDragEnd)
+    this.$root.$off('region-selected', this.cbRegionSelected)
+    this.$emit('region-delete')
+    //console.log("Destroyed region ", this._uid)
+  },
+  mounted: function () {
+    this.segLayout = new SegmentLayout()
+    this.initDrag()
+    this.getFeatures()
+  },
+  updated: function () {
+    this.spreadText()
   }
 })
 </script>

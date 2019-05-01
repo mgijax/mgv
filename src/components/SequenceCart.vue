@@ -163,7 +163,7 @@ export default MComponent({
 
   },
   mounted: function () {
-    this.$root.$on('region-selected', r => this.add(r))
+    // this.$root.$on('region-selected', r => this.add(r))
     this.$root.$on('sequence-selected', rs => {
       rs.forEach(r => this.add(r))
     })

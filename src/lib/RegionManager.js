@@ -217,21 +217,28 @@ class RegionManager {
     this.layout()
   }
   //--------------------------------------
-  zoomAllRegions (amt) {
-    this.app.strips.forEach(s => {
-      s.regions.forEach(r => this.zoomRegion(r, amt))
-    })
+  // Zooms and scrolls the given region by the specified amounts
+  // Args:
+  //  r - the region to update
+  //  zAmt - zoom amount. Multiplied by region length to determine new region length
+  //  sAmt - scroll amount. Multiplied with the region length to determine direction and distance of scroll.
+  zoomScrollRegion (r, zAmt, sAmt) {
+    if (zAmt <= 0) u.fail("Bad parameter: zoom factor must be > 0")
+    const L = r.end - r.start + 1
+    const L2 = zAmt * L
+    const delta = sAmt * Math.max(L, L2)
+    const mid = (r.start + r.end) / 2
+    const s2 = Math.floor(mid - L2 / 2 + delta + 1)
+    const e2 = Math.floor(s2 + L2 - 1)
+    r.start = s2
+    r.end = e2
+    return r
   }
   //--------------------------------------
-  zoomRegion (r, amt) {
-    amt = amt || 2
-    const mid = (r.start + r.end) / 2
-    const len = r.end - r.start + 1
-    const newlen = Math.round(len / amt)
-    const newstart = Math.floor(mid - newlen / 2)
-    const newend = newstart + newlen - 1
-    r.start = newstart
-    r.end = newend
+  zoomScrollAllRegions (zAmt, sAmt) {
+    this.app.strips.forEach(s => {
+      s.regions.forEach(r => this.zoomScrollRegion(r, zAmt, sAmt))
+    })
   }
   //--------------------------------------
   jumpTo (coords, quietly) {
@@ -251,26 +258,6 @@ class RegionManager {
     })
     this.layout()
     if (!quietly) this.announce()
-  }
-  //--------------------------------------
-  zoom (amt, quietly) {
-    this.regionChange({ region: this.currRegion, op: 'zoom', amt: amt }, quietly)
-  }
-  //--------------------------------------
-  scrollAllRegions (amt) {
-    this.app.strips.forEach(s => {
-      s.regions.forEach(r => this.scrollRegion(r, amt))
-    })
-  }
-  //--------------------------------------
-  scrollRegion (r, amt) {
-    const delta = amt * (r.end - r.start + 1)
-    r.start = Math.floor(r.start + delta)
-    r.end = Math.floor(r.end + delta)
-  }
-  //--------------------------------------
-  scroll (amt, quietly) {
-    this.regionChange({ region: this.currRegion, op: 'scroll', amt: amt }, quietly)
   }
   //--------------------------------------
   splitRegion (r, frac) {
@@ -483,24 +470,35 @@ class RegionManager {
   //    pos (when op = split) Position of the split. (0..1)
   //
   regionChange (d, quietly) {
-    const r = d.region
+    const r = d.region || this.currRegion
     if (d.op === 'scroll') {
       if (this.app.scrollLock) {
-        this.scrollAllRegions(d.amt)
+        this.zoomScrollAllRegions(1, d.amt)
       } else if (r === this.app.rRegion) {
-        this.scrollRegion(r, d.amt)
+        this.zoomScrollRegion(r, 1, d.amt)
         this.computeMappedRegions(r)
       } else {
-        this.scrollRegion(r, d.amt)
+        this.zoomScrollRegion(r, 1, d.amt)
       }
     } else if (d.op === 'zoom') {
       if (this.app.scrollLock) {
-        this.zoomAllRegions(d.amt)
+        this.zoomScrollAllRegions(d.amt, 0)
       } else if (r === this.app.rRegion) {
-        this.zoomRegion(r, d.amt)
+        this.zoomScrollRegion(r, d.amt, 0)
         this.computeMappedRegions(r)
       } else {
-        this.zoomRegion(r, d.amt)
+        this.zoomScrollRegion(r, d.amt, 0)
+      }
+    } else if (d.op === 'zoomscroll') {
+      const zAmt = d.out ? 1 / d.plength : d.plength
+      const sAmt = (d.pstart - 0.5 + d.plength / 2) * (d.out ? -1 : 1)
+      if (this.app.scrollLock) {
+        this.zoomScrollAllRegions(zAmt, sAmt)
+      } else if (r === this.app.rRegion) {
+        this.zoomScrollRegion(d.region, zAmt, sAmt)
+        this.computeMappedRegions(r)
+      } else {
+        this.zoomScrollRegion(d.region, zAmt, sAmt)
       }
     } else if (d.op === 'set') {
       this.setRegion(r, d.coords)
