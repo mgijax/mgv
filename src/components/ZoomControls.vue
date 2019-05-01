@@ -23,19 +23,19 @@
       <div class="flexrow">
         <m-button
           icon="zoom_in"
-          @click="$root.$emit('region-change', { op: 'zoom', amt: 0.5 })"
+          @click="$root.$emit('region-change', { op: 'zoom', amt: $event.shiftKey ? 0.1 : 0.5 })"
           />
         <m-button
           icon="zoom_out"
-          @click="$root.$emit('region-change', { op: 'zoom', amt: 2 })"
+          @click="$root.$emit('region-change', { op: 'zoom', amt: $event.shiftKey ? 10 : 2 })"
           />
         <m-button
           icon="chevron_left"
-          @click="$root.$emit('region-change', { op: 'scroll', amt: 0.2 })"
+          @click="$root.$emit('region-change', { op: 'scroll', amt: $event.shiftKey ? 0.8 : 0.2 })"
           />
         <m-button
           icon="chevron_right"
-          @click="$root.$emit('region-change', { op: 'scroll', amt: -0.2 })"
+          @click="$root.$emit('region-change', { op: 'scroll', amt: $event.shiftKey ? -0.8 : -0.2 })"
           />
         </div>
       <!-- scroll lock button -->
