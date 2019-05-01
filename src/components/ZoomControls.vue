@@ -24,18 +24,22 @@
         <m-button
           icon="zoom_in"
           @click="$root.$emit('region-change', { op: 'zoom', amt: $event.shiftKey ? 0.1 : 0.5 })"
+          title="Click to zoom in. Shift-click to zoom in more"
           />
         <m-button
           icon="zoom_out"
           @click="$root.$emit('region-change', { op: 'zoom', amt: $event.shiftKey ? 10 : 2 })"
+          title="Click to zoom out. Shift-click to zoom out more"
           />
         <m-button
           icon="chevron_left"
           @click="$root.$emit('region-change', { op: 'scroll', amt: $event.shiftKey ? 0.8 : 0.2 })"
+          title="Click to pan left. Shift-click to scroll left more."
           />
         <m-button
           icon="chevron_right"
           @click="$root.$emit('region-change', { op: 'scroll', amt: $event.shiftKey ? -0.8 : -0.2 })"
+          title="Click to pan right. Shift-click to scroll right more."
           />
         </div>
       <!-- scroll lock button -->
