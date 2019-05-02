@@ -305,6 +305,21 @@ function niceBounds(axis_start, axis_end, num_ticks){
         "steps": nice_tick
     }
 }
+//--------------------------------------
+function mergeArrays (A, B, mergeItems) {
+  const alen = A.length
+  const blen = B.length
+  if (blen < alen) {
+    A.splice(blen, alen - blen)
+    A.forEach((a, i) => mergeItems(a, B[i]))
+  } else if (blen > alen) {
+    A.forEach((a, i) => mergeItems(a, B[i]))
+    A.splice.apply(A, [A.length, 0].concat(B.slice(alen)))
+  } else {
+    A.forEach((a, i) => mergeItems(a, B[i]))
+  }
+}
+
 // ---------------------------------------------
 export default {
   fail,
@@ -324,5 +339,6 @@ export default {
   wHeight,
   wScrollTop,
   unselectAllText,
-  niceBounds
+  niceBounds,
+  mergeArrays
 }

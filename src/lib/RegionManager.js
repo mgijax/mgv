@@ -14,24 +14,7 @@ class RegionManager {
     this.app.$root.$on('region-current', r => { if (r) this.currRegion = r.region })
     this.app.$root.$on('region-change', d => this.regionChange(d))
     this.app.$root.$on('jump-to', d => this.jumpTo(d.coords))
-    this.app.$root.$on('feature-align', d => {
-      const f = d.feature
-      const anchor = d.basePos ? ((d.basePos - f.start + 1) / (f.end - f.start + 1)) : null
-      let l
-      if (d.region) {
-        l = d.region.end - d.region.start + 1
-      } else {
-        l = 3 * (f.end - f.start + 1)
-      }
-      const lcoords = {
-        landmark: f.symbol || f.cID || f.ID,
-        lgenome: f.genome,
-        anchor: anchor,
-        delta: 0,
-        length: l
-      }
-      this.alignOnLandmark(lcoords)
-    })
+    this.app.$root.$on('feature-align', d => this.featureAlign(d))
   }
   //--------------------------------------
   makeRegion (r) {
@@ -178,7 +161,8 @@ class RegionManager {
     strips.forEach(s => {
       s.regions = s.regions.map(r => this.makeRegion(r))
     })
-    this.app.strips = this.layout(strips)
+    this.mergeStrips(strips)
+    this.layout()
   }
   //--------------------------------------
   // Adds a new region. Adds a new strip if necessary, or adds r to the
@@ -332,15 +316,52 @@ class RegionManager {
     }, [])
     return regions
   }
-  //
   //--------------------------------------
-  alignOnLandmark (lcoords, genomes) {
+  featureAlign (d, quietly) {
+    const f = d.feature
+    const anchor = d.basePos ? ((d.basePos - f.start + 1) / (f.end - f.start + 1)) : null
+    let l
+    if (d.region) {
+      l = d.region.end - d.region.start + 1
+    } else {
+      l = 3 * (f.end - f.start + 1)
+    }
+    const lcoords = {
+      landmark: f.cID || f.ID,
+      lgenome: f.genome,
+      anchor: anchor,
+      delta: 0,
+      length: l
+    }
+    this.alignOnLandmark(lcoords, quietly)
+  }
+  //--------------------------------------
+  alignOnLandmark (lcoords, genomes, quietly) {
     this.computeLandmarkRegions(lcoords, (genomes || this.currentGenomes())).then(strips => {
-      this.app.strips = strips
+      this.mergeStrips(strips)
+      this.layout()
       this.app.scrollLock = true
       this.app.lcoords = lcoords
       this.app.rRegion = null
+      this.app.currentSelection = [lcoords.landmark]
+      if (!quietly) this.announce()
     })
+  }
+  //--------------------------------------
+  mergeStrips (strips) {
+    u.mergeArrays(this.app.strips, strips, (a,b) => this.mergeStrip(a,b))
+  }
+  //--------------------------------------
+  mergeStrip (s1, s2) {
+    if (s1.genome !== s2.genome) s1.genome = s2.genome
+    u.mergeArrays(s1.regions, s2.regions, (r1, r2) => this.mergeRegion(r1, r2))
+  }
+  //--------------------------------------
+  mergeRegion (r1, r2) {
+    if (r1.chr !== r2.chr) r1.chr = r2.chr
+    if (r1.genome !== r2.genome) r1.genome = r2.genome
+    r1.start = r2.start
+    r1.end = r2.end
   }
   //--------------------------------------
   computeLandmarkRegions (lcoords, genomes) {
@@ -349,7 +370,7 @@ class RegionManager {
         return this.computeLandmarkRegion(lcoords, g)
       })
     })
-    return Promise.all(ps).then(strips => this.layout(strips))
+    return Promise.all(ps)
   }
   //
   //--------------------------------------
@@ -358,7 +379,7 @@ class RegionManager {
     const delta = lcoords.delta
     const w = lcoords.length
     const alignOn = config.ZoomRegion.featureAlignment
-    const lms = this.app.dataManager.getGenologs(lcoords.landmark, [genome])
+    const lms = this.app.dataManager.getGenologs(lcoords.landmark, [genome]).filter(x => x)
     if (lms.length === 0) {
       // Landmark does not exist in this genome! Fallback: first compute the
       // landmark region in the landmark's own genome, then map that region 

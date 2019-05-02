@@ -130,8 +130,10 @@ export default MComponent({
       if (!n) return
       const f = this.dataManager.getFeaturesBy(n)[0]
       if (f) {
+        // user entered a valid symbol
         this.$root.$emit('feature-align', { feature: f })
       } else {
+        // not a valid symbol. try parsing as coords.
         const c = gc.parse(n)
         if (c) {
           this.$root.$emit('jump-to', { coords: c })
