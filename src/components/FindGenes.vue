@@ -34,14 +34,21 @@ export default MComponent({
     selectSearch: function (val) {
       this.currentSelection = this.searches.filter(s => s.label === val)[0]
     },
+    tellBusy (bool) {
+      this.$parent.isBusy = bool
+    },
     doSearch (inp) {
       let s = inp.value
       s = s.trim()
       if (!s) return
       let cs = this.currentSelection
+      this.tellBusy(true)
       cs.handler && cs.handler(s).then(data => {
         this.$root.$emit('query-returned', { queryType: this.currentSelection, query: s, results: data })
         inp.value = ''
+        this.tellBusy(false)
+      }).catch(err => {
+        this.tellBusy(false)
       })
     },
     blurOnEnter (e) {

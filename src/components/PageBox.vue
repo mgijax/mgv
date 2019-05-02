@@ -1,6 +1,6 @@
 <template>
 <div class="pagebox"
-    :class="{dragging: isDragging, open: isOpen, closed: !isOpen, floating: floating}"
+    :class="{dragging: isDragging, open: isOpen, closed: !isOpen, floating: floating, busy: isBusy}"
     :style="{top: y + ddData.dy + 'px', left: x + ddData.dx + 'px'}"
     >
   <div name="buttonBox" class="flexrow">
@@ -45,6 +45,11 @@
     <slot></slot>
   </div>
   <canvas ref="canvas" width=1 height=1 />
+  <div
+    class="busybox"
+    >
+    <span>Busy...</span>
+    </div>
 </div>
 </template>
 
@@ -88,6 +93,7 @@ export default MComponent({
   },
   data () {
     return {
+      isBusy: false,
       isOpen: this.initiallyOpen,
       isDragging: false,
       x: this.initialX,
@@ -251,5 +257,18 @@ export default MComponent({
 .pagebox.dragging [name="buttonBox"]
 {
   display: inherit;
+}
+.busybox {
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  width: 100%;
+  height: 100%;
+  color: white;
+  background-color: rgba(0,0,0,0.8);
+  display: none;
+}
+.busy .busybox {
+  display: block
 }
 </style>
