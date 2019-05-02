@@ -16,6 +16,19 @@ import cgi
 import cgitb
 cgitb.enable()
 
+VALID_PREFIXES = [
+  'http://',
+  'https://'
+]
+VALID_WSROOTS = [
+  'www.mousemine.org/mousemine/service/',
+  'www.humanmine.org/humanmine/service/'
+]
+VALID_ENDPOINTS = [
+  'query/results/fasta?',
+  'sequence?'
+]
+
 def chunkString (s, n) :
   return [s[i:i+n] for i in range(0, len(s), n)]
 
@@ -27,7 +40,28 @@ def defaultHeader (desc) :
   else:
     return '>%(genome)s::%(ID)s (%(rc)s%(tr)s%(type)s)' % desc
 
+def splitPrefix (s, possibles) :
+  for p in possibles:
+    if s.startswith(p):
+      return (p, s[len(p):])
+  return (None, s)
+
+def validateUrl (url) :
+  protocol, rest = splitPrefix(url, VALID_PREFIXES)
+  if not protocol: return False
+  #
+  webservice, rest = splitPrefix(rest, VALID_WSROOTS)
+  if not webservice: return False
+  #
+  endpoint, rest = splitPrefix(rest, VALID_ENDPOINTS)
+  if not endpoint: return False
+  #
+  return True
+
 def doOneSequence (desc) :
+  if not validateUrl(desc['url']):
+    return ''
+  #
   fd = urllib.urlopen(desc['url'])
   data = fd.read()
   fd.close()
@@ -50,7 +84,7 @@ def doOneSequence (desc) :
 def translate (rna) :
   rna = rna.upper().replace('T', 'U')
   codons = [ rna[i:i+3] for i in range(0, len(rna),3) ]
-  residues = ''.join(map(lambda c: aaShort2Letter[genetic_code[c]], codons))
+  residues = ''.join(map(lambda c: aaShort2Letter.get(genetic_code.get(c, ''), ''), codons))
   return residues
 
 def complement (dna) :
