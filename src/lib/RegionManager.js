@@ -161,7 +161,7 @@ class RegionManager {
     strips.forEach(s => {
       s.regions = s.regions.map(r => this.makeRegion(r))
     })
-    this.mergeStrips(strips)
+    this.mergeUpdate(strips)
     this.layout()
   }
   //--------------------------------------
@@ -338,7 +338,7 @@ class RegionManager {
   //--------------------------------------
   alignOnLandmark (lcoords, genomes, quietly) {
     this.computeLandmarkRegions(lcoords, (genomes || this.currentGenomes())).then(strips => {
-      this.mergeStrips(strips)
+      this.mergeUpdate(strips)
       this.layout()
       this.app.scrollLock = true
       this.app.lcoords = lcoords
@@ -348,7 +348,7 @@ class RegionManager {
     })
   }
   //--------------------------------------
-  mergeStrips (strips) {
+  mergeUpdate (strips) {
     u.mergeArrays(this.app.strips, strips, (a,b) => this.mergeStrip(a,b))
   }
   //--------------------------------------

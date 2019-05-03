@@ -80,32 +80,11 @@ export default MComponent({
     }
   },
   mounted: function () {
-    this.$watch('context', () => this.reset(), { 'deep': true })
     this.$el.closest('.page-box-container').addEventListener('scroll', () => {
       let bcr = this.$parent.$el.getBoundingClientRect()
       this.fixed = bcr.top < 60
       this.offset = this.fixed ? -bcr.top + 60 : 0
     })
-  },
-  computed: {
-    formattedCoords: {
-      get: function () {
-        return `${this.my.chr.name}:${this.my.start}..${this.my.end}`
-      },
-      set: function (v) {}
-    },
-    alignedText: function () {
-        if (!this.my.landmark) return ''
-        let dtext = this.my.delta ? ` (${this.my.delta > 0 ? '+' : ''}${u.prettyPrintBases(this.my.delta)})` : ''
-        return `Aligned on ${this.landmarkSymbol}${dtext}`
-    },
-    width: function () {
-      return this.my.end - this.my.start + 1
-    },
-    landmarkSymbol: function () {
-      if (!this.my.landmark) return ''
-      return this.my.landmark
-    }
   },
   methods: {
     copyProps () {
@@ -113,18 +92,6 @@ export default MComponent({
     },
     blurOnEnter (e) {
       if (e.keyCode === 13) e.target.blur()
-    },
-    validate (c, error) {
-      try {
-        let nc = gc.validate(c, this.my.rGenome, true)
-        if (!nc) {
-          this.reset(error)
-          return
-        }
-        this.setCoordinates(nc)
-      } catch (e) {
-        this.reset(e)
-      }
     },
     findLandmark (n) {
       if (!n) return
@@ -142,51 +109,6 @@ export default MComponent({
         }
       }
       this.$refs.searchBox.value = ''
-    },
-    setFormatted (c) {
-      let coords = gc.parse(c)
-      if (!coords) {
-        let f = this.dataManager.getFeaturesBy(c)[0]
-        if (f) {
-          let lm = f.symbol || f.cID || f.ID
-          this.$root.$emit('context', { landmark: lm, currentSelection: [f.cID || f.ID] })
-          return
-        }
-        this.reset('Invalid coordinates. Please try again.')
-        return
-      }
-      this.validate(coords, 'Invalid coordinates. Please try again.')
-    },
-    setWidth (w) {
-      this.zoom((this.my.end - this.my.start + 1) / w)
-    },
-    zoom (amount) {
-      this.validate(gc.zoom(this.my, amount), 'Invalid zoom factor. Please try again.')
-    },
-    pan (amount) {
-      this.validate(gc.pan(this.my, amount), 'Invalid pan amount. Please try again.')
-    },
-    // ------------------------------------------------------
-    setCoordinates (c) {
-      let mp = (this.my.start + this.my.end) / 2
-      let mp2 = (c.start + c.end) / 2
-      this.my.chr = c.chr
-      this.my.start = c.start
-      this.my.end = c.end
-      if (this.context.lcoords.landmark) {
-        this.$root.$emit('context', {
-          length: c.end - c.start + 1,
-          delta: Math.round(this.context.lcoords.delta + (mp2 - mp))
-        })
-      } else {
-        this.$root.$emit('context', c)
-      }
-    },
-    //
-    reset (message) {
-      if (message) alert(message)
-      this.my = this.copyProps()
-      this.$forceUpdate()
     }
   }
 })

@@ -113,7 +113,7 @@ export default MComponent({
     },
     backgroundClick: function (e) {
       if (e.target.closest('.zoom-region')) {
-        this.$root.$emit('context', { currentSelection: [] })
+        this.$root.$emit('clear-selection')
       }
     }
   },

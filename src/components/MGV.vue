@@ -608,7 +608,11 @@ export default MComponent({
     //
     this.$root.$on('no-align', () => this.unAlign())
     // listen for context events - how descendant component announce they want to redraw
-    this.$root.$on('context', cxt => this.setContext(cxt))
+    // this.$root.$on('context', cxt => this.setContext(cxt))
+    this.$root.$on('clear-selection', () => {
+      this.currentSelection = []
+      this.$root.$emit('context-changed')
+    })
     //
     this.app.$root.$on('region-current', r => { this.currRegion = r ? r.region : null })
     //
