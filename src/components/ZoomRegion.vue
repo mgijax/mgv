@@ -66,6 +66,22 @@
             >{{x.label}}</text>
         </g>
       </g>
+      <!-- ======= left end underlay, shows when you scroll past the beginning of the chr  ======= -->
+      <rect
+        :x="b2p(-region.chr.length)"
+        :y="-zeroOffset"
+        :width="b2p(0) - b2p(-region.chr.length)"
+        :height="Math.max(height, 20)"
+        fill="gray"
+        />
+      <!-- ======= right end underlay, shows when you scroll past the end of the chr  ======= -->
+      <rect
+        :x="b2p(region.chr.length)"
+        :y="-zeroOffset"
+        :width="b2p(region.chr.length)"
+        :height="Math.max(height, 20)"
+        fill="gray"
+        />
       <!-- ======= underlay ======= -->
       <rect
         x=0
