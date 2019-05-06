@@ -11,7 +11,6 @@
     @mouseenter.stop="mouseenter"
     @mouseleave.stop="mouseleave"
     @click="clicked"
-    @dblclick="dblClicked"
     :width="region.width"
     >
     <g
@@ -786,7 +785,10 @@ export default MComponent({
       if (f) this.$root.$emit('feature-out', { region: this.region, feature: f.feature, transcript: f.transcript, event: e })
     },
     clicked: function (e) {
-      this.$root.$emit('region-click', { region: this.region, event: e })
+      if (e.altKey) {
+        this.altClicked(e)
+        return
+      }
       let f = this.getEventObjects(e)
       if (f) {
         this.$root.$emit('feature-click', { region: this.region, feature: f.feature, transcript: f.transcript, event: e })
@@ -796,14 +798,14 @@ export default MComponent({
       }
       this.absorbNextClick = false
     },
-    dblClicked: function (e) {
+    altClicked: function (e) {
       let f = this.getEventObjects(e)
       if (f) {
-        // double clicked on a feature
+        // alt clicked on a feature
         this.$root.$emit('feature-align', { region: this.region, feature: f.feature, transcript: f.transcript, event: e, basePos: this.clientXtoBase(e.clientX) })
         e.stopPropagation()
       } else {
-        // double clicked on region background
+        // alt clicked on region background
         // split region at that point
         const regionRect = this.$refs.underlay.getBoundingClientRect()
         const px = e.clientX - regionRect.left

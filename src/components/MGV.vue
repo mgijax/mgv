@@ -396,7 +396,7 @@ export default MComponent({
           let lm = this.dataManager.getGenolog(cxt.landmark || this.lcoords.landmark, newc.ref)
           if (lm) {
             newc.lcoords = {
-              landmark: lm.symbol || lm.cID || lm.ID,
+              landmark: lm.cID || lm.ID,
               delta: typeof cxt.delta === 'number' ? cxt.delta : this.lcoords.delta,
               length: typeof cxt.length === 'number' ? cxt.length : this.lcoords.length
             }
@@ -466,16 +466,6 @@ export default MComponent({
       this.currentMouseover = f
       this.currentMouseoverT = t
       if (e.ctrlKey || e.altKey) this.detailFeatures = this.dataManager.getGenologs(f, this.vGenomes)
-      if (e.altKey) {
-        if (this.currentSelection.indexOf(fid) === -1) {
-          this.currentSelection.push(fid)
-          // Don't register context changes until user has paused for at least 1s.
-          if (this.timeout) window.clearTimeout(this.timeout)
-          this.timeout = window.setTimeout(() => {
-            this.setContext({ currentSelection: this.currentSelection })
-          }, 1000)
-        }
-      }
     },
     featureOff: function (f, t, e) {
       this.currentMouseover = null
