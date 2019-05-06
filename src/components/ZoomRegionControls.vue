@@ -110,12 +110,15 @@ export default MComponent({
     },
     split: function () {
       this.$root.$emit('region-change', { region: this.region, vm: this, op: 'split', pos: 0.5 })
+      this.close()
     },
     makeRef: function () {
       this.$root.$emit('region-change', { region: this.region, vm: this, op: 'make-reference' })
+      this.close()
     },
     remove: function () {
       this.$root.$emit('region-change', { region: this.region, vm: this, op: 'remove' })
+      this.close()
     },
     setCoords: function () {
       const val = this.formattedCoords
@@ -131,12 +134,15 @@ export default MComponent({
             end: f.end + l
           }
           this.$root.$emit('region-change', { region: this.region, vm: this, op: 'set', coords: rr })
+          this.close()
         } else {
+          alert("Could not resolve coordinates.")
           this.reset()
         }
       } else {
         const rr = gc.validate(r, this.region.genome, true)
         this.$root.$emit('region-change', { region: this.region, vm: this, op: 'set', coords: rr })
+        this.close()
       }
     },
     reset: function () {
