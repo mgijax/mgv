@@ -7,23 +7,24 @@ class HistoryManager {
     this.settingHash = false
     this.initialHash = null
     // when user hits back button, tell the app
-    window.addEventListener('popstate', evt => {
-      if (this.settingHash) {
-        this.settingHash = false
-        return
-      }
-      let cxt = this.pqstring(document.location.hash.substring(1))
-      // console.log('HistoryManager: window state changed. Setting app context.', cxt)
-      this.app.setContext(cxt, true)
-    })
+    window.addEventListener('popstate', () => this.setAppContext())
     // when app context changes, tell the window
-    this.app.$root.$on('context-changed', () => {
-      this.setHash()
-    })
+    this.app.$root.$on('context-changed', () => this.setHash())
     // tell the app about the initial state
     let qstring = window.location.hash.substring(1)
     this.initialHash = this.pqstring(qstring)
     // console.log('HistoryManager: initial hash ', this.initialHash)
+  }
+  // After user hits the back button, set the app state from the restored hash
+  setAppContext () {
+    if (this.settingHash) {
+      // avoid inf loop from setting window.location.hash in setHash()
+      this.settingHash = false
+      return
+    }
+    let cxt = this.pqstring(document.location.hash.substring(1))
+    // console.log('HistoryManager: window state changed. Setting app context.', cxt)
+    this.app.setContext(cxt, true)
   }
   // Uses the current app context to set the hash part of the
   // browser's location. This also registers the change in
@@ -31,6 +32,8 @@ class HistoryManager {
   setHash () {
     let newHash = this.app.getContextString()
     if ('#' + newHash === window.location.hash) return
+    // setting the hash causes the browser to emit a popstate, which we don't want to
+    // interpret as a user-initiated back command. (see setAppContext)
     this.settingHash = true
     window.location.hash = newHash
   }

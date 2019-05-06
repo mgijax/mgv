@@ -1,4 +1,7 @@
-
+//
+// RegionManager - central point of control for creating/updating the model data that
+// drives the main display.
+//`
 import config from '@/config'
 import u from '@/lib/utils'
 import gc from '@/lib/GenomeCoordinates'
@@ -273,8 +276,8 @@ class RegionManager {
       this.app.scrollLock = false
       this.app.lcoords = null
       strips.forEach(s => {
-        s.regions.forEach(r => { r.width = r.end - r.start + 1 })
-        s.regions = s.regions.map(r => this.makeRegion(r))
+        s.regions.forEach(rr => { rr.width = rr.end - rr.start + 1 })
+        s.regions = s.regions.map(rr => rr === r ? r : this.makeRegion(rr))
       })
       this.app.strips = this.layout(strips)
     })
@@ -362,6 +365,7 @@ class RegionManager {
     if (r1.genome !== r2.genome) r1.genome = r2.genome
     r1.start = r2.start
     r1.end = r2.end
+    r1.width = r2.width
   }
   //--------------------------------------
   computeLandmarkRegions (lcoords, genomes) {
