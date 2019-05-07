@@ -140,14 +140,26 @@ class DataManager {
             exons: exons,
             start: Math.min.apply(null,exons.map(e => e.start)),
             end: Math.max.apply(null,exons.map(e => e.end)),
+            strand: t[6],
             length: tlen,
             cds: cds
           }
           return tt
+        }).sort((a,b) => {
+          if (a.strand === '+') {
+            return a.start !== b.start ? a.start - b.start : b.length - a.length
+          } else {
+            return a.end !== b.end ? b.end - a.end : b.length - a.length
+          }
+          
         })
       })
     })
   }
+  // Exons of a transcript are encoded as a string such as "0_110,2100_344,..."
+  // where for each N_M item, N is the offset of the exon from the start of the transcript
+  // and M is the exon's length.
+  // Here we parse the string and produce a list of exons each with full start and end coordinates.
   _unpackExons (t) {
     const exonsAttr = t[8]['exons']
     if (!exonsAttr) {
@@ -156,6 +168,9 @@ class DataManager {
     const ecoords = exonsAttr.split(',').map(s => s.split('_').map(s => parseInt(s)))
     return ecoords.map(ec => { return { start: t[3] + ec[0], end: t[3] + ec[0] + ec[1] - 1 } })
   }
+  // CDSs of a transcript are encoded as "ID|start|end", where ID is the CDSs ID and start and end are
+  // the positions of the start and stop codons. (Reminder: Coordinates are always forward strand. To know
+  // which is the start codon and which is the stop codon, you have to look at the strand of the gene.)
   _unpackCds (cdsAttr, tlen, exons) {
     if (!cdsAttr) return null
     const parts = cdsAttr.split('|')
@@ -164,6 +179,8 @@ class DataManager {
       start: parseInt(parts[1]),
       end: parseInt(parts[2])
     }
+    // compute the length of the CDS by adding up the included exons (taking care not to
+    // include UTRs)
     c.length = exons.reduce((a,x) => {
       if (c.start > x.end || c.end < x.start) return a
       return a + Math.min(c.end, x.end) - Math.max(c.start, x.start) + 1
