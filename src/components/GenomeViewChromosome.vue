@@ -154,7 +154,9 @@ export default MComponent({
       return `rotate(90)translate(-10,8)`
     },
     myList: function () {
-      return (this.currentList.slice(0,250) || []).filter(f => f.chr === this.chromosome)
+      return (this.currentList.slice(0,250) || []).filter(f => {
+        return f.chr === this.chromosome
+      })
     },
     myGlyphs: function () {
       const gs = this.myList.map(f => {

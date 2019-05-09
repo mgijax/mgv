@@ -880,6 +880,8 @@ export default MComponent({
           const cr = this.currRange
           const crs = Math.min(cr[0], cr[1])
           const cre = Math.max(cr[0], cr[1])
+          // Express the dragged region start and length as fractions relative to the whole region.
+          // This allows easy conversion to the equiv part of other regions (for coordinated zooming).
           const pstart = crs / this.region.width
           const plength = (cre - crs + 1) / this.region.width
           //
@@ -892,13 +894,13 @@ export default MComponent({
               reverseComplement: e.clientX < d.startX
             })
           } else if (d.shiftDrag) {
-            // zoom in/out
+            // zoom in/out of dragged region === composition of centered zoom plus a scroll
             this.$root.$emit('region-change', {
               region: this.region,
               op: 'zoomscroll',
               pstart: pstart,
               plength: plength,
-              out: e.metaKey
+              out: e.metaKey // whether this is a zoom out (true) or zoom in (false)
             })
           } else {
             // scroll
@@ -907,8 +909,7 @@ export default MComponent({
           }
           
           //
-          // for some reason, a click event is fired at mouseup, even though dragify handlers call
-          // stopPropagation and preventDefault. So here we just set a little flag for ourselves to ignore
+          // A click event is fired (unavoidably) at mouseup. Here we set a flag for ourselves to ignore
           // the next click event (see method clicked() above).
           //
           this.absorbNextClick = true

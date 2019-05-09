@@ -68,30 +68,41 @@ class RegionManager {
    const toRemove = current.filter(g => !newset.has(g))
    const toAdd = genomes.filter(g => !curset.has(g))
    toRemove.forEach(g => this.deleteStrip(g, true))
-   toAdd.forEach(g => this.addStrip(g, true))
-   this.layout()
-   if (!quietly) this.announce()
+   Promise.all(toAdd.map(g => this.addStrip(g))).then(() => {
+     this.layout()
+     if (!quietly) this.announce()
+   })
   }
 
   //--------------------------------------
-  // Add a strip to the display for genome g.
-  addStrip (g, quietly, r) {
-    const chr = g.chromosomes[0]
-    const defaultRegion = {
-      genome: g,
-      chr: chr,
-      start: 1,
-      end: Math.min(10000000, chr.length),
-      width: 1 // value doesn't matter here
+  // Add a strip to the display for genome g. 
+  // If r is specified, use that region as the initial region for the strip.
+  // Otherwise, if there is a current landmark the initial region should be there.
+  // Otherwise, if there is a current reference region, the initial region should be mapped.
+  // Otherwise, the initial region is the default (1:1..10000000)
+  addStrip (g, r) {
+    let p
+    if (this.app.lcoords && this.app.lcoords.landmark) {
+      p = this.computeLandmarkRegions(this.app.lcoords, [g]).then(strips => strips[0])
+    } else if (this.app.rRegion) {
+      p = this.mapRegionToGenome(this.app.rRegion, g)
+    } else {
+      const chr = g.chromosomes[0]
+      p = Promise.resolve({
+        genome: g,
+        regions: [{
+          genome: g,
+          chr: chr,
+          start: 1,
+          end: Math.min(10000000, chr.length),
+          width: 1 // value doesn't matter here
+          }]
+      })
     }
-    const strip = {
-      genome: g,
-      regions: [ r || defaultRegion ]
-    }
-    this.app.strips.push(strip)
-    this.layout()
-    if (!quietly) this.announce()
-    return strip
+    return p.then(strip => {
+      this.app.strips.push(this.layoutStrip(strip))
+      return strip
+    })
   }
   //--------------------------------------
   // Removes the strip for genome g.
@@ -174,13 +185,13 @@ class RegionManager {
     r = this.makeRegion(r)
     const si = this.findStrip(r.genome)
     if (si === -1) {
-      this.addStrip(r.genome, true, r)
+      this.addStrip(r.genome, r).then(this.layout())
     } else {
       const s = this.app.strips[si]
       r.width = s.regions.length ? s.regions[0].width : 1
       s.regions.push(r)
+      this.layout()
     }
-    this.layout()
   }
   //--------------------------------------
   setRegion(r, coords) {
@@ -211,12 +222,18 @@ class RegionManager {
   //  sAmt - scroll amount. Multiplied with the region length to determine direction and distance of scroll.
   zoomScrollRegion (r, zAmt, sAmt) {
     if (zAmt <= 0) u.fail("Bad parameter: zoom factor must be > 0")
+    // current region length
     const L = r.end - r.start + 1
+    // zoomed length
     const L2 = zAmt * L
+    // scroll amount
     const delta = sAmt * Math.max(L, L2)
+    // ref point = midpoint of region
     const mid = (r.start + r.end) / 2
+    // new start and end pos
     const s2 = Math.floor(mid - L2 / 2 + delta + 1)
     const e2 = Math.floor(s2 + L2 - 1)
+    //
     r.start = s2
     r.end = e2
     return r
@@ -226,6 +243,13 @@ class RegionManager {
     this.app.strips.forEach(s => {
       s.regions.forEach(r => this.zoomScrollRegion(r, zAmt, sAmt))
     })
+    if (this.app.lcoords && this.app.lcoords.landmark) {
+      const lc = this.app.lcoords
+      const L2 = zAmt * lc.length
+      const d = sAmt * lc.length + lc.delta
+      lc.length = Math.round(L2)
+      lc.delta = Math.round(d)
+    }
   }
   //--------------------------------------
   jumpTo (coords, quietly) {
@@ -294,9 +318,11 @@ class RegionManager {
     const tr = this.app.translator
     return tr.translate(r.genome, r.chr.name, r.start, r.end, g).then(rs => {
       rs.forEach(rr => { rr.genome = g })
+      rs = this.combineRegions(rs)
+      rs.forEach(r => { r.width = r.end - r.start + 1 })
       return {
         genome: g,
-        regions: this.combineRegions(rs)
+        regions: rs
       }
     })
   }
@@ -339,6 +365,8 @@ class RegionManager {
     this.alignOnLandmark(lcoords, quietly)
   }
   //--------------------------------------
+  // High level call for lining up on a landmark. Computed the regions, does the update, sets the scroll locsk,
+  // and announces context change. 
   alignOnLandmark (lcoords, genomes, quietly) {
     this.computeLandmarkRegions(lcoords, (genomes || this.currentGenomes())).then(strips => {
       this.mergeUpdate(strips)
@@ -351,23 +379,10 @@ class RegionManager {
     })
   }
   //--------------------------------------
-  mergeUpdate (strips) {
-    u.mergeArrays(this.app.strips, strips, (a,b) => this.mergeStrip(a,b))
-  }
-  //--------------------------------------
-  mergeStrip (s1, s2) {
-    if (s1.genome !== s2.genome) s1.genome = s2.genome
-    u.mergeArrays(s1.regions, s2.regions, (r1, r2) => this.mergeRegion(r1, r2))
-  }
-  //--------------------------------------
-  mergeRegion (r1, r2) {
-    if (r1.chr !== r2.chr) r1.chr = r2.chr
-    if (r1.genome !== r2.genome) r1.genome = r2.genome
-    r1.start = r2.start
-    r1.end = r2.end
-    r1.width = r2.width
-  }
-  //--------------------------------------
+  // Returns a promise for regions around the specified landmark in the specified geneoms.
+  // The promise resolves to a list of strips, each of which has a list of regions.
+  // It is possible for there to be multiple copies of a landmark in a genome leading 
+  // to multiple regions in that strip.
   computeLandmarkRegions (lcoords, genomes) {
     const ps = genomes.map(g => {
       return this.app.dataManager.ensureFeatures(g).then(() => {
@@ -378,6 +393,9 @@ class RegionManager {
   }
   //
   //--------------------------------------
+  // Computes the region(s) around the given landmark in the given genome.
+  // Assumes the genome has been loaded!
+  //
   computeLandmarkRegion (lcoords, genome) {
     // landmark mode
     const delta = lcoords.delta
@@ -429,6 +447,23 @@ class RegionManager {
     }
   }
   //--------------------------------------
+  mergeUpdate (strips) {
+    u.mergeArrays(this.app.strips, strips, (a,b) => this.mergeStrip(a,b))
+  }
+  //--------------------------------------
+  mergeStrip (s1, s2) {
+    if (s1.genome !== s2.genome) s1.genome = s2.genome
+    u.mergeArrays(s1.regions, s2.regions, (r1, r2) => this.mergeRegion(r1, r2))
+  }
+  //--------------------------------------
+  mergeRegion (r1, r2) {
+    if (r1.chr !== r2.chr) r1.chr = r2.chr
+    if (r1.genome !== r2.genome) r1.genome = r2.genome
+    r1.start = r2.start
+    r1.end = r2.end
+    r1.width = r2.width
+  }
+  //--------------------------------------
   //
   layout (strips, width) {
     strips = strips || this.app.strips
@@ -460,6 +495,7 @@ class RegionManager {
       r.deltaX = dx
       dx += r.width + gap
     })
+    return strip
   }
   //--------------------------------------
   scaleAdjust (nums, width, mWidth) {

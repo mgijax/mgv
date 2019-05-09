@@ -21,7 +21,7 @@
       </div>
       <!-- aligned-on text -->
       <div
-        class="flexcolumn"
+        class="flexrow"
         v-if="context.lcoords && context.lcoords.landmark"
         >
         <span>Aligned on {{ context.lcoords.landmark }}</span>
