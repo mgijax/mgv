@@ -435,8 +435,7 @@ export default MComponent({
       // return (this.context.coords.end - this.context.coords.start + 1) < this.detailThreshold
     },
     showSequence: function () {
-      return (this.region.end - this.region.start + 1) < this.sequenceThreshold
-      // return (this.context.coords.end - this.context.coords.start + 1) < this.sequenceThreshold
+      return this.ppb >= 1
     },
     showStartStopCodons: function () {
       return this.cfg.showStartStopCodons

@@ -131,19 +131,6 @@
   <!-- ============== SEQUENCES section  ============== -->
   <label>Sequences</label>
   <div
-    title="Display DNA sequence when view width is below this value."
-    class="flexrow">
-    <label>Display threshold</label>
-    <input
-        min=0
-        max=10000
-        step=100
-        type="number"
-        v-model="ZoomRegion.sequenceThreshold"
-        />bp
-  </div>
-  <!-- =================== -->
-  <div
     title="Set the font size of displayed sequences."
     class="flexrow"
     >
