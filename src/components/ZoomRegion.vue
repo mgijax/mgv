@@ -135,7 +135,7 @@
         font-family="sans-serif"
         :font-weight="isCurrent ? 'bold' : 'normal'"
         :transform="`translate(${-myDelta},0)`"
-        >{{region.chr.name}}:{{region.start + deltaB}}..{{region.end + deltaB}}</text>
+        >{{coordinatesLabel}}</text>
       <!-- ======= sequence string ======= -->
       <text
         v-if="showSequence"
@@ -380,6 +380,13 @@ export default MComponent({
     }
   },
   computed: {
+    coordinatesLabel: function () {
+      const r = this.region
+      const c = r.chr.name
+      const s = u.prettyPrintBases(r.start + this.deltaB, true)
+      const e = u.prettyPrintBases(r.end + this.deltaB, true)
+      return `${c}:${s}..${e}`
+    },
     tickPositions: function () {
       const r = this.region
       const nticks = Math.floor(r.width / 20)

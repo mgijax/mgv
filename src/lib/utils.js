@@ -176,10 +176,10 @@ function prettyPrintBases (n, commas) {
     return `${n} bp`
   }
   if (absn >= 1000 && absn < 1000000) {
-    return `${(n/1000).toFixed(2)} kb`
+    return `${(n/1000).toFixed(1)} kb`
   }
   else {
-    return `${(n/1000000).toFixed(2)} Mb`
+    return `${(n/1000000).toFixed(1)} Mb`
   }
 }
 // ---------------------------------------------

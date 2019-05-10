@@ -19,13 +19,14 @@
           @blur="findLandmark($event.target.value)"
           />
       </div>
-      <!-- aligned-on text -->
+      <!-- aligned-on text 
       <div
         class="flexrow"
         v-if="context.lcoords && context.lcoords.landmark"
         >
         <span>Aligned on {{ context.lcoords.landmark }}</span>
         </div>
+      -->
       <!-- zoom/scroll controls -->
       <div class="flexrow">
         <m-button
