@@ -8,13 +8,17 @@
         :allGenomes="context.allGenomes"
         :strips="context.strips"
         :genomeSets="context.genomeSets"
+        title="Specify which genome(s) to display."
         />
       <!-- Search box -->
       <div class="flexrow">
-        <label>Find</label>
+        <label
+          title="Focus the view around a gene or jump to specific coordinates."
+          >Find</label>
         <input
           ref="searchBox"
-          size="24"
+          size="28"
+          placeholder="Enter symbol, ID, or coordinates."
           @keypress="blurOnEnter"
           @blur="findLandmark($event.target.value)"
           />
@@ -42,12 +46,12 @@
         <m-button
           icon="chevron_left"
           @click="$root.$emit('region-change', { op: 'scroll', amt: $event.shiftKey ? 0.8 : 0.2 })"
-          title="Click to pan left. Shift-click to scroll left more."
+          title="Click to scroll left. Shift-click to scroll left more."
           />
         <m-button
           icon="chevron_right"
           @click="$root.$emit('region-change', { op: 'scroll', amt: $event.shiftKey ? -0.8 : -0.2 })"
-          title="Click to pan right. Shift-click to scroll right more."
+          title="Click to scroll right. Shift-click to scroll right more."
           />
         </div>
       <!-- scroll lock button -->
@@ -55,7 +59,7 @@
         <m-button
           :icon="context.scrollLock ? 'lock' : 'lock_open'"
           @click="context.scrollLock = !context.scrollLock"
-          :title="context.scrollLock ? 'Lockstep scrolling is ON. Click to turn OFF.' : 'Lockstep scrolling is OFF. Click to turn ON'"
+          :title="context.scrollLock ? 'Scroll lock is ON. Click to turn OFF.' : 'Scroll lock is OFF. Click to turn ON'"
           />
         </div>
       <!-- camera button -->
@@ -111,6 +115,7 @@ export default MComponent({
         // not a valid symbol. try parsing as coords.
         const c = gc.parse(n)
         if (c) {
+          this.context.scrollLock = true
           this.$root.$emit('jump-to', { coords: c })
         } else {
           alert('Landmark not found: ' + n)

@@ -58,7 +58,7 @@
           icon="settings"
           >
           <settings
-            title="Provides numerous ways to customize the display. Settings are remembered between sessions."
+            title="Provides options for customizing the display. Settings are remembered between sessions."
             ref="settings"
             />
         </page-box>
@@ -120,7 +120,7 @@
           <zoom-view
             :context="$data"
             ref="zoomView"
-            title="The main view. Shows features in the current region of the reference genome and all selected comparison genomes. Highlights features in the view that are currently selected. Many controls for panning, zooming, selecting, etc. Most anything can be undone by hitting the browser's Back button."
+            title="The main view. Shows features in selected regions of selected genomes. You can zoom, scroll, find genes, download sequences and more. These operations can affect regions independently or in synch using the lock icon. Most things can be undone using the browser's Back button."
             />
         </page-box>
       </page-box-container>
