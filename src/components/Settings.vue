@@ -169,17 +169,6 @@
         step="0.01"
         />
   </div>
-  <!-- =================== -->
-  <div
-    title="Controls how connectors are drawn between genomes. Only relevant when there are duplications, either due to evolution or simply because overlapping regions of the same genome are being displayed."
-    class="flexrow"
-    >
-    <label>Connector style</label>
-    <select v-model="ZoomFiducials.connectorStyle">
-      <option value="linear">linear</option>
-      <option value="combinatorial">combinatorial</option>
-    </select>
-  </div>
   <!-- ============== MISC section  ============== -->
   <label>Misc</label>
   <!-- =================== -->
