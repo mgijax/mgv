@@ -260,9 +260,8 @@ export default MComponent({
   },
   mounted: function () {
     this.$root.$on('resize', () => this.resize())
-    Vue.nextTick(() => {
-      this.resize()
-    })
+    this.$parent.$on('pagebox-open', () => this.nextTick(() => this.resize()))
+    this.nextTick(() => { this.resize() })
     this.$watch(
       'context.currRegion',
       () => { this.scrollDelta = 0 },

@@ -120,7 +120,8 @@ export default MComponent({
   created: function () {
     //
     this.$root.$on('resize', () => this.resize())
-    window.setTimeout(() => this.resize(), 1000)
+    this.nextTick(() => this.resize())
+    this.$parent.$parent.$on('pagebox-open', () => this.nextTick(() => this.resize()))
     //
     this.$root.$on('region-change', d => {
       if (d.op === 'delete-strip') {
