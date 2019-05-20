@@ -11,6 +11,11 @@ class MouseMineQueries {
       placeholder: 'Pheno/disease (MP/DO) term or IDs',
       handler: (val) => this.queryByPhenoDisease(val)
     }, {
+      name: 'Expression',
+      label: '...by expression location',
+      placeholder: 'Anatomy (EMAPA) terms or IDs',
+      handler: (val) => this.queryByExpression(val)
+    }, {
       name: 'Function',
       label: '...by cellular function',
       placeholder: 'Gene Ontology (GO) terms or IDs',
@@ -40,7 +45,7 @@ class MouseMineQueries {
   //
   // do a LOOKUP query for Genes from MouseMine
   queryByLookup (qryString) {
-    let q = `<query name="" model="genomic"
+    const q = `<query name="" model="genomic"
         view="Gene.primaryIdentifier Gene.symbol"
         constraintLogic="A and B and C">
             <constraint code="A" path="Gene" op="LOOKUP" value="${qryString}"/>
@@ -52,7 +57,7 @@ class MouseMineQueries {
   //
   queryByPathway (qryString) {
     qryString = this.addWildcards(qryString)
-    let q = `<query name="" model="genomic"
+    const q = `<query name="" model="genomic"
         view="Gene.primaryIdentifier Gene.symbol" constraintLogic="A and B">
         <constraint path="Gene.pathways" code="A" op="LOOKUP" value="${qryString}"/>
         <constraint path="Gene.organism.taxonId" code="B" op="=" value="10090"/>
@@ -60,9 +65,20 @@ class MouseMineQueries {
     return this.cxn.query(q, r => r[0])
   }
   //
+  queryByExpression (qryString) {
+    qryString = this.addWildcards(qryString)
+    const q = `<query model="genomic"
+      view="GXDExpression.feature.primaryIdentifier"
+      >
+      <constraint path="GXDExpression.structure.parents" op="LOOKUP" value="${qryString}" />
+      <constraint path="GXDExpression.detected" op="=" value="true"/>
+      </query>`
+    return this.cxn.query(q, r => r[0])
+  }
+  //
   queryByOntologyTerm (qryString, termTypes) {
     qryString = this.addWildcards(qryString)
-    let q = `<query name="" model="genomic"
+    const q = `<query name="" model="genomic"
         view="Gene.primaryIdentifier Gene.symbol" constraintLogic="A and B and C and D">
         <constraint code="A" path="Gene.ontologyAnnotations.ontologyTerm.parents" op="LOOKUP" value="${qryString}"/>
         <constraint code="B" path="Gene.organism.taxonId" op="=" value="10090"/>
