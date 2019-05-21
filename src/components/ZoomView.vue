@@ -70,8 +70,8 @@ export default MComponent({
       const vm = rnode ? rnode.__vue__ : null
       if (!vm) return
       const cbb = this.$el.getBoundingClientRect()
-      const y = evt.clientY - cbb.y
-      const x = evt.clientX - cbb.x
+      const y = evt.clientY // - cbb.y
+      const x = evt.clientX // - cbb.x
       if (fnode) {
         const f = this.dataManager.getFeatureById(fnode.getAttribute('name'))
         const tnode = evt.target.closest('.transcript')

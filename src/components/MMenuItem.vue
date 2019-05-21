@@ -79,7 +79,8 @@ export default MComponent({
     },
     mouseenter: function () {
       if (this.$refs.subMenu) {
-        this.$refs.subMenu.open()
+        const bb = this.$el.getBoundingClientRect()
+        this.$refs.subMenu.open(bb.top + 0.5 * bb.height, bb.left + 0.5 * bb.width)
       }
     },
     mouseleave: function () {

@@ -168,6 +168,13 @@ export default MComponent({
       dragend: function (e, d) {
       }
     }, this.$parent.$el, this)
+  },
+  updated: function () {
+    const bb = this.$el.getBoundingClientRect()
+    const dx = Math.max(0, bb.left + bb.width - window.innerWidth)
+    const dy = Math.max(0, bb.top + bb.height - window.innerHeight)
+    this.y -= dy
+    this.x -= dx
   }
 })
 </script>
@@ -175,7 +182,7 @@ export default MComponent({
 <style scoped>
 .zoom-region-controls {
   justify-content: flex-start;
-  position: absolute;
+  position: fixed;
   background-color: rgba(255,255,255,0.7);
   padding: 6px;
   border-radius: 4px;

@@ -118,13 +118,20 @@ export default MComponent({
   mounted: function () {
     // close me if user clicks on background
     this.$root.$el.addEventListener('click', () => this.close())
+  },
+  updated: function () {
+    const bb = this.$el.getBoundingClientRect()
+    const dx = Math.max(0, bb.left + bb.width - window.innerWidth)
+    const dy = Math.max(0, bb.top + bb.height - window.innerHeight)
+    this.top -= dy
+    this.left -= dx
   }
 })
 </script>
 
 <style scoped>
 .m-menu {
-  position: absolute;
+  position: fixed;
   background-color: #eee;
   z-index: 100;
   padding: 4px;

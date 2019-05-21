@@ -251,7 +251,7 @@ export default MComponent({
     genomeName: function (oldc, newc) {
       this.resize()
     },
-    isOpen: function (v0, v1) {
+    isOpen: function () {
       this.scrollDelta = 0
     },
     genome: function () {

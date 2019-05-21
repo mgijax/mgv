@@ -159,11 +159,12 @@ export default MComponent({
       })
     },
     myGlyphs: function () {
+      // glyphs. Each glyph == a feature + a center point for the glyph (circle) + an attachment point
       const gs = this.myList.map(f => {
         return {
           f: f,
           gPoint: [this.glyphX(f), this.glyphY(f)], // where glyph is centered
-          aPoint: [0, this.glyphY(f)] // where connector line attaces to axis
+          aPoint: [0, this.glyphY(f)] // where connector line attaches to axis
         }
       })
       const gsByStrand = gs.reduce((a,g) => {
