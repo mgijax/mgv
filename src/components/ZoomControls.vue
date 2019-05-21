@@ -75,12 +75,11 @@ import MComponent from '@/components/MComponent'
 import MButton from '@/components/MButton'
 import MMenuItem from '@/components/MMenuItem'
 import GenomeSelector from '@/components/GenomeSelector'
-import ToolbarMenu from '@/components/ToolbarMenu'
 import gc from '@/lib/GenomeCoordinates'
 import u from '@/lib/utils'
 export default MComponent({
   name: 'ZoomControls',
-  components: { MButton, MMenuItem, GenomeSelector, ToolbarMenu },
+  components: { MButton, MMenuItem, GenomeSelector },
   props: [
     'context'
   ],
