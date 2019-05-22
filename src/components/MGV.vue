@@ -70,7 +70,7 @@
           icon="shopping_cart"
           >
           <sequence-cart
-            title="Your basket of selected sequences."
+            title="Contains sequence (descriptors) that you select while browsing. Download sequences as Fasta, with options to reverse complement genomic sequences or translate CDSs."
             ref="sequenceCart"
             />
         </page-box>

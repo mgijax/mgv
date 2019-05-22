@@ -266,9 +266,15 @@
             fontFamily: 'sans-serif',
             fontWeight: featureMouseover(f) ? 'bold' : 'normal'
           }"
-          >
-          {{f.symbol || f.ID}}
-          </text>
+          ><tspan
+            v-if="featureInList(f)"
+            :fill="context.currentList.color"
+            stroke="black"
+            :font-size="2*featureFontSize"
+            :dy="0.3 * featureFontSize"
+            >•</tspan><tspan
+            :dy="featureInList(f) ? -0.3 * featureFontSize : 0"
+            >{{f.symbol || f.ID}}</tspan></text>
       </g> <!-- features -->
     <!-- Region delete button -->
     <g
