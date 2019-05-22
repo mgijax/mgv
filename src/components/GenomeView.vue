@@ -90,11 +90,12 @@
           :orientation="orientation"
           :height="chrLen(c)"
           :width="chrWidth"
-          :currentList="currentListGenologs"
+          :glyphStyle="currentListGenologs.length >= 200 ? 'bigList' : 'smallList'"
+          :currentList="currentListGenologsByChr[c.name] || []"
           :currentListColor="context.currentList ? context.currentList.color : 'gray'"
           :currRegion="context.currRegion"
           :showLabels="showLabels"
-          :glyphRadius="5"
+          :glyphRadius="4"
           @dragstart="dragstart"
           @dragend="dragend"
           :currMBrush="currMBrush"
@@ -145,7 +146,7 @@ export default MComponent({
       fixedHeight: false, // if true, all chrs drawn same length; else, drawn proportional
       showLabels: true, // if true, show current list feature labels
       currMBrush: null, // while user is dragging a region tab, the MBrush component
-      maxListLength: 250 // max number of list items we'll draw
+      maxListLength: 5000 // max number of list items we'll draw
     }
   },
   computed: {
@@ -238,11 +239,18 @@ export default MComponent({
     computeCurrentListGenologs () {
       if (!this.context.currentList) {
         this.currentListGenologs = []
+        this.currentListGenologsByChr = {}
       } else {
         this.dataManager.ensureFeatures(this.genome).then(() => {
           this.currentListGenologs = this.context.currentList.items.map(id => {
             return this.dataManager.getGenologs(id, [this.genome])
           }).reduce((a,v) => a.concat(v), []).filter(x => x)
+          this.currentListGenologsByChr = this.currentListGenologs.slice(0, this.maxListLegth).reduce((a,g) => {
+            const n = g.chr.name
+            if (!a[n]) a[n] = []
+            a[n].push(g)
+            return a
+          }, {})
         })
       }
     }

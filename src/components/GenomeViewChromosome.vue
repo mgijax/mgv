@@ -46,38 +46,54 @@
         stroke="none"
         />
       <!-- Glyphs for current list items -->
-      <g
-        v-for="g in myGlyphs"
-        :key="g.f.ID"
-        :name="g.f.ID"
-        class="list-item"
-        >
-        <line
-          :x1="g.gPoint[0]"
-          :y1="g.gPoint[1]"
-          :x2="g.aPoint[0]"
-          :y2="g.aPoint[1]"
-          stroke="black"
-          />
-        <circle
-          class="glyph"
-          :cx="g.gPoint[0]"
-          :cy="g.gPoint[1]"
-          :r="glyphRadius"
-          stroke="black"
-          :fill="currentListColor"
+      <g v-if="glyphStyle === 'smallList'">
+        <g
+          v-for="g in myGlyphs"
+          :key="g.f.ID"
+          :name="g.f.ID"
+          class="list-item"
           @click="clickedGlyph(g.f)"
           >
+          <line
+            :x1="g.gPoint[0]"
+            :y1="g.gPoint[1]"
+            :x2="g.aPoint[0]"
+            :y2="g.aPoint[1]"
+            stroke="black"
+            />
+          <circle
+            class="glyph"
+            :cx="g.gPoint[0]"
+            :cy="g.gPoint[1]"
+            :r="glyphRadius"
+            stroke="black"
+            :fill="currentListColor"
+            >
           <title>{{ g.f.symbol || g.f.ID }}</title>
-        </circle>
-        <text
-          v-if="showLabels"
-          :x="g.gPoint[0]"
-          :y="g.gPoint[1] - glyphRadius"
-          :ransform="`translate(${glyphTextX(g.f)},${glyphTextY(g.f)})rotate(${orientation === 'h' ? 90 : 0})`"
-          style="font-size: 10px; fill: black; text-anchor: middle;"
-          >{{g.f.symbol || g.f.ID}}</text>
+          </circle>
+          <text
+            v-if="showLabels"
+            :x="g.gPoint[0]"
+            :y="g.gPoint[1] - glyphRadius"
+            style="font-size: 10px; fill: black; text-anchor: middle;"
+            >{{g.f.symbol || g.f.ID}}</text>
+        </g>
       </g>
+      <g v-else>
+        <line
+          v-for="g in myGlyphs"
+          :key="g.f.ID"
+          :name="g.f.ID"
+          class="list-item"
+          :x1="g.aPoint[0] + (g.f.strand === '-' ? -1 : 1) *  width / 2"
+          :y1="g.aPoint[1]"
+          :x2="g.aPoint[0]"
+          :y2="g.aPoint[1]"
+          :stroke="currentListColor"
+          @click="clickedGlyph(g.f)"
+          ><title>{{ g.f.symbol || g.f.ID }}</title></line>
+      </g>
+
       <m-brush
         v-for="(r, ri) in regions"
         :key="'region'+ri"
@@ -123,7 +139,8 @@ export default MComponent({
     'currRegion',
     'showLabels',
     'glyphRadius',
-    'currMBrush' // if the user is currently dragging an MBrush
+    'currMBrush', // if the user is currently dragging an MBrush
+    'glyphStyle' // drawing style. 'smallList' or 'bigList'
   ],
   data: function () {
     return {
@@ -154,9 +171,7 @@ export default MComponent({
       return `rotate(90)translate(-10,8)`
     },
     myList: function () {
-      return (this.currentList.slice(0,250) || []).filter(f => {
-        return f.chr === this.chromosome
-      })
+      return this.currentList
     },
     myGlyphs: function () {
       // glyphs. Each glyph == a feature + a center point for the glyph (circle) + an attachment point
@@ -291,10 +306,10 @@ export default MComponent({
 </script>
 
 <style scoped>
-.glyph {
-  cursor: pointer;
-}
 .genome-view-chromosome *:not([name="dragrect"]) {
   transition: height 0.5s;
+}
+.list-item {
+  cursor: pointer;
 }
 </style>
