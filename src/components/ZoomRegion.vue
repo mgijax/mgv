@@ -245,7 +245,7 @@
           <text
             v-if="spreadTranscripts && showDetails && (showTranscriptLabels || transcriptHighlighted(t))"
             :x="transcriptTextX(t)"
-            :y="featureHeight"
+            :y="featureHeight + 2"
             :font-weight="t.cds ? 'bold' : 'normal'"
             font-family="sans-serif"
             :font-size="transcriptFontSize"
