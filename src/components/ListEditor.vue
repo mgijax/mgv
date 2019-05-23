@@ -206,8 +206,8 @@ export default MComponent({
         let l = this.list
         this.name = l.name
         this.color = l.color
-        this.created = l.created
-        this.modified = l.modified
+        this.created = l.created.toUTCString()
+        this.modified = l.modified.toUTCString()
         this.items = JSON.parse(JSON.stringify(l.items))
         this.pickerOpen = false
         this.pickerColor = this.color
@@ -271,6 +271,9 @@ export default MComponent({
 </script>
 
 <style scoped>
+.list-editor {
+  max-width: 300px;
+}
 .date {
   font-size: 12px;
 }

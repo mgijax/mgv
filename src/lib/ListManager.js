@@ -49,8 +49,13 @@ class ListManager {
     if (updates.name && updates.name !== list.name) {
       updates.name = this.uniqify(updates.name)
     }
+    // cannot change the creation date
+    const cdate = list.created
     Object.assign(list, updates)
+    list.created = cdate
+    // update modification date
     list.modified = new Date()
+    //
     this.saveToStore()
     return list
   }
