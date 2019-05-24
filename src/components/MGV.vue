@@ -631,7 +631,8 @@ export default MComponent({
         if (!shift) return
       }
       let lm = lst.items[this.currentListItem]
-      this.setContext({ landmark: lm, delta: 0, currentSelection: [lm] })
+      let lmf = this.dataManager.getFeaturesBy(lm)[0]
+      if (lmf) this.$root.$emit('feature-align', { feature: lmf })
     })
     //
     this.$root.$on('list-delete', data => {

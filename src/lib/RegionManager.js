@@ -415,9 +415,6 @@ class RegionManager {
         lmp = lm.start + lcoords.anchor * (lm.end - lm.start + 1)
       } else {
         switch (alignOn) {
-        case '5-prime':
-          lmp = lm.strand === '+' ? lm.start : lm.end
-          break
         case '3-prime':
           lmp = lm.strand === '+' ? lm.end : lm.start
           break
@@ -428,8 +425,11 @@ class RegionManager {
           lmp = lm.end
           break
         case 'midpoint':
-        default:
           lmp = Math.floor((lm.start + lm.end) / 2)
+          break
+        case '5-prime':
+        default:
+          lmp = lm.strand === '+' ? lm.start : lm.end
           break
         }
       }

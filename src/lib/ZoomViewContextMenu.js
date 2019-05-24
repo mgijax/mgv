@@ -11,7 +11,6 @@ function getMenus(thisObj) {
       disabled: false,
       helpText: 'Aligns the displayed genomes around this feature.',
       handler: (function (cxt) {
-        const f = cxt.feature
         this.$root.$emit('feature-align', cxt)
       }).bind(thisObj)
     }
