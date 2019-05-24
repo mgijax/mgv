@@ -7,6 +7,10 @@
           <td><input name="name" v-model="name" /></td>
         </tr>
         <tr>
+          <td><label>Description</label></td>
+          <td><textarea name="description" v-model="description" placeholder="Description of this list."/></td>
+        </tr>
+        <tr>
           <td><label>Color</label></td>
           <td>
             <div class="flexcolumn">
@@ -127,6 +131,7 @@ export default MComponent({
       name: '',
       created: '',
       modified: '',
+      description: '',
       color: '#000000',
       items: [],
       pickerOpen: false,
@@ -205,9 +210,10 @@ export default MComponent({
       if (this.list) {
         let l = this.list
         this.name = l.name
+        this.description = l.description
         this.color = l.color
-        this.created = l.created.toUTCString()
-        this.modified = l.modified.toUTCString()
+        this.created = l.created.toDateString() + ' ' + l.created.toLocaleTimeString()
+        this.modified = l.modified.toDateString() + ' ' + l.modified.toLocaleTimeString()
         this.items = JSON.parse(JSON.stringify(l.items))
         this.pickerOpen = false
         this.pickerColor = this.color
