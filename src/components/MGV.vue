@@ -614,6 +614,12 @@ export default MComponent({
     this.$root.$on('list-click', data => {
       let lst = data.list || data
       let shift = data.event ? data.event.shiftKey : false
+      if (lst.items.length === 0) {
+          this.currentList = null
+          this.currentListSet = null
+          this.currentListItem = 0
+          return
+      }
       if (lst === this.currentList) {
         if (shift) {
           // shift-click repeatedly on a list to step through its members
