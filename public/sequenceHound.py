@@ -58,6 +58,12 @@ def validateUrl (url) :
   #
   return True
 
+# A descriptor has these fields:
+#   url (required) the fully formed url to a mine service endpoint
+#   reverseComplement (optional) if truthy, reverse complements the returned sequence
+#   translate (optional) if truthy, translates the sequence (must be a coding sequence)
+#   header (optional) if provided, used as the header string for the sequence.
+#        Otherise header is generated automatically.
 def doOneSequence (desc) :
   if not validateUrl(desc['url']):
     return ''
@@ -81,9 +87,9 @@ def doOneSequence (desc) :
     hdr = '>' + hdr
   return hdr + '\n' + seq + '\n'
 
-def translate (rna) :
-  rna = rna.upper().replace('T', 'U')
-  codons = [ rna[i:i+3] for i in range(0, len(rna),3) ]
+def translate (cds) :
+  cds = cds.upper().replace('T', 'U')
+  codons = [ cds[i:i+3] for i in range(0, len(cds),3) ]
   residues = ''.join(map(lambda c: aaShort2Letter.get(genetic_code.get(c, ''), ''), codons))
   return residues
 
@@ -153,6 +159,8 @@ test = [{
 "url": "http://www.mousemine.org/mousemine/service/query/results/fasta?query=%3Cquery%20model%3D%22genomic%22%20view%3D%22CDS.primaryIdentifier%22%3E%3Cconstraint%20path%3D%22CDS.primaryIdentifier%22%20op%3D%22ONE%20OF%22%3E%3Cvalue%3EMGP_C3HHeJ_P0018680%3C%2Fvalue%3E%3C%2Fconstraint%3E%3C%2Fquery%3E&view=CDS.gene.canonical.primaryIdentifier"
 
 }]
+
+# maps a base to its complement
 base_complement = { 
   'a' : 't',
   't' : 'a',
@@ -167,6 +175,7 @@ base_complement = {
   'N' : 'N' 
 }
 
+# table of amino acids.
 amino_acids_s = ''' 
   Alanine Ala     A   
   Arginine        Arg     R   
@@ -192,6 +201,7 @@ amino_acids_s = '''
   Stop      Stop    X   
 '''
 
+# The genetic code. Map each codon to the abbrev of its translated residue.
 genetic_code_s = '''
   UUU     Phe
   UUC     Phe
@@ -259,10 +269,16 @@ genetic_code_s = '''
   GGG     Gly
 '''
 
+# create table of amino acids from the string
 amino_acids = map(lambda a: a.strip().split(), amino_acids_s.strip().split('\n'))
+# create map from 3-letter AA code to single letter code
 aaShort2Letter = dict([(r[1],r[2]) for r in amino_acids])
+# create table of the genetic code from the string
 genetic_code_t = map(lambda c: c.strip().split(), genetic_code_s.strip().split('\n'))
+# create map from codon to residue
 genetic_code = dict([ (r[0],r[1]) for r in genetic_code_t ])
+# create character mapping table for doing complements
 compTable = string.maketrans('actgACTG', 'tgacTGAC')
 
+# GO!!
 main()

@@ -715,25 +715,27 @@ export default MComponent({
     // Request features in my range, which will asynchromously cause a redraw.
     getFeatures () {
       //
-      if (this.region.genome.name === '') return
+      const r = this.region
       //
-      let delta = Math.round((this.region.end - this.region.start + 1) / 2)
-      this.seqStart = this.region.start
+      if (r.genome.name === '') return
+      //
+      let delta = Math.round((r.end - r.start + 1) / 2)
+      this.seqStart = r.start
       this.busy = true
       this.$emit('busy-start')
       if (this.synGenome) {
         this.translator()
           .getBlocksInRange(
-            this.region.genome,
-            this.region.chr.name,
-            this.region.start - delta,
-            this.region.end + delta,
+            r.genome,
+            r.chr.name,
+            r.start - delta,
+            r.end + delta,
             this.synGenome)
           .then(bs => { this.blocks = bs })
       } else {
         this.blocks = []
       }
-      this.dataManager.getGenes(this.region.genome, this.region.chr, this.region.start - delta, this.region.end + delta, this.showDetails).then(feats => {
+      this.dataManager.getGenes(r.genome, r.chr, r.start - delta, r.end + delta, this.showDetails).then(feats => {
         this.busy = false
         this.features = feats
         this.nextTick(() => {
@@ -742,7 +744,7 @@ export default MComponent({
         })
         if (this.showSequence) {
           this.$emit('busy-start')
-          this.dataManager.getSequence(this.region.genome, this.region.chr, this.region.start, this.region.end).then(data => {
+          this.dataManager.getSequence(r.genome, r.chr, r.start, r.end).then(data => {
             if (data) {
               this.seqStart = data.start
               this.sequence = data.seq
