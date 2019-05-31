@@ -626,7 +626,8 @@ export default MComponent({
       return this.selectedSet.has(f.cID) || this.selectedSet.has(f.ID)
     },
     featureInList: function (f) {
-      let s = this.context.currentListSet
+      if (!this.context.currentList) return false
+      const s = this.context.currentListSet
       return s && (s.has(f.cID) || s.has(f.ID))
     },
     featureVisible: function (f) {
