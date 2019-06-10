@@ -456,6 +456,12 @@ export default MComponent({
       }
       return cs
     },
+    openDrawer: function () {
+      if (!this.drawerOpen) this.toggleDrawer()
+    },
+    closeDrawer: function () {
+      if (this.drawerOpen) this.toggleDrawer()
+    },
     toggleDrawer: function () {
       this.drawerOpen = !this.drawerOpen
       window.setTimeout(this.resize.bind(this), this.cfg.animDur * 1000)

@@ -1,74 +1,100 @@
 <template>
     <div
-      class="zoom-region-controls flexrow"
+      class="zoom-region-controls flexcolumn"
       v-show="isOpen"
       :style="{ top: y + 'px', left: x + 'px' }"
       @click.stop=""
       >
-      <!-- drag handle -->
-      <i
-        ref="dragHandle"
-        class="material-icons"
-        style="font-size: 14px; color: gray; cursor: grab;"
-        >drag_indicator</i>
-      <!-- genome name -->
-      <span style="font-size: 12px">{{region ? region.genome.name : ''}}</span>
-      <!-- coordinates box -->
-      <input
-        size="24"
-        v-model="formattedCoords"
-        title="Enter coordinates (chr:start..end) or feature symbol or ID."
-        @change="setCoords"
-        />
-      <!-- zoom in -->
-      <m-button
-        icon="zoom_in"
-        title="Zoom in."
-        @click="zoom(5)"
-        />
-      <!-- zoom out -->
-      <m-button
-        icon="zoom_out"
-        title="Zoom out."
-        @click="zoom(0.2)"
-        />
-      <!-- pan left -->
-      <m-button
-        icon="chevron_left"
-        title="Pan left."
-        @click="pan(-0.5)"
-        />
-      <!-- pan right -->
-      <m-button
-        icon="chevron_right"
-        title="Pan right."
-        @click="pan(0.5)"
-        />
-      <!-- split region -->
-      <m-button
-        icon="compare"
-        title="Split this region."
-        @click="split()"
-        />
-      <!-- make reference region -->
-      <m-button
-        icon="room"
-        title="Make this the reference region."
-        @click="makeRef()"
-        />
-      <!-- remove region -->
-      <m-button
-        icon="delete_forever"
-        title="Remove this region."
-        @click="remove()"
-        />
-      <!-- close -->
-      <m-button
-        icon="highlight_off"
-        title="Close this contol."
-        style="position: relative; top: -10px; left: 5px; font-size: 10px;"
-        @click="close"
-        />
+      <div class = "flexrow">
+        <!-- drag handle -->
+        <i
+          ref="dragHandle"
+          class="material-icons"
+          style="font-size: 14px; color: gray; cursor: grab;"
+          >drag_indicator</i>
+        <!-- genome name -->
+        <span style="font-size: 12px">{{region ? region.genome.name : ''}}</span>
+        <!-- coordinates box -->
+        <input
+          size="24"
+          v-model="formattedCoords"
+          title="Enter coordinates (chr:start..end) or feature symbol or ID."
+          @change="setCoords"
+          />
+        <!-- zoom in -->
+        <m-button
+          icon="zoom_in"
+          title="Zoom in."
+          @click="zoom($event.shiftKey ? 0.1 : 0.5)"
+          />
+        <!-- zoom out -->
+        <m-button
+          icon="zoom_out"
+          title="Zoom out."
+          @click="zoom($event.shiftKey ? 10 : 2)"
+          />
+        <!-- pan left -->
+        <m-button
+          icon="chevron_left"
+          title="Pan left."
+          @click="pan($event.shiftKey ? 0.8 : 0.2)"
+          />
+        <!-- pan right -->
+        <m-button
+          icon="chevron_right"
+          title="Pan right."
+          @click="pan($event.shiftKey ? -0.8 : -0.2)"
+          />
+        <!-- close -->
+        <m-button
+          icon="highlight_off"
+          title="Close this contol."
+          style="position: absolute; top: -5px; right: -5px; font-size: 10px;"
+          @click="close"
+          />
+      </div>
+      <div class="flexrow" style="justify-content: space-around">
+        <!-- div v-if="region && region.genome.name === 'C57BL/6J'" -->
+        <div>
+          <!-- SNPs linkout -->
+          <m-button
+            icon="SNPs@MGI"
+            style="font-size: 12px"
+            title="See SNPs at MGI in this region for currently displayed genomes."
+            @click="mgiSNPquery"
+            :disabled="region && region.genome.name !== 'C57BL/6J'"
+            />
+          <!-- QTL linkout -->
+          <m-button
+            icon="QTL@MGI"
+            style="font-size: 12px; margin-left: 4px;"
+            title="See QTL at MGI in this region."
+            @click="mgiQTLquery"
+            :disabled="region && region.genome.name !== 'C57BL/6J'"
+            />
+        </div>
+
+        <div>
+          <!-- split region -->
+          <m-button
+            icon="compare"
+            title="Split this region."
+            @click="split()"
+            />
+          <!-- make reference region -->
+          <m-button
+            icon="room"
+            title="Make this the reference region."
+            @click="makeRef()"
+            />
+          <!-- remove region -->
+          <m-button
+            icon="delete_forever"
+            title="Remove this region."
+            @click="remove()"
+            />
+        </div>
+      </div>
     </div>
 </template>
 
@@ -82,6 +108,7 @@ export default MComponent({
   components: { MButton },
   props: [
   ],
+  inject: ['regionManager'],
   data: function () {
     return {
       isOpen: false,
@@ -148,6 +175,43 @@ export default MComponent({
     reset: function () {
       const r = this.region
       this.formattedCoords = `${r.chr.name}:${r.start}..${r.end}`
+    },
+    mgiSNPquery: function () {
+      if (this.region.genome.name !== 'C57BL/6J') return;
+      //
+      const vgs = this.regionManager().currentGenomes().filter(g => g.name !== 'C57BL/6J')
+      const selectedStrains = vgs.map(g => `selectedStrains=${g.name}`).join('&')
+      const url_base = 'http://www.informatics.jax.org/snp/summary?'
+      const url_parts = [
+        `selectedChromosome=${this.region.chr.name}`,
+        `coordinate=${this.region.start}..${this.region.end}`,
+        `coordinateUnit=bp`,
+        `startMarker=`,
+        `endMarker=`,
+        `referenceMode=yes`,
+        `allowNullsForReferenceStrains=no`,
+        `allowNullsForComparisonStrains=yes`,
+        selectedStrains,
+        'referenceStrains=C57BL/6J',
+        `selectedTab=1#myDataTable=results=100`,
+        `startIndex=0`,
+        `sort=accid`,
+        `dir=asc`
+      ]
+      const url = url_base + url_parts.join('&')
+      window.open(url, '_blank')
+    },
+    mgiQTLquery: function () {
+      if (this.region.genome.name !== 'C57BL/6J') return;
+      const url_base = 'http://www.informatics.jax.org/allele/summary?'
+      const url_parts = [
+        `chromosome=${this.region.chr.name}`,
+        `coordinate=${this.region.start}-${this.region.end}`,
+        `coordUnit=bp`,
+        `alleleType=QTL`
+      ]
+      const url = url_base + url_parts.join('&')
+      window.open(url, '_blank')
     }
   },
   mounted: function () {
@@ -183,7 +247,7 @@ export default MComponent({
 .zoom-region-controls {
   justify-content: flex-start;
   position: fixed;
-  background-color: rgba(255,255,255,0.7);
+  background-color: rgba(255,255,255,0.8);
   padding: 6px;
   border-radius: 4px;
   border: thin solid gray;
