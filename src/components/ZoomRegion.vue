@@ -784,10 +784,10 @@ export default MComponent({
     },
     mouseenter: function (e) {
       document.body.focus()
-      this.$root.$emit('region-current', { region: this.region })
+      // this.$root.$emit('region-current', { region: this.region })
     },
     mouseleave: function (e) {
-      this.$root.$emit('region-current', null)
+      // this.$root.$emit('region-current', null)
       if (this.dragging) return
       this.currRange = null
     },
@@ -800,6 +800,7 @@ export default MComponent({
       if (f) this.$root.$emit('feature-out', { region: this.region, feature: f.feature, transcript: f.transcript, event: e })
     },
     clicked: function (e) {
+      this.$root.$emit('region-current', { region: this.region })
       if (e.altKey) {
         this.altClicked(e)
         return
