@@ -21,30 +21,6 @@
           title="Enter coordinates (chr:start..end) or feature symbol or ID."
           @change="setCoords"
           />
-        <!-- zoom in -->
-        <m-button
-          icon="zoom_in"
-          title="Zoom in."
-          @click="zoom($event.shiftKey ? 0.1 : 0.5)"
-          />
-        <!-- zoom out -->
-        <m-button
-          icon="zoom_out"
-          title="Zoom out."
-          @click="zoom($event.shiftKey ? 10 : 2)"
-          />
-        <!-- pan left -->
-        <m-button
-          icon="chevron_left"
-          title="Pan left."
-          @click="pan($event.shiftKey ? 0.8 : 0.2)"
-          />
-        <!-- pan right -->
-        <m-button
-          icon="chevron_right"
-          title="Pan right."
-          @click="pan($event.shiftKey ? -0.8 : -0.2)"
-          />
         <!-- close -->
         <m-button
           icon="highlight_off"
@@ -53,24 +29,57 @@
           @click="close"
           />
       </div>
-      <div class="flexrow" style="justify-content: space-around">
+      <div class="row2 flexrow">
         <!-- div v-if="region && region.genome.name === 'C57BL/6J'" -->
-        <div>
+        <div class="mgibuttons" v-show="region && region.genome.name === 'C57BL/6J'">
+          <label>MGI</label>
           <!-- SNPs linkout -->
           <m-button
-            icon="SNPs@MGI"
-            style="font-size: 12px"
+            icon="SNPs"
             title="See SNPs at MGI in this region for currently displayed genomes."
             @click="mgiSNPquery"
             :disabled="region && region.genome.name !== 'C57BL/6J'"
             />
           <!-- QTL linkout -->
           <m-button
-            icon="QTL@MGI"
-            style="font-size: 12px; margin-left: 4px;"
+            icon="QTL"
             title="See QTL at MGI in this region."
             @click="mgiQTLquery"
             :disabled="region && region.genome.name !== 'C57BL/6J'"
+            />
+          <!-- JBrowse linkout -->
+          <m-button
+            icon="JBrowse"
+            title="See the full details of this region in the MGI JBrowse genome browser."
+            @click="mgiJBquery"
+            :disabled="region && region.genome.name !== 'C57BL/6J'"
+            />
+        </div>
+
+        <div class="navbuttons">
+          <!-- zoom in -->
+          <m-button
+            icon="zoom_in"
+            title="Zoom in."
+            @click="zoom($event.shiftKey ? 0.1 : 0.5)"
+            />
+          <!-- zoom out -->
+          <m-button
+            icon="zoom_out"
+            title="Zoom out."
+            @click="zoom($event.shiftKey ? 10 : 2)"
+            />
+          <!-- pan left -->
+          <m-button
+            icon="chevron_left"
+            title="Pan left."
+            @click="pan($event.shiftKey ? 0.8 : 0.2)"
+            />
+          <!-- pan right -->
+          <m-button
+            icon="chevron_right"
+            title="Pan right."
+            @click="pan($event.shiftKey ? -0.8 : -0.2)"
             />
         </div>
 
@@ -90,6 +99,7 @@
           <!-- remove region -->
           <m-button
             icon="delete_forever"
+            color="red"
             title="Remove this region."
             @click="remove()"
             />
@@ -212,6 +222,18 @@ export default MComponent({
       ]
       const url = url_base + url_parts.join('&')
       window.open(url, '_blank')
+    },
+    mgiJBquery: function () {
+      if (this.region.genome.name !== 'C57BL/6J') return;
+      const url_base = 'http://jbrowse.informatics.jax.org/?'
+      const url_parts = [
+        `data=data/mouse`,
+        `loc=chr${this.region.chr.name}:${this.region.start}..${this.region.end}`,
+        `tracks=DNA,MGI_Genome_Features,NCBI_CCDS,NCBI,ENSEMBL`,
+        `highlight=`
+        ]
+      const url = url_base + url_parts.join('&')
+      window.open(url, '_blank')
     }
   },
   mounted: function () {
@@ -251,5 +273,17 @@ export default MComponent({
   padding: 6px;
   border-radius: 4px;
   border: thin solid gray;
+}
+.row2 {
+  justify-content: space-around;
+}
+.mgibuttons  .m-button {
+  font-size: 12px;
+  margin: 2px;
+  padding: 1px;
+  border: thin solid;
+}
+.mgibuttons label {
+  font-size: 14px;
 }
 </style>
