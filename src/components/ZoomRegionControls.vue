@@ -36,7 +36,7 @@
           <!-- SNPs linkout -->
           <m-button
             icon="SNPs"
-            title="See SNPs at MGI in this region for currently displayed genomes."
+            title="See SNPs at MGI in this region of B6 vs other displayed genomes."
             @click="mgiSNPquery"
             :disabled="region && region.genome.name !== 'C57BL/6J'"
             />
@@ -190,7 +190,7 @@ export default MComponent({
       if (this.region.genome.name !== 'C57BL/6J') return;
       //
       const vgs = this.regionManager().currentGenomes().filter(g => g.name !== 'C57BL/6J')
-      const selectedStrains = vgs.map(g => `selectedStrains=${g.name}`).join('&')
+      const selectedStrains = vgs.map(g => `selectedStrains=${g.name}`).join('&') || 'selectedStrains='
       const url_base = 'http://www.informatics.jax.org/snp/summary?'
       const url_parts = [
         `selectedChromosome=${this.region.chr.name}`,
