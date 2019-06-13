@@ -15,7 +15,7 @@
         :key="i"
         :class="{ current: isCurrent(f) }"
         >
-        <td>{{f && f.cID || '.'}}</td>
+        <td v-html="makeLink(f)"></td>
         <td>{{f && f.symbol || '.'}}</td>
         <td>{{f && f.genome.name || '.'}}</td>
         <td>{{f && f.ID || '.'}}</td>
@@ -43,6 +43,11 @@ export default MComponent({
       let cmo = this.currentMouseover
       return cmo && cmo.ID === f.ID
     },
+    makeLink: function (f) {
+      if (!f || !f.cID || !f.cID.startsWith('MGI:')) return '.'
+      return `<a target="_blank" href="http://www.informatics.jax.org/accession/${f.cID}">${f.cID}</a>`
+
+    }
   }
 })
 </script>
