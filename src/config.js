@@ -13,14 +13,14 @@ export default {
   // Timestamp used at page load to determine whether to flush user's setting cache.
   //
   // IMPORTANT!!! You MUST update this value whenever this config file changes!!!
-  TIMESTAMP: 'Tue Mar  24 06:56:39 EST 2019',
+  TIMESTAMP: 'Tue Mar  25 06:56:39 EST 2019',
   ///////////////////////////////////////////
 
   //
   // global config settings, applied to every class
   //
   all: {
-    VERSION: '2.0.0', // code version.
+    VERSION: '2.0.0-prealpha', // code version.
     animDur: 0.5 // default animation duration in sec
   },
   PageBox: {
@@ -34,10 +34,10 @@ export default {
       label: 'B6 vs non-musculus',
       genomes: 'C57BL/6J,CAROLI/EiJ,PAHARI/EiJ,SPRET/EiJ',
       description: 'View C57BL/6J versus the non-musculus strains.'
-    }, {
-      label: 'All',
-      genomes: '129S1/SvImJ,A/J,AKR/J,BALB/cJ,C3H/HeJ,C57BL/6J,C57BL/6NJ,CAROLI/EiJ,CAST/EiJ,CBA/J,DBA/2J,FVB/NJ,LP/J,PAHARI/EiJ,NOD/ShiLtJ,NZO/HlLtJ,PWK/PhJ,SPRET/EiJ,WSB/EiJ,C57BL/6J',
-      description: 'View all 19 strains (WARNING: may take a while to load and will be sluggish drawing large regions.)'
+    //}, {
+      //label: 'All',
+      //genomes: '129S1/SvImJ,A/J,AKR/J,BALB/cJ,C3H/HeJ,C57BL/6J,C57BL/6NJ,CAROLI/EiJ,CAST/EiJ,CBA/J,DBA/2J,FVB/NJ,LP/J,PAHARI/EiJ,NOD/ShiLtJ,NZO/HlLtJ,PWK/PhJ,SPRET/EiJ,WSB/EiJ,C57BL/6J',
+      //description: 'View all 19 strains (WARNING: may take a while to load and will be sluggish drawing large regions.)'
     }]
   },
   FeatureColorMap: {
