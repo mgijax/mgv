@@ -863,11 +863,12 @@ export default MComponent({
           d.bb = this.$refs.underlay.getBoundingClientRect()
           d.shiftDrag = e.shiftKey
           d.altDrag = e.altKey
+          d.metaDrag = e.metaKey
           this.currRange = [d.startX - d.bb.x, d.startX - d.bb.x]
         },
         drag: function (e, d) {
           d.dragged = true
-          if (d.shiftDrag || d.altDrag) {
+          if (d.shiftDrag || d.altDrag || d.metaDrag) {
             let x1 = d.startX - d.bb.x
             let x2 = e.clientX - d.bb.x
             this.currRange = [Math.min(x1, x2), Math.max(x1, x2)]
@@ -910,14 +911,14 @@ export default MComponent({
               plength: plength,
               reverseComplement: e.clientX < d.startX
             })
-          } else if (d.shiftDrag) {
+          } else if (d.shiftDrag || d.metaDrag) {
             // zoom in/out of dragged region === composition of centered zoom plus a scroll
             this.$root.$emit('region-change', {
               region: this.region,
               op: 'zoomscroll',
               pstart: pstart,
               plength: plength,
-              out: e.metaKey // whether this is a zoom out (true) or zoom in (false)
+              out: d.metaDrag // whether this is a zoom out (true) or zoom in (false)
             })
           } else {
             // scroll
