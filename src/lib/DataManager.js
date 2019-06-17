@@ -270,7 +270,7 @@ class DataManager {
       const sla = f.strand === '+' ? slap : slam
       f.layout.contig = ca.assignNext(f.start, f.end)
       f.layout.l1 = sla.assignNext(f.start, f.end)
-      f.layout.l2 = fp.assignNext(f.start, f.end, Math.max(1, f.transcripts.length), f.ID)
+      f.layout.l2 = fp.assignNext(f.start, f.end, 1 + f.transcripts.length, f.ID)
     })
   }
 
