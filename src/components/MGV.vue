@@ -32,7 +32,7 @@
           icon="list"
           >
           <my-lists
-            title="Shows your current lists. A list simply contains identifiers. Click on a list to show its items in the genome view; click again to hide them. Click on the 'x' to delete a list. Click on the pencil to edit the list (see ListEditor)."
+            title="Shows your current gene lists. A list simply contains identifiers. Click on a list to show its items in the genome view; click again to hide them. Click on the 'x' to delete a list. Click on the pencil to edit the list."
             :lists="lists"
             :currentList="currentList"
             />

@@ -176,6 +176,9 @@ export default MComponent({
 <style scoped>
 .sequence-cart {
 }
+.sequence-cart .m-button {
+  padding: 0px;
+}
 .sequence-cart-items {
   max-height: 450px;
   overflow: scroll;

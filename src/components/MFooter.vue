@@ -1,6 +1,6 @@
 <template>
   <div name="footer" class="flexrow">
-      <span id="version">version {{cfg.VERSION}}</span>
+    <span id="version">version {{cfg.VERSION}}</span>
     <span>MGV is powered by:
     <a href="http://www.informatics.jax.org" target="_blank">MGI</a>,
     <a href="http://www.mousemine.org" target="_blank">MouseMine</a>,
