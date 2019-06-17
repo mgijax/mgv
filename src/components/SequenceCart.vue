@@ -163,8 +163,8 @@ export default MComponent({
 
   },
   mounted: function () {
-    // this.$root.$on('region-selected', r => this.add(r))
     this.$root.$on('sequence-selected', rs => {
+      this.unselectAll()
       rs.forEach(r => this.add(r))
     })
     this.kstore = new KeyStore(this.cfg.dbName)
