@@ -82,7 +82,7 @@ export default MComponent({
         const cm = this.$refs.contextMenu
         cm.open(y, x)
       } else {
-        this.$refs.regionControls.open(vm.region, y, x)
+        this.$refs.regionControls.open(vm.region, y-2, x-2)
       }
     }
   }
