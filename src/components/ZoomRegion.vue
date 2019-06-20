@@ -208,7 +208,7 @@
             :width="featureW(t)"
             :height="featureH(t)"
             fill="white"
-            :fill-opacity="transcriptHighlighted(t) ? 0.6 : 0.2"
+            :fill-opacity="spreadTranscripts ? (transcriptHighlighted(t) ? 0.6 : 0.2) : 0"
             />
           <!-- ======= Transcript axis line, arrow ======= -->
           <polyline
