@@ -83,6 +83,20 @@
         :style="{ height: visHeight + 'px', overflow: 'scroll' }"
         class="flexcolumn">
         <!--
+        ============== Zoom View ==============
+        -->
+        <page-box
+          :message="activeFacets ? 'There are active filters. Some features may not be visible.' : ''"
+          label="ZoomView"
+          icon="view_agenda"
+          >
+          <zoom-view
+            :context="$data"
+            ref="zoomView"
+            title="The main view. Shows features in selected regions of selected genomes. You can zoom, scroll, find genes, download sequences and more. These operations can affect regions independently or in synch using the lock icon. Most things can be undone using the browser's Back button."
+            />
+        </page-box>
+        <!--
         ============ Genome View ==============
         -->
         <page-box
@@ -107,20 +121,6 @@
             title="Shows details of a feature you click on. When open, shows details for genologs in all currently displayed genomes. When closed, shows only the feature in the genome that was clicked."
             :features="detailFeatures"
             :currentMouseover="currentMouseover"
-            />
-        </page-box>
-        <!--
-        ============== Zoom View ==============
-        -->
-        <page-box
-          :message="activeFacets ? 'There are active filters. Some features may not be visible.' : ''"
-          label="ZoomView"
-          icon="view_agenda"
-          >
-          <zoom-view
-            :context="$data"
-            ref="zoomView"
-            title="The main view. Shows features in selected regions of selected genomes. You can zoom, scroll, find genes, download sequences and more. These operations can affect regions independently or in synch using the lock icon. Most things can be undone using the browser's Back button."
             />
         </page-box>
       </page-box-container>
