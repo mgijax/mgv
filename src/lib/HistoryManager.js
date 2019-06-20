@@ -1,4 +1,5 @@
 import u from '@/lib/utils'
+import config from '@/config'
 //
 class HistoryManager {
   //
@@ -11,7 +12,7 @@ class HistoryManager {
     // when app context changes, tell the window
     this.app.$root.$on('context-changed', () => this.setHash())
     // tell the app about the initial state
-    let qstring = window.location.hash.substring(1)
+    let qstring = window.location.hash.substring(1) || config.MGV.defaultHash
     this.initialHash = this.pqstring(qstring)
     // console.log('HistoryManager: initial hash ', this.initialHash)
   }

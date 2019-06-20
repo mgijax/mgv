@@ -694,19 +694,6 @@ export default MComponent({
       // initial hash from page URL
       const ih = Object.assign({}, this.historyManager.initialHash)
       ih.width = u.wWidth()
-      if (!ih.strips && !ih.chr && !ih.landmark) {
-        const g = this.rGenome
-        const c = g.chromosomes[0]
-        ih.strips = [{
-          genome: g.name,
-          regions: [{
-            genome: g.name,
-            chr: c.name,
-            start: 1,
-            end: Math.min(10000000, c.length)
-          }]
-        }]
-      }
       console.log('MGV: setting initial context', ih)
       this.setContext(ih, true)
     })

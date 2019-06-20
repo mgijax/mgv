@@ -13,7 +13,7 @@ export default {
   // Timestamp used at page load to determine whether to flush user's setting cache.
   //
   // IMPORTANT!!! You MUST update this value whenever this config file changes!!!
-  TIMESTAMP: 'Tue Mar  25 06:56:39 EST 2019',
+  TIMESTAMP: 'Tue Mar  27 06:58:39 EST 2019',
   ///////////////////////////////////////////
 
   //
@@ -38,7 +38,8 @@ export default {
       //label: 'All',
       //genomes: '129S1/SvImJ,A/J,AKR/J,BALB/cJ,C3H/HeJ,C57BL/6J,C57BL/6NJ,CAROLI/EiJ,CAST/EiJ,CBA/J,DBA/2J,FVB/NJ,LP/J,PAHARI/EiJ,NOD/ShiLtJ,NZO/HlLtJ,PWK/PhJ,SPRET/EiJ,WSB/EiJ,C57BL/6J',
       //description: 'View all 19 strains (WARNING: may take a while to load and will be sluggish drawing large regions.)'
-    }]
+    }],
+    defaultHash: 'regions=C57BL/6J::14:46376992..46398402/886|A/J::14:38855700..38877110/886|CAROLI/EiJ::14:38235123..38256533/886&highlight=MGI:88180'
   },
   FeatureColorMap: {
     colors: [{
