@@ -3,15 +3,6 @@
     :class="{ dragging: dragging }"
     :transform="`translate(0,${zoomY + dragY})`"
   >
-    <!-- genome label -->
-    <text
-      name="label"
-      :x="cfg.endCapWidth"
-      :y="height + 10"
-      dominant-baseline="hanging"
-      stroke="none"
-      font-family= "sans-serif"
-      fill="black">{{ genome.name }}</text>
     <!-- list of ZoomRegions -->
     <zoom-region
       v-for="(zr,zri) in regions"
@@ -46,7 +37,17 @@
       fill-opacity=1
       @mouseenter="activateHandle"
       />
+    <!-- genome label -->
+    <text
+      name="label"
+      :x="cfg.endCapWidth + 2"
+      :y="2"
+      dominant-baseline="hanging"
+      stroke="none"
+      font-family= "sans-serif"
+      fill="black">{{ genome.name }}</text>
     <!-- end cap -->
+    <g>
     <rect name="endcap"
       x="0"
       y="0"
@@ -74,6 +75,7 @@
       style="font-size: 20px; font-weight: bold;"
       fill="gray"
       >::<title>Drag up/down to reposition.</title></text>
+    </g>
     <!-- busy indicator -->
     <g
       v-show="busyCount > 0"
@@ -236,7 +238,7 @@ export default MComponent({
 .zoom-strip text[name="label"] {
   transition: y 0.3s;
 }
-.zoom-strip > [name="draghandle"] {
+.zoom-strip [name="draghandle"] {
   cursor: grab;
   -webkit-touch-callout: none;
   -webkit-user-select: none;
@@ -245,7 +247,7 @@ export default MComponent({
   -ms-user-select: none;
   user-select: none;
 }
-.zoom-strip.dragging > [name="draghandle"] {
+.zoom-strip.dragging [name="draghandle"] {
   cursor: grabbing;
 }
 [name="deleteBtn"] {

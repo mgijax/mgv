@@ -25,8 +25,8 @@ class ChunkedGff3FileReader extends FeatureTrackReader {
       url = `${this.url}/${this.name}/${c.name}/0`
       p = this.fetcher.fetch(url, 'gff3')
     } else {
-      const minBlk = Math.floor(s / this.cfg.chunkSize)
-      const maxBlk = Math.floor(e / this.cfg.chunkSize)
+      const minBlk = Math.max(0, Math.floor(s / this.cfg.chunkSize))
+      const maxBlk = Math.max(minBlk, Math.floor(e / this.cfg.chunkSize))
       const ps = []
       for (let i = minBlk; i <= maxBlk; i++) {
         url = `${this.url}/${this.name}/${c.name}/${i}`

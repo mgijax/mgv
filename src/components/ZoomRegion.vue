@@ -67,6 +67,7 @@
       </g>
       <!-- ======= left end underlay, shows when you scroll past the beginning of the chr  ======= -->
       <rect
+        v-if="region.start - (region.end - region.start) < 0"
         :x="b2p(-region.chr.length)"
         :y="-zeroOffset"
         :width="b2p(0) - b2p(-region.chr.length)"
@@ -761,7 +762,9 @@ export default MComponent({
         } else {
           this.sequence = ''
         }
-      }).catch(() => this.$emit('busy-end'))
+      }).catch((e) => {
+        this.$emit('busy-end')
+      })
     },
     getEventObjects (e) {
       const f = e.target.closest('.feature')
