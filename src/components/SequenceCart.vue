@@ -90,6 +90,7 @@ export default MComponent({
   },
   methods: {
     add (r) {
+      // standardize these fields
       r.selected = r.selected || false
       r.reverseComplement = r.reverseComplement || false
       r.translate = r.translate || false

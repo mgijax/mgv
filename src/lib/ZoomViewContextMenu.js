@@ -47,6 +47,29 @@ function getMenus(thisObj) {
     }
   }
   //
+  // A sequence descriptor takes one of two forms depending on whether the
+  // sequence is associated with a specific object or is an arbitrary slice of the genome.
+  //
+  // An object sequence descriptor has these fields:
+  // - genome (string) Name of the genome the sequence is from.
+  // - ID (string) primary identifier of the object (eg a transcript ID)
+  // - type (string) type of sequence. One of: dna, transcript, cds
+  // - length (int) length of the requested sequence
+  // - header (string) the fasta header to use for the result
+  // - selected (boolean) True iff the sequence is in the selected state.
+  //
+  // A sequence descriptor may also specify an arbitrary genomic segment
+  // specified by address.
+  // The descriptor is an object with these fields:
+  // - genome (string) name of the genome
+  // - chr (string) the chromosome
+  // - start (int) start coordinate
+  // - end (int) end coordinate of the region
+  // - type (string) always 'dna'
+  // - reverseComplement (boolean) True iff the sequence should be reverse complemented 
+  // - selected (boolean) True iff the sequence is in the selected state
+  // - length (int) length of the sequence
+  //
   function makeDescriptor (stype, f, t) {
     const id = t ? (stype === 'cds' ? t.cds.ID : t.ID) : f.ID
     const len = t ? (stype === 'cds' ? t.cds.length : t.length) : f.length

@@ -1,7 +1,7 @@
 <template>
   <g class="zoom-strip"
     :class="{ dragging: dragging }"
-    :transform="`translate(0,${zoomY + dragY})`"
+    :transform="`translate(0,${zoomY + dragY + 14})`"
   >
     <!-- list of ZoomRegions -->
     <zoom-region
@@ -41,40 +41,39 @@
     <text
       name="label"
       :x="cfg.endCapWidth + 2"
-      :y="2"
-      dominant-baseline="hanging"
+      :y="-1"
       stroke="none"
       font-family= "sans-serif"
       fill="black">{{ genome.name }}</text>
     <!-- end cap -->
     <g>
-    <rect name="endcap"
-      x="0"
-      y="0"
-      :width="cfg.endCapWidth"
-      :height="height + 1"
-      :fill="endCapColor"
-      />
-    <!-- delete button  -->
-    <text name="deleteBtn"
-      :x="cfg.endCapWidth / 2"
-      :y="2"
-      dominant-baseline="hanging"
-      text-anchor="middle"
-      style="font-size: 10px; font-weight: bold;"
-      font-family="sans-serif"
-      fill="gray"
-      @click="deleteClicked"
-      >X<title>Click to remove this strip.</title></text>
-    <!-- drag handle  -->
-    <text name="draghandle"
-      ref="draghandle"
-      :x="cfg.endCapWidth / 2"
-      :y="height / 2 + 10"
-      text-anchor="middle"
-      style="font-size: 20px; font-weight: bold;"
-      fill="gray"
-      >::<title>Drag up/down to reposition.</title></text>
+      <rect name="endcap"
+        x="0"
+        y="0"
+        :width="cfg.endCapWidth"
+        :height="height + 1"
+        :fill="endCapColor"
+        />
+      <!-- delete button  -->
+      <text name="deleteBtn"
+        :x="cfg.endCapWidth / 2"
+        :y="2"
+        dominant-baseline="hanging"
+        text-anchor="middle"
+        style="font-size: 10px; font-weight: bold;"
+        font-family="sans-serif"
+        fill="gray"
+        @click="deleteClicked"
+        >X<title>Click to remove this strip.</title></text>
+      <!-- drag handle  -->
+      <text name="draghandle"
+        ref="draghandle"
+        :x="cfg.endCapWidth / 2"
+        :y="height / 2 + 10"
+        text-anchor="middle"
+        style="font-size: 20px; font-weight: bold;"
+        fill="gray"
+        >::<title>Drag up/down to reposition.</title></text>
     </g>
     <!-- busy indicator -->
     <g
