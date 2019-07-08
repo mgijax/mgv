@@ -234,6 +234,7 @@
             :fill="'cyan'"
             stroke="cyan"
             stroke-width="0.5"
+            :transform="`translate(0,${spreadTranscripts ? 4 + featureHeight/2 : 0})`"
             />
           <!-- ======= Stop codon ======= -->
           <path v-if="t.cds && showStartStopCodons"
@@ -241,6 +242,7 @@
             :fill="'red'"
             stroke="red"
             stroke-width="0.5"
+            :transform="`translate(0,${spreadTranscripts ? featureHeight/2 : 0})`"
             />
           <!-- transcript label -->
           <text
