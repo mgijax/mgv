@@ -517,7 +517,7 @@ export default MComponent({
       }
     },
     height: function () {
-      let h = (this.allMaxLaneP + this.allMaxLaneM) * (this.featureHeight + this.laneGap) + this.laneGap + 4
+      let h = (this.allMaxLaneP + this.allMaxLaneM) * (this.featureHeight + this.laneGap) + 2 * this.laneGap + 4
       return Math.max(h, this.cfg.minHeight)
     },
     zeroOffset: function () {
