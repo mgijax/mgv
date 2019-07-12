@@ -8,7 +8,7 @@ import config from '@/config'
 import DataManager from '@/lib/DataManager'
 import Vue from 'vue'
 
-let dm = new DataManager('./index.json')
+let dm = new DataManager(config.DataManager.rootUrl)
 
 export default function (cfg) {
   cfg.computed = cfg.computed || {}
