@@ -137,8 +137,7 @@ export default {
     fetchUrl: "http://proto.informatics.jax.org/prototypes/sequenceHound/sequenceHound.cgi"
   },
   DataManager: {
-    // URL of index describing of available genomes
-    rootUrl: "http://localhost:5000/index.json",
+    runtimeConfigFile: "runtime_config.json",
     // max size allowed for a feature
     featureSizeLimit: 10000000
   },

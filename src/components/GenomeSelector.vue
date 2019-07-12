@@ -46,7 +46,7 @@ import u from '@/lib/utils'
 export default MComponent({
   name: 'GenomeSelector',
   props: ['allGenomes', 'strips', 'genomeSets'],
-  inject: ['regionManager'],
+  inject: ['regionManager','dataManager'],
   data: function () {
     return {
       dropVisible: false,
@@ -66,7 +66,7 @@ export default MComponent({
       this.changed()
     },
     changed: function () {
-      this.regionManager().setStrips(this.vGs.map(g => this.dataManager.lookupGenome(g)))
+      this.regionManager().setStrips(this.vGs.map(g => this.dataManager().lookupGenome(g)))
     }
   },
   watch: {

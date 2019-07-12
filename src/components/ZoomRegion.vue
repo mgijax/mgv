@@ -336,7 +336,12 @@ import { complement } from '@/lib/genetic_code'
 //
 export default MComponent({
   name: 'ZoomRegion',
-  inject: ['featureColorMap', 'getFacets', 'translator'],
+  inject: [
+    'dataManager',
+    'featureColorMap',
+    'getFacets',
+    'translator'
+  ],
   props: {
     // the app context
     context: {
@@ -739,7 +744,7 @@ export default MComponent({
       } else {
         this.blocks = []
       }
-      this.dataManager.getGenes(r.genome, r.chr, r.start - delta, r.end + delta, this.showDetails).then(feats => {
+      this.dataManager().getGenes(r.genome, r.chr, r.start - delta, r.end + delta, this.showDetails).then(feats => {
         this.busy = false
         this.features = feats
         this.nextTick(() => {
@@ -748,7 +753,7 @@ export default MComponent({
         })
         if (this.showSequence) {
           this.$emit('busy-start')
-          this.dataManager.getSequence(r.genome, r.chr, r.start, r.end).then(data => {
+          this.dataManager().getSequence(r.genome, r.chr, r.start, r.end).then(data => {
             if (data) {
               this.seqStart = data.start
               this.sequence = data.seq

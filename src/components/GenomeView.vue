@@ -131,6 +131,7 @@ export default MComponent({
   props: [
     'context'
   ],
+  inject: ['dataManager'],
   data: function () {
     return {
       genome: null, // the genome to show
@@ -241,9 +242,9 @@ export default MComponent({
         this.currentListGenologs = []
         this.currentListGenologsByChr = {}
       } else {
-        this.dataManager.ensureFeatures(this.genome).then(() => {
+        this.dataManager().ensureFeatures(this.genome).then(() => {
           this.currentListGenologs = this.context.currentList.items.map(id => {
-            return this.dataManager.getGenologs(id, [this.genome])
+            return this.dataManager().getGenologs(id, [this.genome])
           }).reduce((a,v) => a.concat(v), []).filter(x => x)
           this.currentListGenologsByChr = this.currentListGenologs.slice(0, this.maxListLegth).reduce((a,g) => {
             const n = g.chr.name

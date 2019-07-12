@@ -36,6 +36,7 @@ import getFeatureMenus from '@/lib/ZoomViewContextMenu'
 export default MComponent({
   name: 'ZoomView',
   props: ['context'],
+  inject: ['dataManager'],
   components: { ZoomControls, ZoomRegionControls, ZoomMain, MMenu },
   data: function () {
     return {
@@ -73,7 +74,7 @@ export default MComponent({
       const y = evt.clientY // - cbb.y
       const x = evt.clientX // - cbb.x
       if (fnode) {
-        const f = this.dataManager.getFeatureById(fnode.getAttribute('name'))
+        const f = this.dataManager().getFeatureById(fnode.getAttribute('name'))
         const tnode = evt.target.closest('.transcript')
         const tid = tnode ? tnode.getAttribute('name') : ''
         const t = tnode ? f.transcripts.filter(t => t.ID === tid)[0] : null

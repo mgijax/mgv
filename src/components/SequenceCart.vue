@@ -77,6 +77,7 @@ import KeyStore from '@/lib/KeyStore'
 export default MComponent({
   name: 'SequenceCart',
   components: { SequenceCartItem, MButton },
+  inject: ['dataManager'],
   data: function () {
     return {
       cart: [],
@@ -120,7 +121,7 @@ export default MComponent({
     },
     getSequencesForSelected: function () {
       const selected = this.cart.filter(item => item.selected)
-      return this.dataManager.getSequences(selected)
+      return this.dataManager().getSequences(selected)
     },
     emitSelected: function () {
       this.getSequencesForSelected().then(seqs => {
@@ -130,7 +131,7 @@ export default MComponent({
     downloadSelected: function () {
       const selected = this.cart.filter(item => item.selected)
       if (selected.length === 0) return
-      this.dataManager.getSequenceUrls(selected).then(descrs => {
+      this.dataManager().getSequenceUrls(selected).then(descrs => {
         this.descriptors = JSON.stringify(descrs)
         this.$nextTick(() => {
           this.$refs.sequenceDownloadForm.submit()
@@ -151,7 +152,7 @@ export default MComponent({
         if (all) {
           this.cart = all.map(obj => {
             // look up the genome name, convert to actual genome
-            const g = this.dataManager.lookupGenome(obj.genome)
+            const g = this.dataManager().lookupGenome(obj.genome)
             if (g) {
               obj.genome = g
               return obj

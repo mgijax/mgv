@@ -69,6 +69,11 @@ class RegionManager {
    const toAdd = genomes.filter(g => !curset.has(g))
    toRemove.forEach(g => this.deleteStrip(g, true))
    Promise.all(toAdd.map(g => this.addStrip(g))).then(() => {
+
+     // because strips are added asynchronously, the final order
+     // may not match the specified order. Resort according to specified order.
+
+
      this.layout()
      if (!quietly) this.announce()
    })

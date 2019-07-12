@@ -169,6 +169,7 @@ import gc from '@/lib/GenomeCoordinates'
 import u from '@/lib/utils'
 import config from '@/config'
 import KeyStore from '@/lib/KeyStore'
+import DataManager from '@/lib/DataManager'
 import HistoryManager from '@/lib/HistoryManager'
 import RegionManager from '@/lib/RegionManager'
 import ListManager from '@/lib/ListManager'
@@ -211,6 +212,9 @@ export default MComponent({
       }.bind(this),
       regionManager: function () {
         return this.regionManager
+      }.bind(this),
+      dataManager: function () {
+        return this.dataManager
       }.bind(this)
     }
   },
@@ -573,6 +577,8 @@ export default MComponent({
     this.preferencesManager = new PreferencesManager(this)
   },
   created: function () {
+    //
+    this.dataManager = new DataManager("./index.json")
     //
     this.keyManager = new KeyManager(document.body)
     //

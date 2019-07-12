@@ -83,6 +83,7 @@ export default MComponent({
   props: [
     'context'
   ],
+  inject: ['dataManager'],
   data: function () {
     return {
       my: this.copyProps(),
@@ -106,7 +107,7 @@ export default MComponent({
     },
     findLandmark (n) {
       if (!n) return
-      const f = this.dataManager.getFeaturesBy(n)[0]
+      const f = this.dataManager().getFeaturesBy(n)[0]
       if (f) {
         // user entered a valid symbol
         this.$root.$emit('feature-align', { feature: f })

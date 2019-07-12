@@ -40,7 +40,7 @@ function getMenus(thisObj) {
       extraArgs: [type],
       handler: (function (cxt, seqtype) {
         const f = cxt.feature
-        const genologs = this.dataManager.getGenologs(f, this.context.strips.map(s => s.genome))
+        const genologs = this.dataManager().getGenologs(f, this.context.strips.map(s => s.genome))
         const url = connections.MouseMine.getFastaUrl(genologs, seqtype)
         window.open(url, '_blank')
       }).bind(thisObj)
@@ -96,7 +96,7 @@ function getMenus(thisObj) {
       extraArgs: [type],
       handler: (function (cxt, seqtype) {
         const f = cxt.feature
-        const genologs = this.dataManager.getGenologs(f, this.context.strips.map(s => s.genome)).filter(x => x)
+        const genologs = this.dataManager().getGenologs(f, this.context.strips.map(s => s.genome)).filter(x => x)
         const seqs = genologs.map(f => {
           if (seqtype === 'dna') {
             return makeDescriptor(seqtype, f)

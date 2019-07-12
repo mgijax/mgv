@@ -118,7 +118,7 @@ export default MComponent({
   components: { MButton },
   props: [
   ],
-  inject: ['regionManager'],
+  inject: ['regionManager','dataManager'],
   data: function () {
     return {
       isOpen: false,
@@ -161,7 +161,7 @@ export default MComponent({
       const val = this.formattedCoords
       const r = gc.parse(val)
       if (!r) {
-        const f = this.dataManager.getGenologs(val, [this.region.genome])[0]
+        const f = this.dataManager().getGenologs(val, [this.region.genome])[0]
         if (f) {
           const l = f.end - f.start + 1
           const rr = {
