@@ -18,16 +18,14 @@ import gff3 from '@/lib/gff3lite'
 import { translate, reverseComplement } from '@/lib/genetic_code'
 
 class DataManager {
-  // Args:
-  //   url - starting URL for finding genome info
-  constructor (url) {
+  constructor () {
     this.cache = {} // { genome.name -> { chr.name -> P([ feats ]) } }
     this.pending = {} // genome.name -> pending promise
     this.id2feat = {} // ID -> feature
     this.cid2feats = {} // cID -> [ features ]
     this.symbol2feats = {} // symbol -> [ features ]
     this.greg = new GenomeRegistrar()
-    this.genomes = this.greg.register(url)
+    this.genomes = this.greg.register(config.DataManager.initialUrl)
   }
   getFeatureById (id) {
     return this.id2feat[id]

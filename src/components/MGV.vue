@@ -578,7 +578,7 @@ export default MComponent({
   },
   created: function () {
     //
-    this.dataManager = new DataManager("./index.json")
+    this.dataManager = new DataManager()
     //
     this.keyManager = new KeyManager(document.body)
     //

@@ -137,7 +137,7 @@ export default {
     fetchUrl: "http://proto.informatics.jax.org/prototypes/sequenceHound/sequenceHound.cgi"
   },
   DataManager: {
-    runtimeConfigFile: "runtime_config.json",
+    initialUrl: "./index.json",
     // max size allowed for a feature
     featureSizeLimit: 10000000
   },
