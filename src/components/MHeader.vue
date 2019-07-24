@@ -43,7 +43,7 @@ export default MComponent({
   components: { MButton },
   methods: {
     openHelp () {
-      window.open('http://www.informatics.jax.org/userhelp/MGV_help.shtml', '_blank')
+      this.app.$refs.helpBox.open()
     }
   }
 })

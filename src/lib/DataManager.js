@@ -106,12 +106,41 @@ class DataManager {
       feats = feats.filter(f => gc.overlaps(f, { chr: c, start: s, end: e }))
       if (includeTranscripts) {
         return this.getModels(g, c, s, e).then(tps => {
+          // The getModels call returns all transcripts in the region.
+          // Here we attach them to their genes.
+          // Index the transcripts by gene ID.
           const gid2tps = u.index(tps, t => t.gID, false)
           let needLayout = false
           feats.forEach(f => {
+            // if we've already got the transcripts for this gene, skip
             if (f.transcripts.length) return
             const ftps = gid2tps[f.ID] || []
+            // add each transcript to it's gene's list
             ftps.forEach(t => f.transcripts.push(t))
+            // Build the composite transcript for the gene from the real transcripts.
+            // If none, build a "fake" composite of a single exon covering the gene.
+            const c = this._computedExons(f.transcripts)
+            const cT = c.composite.length ? {
+              gID: f.ID,
+              ID: f.ID + "_composite",
+              exons: c.composite,
+              dExons: c.distinct,
+              start: c.composite[0].start,
+              end: c.composite[c.composite.length - 1].end,
+              length: c.composite.reduce((l,x) => l + x.end - x.start + 1, 0),
+              cds: null
+            } : {
+              gID: f.ID,
+              ID: f.ID + "_composite",
+              exons: [{start: f.start, end: f.end}],
+              dExons: [{start: f.start, end: f.end}],
+              start: f.start,
+              end: f.end,
+              length: f.end - f.start + 1,
+              cds: null
+            }
+            Object.assign(f.composite, cT)
+            //f.transcripts.push(cT)
             needLayout = true
           })
           if (needLayout) this.assignLanes(this.cache[g.name][c.name])
@@ -128,7 +157,7 @@ class DataManager {
   getModels (g, c, s, e) {
     return this.greg.getReader(g, 'transcripts').then(reader => {
       return reader.readRange(c, s, e).then(ts => {
-        return ts.map(t => {
+        const val = ts.map(t => {
           const exons = this._unpackExons(t)
           const tlen = exons.reduce((l,x) => l + x.end - x.start + 1, 0)
           const cds = this._unpackCds(t[8]['cds'], tlen, exons)
@@ -149,8 +178,8 @@ class DataManager {
           } else {
             return a.end !== b.end ? b.end - a.end : b.length - a.length
           }
-          
         })
+        return val
       })
     })
   }
@@ -185,6 +214,39 @@ class DataManager {
     }, 0)
     return c
   }
+  // Given transcripts for a gene, returns an object containing (1) the "distinct" exons, and 
+  // (2) the "composite" exons
+  _computedExons (tps) {
+    const cExons = [] // composite exons
+    const dExons = new Set() // distinct exons
+    const allExons = tps.reduce((a,t) => a.concat(t.exons), [])
+    allExons.sort((e1, e2) => e1.start - e2.start)
+    let ccontig = null
+    let hwm = 0
+    allExons.forEach(e => {
+      // composite
+      const lastE = cExons[cExons.length - 1]
+      if (!lastE || lastE.end < e.start) {
+        cExons.push({start: e.start, end: e.end, length: e.end - e.start + 1})
+      } else {
+        lastE.end = Math.max(lastE.end, e.end)
+      }
+      // distinct
+      dExons.add(`${e.start}_${e.end}`)
+    })
+    return {
+      distinct: Array.from(dExons).map(de => {
+          const bits = de.split('_')
+          const start = parseInt(bits[0])
+          const end = parseInt(bits[1])
+          const length = end - start + 1
+          return { start, end, length };
+      }).sort((a,b) => a.start - b.start),
+      composite: cExons
+    }
+  }
+  // 
+
   // Returns a promise for the genomic sequence of the specified range for the specified genome
   getSequence (g, c, s, e, doRC) {
     return this.greg.getReader(g, 'sequences')
@@ -291,6 +353,7 @@ class FeatureRegistrar {
   register (r) {
     const f = gff3.record2object(r)
     f.transcripts = []
+    f.composite = {}
     f.sotype = f.type
     delete f.score
     delete f.phase

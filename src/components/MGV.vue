@@ -97,6 +97,20 @@
             />
         </page-box>
         <!--
+        ============== Gene View ==============
+        <page-box
+          label="GeneView"
+          icon="view_agenda"
+          >
+          <gene-view
+            :genes="detailFeatures"
+            :spreadTranscripts="false"
+            ref="geneView"
+            title="GeneView shows the details of a single gene."
+            />
+        </page-box>
+        -->
+        <!--
         ============ Genome View ==============
         -->
         <page-box
@@ -143,40 +157,59 @@
           ref="listEditor"
           />
       </page-box>
+      <!--
+      ============ Help Screen  ==============
+      -->
+      <page-box
+        label=""
+        :floating="true"
+        :initialX="250"
+        :initialY="0"
+        :initiallyOpen="false"
+        ref="helpBox"
+        >
+        <help-box
+          />
+      </page-box>
     </div>
     <m-footer version="1.0.0"></m-footer>
   </div>
 </template>
 
 <script>
-import MHeader from '@/components/MHeader'
+//
+import Facets from '@/components/Facets'
+import FeatureColorMap from '@/lib/FeatureColorMap'
+import FeatureDetails from '@/components/FeatureDetails'
+import FindGenes from '@/components/FindGenes'
+import GeneView from '@/components/GeneView'
+import GenomeSelector from '@/components/GenomeSelector'
+import GenomeView from '@/components/GenomeView'
+import HelpBox from '@/components/HelpBox'
+import ListEditor from '@/components/ListEditor'
+import MComponent from '@/components/MComponent'
 import MFooter from '@/components/MFooter'
+import MHeader from '@/components/MHeader'
+import MyLists from '@/components/MyLists'
 import PageBox from '@/components/PageBox'
 import PageBoxContainer from '@/components/PageBoxContainer'
-import GenomeSelector from '@/components/GenomeSelector'
 import Settings from '@/components/Settings'
-import MyLists from '@/components/MyLists'
 import SequenceCart from '@/components/SequenceCart'
-import FindGenes from '@/components/FindGenes'
-import ListEditor from '@/components/ListEditor'
-import Facets from '@/components/Facets'
-import GenomeView from '@/components/GenomeView'
 import ZoomView from '@/components/ZoomView'
-import FeatureDetails from '@/components/FeatureDetails'
-import FeatureColorMap from '@/lib/FeatureColorMap'
-import MComponent from '@/components/MComponent'
+//
+import config from '@/config'
 import gc from '@/lib/GenomeCoordinates'
 import u from '@/lib/utils'
-import config from '@/config'
-import KeyStore from '@/lib/KeyStore'
+//
 import DataManager from '@/lib/DataManager'
 import HistoryManager from '@/lib/HistoryManager'
-import RegionManager from '@/lib/RegionManager'
-import ListManager from '@/lib/ListManager'
 import KeyManager from '@/lib/KeyManager'
-import Translator from '@/lib/Translator'
+import KeyStore from '@/lib/KeyStore'
+import ListManager from '@/lib/ListManager'
 import PreferencesManager from '@/lib/PreferencesManager'
-
+import RegionManager from '@/lib/RegionManager'
+import Translator from '@/lib/Translator'
+//
 export default MComponent({
   name: 'MGV',
   components: {
@@ -187,12 +220,14 @@ export default MComponent({
     GenomeSelector,
     MyLists,
     SequenceCart,
+    HelpBox,
     Settings,
     ListEditor,
     FindGenes,
     Facets,
     GenomeView,
     ZoomView,
+    GeneView,
     FeatureDetails
   },
   provide: function () {
