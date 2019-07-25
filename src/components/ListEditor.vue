@@ -53,7 +53,7 @@
              <div
                name="union"
                class="listop"
-               title="DRAG a list here to ADD its items to this list. CLICK here to add currently selected items."
+               title="DRAG a list here to ADD its items to this list. CLICK here to add the current selection."
                @dragover="dragover"
                @dragleave="dragleave"
                @drop="drop"
@@ -79,7 +79,7 @@
              <div
                name="difference"
                class="listop"
-               title="DRAG a list here to REMOVE its items from this list. CLICK here to remove currently selected items."
+               title="DRAG a list here to REMOVE its items from this list. CLICK here to remove the current selection."
                @dragover="dragover"
                @dragleave="dragleave"
                @drop="drop"
