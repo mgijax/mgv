@@ -5,17 +5,6 @@
   <label>Features</label>
   <!-- =================== -->
   <div
-    title="Display all feature labels when view width is below display threshold."
-    class="flexrow"
-    >
-    <label>Show all<sup title="When zoomed in">*</sup> labels</label>
-    <input
-        type="checkbox"
-        v-model="ZoomRegion.showFeatureLabels"
-        />
-  </div>
-  <!-- =================== -->
-  <div
     title="Above this threshold, features are simply boxes. Below this threshold, exon structure becomes visible."
     class="flexrow">
     <label>Details threshold</label>
@@ -26,6 +15,17 @@
         type="number"
         v-model="ZoomRegion.detailThreshold"
         />bp
+  </div>
+  <!-- =================== -->
+  <div
+    title="Display all feature labels when view width is below display threshold."
+    class="flexrow"
+    >
+    <label>Show all<sup title="When zoomed in">*</sup> labels</label>
+    <input
+        type="checkbox"
+        v-model="ZoomRegion.showFeatureLabels"
+        />
   </div>
   <!-- =================== -->
   <div
@@ -64,20 +64,6 @@
         v-model="ZoomRegion.laneGap"
         min="1"
         max="24"
-        />
-  </div>
-  <!-- =================== -->
-  <div
-    title="Make selected features stand out more by fading unselected features."
-    class="flexrow"
-    >
-    <label>Contrast</label>
-    <input
-        type="range"
-        v-model="ZoomRegion.contrast"
-        min="0"
-        max=".9"
-        step=".1"
         />
   </div>
   <!-- ============== TRANSCRIPTS section  ============== -->
@@ -143,10 +129,24 @@
         />
   </div>
   <!-- ============== FIDUCIALS section  ============== -->
-  <label>Connectors</label>
+  <label>Selections</label>
   <!-- =================== -->
   <div
-    title="For highlighted features, show connectors between genologs."
+    title="Make selected features stand out more by fading unselected features."
+    class="flexrow"
+    >
+    <label>Contrast</label>
+    <input
+        type="range"
+        v-model="ZoomRegion.contrast"
+        min="0"
+        max=".9"
+        step=".1"
+        />
+  </div>
+  <!-- =================== -->
+  <div
+    title="For selected features, show connectors between genologs."
     class="flexrow"
     >
     <label>Show connectors</label>

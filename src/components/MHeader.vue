@@ -43,7 +43,7 @@ export default MComponent({
   components: { MButton },
   methods: {
     openHelp () {
-      this.app.$refs.helpBox.open()
+      this.app.$refs.helpBox.toggleOpen()
     }
   }
 })

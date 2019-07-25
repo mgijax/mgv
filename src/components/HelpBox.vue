@@ -19,8 +19,9 @@
         />
       <table>
         <tr v-for="(r,ri) in currSection.items" class="itemrow">
-          <td width="25%" class="what" v-html="r.what"></td>
-          <td class="how" v-html="r.how"></td>
+          <td v-if="r.heading" colspan="2" class="heading" v-html="r.heading"></td>
+          <td v-if="r.what" width="25%" class="what" v-html="r.what"></td>
+          <td v-if="r.what" class="how" v-html="r.how"></td>
         </tr>
       </table>
     </div>
@@ -52,7 +53,7 @@ export default MComponent({
    },
    mounted: function () {
      this.preferencesManager().getPrefs('settings').then(settings => {
-       if (settings.HelpBox.showOnStartup) {
+       if (!settings || settings.HelpBox.showOnStartup) {
          this.$parent.open()
        }
      })
@@ -89,9 +90,8 @@ export default MComponent({
 .help-box .bottom-part.Shortcuts .what {
   text-align: center;
 }
-.help-box .how .material-icons {
+.help-box .bottom-part .material-icons {
   font-size: 16px;
-  font-weight: bold;
 }
 .help-box .sectionButton {
   cursor: pointer;
