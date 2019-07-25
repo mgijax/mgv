@@ -75,13 +75,15 @@ export default MComponent({
       const x = evt.clientX // - cbb.x
       if (fnode) {
         const f = this.dataManager().getFeatureById(fnode.getAttribute('name'))
-        const tnode = evt.target.closest('.transcript')
-        const tid = tnode ? tnode.getAttribute('name') : ''
-        const t = tnode ? f.transcripts.filter(t => t.ID === tid)[0] : null
-        this.contextObject = { event: evt, vm: vm, feature: f, transcript: t }
-        this.contextMenu = (this.featureMenu[f.genome.taxonid] || this.featureMenu['default'])
-        const cm = this.$refs.contextMenu
+        this.dataManager().getGenes(f.genome, f.chr, f.start, f.end, true).then(() => {
+          const tnode = evt.target.closest('.transcript')
+          const tid = tnode ? tnode.getAttribute('name') : ''
+          const t = tnode ? f.transcripts.filter(t => t.ID === tid)[0] : null
+          this.contextObject = { event: evt, vm: vm, feature: f, transcript: t }
+          this.contextMenu = (this.featureMenu[f.genome.taxonid] || this.featureMenu['default'])
+          const cm = this.$refs.contextMenu
         cm.open(y, x)
+        })
       } else {
         this.$refs.regionControls.open(vm.region, y-2, x-2)
       }
