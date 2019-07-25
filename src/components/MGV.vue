@@ -163,7 +163,7 @@
       <page-box
         label=""
         :floating="true"
-        :initialX="250"
+        :initialX="0"
         :initialY="0"
         :initiallyOpen="false"
         ref="helpBox"
@@ -538,6 +538,11 @@ export default MComponent({
     },
     initKeyBindings () {
       this.keyManager.register({
+       key: 'h',
+       handler: () => this.$refs.helpBox.toggleOpen(),
+       thisObj: this
+      })
+      this.keyManager.register({
        key: 't',
        handler: () => this.toggleDrawer(),
        thisObj: this
@@ -553,42 +558,42 @@ export default MComponent({
        thisObj: this
       })
       this.keyManager.register({
-       key: '+',
-       shiftKey: true,
-       handler: () => {
+       key: 'ArrowUp',
+       handler: (e) => {
          this.$root.$emit('region-change', {
            op: 'zoom',
-           amt: 0.5,
+           amt: e.shiftKey ? 0.1 : 0.5
          })
        },
        thisObj: this
       })
       this.keyManager.register({
-       key: '-',
-       handler: () => {
+       key: 'ArrowDown',
+       handler: (e) => {
          this.$root.$emit('region-change', {
            op: 'zoom',
-           amt: 2,
+           amt: e.shiftKey ? 10 : 2
          })
        },
        thisObj: this
       })
       this.keyManager.register({
        key: 'ArrowRight',
-       handler: () => {
+       handler: (e) => {
+         console.log(e)
          this.$root.$emit('region-change', {
            op: 'scroll',
-           amt: -.2,
+           amt: e.shiftKey ? -0.8 : -0.2
          })
        },
        thisObj: this
       })
       this.keyManager.register({
        key: 'ArrowLeft',
-       handler: () => {
+       handler: (e) => {
          this.$root.$emit('region-change', {
            op: 'scroll',
-           amt: .2,
+           amt: e.shiftKey ? 0.8 : 0.2
          })
        },
        thisObj: this
