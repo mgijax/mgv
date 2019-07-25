@@ -230,16 +230,16 @@ export default MComponent({
 .pagebox canvas {
   position: absolute;
 }
-.pagebox .button[name="dragHandle"] {
-  cursor: grab !important;
-  cursor: -webkit-grab !important;
+.pagebox .m-button[name="dragHandle"] {
+  cursor: grab;
+  cursor: -webkit-grab;
 }
 .pagebox.dragging {
     z-index: 100;
 }
-.pagebox.dragging .button[name="dragHandle"] {
-  cursor: grabbing !important;
-  cursor: -webkit-grabbing !important;
+.pagebox.dragging .m-button[name="dragHandle"] {
+  cursor: grabbing;
+  cursor: -webkit-grabbing;
 }
 .pagebox.closed > [name="content"] {
 }
