@@ -538,6 +538,11 @@ export default MComponent({
     },
     height: function () {
       this.$nextTick(() => this.$emit('region-draw', this))
+    },
+    showDetails: function(newval, oldval) {
+      if (newval !== oldval) {
+        this.$nextTick(() => this.$emit('region-draw', this))
+      }
     }
   },
   methods: {
