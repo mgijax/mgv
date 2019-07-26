@@ -10,11 +10,11 @@
     <label>Details threshold</label>
     <input
         min=0
-        max=10000000
-        step=1000000
+        max=10
+        step=1
         type="number"
-        v-model="ZoomRegion.detailThreshold"
-        />bp
+        v-model="thresholdMb"
+        />Mbp
   </div>
   <!-- =================== -->
   <div
@@ -236,6 +236,16 @@ export default MComponent({
   },
   mounted: function () {
     this.$watch('$data', () => this.save(), {deep: true})
+  },
+  computed: {
+    thresholdMb: {
+      get: function () {
+        return this.ZoomRegion.detailThreshold / 1000000
+      },
+      set: function (v) {
+        this.ZoomRegion.detailThreshold = parseInt(v) * 1000000
+      }
+    }
   }
 })
 </script>
