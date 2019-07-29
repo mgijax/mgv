@@ -196,7 +196,7 @@
           >
         <g
           class="transcript"
-          v-for="(t, ti) in f.transcripts"
+          v-for="(t, ti) in spreadTranscripts ? f.transcripts : f.composite.exons ? [f.composite] : []"
           :key="t.ID"
           :name="t.ID"
           :transform="transcriptTransform(f, t, ti)"
