@@ -19,24 +19,35 @@ export default [{
     description: ``,
     items: [{
       what: `Page Layout`,
-      how: `The page is divided into boxes, with left and right columns.
+      how: `The page is divided into two columns of boxes.
+          The left column, which contains various tools, can be hidden or shown
+          by typing "t" (for "tools"), or by clicking the ${i('settings')} button
+          in the header.
+          The right column, containing various views, is always visible.
           Each box can be opened/closed by clicking the "X" in its top right corner.
-          The left column of boxes can be hidden or show by typing "t" (for "tools"), or by clicking
-          the ${i('settings')} button in the header.
-          Boxes can be repositioned vertically in their columns by dragging; grab the
+          Boxes can be repositioned vertically in their columns by dragging the grab
           handle (${i('drag_indicator')}) in the box's top right corner.
           `
     }, {
       what: `Views`,
       how: `The two main sections of the page are ${ref('GenomeView')}, 
-          which shows all the chromosomes of a single genome, and ${ref('ZoomView')}.
+          which shows all the chromosomes of a single genome, and ${ref('ZoomView')},
           which shows specified chromosomal regions from one or more genomes. 
+          The two views are synchronized. E.g., clicking on a strip in ${ref('ZoomView')}
+          refocuses ${ref('GenomeView')} to display that genome.
           `
     }, {
       what: `Genomes and Regions`,
       how: `MGV displays multiple chromosomal regions for multiple genomes.
           In the ${ref('ZoomView')}, each region is its own "mini browser" 
-          that can be independently scrolled and zoomed.
+          that can be independently scrolled and zoomed. The size of a region
+          ranges from one chromosome to a few bases.
+          <p/>
+          Regions shown in the ${ref('GenomeView')} for a given genome and
+          the genome's strip in the ${ref('ZoomView')} correspond, and all changes
+          are reflect in both..
+          Clicking in a genome region in the ${ref('ZoomView')} highlights the
+          corresponding region in the ${ref('GenomeView')}, and vice versa.
           `
     }]
   }, {
@@ -60,7 +71,7 @@ export default [{
           </tr>
           <tr>
             <td>${i('lock')}</td>
-            <td>Synchronized. All displayed regions scroll and zoom in sync. Eg, if you drag 
+            <td>Synchronized. All displayed regions scroll and zoom in sync. E.g., if you drag 
             in one region, all regions scroll.</td>
           </tr>
           </table>
@@ -74,34 +85,39 @@ export default [{
       }, {
       what: `Aligning regions around a gene`,
       how: `To center all the views around a gene (and turn on ${i('lock')}), alt-click 
-          on the gene, or select "Align on this gene" from its popup menu, or search for the gene 
+          on the gene, or select "Align on this gene" from the gene's popup menu, or search for the gene 
           via the Find box.`
       }, {
       what: `Region controls`,
-      how: `To access individual controls for a region, right-click on its background (not on a feature).
+      how: `To access individual controls for a region within a genome,
+          right-click on its background (not on a feature).
           Changes made here affect only that region (and switch to ${i('lock_open')} mode).
-          `
-      }, {
-      what: `Repositioning`,
-      how: `
-          In the ${ref('ZoomView')}, multiple regions for the one genome are displayed side-by-side in a "strip".
-          Strips can be reordered vertically by dragging; grab the handle on the left end of a strip.
-          Regions in a strip can be reordered horizontally by dragging; grab the handle at the top 
-          left corner of the region.
-          As well, regions can be resized by dragging the gray divider bar between neighboring regions.
           `
       }, {
       what: `Splitting a region`,
       how: `You can create a new region for a genome by splitting an existing one. To split a region, alt-click on
-          its background (not on a feature). Alternatively, click the ${i('compare')} button in the region's controls.
+          its background (not on a feature). Alternatively, click the ${i('compare')} button in the region's popup controls.
+          `
+      }, {
+      what: `Moving and sizing the pieces`,
+      how: `
+          In the ${ref('ZoomView')}, genomes are displayed as horizontal "strips".
+          Strips (i.e. genomes) can be reordered by dragging;
+          grab the center handle at the far left end of the strip to move it up or down.
+          Multiple regions for a genome can be displayed side-by-side in a strip.
+          These regions can be reordered by dragging; grab the handle
+          at the top left corner of a region to move it left or right.
+          Genome regions can be resized by dragging the gray divider bar between
+          neighboring regions.
           `
     }]
   }, {  
     name: `Navigation`,
-    description: ``,
+    description: `The following commands all apply to the ${ref('ZoomView')}.`,
     items: [{
       what: `Find a gene`,
-      how: `Enter the gene symbol or ID in the Find box. Then hit enter or tab.`
+      how: `Enter the gene symbol or ID in the Find input box at the top of
+      the ${ref('ZoomView')}. Then hit enter or tab.`
     }, {
       what: `Specify coordinates`,
       how: `Type or paste coordinates in the Find box. Then hit enter or tab.`
@@ -139,7 +155,7 @@ export default [{
       }, {
       what: `Select gene sequences`,
       how: `Right click on a gene to open its context menu. Choose one of the 
-          options under "Add sequences to cart". You can select genomic, transcript, or CDS
+          options under "Add sequences to cart." You can select genomic, transcript, or CDS
           sequences, for the current gene or for that gene and its genologs.
           `
       }, {
@@ -170,14 +186,16 @@ export default [{
         or by combining other lists. Your current lists are shown under ${ref('MyLists')}.`,
     items: [{
       what: `Create by category`,
-      how: `Under ${ref('Find Genes')}, choose a category (eg "...by phenotype or disease"), enter a term
-          (eg "Parkinson") and hit tab or enter. The results are shown as a new list entry under
-          ${ref('MyLists')}. This method of creating a list sends a query to MouseMine, so category definitions
-          depend on its content.`
+      how: `Under ${ref('FindGenes')}, choose a category (e.g. "...by phenotype or disease"), enter a term
+          (e.g. "Parkinson") and hit tab or enter. The results are shown as a new list entry under
+          ${ref('MyLists')}.
+          If your category term retured no or unexpected results, check 
+          <a href="htto://www.mousemine.org/">MouseMine</a> for term usage.
+          `
       }, {
       what: `Create from selection`,
       how: `In the ${ref('ZoomView')}, you select genes by clicking on them. Hold the shift key to select more
-          than one. Then, in ${ref('MyLists')}. shift-click the "New" button.`
+          than one. Then, in ${ref('MyLists')}, shift-click the "New" button.`
       }, {
       what: `Create by combining`,
       how: `Example: you have lists A and B and you want to create C containing the genes common to
@@ -185,7 +203,11 @@ export default [{
           ${ref('ListEditor')} items area.
           (3) Drag list B onto the set intersection area. Neighboring areas implement set union and set
           difference. You can also combine the current selection with a list by simply clicking on one
-          of the set operators. Example: to add the current selection to a list, click the union area.` 
+          of the set operators.
+          (Example: to add the current selection to a list, click the union area.)
+          (4) Click the Create button at the bottom of the ListEditor to generate
+          the set of intersection genes, which are also displayed in the GenomeView.
+          `
       }, {
       what: `Display a list`,
       how: `Click on the list in ${ref('MyLists')}. The positions of all list items are shown in the ${ref('GenomeView')}.
@@ -233,7 +255,7 @@ export default [{
       how: `Sets the vertical distance between overlapping genes.`
     }, {
       heading: `Transcripts. Note that transcripts are only visible when the view region 
-          size is below the detials threshild.
+          size is below the details threshold.
           `
     }, {
       what: `Spread transcripts`,
