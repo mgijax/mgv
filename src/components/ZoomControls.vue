@@ -35,22 +35,22 @@
       <div class="flexrow">
         <m-button
           icon="zoom_in"
-          @click="$root.$emit('region-change', { op: 'zoom', amt: $event.shiftKey ? 0.1 : 0.5 })"
+          @click="zoom($event.shiftKey ? 0.1 : 0.5)"
           title="Click to zoom in. Shift-click to zoom in more"
           />
         <m-button
           icon="zoom_out"
-          @click="$root.$emit('region-change', { op: 'zoom', amt: $event.shiftKey ? 10 : 2 })"
+          @click="zoom($event.shiftKey ? 10 : 2)"
           title="Click to zoom out. Shift-click to zoom out more"
           />
         <m-button
           icon="chevron_left"
-          @click="$root.$emit('region-change', { op: 'scroll', amt: $event.shiftKey ? 0.8 : 0.2 })"
+          @click="scroll($event.shiftKey ? 0.8 : 0.2)"
           title="Click to scroll left. Shift-click to scroll left more."
           />
         <m-button
           icon="chevron_right"
-          @click="$root.$emit('region-change', { op: 'scroll', amt: $event.shiftKey ? -0.8 : -0.2 })"
+          @click="scroll($event.shiftKey ? -0.8 : -0.2)"
           title="Click to scroll right. Shift-click to scroll right more."
           />
         </div>
@@ -105,16 +105,26 @@ export default MComponent({
     blurOnEnter (e) {
       if (e.keyCode === 13) e.target.blur()
     },
+    scroll (amt) {
+      this.app.scrollLock = true
+      this.$root.$emit('region-change', { op: 'scroll', amt: amt })
+    },
+    zoom (amt) {
+      this.app.scrollLock = true
+      this.$root.$emit('region-change', { op: 'zoom', amt: amt })
+    },
     findLandmark (n) {
       if (!n) return
       const f = this.dataManager().getFeaturesBy(n)[0]
       if (f) {
         // user entered a valid symbol
+        this.app.scrollLock = true
         this.$root.$emit('feature-align', { feature: f })
       } else {
         // not a valid symbol. try parsing as coords.
         const c = gc.parse(n)
         if (c) {
+          this.app.scrollLock = true
           this.context.scrollLock = true
           this.$root.$emit('jump-to', { coords: c })
         } else {

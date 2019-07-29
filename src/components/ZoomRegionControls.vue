@@ -140,12 +140,15 @@ export default MComponent({
       this.isOpen = false
     },
     zoom: function (amt) {
+      this.app.scrollLock = false
       this.$root.$emit('region-change', { region: this.region, vm: this, op: 'zoom', amt: amt })
     },
     pan: function (amt) {
+      this.app.scrollLock = false
       this.$root.$emit('region-change', { region: this.region, vm: this, op: 'scroll', amt: amt })
     },
     split: function () {
+      this.app.scrollLock = false
       this.$root.$emit('region-change', { region: this.region, vm: this, op: 'split', pos: 0.5 })
       this.close()
     },
@@ -158,6 +161,7 @@ export default MComponent({
       this.close()
     },
     setCoords: function () {
+      this.app.scrollLock = false
       const val = this.formattedCoords
       const r = gc.parse(val)
       if (!r) {
