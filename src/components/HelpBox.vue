@@ -68,6 +68,7 @@ export default MComponent({
   text-align: left;
 }
 .help-box .title {
+  font-weight: bold;
   font-size: 18px;
 }
 .help-box .top-part {

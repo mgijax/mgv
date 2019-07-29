@@ -8,24 +8,51 @@ function ref(name) {
 }
 
 export default [{
-    name: `Overview`,
+    name: `About`,
     description: `The Multiple Genome Viewer (MGV) allows you to browse and compare multiple 
         related genomes, download corresponding sequence regions, display lists of genes, and 
-        several other functions.  For full details see:
+        several other functions. This popup provides basic help. For more details see:
         <a href="http://www.informatics.jax.org/userhelp/MGV_help.shtml" target="_blank">MGV help doc at MGI</a>`,
-    items: [
-    ]
+    items: []
+  }, {
+    name: `Overview`,
+    description: ``,
+    items: [{
+      what: `Page Layout`,
+      how: `The page is divided into boxes, with left and right columns.
+          Each box can be opened/closed by clicking the "X" in its top right corner.
+          The left column of boxes can be hidden or show by typing "t" (for "tools"), or by clicking
+          the ${i('settings')} button in the header.
+          Boxes can be repositioned vertically in their columns by dragging; grab the
+          handle (${i('drag_indicator')}) in the box's top right corner.
+          `
+    }, {
+      what: `Views`,
+      how: `The two main sections of the page are ${ref('GenomeView')}, 
+          which shows all the chromosomes of a single genome, and ${ref('ZoomView')}.
+          which shows specified chromosomal regions from one or more genomes. 
+          `
+    }, {
+      what: `Genomes and Regions`,
+      how: `MGV displays multiple chromosomal regions for multiple genomes.
+          In the ${ref('ZoomView')}, each region is its own "mini browser" 
+          that can be independently scrolled and zoomed.
+          `
+    }]
   }, {
     name: `Genomes`,
-    description: `MGV is designed to let you explore multiple genomes at once. Actions such 
-        as zooming, scrolling, and selecting genomic sequence may be applied to all displayed
-        genomes at once, or only the one your mouse is in.`,
+    description: `MGV lets you explore multiple regions from multiple genomes at once.
+        `,
     items: [{
-      what: `Add/remove genomes to the view`,
-      how: `Open the "Genomes" dropdown list. Command-click the genomes you wish to add/remove.`
+      what: `Add genomes to the view`,
+      how: `In ${ref('ZoomView')} open the "Genomes" dropdown list. 
+          Command-click the genomes you wish to add.
+          Alternatively, in the ${ref('GenomeView')}, select a genome from the dropdown,
+          then drag on a chromosome; that region is added to the ${ref('ZoomView')}.
+          `
       }, {
-      what: `Switch modes`,
-      how: `Click the lock icon.
+      what: `Synchronized browsing`,
+      how: `
           <table>
           <tr>
             <td>${i('lock_open')}</td>
@@ -33,15 +60,41 @@ export default [{
           </tr>
           <tr>
             <td>${i('lock')}</td>
-            <td>Synchronized. All regions scroll and zoom in sync.</td>
+            <td>Synchronized. All displayed regions scroll and zoom in sync. Eg, if you drag 
+            in one region, all regions scroll.</td>
           </tr>
           </table>
+      Click the lock icon to switch modes. Other actions also set/clear this mode:
+        <ol>
+        <li> Navigating via controls at the top of the ${ref('ZoomView')} sets mode to synchronized (${i('lock')}).
+        <li> Navigating via individual (pop-up) region controls sets mode to unsynchronized (${i('lock_open')}).
+        <li> Navigating via dragging in a region maintains the current mode.
+        </ol>
+        `
+      }, {
+      what: `Aligning regions around a gene`,
+      how: `To center all the views around a gene (and turn on ${i('lock')}), alt-click 
+          on the gene, or select "Align on this gene" from its popup menu, or search for the gene 
+          via the Find box.`
+      }, {
+      what: `Region controls`,
+      how: `To access individual controls for a region, right-click on its background (not on a feature).
+          Changes made here affect only that region (and switch to ${i('lock_open')} mode).
           `
       }, {
-      what: `Aligning displays`,
-      how: `To center all the views around a gene (and turn on ${i('lock')}), alt-click 
-          on gene, or select "Align on this gene" from its popup menu, or search for the gene 
-          via the Find box.`
+      what: `Repositioning`,
+      how: `
+          In the ${ref('ZoomView')}, multiple regions for the one genome are displayed side-by-side in a "strip".
+          Strips can be reordered vertically by dragging; grab the handle on the left end of a strip.
+          Regions in a strip can be reordered horizontally by dragging; grab the handle at the top 
+          left corner of the region.
+          As well, regions can be resized by dragging the gray divider bar between neighboring regions.
+          `
+      }, {
+      what: `Splitting a region`,
+      how: `You can create a new region for a genome by splitting an existing one. To split a region, alt-click on
+          its background (not on a feature). Alternatively, click the ${i('compare')} button in the region's controls.
+          `
     }]
   }, {  
     name: `Navigation`,
@@ -91,7 +144,9 @@ export default [{
           `
       }, {
       what: `Download sequences`,
-      how: `In the ${ref('SequenceCart')}, select the sequences you want to download. Fill in a file name (optional). Then click the ${i('cloud_download')} button.`
+      how: `In the ${ref('SequenceCart')}, select the sequences you want to download. Fill 
+          in a file name (optional). Then click the ${i('cloud_download')} button.
+          `
       }, {
       what: `Reverse complement`,
       how: `Genomic sequences in the ${ref('SequenceCart')} are reverse complemented (or not) at the time of 
@@ -126,7 +181,8 @@ export default [{
       }, {
       what: `Create by combining`,
       how: `Example: you have lists A and B and you want to create C containing the genes common to
-          both. (1) Click "New" in ${ref('MyLists')}. (2) Drag list A from ${ref('MyLists')} onto the ${ref('ListEditor')} items area.
+          both. (1) Click "New" in ${ref('MyLists')}. (2) Drag list A from ${ref('MyLists')} onto the
+          ${ref('ListEditor')} items area.
           (3) Drag list B onto the set intersection area. Neighboring areas implement set union and set
           difference. You can also combine the current selection with a list by simply clicking on one
           of the set operators. Example: to add the current selection to a list, click the union area.` 
@@ -237,7 +293,9 @@ export default [{
       how: `Open/close this help window. Same as clicking ${i('info')}.`
     },{
       what: `l (ell)`,
-      how: `Same as clicking the lock icon. Flips synchronization mode between synchronized (${i('lock')}) and not synchronized (${i('lock_open')}).`
+      how: `Same as clicking the lock icon. Flips synchronization mode between synchronized
+          (${i('lock')}) and not synchronized (${i('lock_open')}).
+          `
     },{
       what: `t`,
       how: `Open/close the left-side tool panel.`
