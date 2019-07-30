@@ -1,15 +1,19 @@
 <template>
-  <div class="help-box">
+  <div class="help-box" :class="{ 'help-collapsed' : collapsed }">
     <!-- top part does not scroll -->
-    <span class="title">MGV Help</span>
     <div class="top-part">
       <!-- a button per section -->
       <span
         v-for="(s,i) in sections"
         class="sectionButton"
         :class="{ current: selectedSection === i }"
-        @click="selectedSection = i"
+        @click="select(i)"
         >{{s.name}}</span>
+      <m-button
+        class="collapse-btn"
+        @click="collapsed = !collapsed"
+        :icon="collapsed ? 'arrow_drop_down' : 'arrow_drop_up'"
+        />
     </div>
     <!-- bottom part scrolls -->
     <div class="bottom-part" :class="currSection.name">
@@ -35,15 +39,23 @@
 <script>
 import config from '@/config'
 import MComponent from '@/components/MComponent'
+import MButton from '@/components/MButton'
 import helpData from '@/components/HelpBoxData'
 export default MComponent({
     name: 'HelpBox',
     inject: ['preferencesManager'],
+    components: { MButton },
     data: function () {
-      console.log(helpData)
       return {
         selectedSection: 0,
         sections: helpData,
+        collapsed: false
+     }
+   },
+   methods: {
+     select: function (i) {
+       this.collapsed = false
+       this.selectedSection = i
      }
    },
    computed: {
@@ -66,6 +78,7 @@ export default MComponent({
 .help-box {
   width: 450px;
   text-align: left;
+  position: relative;
 }
 .help-box .title {
   font-weight: bold;
@@ -77,6 +90,15 @@ export default MComponent({
 .help-box .bottom-part {
   max-height: 500px;
   overflow: scroll;
+}
+.help-box.help-collapsed .bottom-part,
+.help-box.help-collapsed .footer {
+  display: none;
+}
+.help-box .collapse-btn {
+  position: absolute;
+  right: 10px;
+  top: 0px;
 }
 .help-box td {
   padding-bottom: 10px;

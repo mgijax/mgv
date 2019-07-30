@@ -161,7 +161,7 @@
       ============ Help Screen  ==============
       -->
       <page-box
-        label=""
+        label="MGV Help"
         :floating="true"
         :initialX="0"
         :initialY="0"

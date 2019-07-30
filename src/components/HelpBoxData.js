@@ -190,7 +190,7 @@ export default [{
           (e.g. "Parkinson") and hit tab or enter. The results are shown as a new list entry under
           ${ref('MyLists')}.
           If your category term retured no or unexpected results, check 
-          <a href="htto://www.mousemine.org/">MouseMine</a> for term usage.
+          <a href="http://www.mousemine.org/" target="_blank">MouseMine</a> for term usage.
           `
       }, {
       what: `Create from selection`,
