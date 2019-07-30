@@ -11,8 +11,17 @@ export default [{
     name: `About`,
     description: `The Multiple Genome Viewer (MGV) allows you to browse and compare multiple 
         related genomes, download corresponding sequence regions, display lists of genes, and 
-        several other functions. This popup provides basic help. For more details see:
-        <a href="http://www.informatics.jax.org/userhelp/MGV_help.shtml" target="_blank">MGV help doc at MGI</a>`,
+        several other functions.
+        <p/>
+        To open/close this Help at any time, click the ${i('info')} button in the page header, or type 'h'.
+        This popup provides basic help.
+        For more details see:
+        <a href="http://www.informatics.jax.org/userhelp/MGV_help.shtml" target="_blank">MGV help doc at MGI</a>
+        <p/>
+        Help is also available from MGI User Support via <a href="mailto:mgi-help@jax.org">email</a>, online 
+        <a href="http://www.informatics.jax.org/mgihome/support/mgi_inbox.shtml" target="_blank">form</a>, 
+        or phone (207-288-6445).
+        `,
     items: []
   }, {
     name: `Overview`,
