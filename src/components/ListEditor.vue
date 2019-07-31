@@ -203,7 +203,7 @@ export default MComponent({
       let list = this.listManager().getList(listName)
       let dtgt = this.getDropTarget(evt)
       let op = dtgt.getAttribute('name')
-      if (op === 'items') op = 'union'
+      if (op === 'items') op = 'replace'
       this[op](list)
     },
     reset: function () {
@@ -246,6 +246,10 @@ export default MComponent({
     cancel: function () {
       this.$root.$emit('list-edit-cancel')
       this.$parent.close()
+    },
+    replace: function (lst) {
+      this.items = []
+      this.union(lst)
     },
     union: function (lst) {
       let s = new Set(this.items)
