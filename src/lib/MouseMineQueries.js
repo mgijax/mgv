@@ -69,9 +69,13 @@ class MouseMineQueries {
     qryString = this.addWildcards(qryString)
     const q = `<query model="genomic"
       view="GXDExpression.feature.primaryIdentifier"
+      constraintLogic="A and (B or (C and D)) and E"
       >
-      <constraint path="GXDExpression.structure.parents" op="LOOKUP" value="${qryString}" />
-      <constraint path="GXDExpression.detected" op="=" value="true"/>
+      <constraint path="GXDExpression.structure.parents" code="A" op="LOOKUP" value="${qryString}" />
+      <constraint path="GXDExpression.genotype.hasMutantAllele" code="B" op="=" value="false"/>
+      <constraint path="GXDExpression.assayType" code="C" op="=" value="In situ reporter (knock in)"/>
+      <constraint path="GXDExpression.genotype.zygosity" code="D" op="=" value="ht"/>
+      <constraint path="GXDExpression.detected" code="E" op="=" value="true"/>
       </query>`
     return this.cxn.query(q, r => r[0])
   }
