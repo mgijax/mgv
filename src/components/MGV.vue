@@ -14,7 +14,6 @@
         >
         <!--
         ============ Find Genes ==============
-        -->
         <page-box
           label="FindGenes"
           icon="search"
@@ -24,15 +23,17 @@
             title="Creates a new list of genes having the specified annotations. Select criterion (eg by pathway), enter a term (eg apoptosis), and hit enter. Results appear in MyLists"
             />
         </page-box>
+        -->
         <!--
         ============ My Lists ==============
         -->
         <page-box
-          label="MyLists"
+          label="Gene lists"
           icon="list"
           >
           <my-lists
             title="Shows your current gene lists. A list simply contains identifiers. Click on a list to show its items in the genome view; click again to hide them. Click on the 'x' to delete a list. Click on the pencil to edit the list."
+            ref="myLists"
             :lists="lists"
             :currentList="currentList"
             />

@@ -1,7 +1,7 @@
 <template>
   <div class="my-lists">
      <div class="flexcolumn">
-     <span>{{ lists.length }} list{{ lists.length === 1 ? '' : 's' }}</span>
+     <span>My lists: {{ lists.length }} list{{ lists.length === 1 ? '' : 's' }}</span>
      <my-list-item
          v-for="item in lists"
          :key="item.name"
@@ -9,23 +9,64 @@
          :class="{ current: item === currentList }"
          />
      </div>
-     <button
-       @click="newlist"
-       title="Create a new list by entering/pasting identifiers. Shift-click to create a new list from the currently selected features."
-       >New</button>
+     <p/>
+     <span>Create</span>
+     <select v-model="createMethod">
+       <option
+         v-for="opt in createOptions"
+         :value="opt.value"
+         >{{opt.label}}</option>
+     </select>
+     <button @click="clickedGo">GO</button>
+     <find-genes
+       style="width: 95%; float: right;"
+       ref="findGenes"
+       v-show="createMethod === 'newFromQuery'"
+       />
+
   </div>
 </template>
 
 <script>
 import MComponent from '@/components/MComponent'
 import MyListItem from '@/components/MyListItem'
+import FindGenes from '@/components/FindGenes'
 export default MComponent({
   name: 'MyLists',
   props: ['lists', 'currentList'],
-  components: { MyListItem },
+  components: { MyListItem, FindGenes },
+  data: function () {
+    return {
+      createOptions: [{
+        label: 'New empty list',
+        value: 'newEmpty'
+      }, {
+        label: 'New list from current selection',
+        value: 'newFromSel'
+      }, {
+        label: 'New list from combining lists',
+        value: 'newFromCombo'
+      }, {
+        label: 'New list from query...',
+        value: 'newFromQuery'
+      }],
+      createMethod: 'newEmpty'
+    }
+  },
   methods: {
-    newlist: function (e) {
-      this.$root.$emit(e.shiftKey ? 'list-edit-newfromselected' : 'list-edit-new')
+    clickedGo () {
+      this[this.createMethod]()
+    },
+    newEmpty () {
+      this.$root.$emit('list-edit-new')
+    },
+    newFromSel () {
+      this.$root.$emit('list-edit-newfromselected')
+    },
+    newFromCombo () {
+    },
+    newFromQuery () {
+      this.$refs.findGenes.doSearch()
     }
   }
 })

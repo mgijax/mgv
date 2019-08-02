@@ -374,6 +374,7 @@ class FeatureRegistrar {
     //
     this.id2feat[f.ID] = f
     if (f.cID) {
+
       let d = this.cid2feats[f.cID]
       if (!d) d = this.cid2feats[f.cID] = []
       d.push(f)

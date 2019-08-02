@@ -10,10 +10,10 @@
         >{{search.label}}</option>
     </select>
     <input
+      ref="searchTerm"
       size=30
       :placeholder="currentSelection.placeholder"
-      @blur="doSearch($event.target)"
-      @keypress="blurOnEnter"
+      @keypress="submitOnEnter"
       />
   </div>
 </template>
@@ -35,10 +35,10 @@ export default MComponent({
       this.currentSelection = this.searches.filter(s => s.label === val)[0]
     },
     tellBusy (bool) {
-      this.$parent.isBusy = bool
+      this.$parent.$parent.isBusy = bool
     },
-    doSearch (inp) {
-      let s = inp.value
+    doSearch () {
+      let s = this.$refs.searchTerm.value
       s = s.trim()
       if (!s) return
       let cs = this.currentSelection
@@ -51,8 +51,8 @@ export default MComponent({
         this.tellBusy(false)
       })
     },
-    blurOnEnter (e) {
-      if (e.keyCode === 13) e.target.blur()
+    submitOnEnter (e) {
+      if (e.keyCode === 13) this.doSearch()
     }
   },
   mounted: function () {
