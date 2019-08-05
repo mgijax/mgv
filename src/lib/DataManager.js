@@ -381,6 +381,9 @@ class FeatureRegistrar {
     } else {
       f.cID = null // make sure it's not undefined
     }
+    //
+    f.symbol = f.symbol || f.Name
+    //
     if (f.symbol) {
       let lc = f.symbol.toLowerCase()
       let d = this.symbol2feats[lc]

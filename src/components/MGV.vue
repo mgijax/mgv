@@ -13,26 +13,14 @@
         :style="{ height: visHeight + 'px', overflow: 'scroll' }"
         >
         <!--
-        ============ Find Genes ==============
-        <page-box
-          label="FindGenes"
-          icon="search"
-          >
-          <find-genes
-            ref="findGenes"
-            title="Creates a new list of genes having the specified annotations. Select criterion (eg by pathway), enter a term (eg apoptosis), and hit enter. Results appear in MyLists"
-            />
-        </page-box>
-        -->
-        <!--
-        ============ My Lists ==============
+        ============ Gene Lists ==============
         -->
         <page-box
-          label="Gene lists"
+          label="Lists and searches"
           icon="list"
           >
           <my-lists
-            title="Shows your current gene lists. A list simply contains identifiers. Click on a list to show its items in the genome view; click again to hide them. Click on the 'x' to delete a list. Click on the pencil to edit the list."
+            title="Create, display, and save lists of genes. A list simply contains identifiers. Create lists via searches, pasting identifiers, or combining other lists.  Click on a list to show its items in the genome view; click again to hide them. Click on the 'x' to delete a list. Click on the pencil to edit the list."
             ref="myLists"
             :lists="lists"
             :currentList="currentList"
@@ -825,8 +813,8 @@ button:hover {
   transition: min-width 0.5s, max-width 0.5s, opacity 0.5s;
 }
 [name="leftColumn"].open {
-  min-width: 250px;
-  max-width: 250px;
+  min-width: 260px;
+  max-width: 260px;
   opacity: 1;
 }
 [name="leftColumn"].closed {

@@ -1,7 +1,7 @@
 <template>
   <div class="my-lists">
      <div class="flexcolumn">
-     <span>My lists: {{ lists.length }} list{{ lists.length === 1 ? '' : 's' }}</span>
+     <span>My lists <span style="font-size: smaller;">({{ lists.length }} list{{ lists.length === 1 ? '' : 's' }})</span></span>
      <my-list-item
          v-for="item in lists"
          :key="item.name"
@@ -11,13 +11,15 @@
      </div>
      <p/>
      <span>Create</span>
-     <select v-model="createMethod">
-       <option
-         v-for="opt in createOptions"
-         :value="opt.value"
-         >{{opt.label}}</option>
-     </select>
-     <button @click="clickedGo">GO</button>
+     <div class="flexrow">
+       <select v-model="createMethod">
+         <option
+           v-for="opt in createOptions"
+           :value="opt.value"
+           >{{opt.label}}</option>
+       </select>
+       <button class="gobutton" @click="clickedGo">GO</button>
+     </div>
      <find-genes
        style="width: 95%; float: right;"
        ref="findGenes"
@@ -41,16 +43,16 @@ export default MComponent({
         label: 'New empty list',
         value: 'newEmpty'
       }, {
-        label: 'New list from current selection',
+        label: 'New list from ZoomView  selection',
         value: 'newFromSel'
       }, {
         label: 'New list from combining lists',
         value: 'newFromCombo'
       }, {
-        label: 'New list from query...',
+        label: 'New list from search...',
         value: 'newFromQuery'
       }],
-      createMethod: 'newEmpty'
+      createMethod: 'newFromQuery'
     }
   },
   methods: {
@@ -64,6 +66,7 @@ export default MComponent({
       this.$root.$emit('list-edit-newfromselected')
     },
     newFromCombo () {
+      this.$root.$emit('list-edit-new')
     },
     newFromQuery () {
       this.$refs.findGenes.doSearch()
@@ -76,5 +79,10 @@ export default MComponent({
 .my-lists > div {
   max-height: 250px;
   overflow: scroll;
+}
+.gobutton {
+  background-color: green;
+  color: white;
+  margin: 4px;
 }
 </style>
