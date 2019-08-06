@@ -134,7 +134,7 @@ export default {
   },
   SequenceCart: {
     dbName: DATACACHE_PREFIX + 'user-seqs',
-    fetchUrl: "http://proto.informatics.jax.org/prototypes/sequenceHound/sequenceHound.cgi"
+    fetchUrl: "http://proto.informatics.jax.org/prototypes/mgv-data/fetch.cgi"
   },
   DataManager: {
     initialUrl: "./index.json",

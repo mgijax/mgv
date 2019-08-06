@@ -15,10 +15,10 @@
         :key="i"
         >{{v.replace('::', ' ')}}</div>
     </div>
-    <div>{{prettyPrint(item.length)}}</div>
+    <div>{{prettyPrint(item.totalLength)}}</div>
     <!-- Reverse-complement button (for genomic sequence only) -->
     <m-button
-      v-if="item.type==='dna' && item.start"
+      v-if="item.type==='dna' && !item.ID"
       :icon="item.reverseComplement ? 'AG' : 'CT'"
       :style="{ transform: `rotate(${item.reverseComplement ? 180 : 0}deg)` }"
       :title="`Reverse complement is ${item.reverseComplement ? 'ON' : 'OFF'}. Click to turn ${item.reverseComplement ? 'OFF' : 'ON'}.`"
@@ -84,8 +84,8 @@ export default MComponent({
         return i.header.split('\n')
       } else {
         return [
-          `${i.genome.name} (${i.type || 'dna'})`,
-          `${i.ID || ''}` || `${i.chr.name}:${i.start}..${i.end}`
+          `${i.genome} (${i.type || 'dna'})`,
+          `${i.ID || ''}` || `${i.chromosome}:${i.start[0]}..${i.start[0] + i.length[0] - 1}`
         ]
       }
     }

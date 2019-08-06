@@ -978,15 +978,20 @@ export default MComponent({
         const L = r.end - r.start + 1
         const start = Math.floor(r.start + d.pstart * L)
         const end = Math.floor(start + d.plength * L - 1)
+	const gname = this.region.genome.name
+	const cname = this.region.chr.name
+	const rc = d.reverseComplement ? 'reverse complemented' : ''
         const seq = {
-          genome: this.region.genome,
-          chr: this.region.chr,
-          start: start,
-          end: end,
+	  header: `>${gname}::${cname}:${start}..${end} ${rc} (dna)`,
+          genome: this.region.genome.name,
+          genomeUrl: this.region.genome.url,
+          chromosome: this.region.chr.name,
+          start: [start],
+          length: [end - start + 1],
           type: 'dna',
           reverseComplement: d.reverseComplement,
           selected: true,
-          length: end - start + 1
+          totalLength: end - start + 1
         }
         this.$root.$emit('sequence-selected', [seq])
       }

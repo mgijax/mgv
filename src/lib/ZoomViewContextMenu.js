@@ -62,16 +62,21 @@ function getMenus(thisObj) {
     const parts = t ? (stype === 'cds' ? t.cds.pieces : t.exons) : [f]
     const starts = parts.map(p => p.start)
     const lengths = parts.map(p => p.end - p.start + 1)
-    return {
+    const d = {
       selected: true,
-      genome: f.genome,
+      genome: f.genome.name,
+      genomeUrl: f.genome.url,
       type: stype,
       ID: id,
       header: `${gn}::${id} ${sym} (${stype})`,
+      chromosome: f.chr.name,
       start: starts,
       length: lengths,
-      totalLength: len
+      totalLength: len,
+      reverseComplement: f.strand === '-',
+      translate: false
     }
+    return d
   }
   //
   function sequenceSelectionOption (type) {

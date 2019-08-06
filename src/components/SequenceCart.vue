@@ -131,19 +131,17 @@ export default MComponent({
     downloadSelected: function () {
       const selected = this.cart.filter(item => item.selected)
       if (selected.length === 0) return
-      this.dataManager().getSequenceUrls(selected).then(descrs => {
-        this.descriptors = JSON.stringify(descrs)
-        this.$nextTick(() => {
-          this.$refs.sequenceDownloadForm.submit()
-          this.$refs.sequenceDownloadForm.reset()
-        })
+      this.descriptors = JSON.stringify(selected)
+      this.$nextTick(() => {
+	  this.$refs.sequenceDownloadForm.submit()
+	  this.$refs.sequenceDownloadForm.reset()
       })
     },
     save () {
       return this.kstore.set('all', this.cart.map(seq => {
         // sequences have actual genome objects. For db store, just want the name.
         const obj = Object.assign({}, seq)
-        obj.genome = obj.genome.name
+        //obj.genome = obj.genome.name
         return obj
       }))
     },
@@ -154,7 +152,7 @@ export default MComponent({
             // look up the genome name, convert to actual genome
             const g = this.dataManager().lookupGenome(obj.genome)
             if (g) {
-              obj.genome = g
+              //obj.genome = g
               return obj
             }
             return null
