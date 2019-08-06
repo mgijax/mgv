@@ -208,10 +208,14 @@ class DataManager {
     }
     // compute the length of the CDS by adding up the included exons (taking care not to
     // include UTRs)
-    c.length = exons.reduce((a,x) => {
-      if (c.start > x.end || c.end < x.start) return a
-      return a + Math.min(c.end, x.end) - Math.max(c.start, x.start) + 1
-    }, 0)
+    c.pieces = exons.reduce((a,x) => {
+      if (c.start <= x.end && c.end >= x.start) {
+        const piece = { start: Math.max(c.start, x.start), end: Math.min(c.end, x.end) }
+        a.push(piece)
+      }
+      return a
+    }, [])
+    c.length = c.pieces.reduce((a,x) => a + x.end - x.start + 1, 0)
     return c
   }
   // Given transcripts for a gene, returns an object containing (1) the "distinct" exons, and 

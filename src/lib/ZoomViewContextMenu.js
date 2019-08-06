@@ -31,22 +31,6 @@ function getMenus(thisObj) {
     }
   }
   //
-  function sequenceDownloadOption (type) {
-    return {
-      icon: 'cloud_download',
-      label: `Download ${type} sequences`,
-      helpText: `Download ${type} sequences for this feature from currently displayed genomes.`,
-      disabled: f => f.sotype !== 'protein_coding_gene' && type === 'cds',
-      extraArgs: [type],
-      handler: (function (cxt, seqtype) {
-        const f = cxt.feature
-        const genologs = this.dataManager().getGenologs(f, this.context.strips.map(s => s.genome))
-        const url = connections.MouseMine.getFastaUrl(genologs, seqtype)
-        window.open(url, '_blank')
-      }).bind(thisObj)
-    }
-  }
-  //
   // A sequence descriptor takes one of two forms depending on whether the
   // sequence is associated with a specific object or is an arbitrary slice of the genome.
   //
@@ -75,13 +59,18 @@ function getMenus(thisObj) {
     const len = t ? (stype === 'cds' ? t.cds.length : t.length) : f.length
     const sym = f.symbol || ''
     const gn = f.genome.name
+    const parts = t ? (stype === 'cds' ? t.cds.pieces : t.exons) : [f]
+    const starts = parts.map(p => p.start)
+    const lengths = parts.map(p => p.end - p.start + 1)
     return {
       selected: true,
       genome: f.genome,
       type: stype,
       ID: id,
-      length: len,
-      header: `${gn}::${id} ${sym} (${stype})`
+      header: `${gn}::${id} ${sym} (${stype})`,
+      start: starts,
+      length: lengths,
+      totalLength: len
     }
   }
   //
@@ -176,25 +165,12 @@ function getMenus(thisObj) {
      ]
     }
   ]
-  // 
-  const humanMenu = [
-    alignOption(),
-    externalLinkOption('Ensembl', 'http://www.ensembl.org/Homo_sapiens/Gene/Summary?db=core;g='),
-    externalLinkOption('HumanMine', 'http://www.humanmine.org/humanmine/portal.do?class=Gene&externalids=')
-  ]
-  // 
-  const ratMenu = [
-    alignOption(),
-    externalLinkOption('Ensembl', 'http://www.ensembl.org/Rattus_norvegicus/Gene/Summary?db=core;g=')
-  ]
 
   return {
     '10089': mouseMenu,
     '10090': mouseMenu,
     '10093': mouseMenu,
     '10096': mouseMenu,
-    '10116': ratMenu,
-    '9606': humanMenu,
     'default': [ alignOption() ]
   }
 }
