@@ -45,7 +45,7 @@ export default MComponent({
       this.tellBusy(true)
       cs.handler && cs.handler(s).then(data => {
         this.$root.$emit('query-returned', { queryType: this.currentSelection, query: s, results: data })
-        inp.value = ''
+	this.$refs.searchTerm.value = ''
         this.tellBusy(false)
       }).catch(err => {
         this.tellBusy(false)
