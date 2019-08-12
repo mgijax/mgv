@@ -133,12 +133,11 @@ export default {
     dbName: DATACACHE_PREFIX + 'blocks'
   },
   SequenceCart: {
-    dbName: DATACACHE_PREFIX + 'user-seqs',
-    fetchUrl: "http://proto.informatics.jax.org/prototypes/mgv-data/fetch.cgi"
+    dbName: DATACACHE_PREFIX + 'user-seqs'
   },
   DataManager: {
     initialUrl: "./index.json",
-    // max size allowed for a feature
+    fetchUrl: "http://proto.informatics.jax.org/prototypes/mgv-data/fetch.cgi",
     featureSizeLimit: 10000000
   },
   PreferencesManager: {
@@ -146,17 +145,5 @@ export default {
   },
   HelpBox: {
     showOnStartup: true
-  },
-  InterMineConnection: {
-    mines: [{
-      name: 'MouseMine',
-      url: 'http://www.mousemine.org/mousemine',
-    }, {
-      name: 'HumanMine',
-      url: 'http://www.humanmine.org/humanmine'
-    }, {
-      name: 'FlyMine',
-      url: 'http://www.flymine.org/flymine'
-    }]
   }
 }

@@ -760,8 +760,8 @@ export default MComponent({
           this.$emit('busy-start')
           this.dataManager().getSequence(r.genome, r.chr, r.start, r.end).then(data => {
             if (data) {
-              this.seqStart = data.start
-              this.sequence = data.seq
+              this.seqStart = r.start - 1
+              this.sequence = data
             } else {
               this.sequence = ''
             }

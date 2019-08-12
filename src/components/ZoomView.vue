@@ -31,7 +31,6 @@ import ZoomControls from '@/components/ZoomControls'
 import ZoomRegionControls from '@/components/ZoomRegionControls'
 import ZoomMain from '@/components/ZoomMain'
 import MMenu from '@/components/MMenu'
-import { connections } from '@/lib/InterMineServices'
 import getFeatureMenus from '@/lib/ZoomViewContextMenu'
 export default MComponent({
   name: 'ZoomView',

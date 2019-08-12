@@ -250,56 +250,62 @@ class DataManager {
     }
   }
   // 
-
   // Returns a promise for the genomic sequence of the specified range for the specified genome
   getSequence (g, c, s, e, doRC) {
-    return this.greg.getReader(g, 'sequences')
-      .then(reader => reader ? reader.readRange(c, s, e) : '')
-      .then(s => {
-        s.seq = doRC ? reverseComplement(s.seq) : s.seq
-        return s
-      })
-  }
-  // Returns a promise for the sequence of the specified object
-  getSequenceForObject(g, id, type, doRC, doPT) {
-    return this.greg.getReader(g, 'sequences').then(reader => {
-      return reader ? reader.getFastaForObject(id, type) : null
-    }).then(s => {
-        s.seq = doRC ? reverseComplement(s.seq) : doPT ? translate(s.seq) : s.seq
-        return s
+    const descr = {
+      header: `>${g.name}::${c.name}:${s}..${e}`,
+      genome: g.name,
+      genomeUrl: g.url,
+      chromosome: c.name,
+      start: s,
+      length: e - s + 1,
+      reverseComplement: Boolean(doRC),
+      type: "dna"
+    }
+    const url = `${config.DataManager.fetchUrl}?descriptors=${JSON.stringify([descr])}`
+    const p = fetch(url).then(r => r.text()).then(txt => {
+      txt = txt.split('\n')
+      txt.shift()
+      return txt.join('')
     })
+    return p
   }
   //
-  getSequences(descrs) {
-    const ps = descrs.map(d => {
-      if (d.ID) {
-        return this.getSequenceForObject(d.genome, d.ID, d.type, d.reverseComplement, d.translate)
-      } else {
-        return this.getSequence(d.genome, d.chr, d.start, d.end, d.reverseComplement)
-      }
-    })
-    return Promise.all(ps)
-  }
-  // Returns a promise for the urls that will fetch the each of the sequences described
-  // by the given list of descriptors.
-  getSequenceUrls(descrs) {
-    const ps = descrs.map(d => {
-      return this.greg.getReader(d.genome, 'sequences').then(reader => {
-        const dd = Object.assign({}, d)
-        dd.genome = d.genome.name
-        if (dd.chr) dd.chr = d.chr.name
-        dd.url = null
-        if (reader && reader.mine) {
-          if (d.ID) {
-            dd.url = reader.mine.getFastaUrl(d.ID, d.type, true)
-          } else {
-            dd.url = reader.mine.getChromosomeSliceUrl(d.genome, d.chr, d.start, d.end)
-          }
-        }
-        return dd
-      })
-    })
-    return Promise.all(ps)
+  // A sequence descriptor specifies arbitrary slice(s) of a chromosome,
+  // and whether to reverse complement and/or translate the sequence.
+  // The descriptor is an object with these fields:
+  // - header (string) The header line for the sequence.
+  // - genome (string) name of the genome
+  // - chromosome (string) the chromosome
+  // - start (int) start coordinate(s)
+  // - length (int) length(s) of the region(s)
+  // - type (string) one of: 'dna', 'transcript', 'cds'
+  // - reverseComplement (boolean) True iff the sequence should be reverse complemented 
+  // - translate (boolean) True iff the sequence should be translated to protein
+  // - selected (boolean) True iff the sequence is in the selected state
+  //
+  makeSequenceDescriptor (stype, f, t) {
+    const id = t ? (stype === 'cds' ? t.cds.ID : t.ID) : f.ID
+    const len = t ? (stype === 'cds' ? t.cds.length : t.length) : f.length
+    const sym = f.symbol || ''
+    const gn = f.genome.name
+    const parts = t ? (stype === 'cds' ? t.cds.pieces : t.exons) : [f]
+    const starts = parts.map(p => p.start)
+    const lengths = parts.map(p => p.end - p.start + 1)
+    const d = {
+      header: `${gn}::${id} ${sym} (${stype})`,
+      genome: f.genome.name,
+      genomeUrl: f.genome.url,
+      type: stype,
+      chromosome: f.chr.name,
+      start: starts,
+      length: lengths,
+      totalLength: len,
+      selected: true,
+      reverseComplement: f.strand === '-',
+      translate: false
+    }
+    return d
   }
   // Returns the genologs of feature f from the specified genomes in the specified order.
   // If a genolog does not exist in a given genome, that entry in the returned list === undefined.

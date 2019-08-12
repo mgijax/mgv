@@ -1,8 +1,18 @@
-import { connections } from '@/lib/InterMineServices'
+import u from '@/lib/utils'
 
 class MouseMineQueries {
   constructor () {
-    this.cxn = connections.MouseMine
+    this.qUrl = 'http://www.mousemine.org/mousemine/service/query/results?'
+  }
+  // Args:
+  //   q - query in XML fomat
+  //   mapper - (optional) function that maps each result into a desired form
+  doQuery (q, mapper) {
+    mapper = mapper || (x => x)
+    let format = 'json'
+    let query = encodeURIComponent(q)
+    let url = this.qUrl + `format=${format}&query=${query}`
+    return u.fetch(url, 'json').then(data => data.results.map(mapper))
   }
   getQueries () {
     return [{
@@ -52,7 +62,7 @@ class MouseMineQueries {
             <constraint code="B" path="Gene.organism.taxonId" op="=" value="10090"/>
             <constraint code="C" path="Gene.sequenceOntologyTerm.name" op="!=" value="transgene"/>
         </query>`
-    return this.cxn.query(q, r => r[0])
+    return this.doQuery(q, r => r[0])
   }
   //
   queryByPathway (qryString) {
@@ -62,7 +72,7 @@ class MouseMineQueries {
         <constraint path="Gene.pathways" code="A" op="LOOKUP" value="${qryString}"/>
         <constraint path="Gene.organism.taxonId" code="B" op="=" value="10090"/>
         </query>`
-    return this.cxn.query(q, r => r[0])
+    return this.doQuery(q, r => r[0])
   }
   //
   queryByExpression (qryString) {
@@ -77,7 +87,7 @@ class MouseMineQueries {
       <constraint path="GXDExpression.genotype.zygosity" code="D" op="=" value="ht"/>
       <constraint path="GXDExpression.detected" code="E" op="=" value="true"/>
       </query>`
-    return this.cxn.query(q, r => r[0])
+    return this.doQuery(q, r => r[0])
   }
   //
   queryByOntologyTerm (qryString, termTypes) {
@@ -91,7 +101,7 @@ class MouseMineQueries {
             ${termTypes.map(tt => '<value>' + tt + '</value>').join('')}
         </constraint>
     </query>`
-    return this.cxn.query(q, r => r[0])
+    return this.doQuery(q, r => r[0])
   }
   //
   queryByFunction (qryString) {

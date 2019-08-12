@@ -4,13 +4,7 @@ import config from '@/config'
 import KeyStore from '@/lib/KeyStore'
 import CachingFetcher from '@/lib/CachingFetcher'
 import ChunkedGff3FileReader from '@/lib/ChunkedGff3FileReader'
-import { InterMineSequenceReader, MouseMineSequenceReader } from '@/lib/InterMineServices'
-// -------------------------------------------------------------------------------
-const RegisteredReaderClasses = {
-  ChunkedGff3FileReader,
-  InterMineSequenceReader,
-  MouseMineSequenceReader
-}
+//
 // -------------------------------------------------------------------------------
 // Container for track readers for a genome
 class GenomeReader {
@@ -21,8 +15,9 @@ class GenomeReader {
     this.fetcher = new CachingFetcher(n, info.name)
     this.kstore = new KeyStore(n)
     this.readers = this.info.tracks.reduce((a,t) => {
-      const rclass = RegisteredReaderClasses[t.reader.type]
-      a[t.name] = new rclass(this.fetcher, t.name, t.reader, info)
+      if (t.type === 'ChunkedGff3') {
+        a[t.name] = new ChunkedGff3FileReader(this.fetcher, t.name, t.chunkSize, info)
+      }
       return a
     }, {})
     this.readyp = this.checkTimestamp()

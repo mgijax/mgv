@@ -36,13 +36,13 @@
        <!-- Download form -->
        <form
          ref="sequenceDownloadForm"
-         :action="cfg.fetchUrl"
+         :action="fetchUrl"
          target="_blank"
          method="POST"
          download>
          <input type="hidden" name="descriptors" v-model="descriptors"></textarea>
          <div class="flexrow">
-           <input :disabled="cartEmpty" type="text" placeholder="Enter file name." name="filename"></input>
+           <input name="filename" type="text" :disabled="cartEmpty" placeholder="Enter file name."></input>
            <!-- Download button -->
            <m-button
              icon="cloud_download"
@@ -70,6 +70,7 @@
 </template>
 
 <script>
+import config from '@/config'
 import MComponent from '@/components/MComponent'
 import MButton from '@/components/MButton'
 import SequenceCartItem from '@/components/SequenceCartItem'
@@ -87,6 +88,9 @@ export default MComponent({
   computed: {
     cartEmpty () {
       return this.cart.length === 0
+    },
+    fetchUrl () {
+      return config.DataManager.fetchUrl
     }
   },
   methods: {
@@ -118,15 +122,6 @@ export default MComponent({
     },
     unselectAll: function () {
       this.cart.forEach(item => {item.selected = false})
-    },
-    getSequencesForSelected: function () {
-      const selected = this.cart.filter(item => item.selected)
-      return this.dataManager().getSequences(selected)
-    },
-    emitSelected: function () {
-      this.getSequencesForSelected().then(seqs => {
-        this.$root.$emit('sequence-cart-sequences', seqs)
-      })
     },
     downloadSelected: function () {
       const selected = this.cart.filter(item => item.selected)

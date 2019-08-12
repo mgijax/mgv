@@ -1,11 +1,16 @@
 import u from '@/lib/utils'
-import { FeatureTrackReader } from '@/lib/TrackReader'
 
 // ---------------------------------------------------------------------
-// Implementation of a feature reader that reads chunked GFF3 files.
-class ChunkedGff3FileReader extends FeatureTrackReader {
+class ChunkedGff3FileReader {
+  constructor (fetcher, name, chunkSize, genome) {
+    this.fetcher = fetcher
+    this.name = name
+    this.chunkSize = chunkSize
+    this.genome = genome
+    this.url = genome.url
+  }
   readAll () {
-    if (this.cfg.chunkSize === 0) {
+    if (this.chunkSize === 0) {
       return this.fetcher.fetch(`${this.url}/${this.name}/0`, 'gff3')
     } else {
       const ps = this.genome.chromosomes.map(c => this.readChromosome(c))
@@ -18,15 +23,15 @@ class ChunkedGff3FileReader extends FeatureTrackReader {
   readChunks (c, s, e) {
     let url
     let p
-    if (this.cfg.chunkSize === 0) {
+    if (this.chunkSize === 0) {
       url = `${this.url}/${this.name}/0`
       p = this.fetcher.fetch(url, 'gff3').then(data => data.filter(f => f[0] === c.name))
-    } else if (this.cfg.chunkSize === 1) {
+    } else if (this.chunkSize === 1) {
       url = `${this.url}/${this.name}/${c.name}/0`
       p = this.fetcher.fetch(url, 'gff3')
     } else {
-      const minBlk = Math.max(0, Math.floor(s / this.cfg.chunkSize))
-      const maxBlk = Math.max(minBlk, Math.floor(e / this.cfg.chunkSize))
+      const minBlk = Math.max(0, Math.floor(s / this.chunkSize))
+      const maxBlk = Math.max(minBlk, Math.floor(e / this.chunkSize))
       const ps = []
       for (let i = minBlk; i <= maxBlk; i++) {
         url = `${this.url}/${this.name}/${c.name}/${i}`
