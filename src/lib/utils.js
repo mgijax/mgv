@@ -320,25 +320,38 @@ function mergeArrays (A, B, mergeItems) {
   }
 }
 
+//--------------------------------------
+// Recursively flattens arrays of arrays.
+function flatten (lst) {
+    return lst.reduce((a,v) => {
+      if (Array.isArray(v)) {
+	a = a.concat(flatten(v))
+      } else {
+	a.push(v)
+      }
+      return a
+    }, [])
+}
 // ---------------------------------------------
 export default {
-  fail,
-  concatAll,
-  assert,
-  index,
-  dragify,
-  removeDups,
-  randomColor,
   afterTicks,
-  eachTick,
-  prettyPrintBases,
-  fetch,
-  uniqueItems,
+  assert,
+  concatAll,
   deepCopy,
-  wWidth,
+  dragify,
+  eachTick,
+  fail,
+  fetch,
+  flatten,
+  index,
+  mergeArrays,
+  niceBounds,
+  prettyPrintBases,
+  randomColor,
+  removeDups,
+  uniqueItems,
+  unselectAllText,
   wHeight,
   wScrollTop,
-  unselectAllText,
-  niceBounds,
-  mergeArrays
+  wWidth
 }

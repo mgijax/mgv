@@ -38,12 +38,13 @@ function getMenus(thisObj) {
         const f = cxt.feature
 	const t = cxt.transcript
 	const c = t ? t.cds : null
-	const ident = (c || t || f).ID
+	const target = type === 'dna' ? f : type === 'transcript' ? t : type === 'cds' ? c : f
+	const ident = target ? target.ID : ''
         const all = which === 'all'
 	if (all) {
-	  return `${type} ${f.ID} and genologs`
+	  return `${f.ID} and genologs, all ${type}`
 	} else {
-	  return `${type} ${ident}`
+	  return `${ident} ${type}`
 	}
       },
       helpText: cxt => {
@@ -55,7 +56,7 @@ function getMenus(thisObj) {
 	if (all) {
           return `Adds ${type} sequences to your cart for ${f.ID} from all currently displayed genomes.`
 	} else {
-          return `Adds ${type} sequence to your cart ${ident} feature.`
+          return `Adds ${type} sequence to your cart for feature ${ident}.`
 	}
       },
       disabled: cxt => {
@@ -78,13 +79,15 @@ function getMenus(thisObj) {
 	  this.dataManager().getGenologs(f, this.context.strips.map(
 	      s => s.genome)).filter(x => x)
 	  : [f]
-        const seqs = genologs.map(ff => {
+        const seqs = u.flatten(genologs.map(ff => {
           if (seqtype === 'dna') {
             return this.dataManager().makeSequenceDescriptor(seqtype, ff)
           } else if (seqtype === 'transcript') {
             return (t ? [t] : all ? ff.transcripts : []).map(tt => {
               return this.dataManager().makeSequenceDescriptor(seqtype, ff, tt)
             })
+          } else if (seqtype === 'composite transcript') {
+            return this.dataManager().makeSequenceDescriptor('transcript', ff, ff.composite)
           } else if (seqtype === 'cds') {
             return (c ? [t] : all ? ff.transcripts.filter(t => t.cds) : []).map(cc => {
               return this.dataManager().makeSequenceDescriptor(seqtype, ff, cc)
@@ -92,15 +95,7 @@ function getMenus(thisObj) {
           } else {
             u.fail('Unknown sequence type: ' + seqtype)
           }
-        }).reduce((a,v) => {
-          // flatten array where some elements are also arrays
-          if (Array.isArray(v)) {
-            return a.concat(v)
-          } else {
-            a.push(v)
-            return a
-          }
-        }, [])
+        }))
         this.$root.$emit('sequence-selected', seqs)
       }).bind(thisObj)
     }
@@ -120,9 +115,11 @@ function getMenus(thisObj) {
      helpText: 'Add sequences to cart',
      menuItems: [
       sequenceSelectionOption('dna','this'),
+      sequenceSelectionOption('composite transcript','this'),
       sequenceSelectionOption('transcript','this'),
       sequenceSelectionOption('cds','this'),
       sequenceSelectionOption('dna','all'),
+      sequenceSelectionOption('composite transcript','all'),
       sequenceSelectionOption('transcript','all'),
       sequenceSelectionOption('cds','all')
      ]
