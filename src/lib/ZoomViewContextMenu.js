@@ -42,7 +42,7 @@ function getMenus(thisObj) {
 	const ident = target ? target.ID : ''
         const all = which === 'all'
 	if (all) {
-	  return `${f.ID} and genologs, all ${type}`
+	  return `${f.ID} and all genologs, ${type}`
 	} else {
 	  return `${ident} ${type}`
 	}
@@ -127,11 +127,7 @@ function getMenus(thisObj) {
   ]
 
   return {
-    '10089': mouseMenu,
-    '10090': mouseMenu,
-    '10093': mouseMenu,
-    '10096': mouseMenu,
-    'default': [ alignOption() ]
+    'default': mouseMenu
   }
 }
 
