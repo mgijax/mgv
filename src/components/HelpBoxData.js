@@ -119,6 +119,11 @@ export default [{
           Genome regions can be resized by dragging the gray divider bar between
           neighboring regions.
           `
+      }, {
+      what: `Metadata`,
+      how: `
+          Metadata such as the genome build number is displayed when you mouse over the genome's name in the ${ref('ZoomView')}. 
+          `
     }]
   }, {  
     name: `Navigation`,
@@ -197,37 +202,38 @@ export default [{
           click the ${i('delete')} button.`
     }]
   }, {
-    name: `Lists`,
-    description: `You can create and display lists of genes. You can create lists by selecting specific
-        genes, by entering a list of symbols or IDs, by specifying a disease, phenotype or other category,
-        or by combining other lists. Your current lists are shown under ${ref('MyLists')}.`,
+    name: `Lists and searches`,
+    description: `You can create and display lists of genes. Your current lists plus controls for creating new lists are
+        available under ${ref('Lists and searches')}. You can create lists by selecting specific
+        genes, by entering a list of symbols or IDs, by searching by a disease, phenotype or other category,
+        or by combining other lists.`, 
     items: [{
-      what: `Create by category`,
-      how: `Under ${ref('FindGenes')}, choose a category (e.g. "...by phenotype or disease"), enter a term
-          (e.g. "Parkinson") and hit tab or enter. The results are shown as a new list entry under
-          ${ref('MyLists')}.
+      what: `Create by search`,
+      how: `Under Create, choose a category (e.g. "...by phenotype or disease"), enter a term
+          (e.g. "Parkinson") and click the "GO" button. The results are shown as a new list entry under MyLists.
           If your category term retured no or unexpected results, check 
           <a href="http://www.mousemine.org/" target="_blank">MouseMine</a> for term usage.
           `
       }, {
       what: `Create from selection`,
       how: `In the ${ref('ZoomView')}, you select genes by clicking on them. Hold the shift key to select more
-          than one. Then, in ${ref('MyLists')}, shift-click the "New" button.`
+          than one. Then, under Create, select "New list from ZoomView selection" and click the "GO" button.
+	  `
       }, {
       what: `Create by combining`,
       how: `Example: you have lists A and B and you want to create C containing the genes common to
-          both. (1) Click "New" in ${ref('MyLists')}. (2) Drag list A from ${ref('MyLists')} onto the
-          ${ref('ListEditor')} items area.
+          both. (1) Under Create, select "New list from combining lists", and click "GO". The ${ref('ListEditor')} appears.
+	  (2) Drag list A from MyLists onto the ${ref('ListEditor')} items area.
           (3) Drag list B onto the set intersection area. Neighboring areas implement set union and set
           difference. You can also combine the current selection with a list by simply clicking on one
           of the set operators.
           (Example: to add the current selection to a list, click the union area.)
-          (4) Click the Create button at the bottom of the ListEditor to generate
-          the set of intersection genes, which are also displayed in the GenomeView.
+          (4) Click the Create button at the bottom of the ${ref('ListEditor')} to generate
+          the set of intersection genes, which are also displayed in the ${ref('GenomeView')}.
           `
       }, {
       what: `Display a list`,
-      how: `Click on the list in ${ref('MyLists')}. The positions of all list items are shown in the ${ref('GenomeView')}.
+      how: `Click on the list under MyLists. The positions of all list items are shown in the ${ref('GenomeView')}.
       In the ${ref('ZoomView')}, any list items currently in view are highlighted. To stop displaying a list,
       click on it again. To step through the items in the list, shift-click the list repeatedly.`
       }, {
