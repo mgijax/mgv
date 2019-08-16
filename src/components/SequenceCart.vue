@@ -50,6 +50,13 @@
              @click="downloadSelected"
              :disabled="cartEmpty"
              />
+           <!-- Copy to clipboard button -->
+           <m-button
+             icon="file_copy"
+             title="Copy selected sequences to clipboard in Fasta format."
+             @click="copySelected"
+             :disabled="cartEmpty"
+             />
          </div>
        </form>
 
@@ -130,6 +137,22 @@ export default MComponent({
       this.$nextTick(() => {
 	  this.$refs.sequenceDownloadForm.submit()
 	  this.$refs.sequenceDownloadForm.reset()
+      })
+    },
+    copySelected: function () {
+      const selected = this.cart.filter(item => item.selected)
+      if (selected.length === 0) return
+      const size = selected.reduce((a,d) => a + d.totalLength, 0)
+      if (size > 10000000) {
+        if (!confirm(`Really copy ${Math.round(size/1000000)}Mb to the clipboard?`)) return
+      }
+      this.dataManager().getSequences(selected).then(text => {
+        const dummy = document.createElement("textarea")
+        document.body.appendChild(dummy);
+        dummy.value = text;
+        dummy.select();
+        document.execCommand("copy");
+        document.body.removeChild(dummy);
       })
     },
     save () {

@@ -249,6 +249,10 @@ class DataManager {
       composite: cExons
     }
   }
+  getSequences (descrs) {
+    const url = `${config.DataManager.fetchUrl}?descriptors=${JSON.stringify(descrs)}`
+    return fetch(url).then(r => r.text())
+  }
   // 
   // Returns a promise for the genomic sequence of the specified range for the specified genome
   getSequence (g, c, s, e, doRC) {
@@ -262,8 +266,7 @@ class DataManager {
       reverseComplement: Boolean(doRC),
       type: "dna"
     }
-    const url = `${config.DataManager.fetchUrl}?descriptors=${JSON.stringify([descr])}`
-    const p = fetch(url).then(r => r.text()).then(txt => {
+    const p = this.getSequences([descr]).then(txt => {
       txt = txt.split('\n')
       txt.shift()
       return txt.join('')

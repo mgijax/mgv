@@ -149,9 +149,9 @@ export default [{
     }]
   }, {
     name: `Sequences`,
-    description: `You can select sequences and download them in FASTA format. 
+    description: `You can select sequences and download them in FASTA format or copy them to the clipboard.
         The ${ref('SequenceCart')} contains (descriptors of) sequences that you select plus
-        controls for downloading. Actual sequences are not materialized until download
+        controls for downloading/copying. Actual sequences are not materialized until download
         time, so large(-ish) sequences are ok. If you want whole chromosomes, though,
         you should go to <a href="ftp://ftp.ensembl.org/pub/" target="_blank">Ensembl</a>.
         `,
@@ -169,8 +169,16 @@ export default [{
           `
       }, {
       what: `Download sequences`,
-      how: `In the ${ref('SequenceCart')}, select the sequences you want to download. Fill 
-          in a file name (optional). Then click the ${i('cloud_download')} button.
+      how: `In the ${ref('SequenceCart')}, select the sequences you want to download,
+	  and click the ${i('cloud_download')} button. If you fill in a file name, the sequences
+	  will be downloaded to that file. If not, the sequences will be displayed in a new
+	  browser window.
+          `
+      }, {
+      what: `Copy sequences to the clipboard`,
+      how: `In the ${ref('SequenceCart')}, select the sequences you want to copy.
+          Then click the ${i('file_copy')} button. For very large sequences, downloading to
+	  a file is preferred.
           `
       }, {
       what: `Reverse complement`,
