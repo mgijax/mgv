@@ -44,7 +44,7 @@
       :y="-1"
       stroke="none"
       font-family= "sans-serif"
-      fill="black">{{ genome.name }}</text>
+      fill="black">{{ genome.name }}<title>{{ genomeTitleText(genome) }}</text>
     <!-- end cap -->
     <g>
       <rect name="endcap"
@@ -135,6 +135,11 @@ export default MComponent({
     },
   },
   methods: {
+    genomeTitleText: function (g) {
+      const entries = Object.entries(g.metadata)
+      entries.sort((a,b) => a[0] < b[0] ? -1 : a[0] > b[0] ? 1 : 0)
+      return entries.map(e => `${e[0]}: ${e[1]}`).join('\n')
+    },
     regionRdragstart: function (d) {
       this.rDragging = true
     },
