@@ -44,7 +44,7 @@
       :y="-1"
       stroke="none"
       font-family= "sans-serif"
-      fill="black">{{ genome.name }}<title>{{ genomeTitleText(genome) }}</text>
+      fill="black">{{ genome.name }}<title>{{ genomeTitleText(genome) }}</title></text>
     <!-- end cap -->
     <g>
       <rect name="endcap"

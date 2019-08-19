@@ -333,6 +333,24 @@ function flatten (lst) {
     }, [])
 }
 // ---------------------------------------------
+// Returns a list of DOMClientRect objects for the given list
+// of components, optionally sorted as specified.
+// Each component is added as a 'component' attribute to its rect object.
+// If specified, sortedBy is the name of an attribite in DOMClientRect,
+// e.g., 'x' or 'y'.
+// 
+function getBBoxes(components, sortedBy) {
+  const kids = components.map(c => {
+    const r = c.$el.getBoundingClientRect()
+    r.component = c
+    return r
+  })
+  if (sortedBy) {
+    kids.sort((a,b) => a[sortedBy] - b[sortedBy])
+  }
+  return kids
+}
+// ---------------------------------------------
 export default {
   afterTicks,
   assert,
@@ -343,6 +361,7 @@ export default {
   fail,
   fetch,
   flatten,
+  getBBoxes,
   index,
   mergeArrays,
   niceBounds,

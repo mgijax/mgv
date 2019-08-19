@@ -125,10 +125,7 @@ export default MComponent({
       if (this.isOpen) this.toggleOpen()
     },
     // -------------------------------
-    // Drag and drop handlers. NOTE that Firefox drag event do not expose clientX, clientY 
-    // (among others) - they are always 0. The workaround is to attach dragover listeners on
-    // the document. Here, we attach the listener on dragstart and remove it on dragend.
-    // This also works on chrome and safari.
+    // Drag and drop handlers. 
     dragStart: function (ev) {
       // console.log('PageBox.dragStart', ev)
       let dt = ev.dataTransfer
@@ -143,6 +140,15 @@ export default MComponent({
       d.yStart = ev.clientY
       d.dx = 0
       d.dy = 0
+      //
+      d.sibs = u.getBBoxes(this.$parent.$children, 'y')
+      d.myIndex = d.sibs.map(s => s.component).indexOf(this)
+      //
+      // Firefox drag event does not expose clientX, clientY 
+      // (among others) - they are always 0. The workaround is to attach dragover listeners on
+      // the document. Here, we attach the listener on dragstart and remove it on dragend.
+      // This also works on chrome and safari.
+      //
       d.listener = ev => this.drag(ev)
       document.addEventListener('dragover', d.listener)
     },
@@ -151,6 +157,30 @@ export default MComponent({
       let d = this.ddData
       if (this.floating) d.dx = ev.clientX - d.xStart
       d.dy = ev.clientY - d.yStart
+      const mybb = this.$el.getBoundingClientRect()
+      const osibs = d.sibs.map((s,i) => [s,i]).filter(s => {
+        const overlaps = s[0].top <= mybb.bottom && s[0].bottom >= mybb.top
+        const notme = s[1] !== d.myIndex
+        return notme && overlaps
+      })
+      if (osibs.length === 0) return
+      let imin, imax, delta
+      if (d.dy < 0) {
+        // dragging up => move items above me down
+        imin = osibs[0][1]
+        imax = d.myIndex - 1
+        delta = mybb.height
+      } else {
+        // dragging down => move items below me up
+        imin = d.myIndex + 1
+        imax = osibs[osibs.length - 1][1]
+        delta = -mybb.height
+      }
+      d.sibs.forEach((s,i) => {
+        if (i !== d.myIndex) {
+          s.component.ddData.dy = (i >= imin && i <= imax) ? delta : 0
+        }
+      })
     },
     dragEnd: function (ev) {
       // console.log('PageBox.dragEnd', ev)
@@ -162,6 +192,7 @@ export default MComponent({
         this.y = Math.max(-1, this.y + d.dy)
       }
       d.dx = d.dy = 0
+      d.sibs.forEach(s => { s.component.ddData.dy = 0 })
     }
     // end D&D handlers
     // -------------------------------

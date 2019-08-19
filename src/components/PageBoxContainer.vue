@@ -40,13 +40,9 @@ export default MComponent({
     // Returns:
     //   A list of the form: [{ label, isOpen }]
     getChildState: function () {
-      let kids = this.$children.map(c => {
-        let y = c.$el.getBoundingClientRect().y
-        return { c, y }
-      })
-      kids.sort((a, b) => a.y - b.y)
-      return kids.map(k => {
-        return { label: k.c.label, isOpen: k.c.isOpen, floating: k.c.floating }
+      let cbs = u.getBBoxes(this.$children, 'y')
+      return cbs.map(cb => {
+        return { label: cb.component.label, isOpen: cb.component.isOpen, floating: cb.component.floating }
       })
     },
     // Sets the Y order and open/closed state of my children.
