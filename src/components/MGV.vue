@@ -669,12 +669,14 @@ export default MComponent({
           this.currentList = null
           this.currentListSet = null
           this.currentListItem = 0
+	  this.$root.$emit('list-selection', null)
           return
         }
       } else {
         this.currentList = lst
         this.currentListSet = new Set(lst.items)
         this.currentListItem = 0
+	this.$root.$emit('list-selection', this.currentList)
         if (!shift) return
       }
       let lm = lst.items[this.currentListItem]

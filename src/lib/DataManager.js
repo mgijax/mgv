@@ -87,7 +87,7 @@ class DataManager {
     let freg = new FeatureRegistrar(g, c, this.id2feat, this.cid2feats, this.symbol2feats)
     let cfeats = feats.map(f => freg.register(f)).filter(x => x)
     this.cache[g.name][c.name] = cfeats
-    this.assignLanes(cfeats)
+    //this.assignLanes(cfeats)
     return cfeats
   }
   // Returns a promise for all the feature of the specified genome, as a list, sorted by
@@ -143,7 +143,7 @@ class DataManager {
             //f.transcripts.push(cT)
             needLayout = true
           })
-          if (needLayout) this.assignLanes(this.cache[g.name][c.name])
+          //if (needLayout) this.assignLanes(this.cache[g.name][c.name])
           return feats
         })
       }
