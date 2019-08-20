@@ -266,7 +266,7 @@
           :y="0"
           :font-size="featureFontSize"
           :style="{
-            textAnchor: 'middle',
+            textAnchor: 'start',
             fontFamily: 'sans-serif',
             fontWeight: featureMouseover(f) ? 'bold' : 'normal'
           }"
@@ -651,8 +651,7 @@ export default MComponent({
     },
     featureTextX: function (f) {
       let s = Math.max(f.start, this.region.start + this.deltaB)
-      let e = Math.min(f.end, this.region.end + this.deltaB)
-      return this.b2p((s + e) / 2)
+      return this.b2p(s)
     },
     featureStyle (f) {
       let fill = this.featureColor(f)
@@ -754,7 +753,7 @@ export default MComponent({
       this.dataManager().getGenes(r.genome, r.chr, r.start - delta, r.end + delta, this.showDetails).then(feats => {
         this.busy = false
         this.features = feats.filter(f => this.getFacets().test(f))
-	this.dataManager().assignLanes(this.features)
+	this.dataManager().assignLanes(this.features, this.showDetails ? this.ppb : null, this.featureFontSize)
         this.nextTick(() => {
           this.$emit('busy-end')
           this.$emit('region-draw', this)

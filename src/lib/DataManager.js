@@ -335,19 +335,22 @@ class DataManager {
     return this.getGenologs(f, [g])[0]
   }
   //
-  assignLanes (feats) {
+  assignLanes (feats, ppb, fsize) {
     const ca = new ContigAssigner()
     const slap = new SwimLaneAssigner()
     const slam = new SwimLaneAssigner()
     const fp = new FeaturePacker(0, 15000)
     feats.forEach(f => {
+      const lbl = f.symbol || f.ID
+      const lblLenBp = ppb ? lbl.length * fsize / ppb : 0 
+      const start = f.start
+      const end = Math.max(f.end, start + lblLenBp - 1)
       const sla = f.strand === '+' ? slap : slam
-      f.layout.contig = ca.assignNext(f.start, f.end)
-      f.layout.l1 = sla.assignNext(f.start, f.end)
-      f.layout.l2 = fp.assignNext(f.start, f.end, 1 + f.transcripts.length, f.ID)
-    })
+      f.layout.contig = ca.assignNext(start, end)
+      f.layout.l1 = sla.assignNext(start, end)
+      f.layout.l2 = fp.assignNext(start, end, 1 + f.transcripts.length, f.ID)
+    })  
   }
-
 }
 // Registers features for one chromsome of a genome
 class FeatureRegistrar {
