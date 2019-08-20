@@ -65,8 +65,9 @@ export default MComponent({
   },
   methods: {
     synGenome: function (i) {
-      if (this.context.strips.length !== 2) return null
-      return this.context.strips[1-i].genome
+      return null
+      //if (this.context.strips.length !== 2) return null
+      //return this.context.strips[1-i].genome
     },
     downloadImage: function (e) {
       if (e.shiftKey) {
