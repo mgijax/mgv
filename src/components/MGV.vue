@@ -724,10 +724,10 @@ export default MComponent({
     // (names and lengths).
     //
     this.dataManager.getGenomes().then(genomes => {
-      //
-      genomes.sort((a,b) => {
-        return a.name < b.name ? -1 : (a.name > b.name ? 1 : 0)
-      })
+      const byName = (a,b) => a.name < b.name ? -1 : (a.name > b.name ? 1 : 0)
+      const part1 = genomes.filter(g => g.name.indexOf(".") === -1).sort(byName)
+      const part2 = genomes.filter(g => g.name.indexOf(".") !== -1).sort(byName)
+      genomes = part1.concat(part2)
       // now set up the initial state
       this.allGenomes = genomes // all the genomes (at least one)
       this.rGenome = genomes[0] 
