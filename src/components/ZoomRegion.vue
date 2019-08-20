@@ -174,6 +174,7 @@
         :key="f.ID"
         :name="f.ID"
         :canonical="f.cID"
+	:strand="f.strand"
         class="feature"
         :class="{ highlight: featureHighlighted(f), visible: featureVisible(f)}"
         :transform="featureTransform(f)"

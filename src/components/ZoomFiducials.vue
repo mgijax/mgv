@@ -15,9 +15,9 @@
       v-for="(p, i) in s.pairs"
       :key="i"
       :points="points(p[0], p[1])"
-      fill="black"
+      :fill="color(p[0], p[1])"
       :fill-opacity="cfg.fillOpacity"
-      stroke="black"
+      :stroke="color(p[0], p[1])"
       stroke-opacity="0.3"
       />
     </g>
@@ -42,8 +42,19 @@ export default MComponent({
       let pbb = this.$parent.$el.getBoundingClientRect()
       return `translate(${-pbb.x}, ${-pbb.y})`
     },
+    color: function (r1, r2) {
+      return r1.strand === r2.strand ? 'black' : 'red'
+    },
     points: function (r1, r2) {
-      return `${r1.x},${r1.y + r1.height} ${r2.x},${r2.y} ${r2.x + r2.width},${r2.y} ${r1.x + r1.width},${r1.y + r1.height}`
+      const p1 = `${r1.x},${r1.y + r1.height}`
+      const p2 = `${r2.x},${r2.y}`
+      const p3 = `${r2.x + r2.width},${r2.y}`
+      const p4 = `${r1.x + r1.width},${r1.y + r1.height}`
+      if (r1.strand === r2.strand) {
+	  return `${p1} ${p2} ${p3} ${p4}`
+      } else {
+	  return `${p1} ${p3} ${p2} ${p4}`
+      }
     },
     getStacks () {
       if (!this.cfg.showConnectors) return []
@@ -68,7 +79,9 @@ export default MComponent({
           if (!cid) return
           const cdata = ix[cid] ? ix[cid] : { cid:cid, strips: [] }
           const rects = cdata.strips[zi] || []
-          rects.push(fel.querySelector('.feature > rect').getBoundingClientRect())
+	  const rect = fel.querySelector('.feature > rect').getBoundingClientRect()
+	  rect.strand = fel.getAttribute('strand')
+          rects.push(rect)
           cdata.strips[zi] = rects
           ix[cid] = cdata
         })
