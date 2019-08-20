@@ -249,8 +249,9 @@ class DataManager {
       composite: cExons
     }
   }
-  getSequences (descrs) {
-    const url = `${config.DataManager.fetchUrl}?descriptors=${JSON.stringify(descrs)}`
+  getSequences (descrs, filename) {
+    const fparam = filename ? `&filename=${filename}` : ''
+    const url = `${config.DataManager.fetchUrl}?descriptors=${JSON.stringify(descrs)}${fparam}`
     return fetch(url).then(r => r.text())
   }
   // 
