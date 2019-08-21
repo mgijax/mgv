@@ -18,14 +18,17 @@ import gff3 from '@/lib/gff3lite'
 import { translate, reverseComplement } from '@/lib/genetic_code'
 
 class DataManager {
-  constructor () {
+  constructor (app) {
+    this.app = app
+    this.url = this.app.runtimeConfig.dataUrl
+    this.fetchUrl = this.url + "fetch.cgi"
     this.cache = {} // { genome.name -> { chr.name -> P([ feats ]) } }
     this.pending = {} // genome.name -> pending promise
     this.id2feat = {} // ID -> feature
     this.cid2feats = {} // cID -> [ features ]
     this.symbol2feats = {} // symbol -> [ features ]
     this.greg = new GenomeRegistrar()
-    this.genomes = this.greg.register(config.DataManager.initialUrl)
+    this.genomes = this.greg.register(this.url)
   }
   getFeatureById (id) {
     return this.id2feat[id]
@@ -87,7 +90,7 @@ class DataManager {
     let freg = new FeatureRegistrar(g, c, this.id2feat, this.cid2feats, this.symbol2feats)
     let cfeats = feats.map(f => freg.register(f)).filter(x => x)
     this.cache[g.name][c.name] = cfeats
-    this.assignLanes(cfeats)
+    //this.assignLanes(cfeats)
     return cfeats
   }
   // Returns a promise for all the feature of the specified genome, as a list, sorted by
@@ -143,7 +146,7 @@ class DataManager {
             //f.transcripts.push(cT)
             needLayout = true
           })
-          if (needLayout) this.assignLanes(this.cache[g.name][c.name])
+          //if (needLayout) this.assignLanes(this.cache[g.name][c.name])
           return feats
         })
       }
@@ -249,8 +252,9 @@ class DataManager {
       composite: cExons
     }
   }
-  getSequences (descrs) {
-    const url = `${config.DataManager.fetchUrl}?descriptors=${JSON.stringify(descrs)}`
+  getSequences (descrs, filename) {
+    const fparam = filename ? `&filename=${filename}` : ''
+    const url = `${this.fetchUrl}?descriptors=${JSON.stringify(descrs)}${fparam}`
     return fetch(url).then(r => r.text())
   }
   // 
@@ -334,19 +338,22 @@ class DataManager {
     return this.getGenologs(f, [g])[0]
   }
   //
-  assignLanes (feats) {
+  assignLanes (feats, ppb, fsize) {
     const ca = new ContigAssigner()
     const slap = new SwimLaneAssigner()
     const slam = new SwimLaneAssigner()
     const fp = new FeaturePacker(0, 15000)
     feats.forEach(f => {
+      const lbl = f.symbol || f.ID
+      const lblLenBp = ppb ? lbl.length * fsize / ppb : 0 
+      const start = f.start
+      const end = Math.max(f.end, start + lblLenBp - 1)
       const sla = f.strand === '+' ? slap : slam
-      f.layout.contig = ca.assignNext(f.start, f.end)
-      f.layout.l1 = sla.assignNext(f.start, f.end)
-      f.layout.l2 = fp.assignNext(f.start, f.end, 1 + f.transcripts.length, f.ID)
-    })
+      f.layout.contig = ca.assignNext(start, end)
+      f.layout.l1 = sla.assignNext(start, end)
+      f.layout.l2 = fp.assignNext(start, end, 1 + f.transcripts.length, f.ID)
+    })  
   }
-
 }
 // Registers features for one chromsome of a genome
 class FeatureRegistrar {

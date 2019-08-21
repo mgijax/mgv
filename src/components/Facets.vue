@@ -65,6 +65,17 @@ export default MComponent({
           if (this.selectedSet.has('dont care')) return 'dont care'
           return f.cID !== null
         }
+      }, {
+        name: 'Is in current list',
+        values: [true, false, 'dont care'],
+        initialSelection: 'dont care',
+        multi: false,
+        initiallyOpen: false,
+        mapper: function (f) {
+          if (this.selectedSet.has('dont care')) return 'dont care'
+	  if (!this.app.currentList) return false
+          return this.app.currentListSet.has(f.cID) || this.app.currentListSet.has(f.ID)
+        }
       }]
     }
   },

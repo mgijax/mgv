@@ -606,8 +606,9 @@ export default MComponent({
     this.preferencesManager = new PreferencesManager(this)
   },
   created: function () {
+    this.runtimeConfig = this.$root.config
     //
-    this.dataManager = new DataManager()
+    this.dataManager = new DataManager(this)
     //
     this.keyManager = new KeyManager(document.body)
     //
@@ -669,12 +670,14 @@ export default MComponent({
           this.currentList = null
           this.currentListSet = null
           this.currentListItem = 0
+	  this.$root.$emit('list-selection', null)
           return
         }
       } else {
         this.currentList = lst
         this.currentListSet = new Set(lst.items)
         this.currentListItem = 0
+	this.$root.$emit('list-selection', this.currentList)
         if (!shift) return
       }
       let lm = lst.items[this.currentListItem]
@@ -722,10 +725,10 @@ export default MComponent({
     // (names and lengths).
     //
     this.dataManager.getGenomes().then(genomes => {
-      //
-      genomes.sort((a,b) => {
-        return a.name < b.name ? -1 : (a.name > b.name ? 1 : 0)
-      })
+      const byName = (a,b) => a.name < b.name ? -1 : (a.name > b.name ? 1 : 0)
+      const part1 = genomes.filter(g => g.name.indexOf(".") === -1).sort(byName)
+      const part2 = genomes.filter(g => g.name.indexOf(".") !== -1).sort(byName)
+      genomes = part1.concat(part2)
       // now set up the initial state
       this.allGenomes = genomes // all the genomes (at least one)
       this.rGenome = genomes[0] 

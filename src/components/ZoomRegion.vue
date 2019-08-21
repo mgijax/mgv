@@ -174,6 +174,7 @@
         :key="f.ID"
         :name="f.ID"
         :canonical="f.cID"
+	:strand="f.strand"
         class="feature"
         :class="{ highlight: featureHighlighted(f), visible: featureVisible(f)}"
         :transform="featureTransform(f)"
@@ -265,7 +266,7 @@
           :y="0"
           :font-size="featureFontSize"
           :style="{
-            textAnchor: 'middle',
+            textAnchor: 'start',
             fontFamily: 'sans-serif',
             fontWeight: featureMouseover(f) ? 'bold' : 'normal'
           }"
@@ -645,12 +646,12 @@ export default MComponent({
     },
     featureVisible: function (f) {
       let overlaps = f.start <= (this.region.end + this.deltaB) && f.end >= (this.region.start + this.deltaB)
-      return overlaps && this.getFacets().test(f)
+      //return overlaps && this.getFacets().test(f)
+      return overlaps
     },
     featureTextX: function (f) {
       let s = Math.max(f.start, this.region.start + this.deltaB)
-      let e = Math.min(f.end, this.region.end + this.deltaB)
-      return this.b2p((s + e) / 2)
+      return this.b2p(s)
     },
     featureStyle (f) {
       let fill = this.featureColor(f)
@@ -751,7 +752,8 @@ export default MComponent({
       }
       this.dataManager().getGenes(r.genome, r.chr, r.start - delta, r.end + delta, this.showDetails).then(feats => {
         this.busy = false
-        this.features = feats
+        this.features = feats.filter(f => this.getFacets().test(f))
+	this.dataManager().assignLanes(this.features, this.showDetails ? this.ppb : null, this.featureFontSize)
         this.nextTick(() => {
           this.$emit('busy-end')
           this.$emit('region-draw', this)
@@ -996,17 +998,27 @@ export default MComponent({
         this.$root.$emit('sequence-selected', [seq])
       }
     }
+    this.cbFacetState = d => {
+      this.getFeatures()
+    }
+    this.cbListSelection = d => {
+      this.getFeatures()
+    }
     //
     this.$root.$on('region-drag', this.cbRegionDrag)
     this.$root.$on('region-drag-modified', this.cbRegionDragModified)
     this.$root.$on('region-dragend', this.cbRegionDragEnd)
     this.$root.$on('region-selected', this.cbRegionSelected)
+    this.$root.$on('facet-state', this.cbFacetState)
+    this.$root.$on('list-selection', this.cbListSelection)
   },
   destroyed: function () {
     this.$root.$off('region-drag', this.cbRegionDrag)
     this.$root.$off('region-drag-modified', this.cbRegionDragModified)
     this.$root.$off('region-dragend', this.cbRegionDragEnd)
     this.$root.$off('region-selected', this.cbRegionSelected)
+    this.$root.$off('facet-state', this.cbFacetState)
+    this.$root.$off('list-selection', this.cbListSelection)
     this.$emit('region-delete')
     //console.log("Destroyed region ", this._uid)
   },

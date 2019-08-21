@@ -41,23 +41,34 @@
          method="POST"
          download>
          <input type="hidden" name="descriptors" v-model="descriptors"></textarea>
-         <div class="flexrow">
-           <input name="filename" type="text" :disabled="cartEmpty" placeholder="Enter file name."></input>
-           <!-- Download button -->
-           <m-button
-             icon="cloud_download"
-             title="Download selected sequences in Fasta format."
-             @click="downloadSelected"
-             :disabled="cartEmpty"
-             />
-           <!-- Copy to clipboard button -->
-           <m-button
-             icon="file_copy"
-             title="Copy selected sequences to clipboard in Fasta format."
-             @click="copySelected"
-             :disabled="cartEmpty"
-             />
-         </div>
+	 <div class="flexcolumn">
+	     <div v-show="fetched.length === 0" class="flexrow">
+	       <input name="filename" type="text" :disabled="cartEmpty" placeholder="Enter file name."></input>
+	       <!-- Download button -->
+	       <m-button
+		 icon="cloud_download"
+		 title="Download selected sequences in Fasta format."
+		 @click="downloadSelected"
+		 :disabled="cartEmpty"
+		 />
+	     </div>
+	     <div v-show="fetched.length > 0" class="flexrow">
+	       <!-- Fetched summary -->
+	       <span>Fetched {{fetched.length}} chars</span>
+	       <!-- View in browser -->
+	       <m-button
+		 icon="subject"
+		 title="View."
+		 @click="viewFetched"
+		 />
+	       <!-- Copy to clipboard -->
+	       <m-button
+		 icon="file_copy"
+		 title="Copy to clipboard."
+		 @click="copyFetched"
+		 />
+	     </div>
+	 </div>
        </form>
 
        <!-- spacer -->
@@ -89,7 +100,9 @@ export default MComponent({
   data: function () {
     return {
       cart: [],
-      descriptors: ''
+      descriptors: '',
+      bottomShowing: false,
+      fetched: ''
     }
   },
   computed: {
@@ -97,7 +110,7 @@ export default MComponent({
       return this.cart.length === 0
     },
     fetchUrl () {
-      return config.DataManager.fetchUrl
+      return this.app.runtimeConfig.dataUrl + ".fetch.cgi"
     }
   },
   methods: {
@@ -133,27 +146,33 @@ export default MComponent({
     downloadSelected: function () {
       const selected = this.cart.filter(item => item.selected)
       if (selected.length === 0) return
-      this.descriptors = JSON.stringify(selected)
-      this.$nextTick(() => {
-	  this.$refs.sequenceDownloadForm.submit()
-	  this.$refs.sequenceDownloadForm.reset()
-      })
-    },
-    copySelected: function () {
-      const selected = this.cart.filter(item => item.selected)
-      if (selected.length === 0) return
-      const size = selected.reduce((a,d) => a + d.totalLength, 0)
-      if (size > 10000000) {
-        if (!confirm(`Really copy ${Math.round(size/1000000)}Mb to the clipboard?`)) return
+      if (this.$refs.sequenceDownloadForm.filename.value) {
+	  // if filename is specified, use form submission mentod
+	  this.descriptors = JSON.stringify(selected)
+	  this.$nextTick(() => {
+	      this.$refs.sequenceDownloadForm.submit()
+	      this.$refs.sequenceDownloadForm.reset()
+	  })
+      } else {
+          // no filename - use fetch
+	  this.dataManager().getSequences(selected).then(text => {
+	    this.fetched = text
+	  })
       }
-      this.dataManager().getSequences(selected).then(text => {
+    },
+    viewFetched: function () {
+	const w = window.open("","_blank")
+	w.document.write('<pre>', this.fetched, '</pre>')
+	this.fetched = ''
+    },
+    copyFetched: function () {
         const dummy = document.createElement("textarea")
         document.body.appendChild(dummy);
-        dummy.value = text;
+        dummy.value = this.fetched;
         dummy.select();
         document.execCommand("copy");
         document.body.removeChild(dummy);
-      })
+	this.fetched = ''
     },
     save () {
       return this.kstore.set('all', this.cart.map(seq => {

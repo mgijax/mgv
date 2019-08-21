@@ -51,6 +51,7 @@ export default MComponent({
       if (cxt && cxt.feature) {
         return [
           cxt.feature.label,
+	  cxt.feature.biotype || cxt.feature.sotype || '',
           cxt.feature.ID, 
           cxt.transcript ? cxt.transcript.ID : '',
           cxt.transcript && cxt.transcript.cds ? cxt.transcript.cds.ID : ''
