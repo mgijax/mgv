@@ -9,6 +9,7 @@
        :initiallyOpen="fd.initiallyOpen"
        :label="fd.name"
        :draggable="false"
+       :message="fd.message"
        >
        <facet
          :name="fd.name"
@@ -44,7 +45,8 @@ export default MComponent({
         initiallyOpen: true,
         mapper: function (f) {
           return this.featureColorMap.getMungedType(f.sotype)
-        }.bind(this)
+        }.bind(this),
+        message: ""
       }, {
         name: 'Feature length',
         values: ['< 1kb', '1-10kb', '10-100kb', '100kb - 1Mb', '> 1Mb'],
@@ -54,7 +56,8 @@ export default MComponent({
         mapper: function (f) {
           let n = f.end - f.start + 1
           return n < 1000 ? '< 1kb' : n <= 10000 ? '1-10kb' : n <= 100000 ? '10-100kb' : n <= 1000000 ? '100kb - 1Mb' : '> 1Mb'
-        }
+        },
+        message: ""
       }, {
         name: 'Has canonical ID',
         values: [true, false, 'dont care'],
@@ -64,7 +67,8 @@ export default MComponent({
         mapper: function (f) {
           if (this.selectedSet.has('dont care')) return 'dont care'
           return f.cID !== null
-        }
+        },
+        message: ""
       }, {
         name: 'Is in current list',
         values: [true, false, 'dont care'],
@@ -75,7 +79,8 @@ export default MComponent({
           if (this.selectedSet.has('dont care')) return 'dont care'
 	  if (!this.app.currentList) return false
           return this.app.currentListSet.has(f.cID) || this.app.currentListSet.has(f.ID)
-        }
+        },
+        message: ""
       }]
     }
   },
@@ -90,6 +95,9 @@ export default MComponent({
       })
     },
     facetStateChanged (facet) {
+      // find the data item for this facet.
+      const fd = this.facetData.filter(fd => fd.name === facet.name)[0]
+      fd.message = facet.active ? "Active." : ""
       let state = this.getFacetState()
       this.someoneActive = state.length > 0
       this.$root.$emit('facet-state', state)
