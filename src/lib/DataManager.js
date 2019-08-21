@@ -18,14 +18,17 @@ import gff3 from '@/lib/gff3lite'
 import { translate, reverseComplement } from '@/lib/genetic_code'
 
 class DataManager {
-  constructor () {
+  constructor (app) {
+    this.app = app
+    this.url = this.app.runtimeConfig.dataUrl
+    this.fetchUrl = this.url + "fetch.cgi"
     this.cache = {} // { genome.name -> { chr.name -> P([ feats ]) } }
     this.pending = {} // genome.name -> pending promise
     this.id2feat = {} // ID -> feature
     this.cid2feats = {} // cID -> [ features ]
     this.symbol2feats = {} // symbol -> [ features ]
     this.greg = new GenomeRegistrar()
-    this.genomes = this.greg.register(config.DataManager.initialUrl)
+    this.genomes = this.greg.register(this.url)
   }
   getFeatureById (id) {
     return this.id2feat[id]
@@ -251,7 +254,7 @@ class DataManager {
   }
   getSequences (descrs, filename) {
     const fparam = filename ? `&filename=${filename}` : ''
-    const url = `${config.DataManager.fetchUrl}?descriptors=${JSON.stringify(descrs)}${fparam}`
+    const url = `${this.fetchUrl}?descriptors=${JSON.stringify(descrs)}${fparam}`
     return fetch(url).then(r => r.text())
   }
   // 

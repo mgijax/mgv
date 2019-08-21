@@ -13,7 +13,7 @@ export default {
   // Timestamp used at page load to determine whether to flush user's setting cache.
   //
   // IMPORTANT!!! You MUST update this value whenever this config file changes!!!
-  TIMESTAMP: 'Tue Mar  29 06:58:39 EST 2019',
+  TIMESTAMP: 'Tue Apr  30 06:58:39 EST 2019',
   ///////////////////////////////////////////
 
   //
@@ -136,8 +136,6 @@ export default {
     dbName: DATACACHE_PREFIX + 'user-seqs'
   },
   DataManager: {
-    initialUrl: "./index.json",
-    fetchUrl: "http://proto.informatics.jax.org/prototypes/mgv-data/fetch.cgi",
     featureSizeLimit: 10000000
   },
   PreferencesManager: {

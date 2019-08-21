@@ -606,8 +606,9 @@ export default MComponent({
     this.preferencesManager = new PreferencesManager(this)
   },
   created: function () {
+    this.runtimeConfig = this.$root.config
     //
-    this.dataManager = new DataManager()
+    this.dataManager = new DataManager(this)
     //
     this.keyManager = new KeyManager(document.body)
     //
