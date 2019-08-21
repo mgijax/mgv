@@ -521,10 +521,6 @@ export default MComponent({
       this.detailFeatures = this.dataManager.getGenologs(f, this.vGenomes)
       this.$root.$emit('context-changed')
     },
-    featureDblClick: function (f, t, e) {
-      let id = f.symbol || f.cID || f.ID
-      this.setContext({ landmark: id, delta: 0, currentSelection: [f.cID], ref: f.genome })
-    },
     initKeyBindings () {
       this.keyManager.register({
        key: 'h',
@@ -651,7 +647,6 @@ export default MComponent({
     this.$root.$on('feature-over', arg => this.featureOver(arg.feature, arg.transcript, arg.event))
     this.$root.$on('feature-out', arg => this.featureOff(arg.feature, arg.transcript, arg.event))
     this.$root.$on('feature-click', arg => this.featureClick(arg.feature, arg.transcript, arg.event))
-    //this.$root.$on('feature-dblclick', arg => this.featureDblClick(arg.feature, arg.transcript, arg.event))
     //
     this.$root.$on('list-click', data => {
       let lst = data.list || data

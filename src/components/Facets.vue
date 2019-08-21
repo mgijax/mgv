@@ -81,6 +81,19 @@ export default MComponent({
           return this.app.currentListSet.has(f.cID) || this.app.currentListSet.has(f.ID)
         },
         message: ""
+      }, {
+        name: 'Is currently selected',
+        values: [true, false, 'dont care'],
+        initialSelection: 'dont care',
+        multi: false,
+        initiallyOpen: false,
+        mapper: function (f) {
+          if (this.selectedSet.has('dont care')) return 'dont care'
+	  const cs = this.app.currentSelection
+	  if (!cs || cs.length === 0) return true
+	  return cs.indexOf(f.cID) !== -1
+        },
+        message: ""
       }]
     }
   },
