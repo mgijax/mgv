@@ -8,7 +8,7 @@
      <td>
      </td>
      <!-- column 2 - checkboxes -->
-     <td>
+     <td class="checkbox">
        <div
          :style="{
            width: '18px',
@@ -18,15 +18,6 @@
            borderRadius: '3px'
            }"
            >
-         <i class="material-icons"
-           :style="{
-             color: 'white',
-             position: 'absolute',
-             top: '-4px',
-             opacity: selectedSet.has(v) ? 1 : 0
-           }"
-           @click="$refs.inputs[i].click()"
-           >done</i>
          <input
            ref="inputs"
            v-model="selected"
@@ -35,6 +26,17 @@
            :type="multi ? 'checkbox' : 'radio'"
            style="opacity: 0"
            />
+         <i class="material-icons"
+           :style="{
+             color: 'white',
+             position: 'absolute',
+             top: '-4px',
+             left: '0px',
+             opacity: selectedSet.has(v) ? 1 : 0,
+             cursor: 'pointer'
+           }"
+           @click="$event.shiftKey ? checkOnly(v) : $refs.inputs[i].click()"
+           >done</i>
        </div>
      </td>
      <!-- column 3 - labels -->
@@ -95,6 +97,9 @@ export default MComponent({
       } else {
         this.selected = []
       }
+    },
+    checkOnly: function (value) {
+      this.selected = [value]
     }
   }
 })
@@ -103,5 +108,11 @@ export default MComponent({
 <style scoped>
 .facet {
   text-align: left;
+}
+.checkbox {
+  -webkit-user-select: none; /* Safari */        
+  -moz-user-select: none; /* Firefox */
+  -ms-user-select: none; /* IE10+/Edge */
+  user-select: none; /* Standard */
 }
 </style>
