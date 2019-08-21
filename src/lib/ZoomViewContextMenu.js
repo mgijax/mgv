@@ -83,14 +83,14 @@ function getMenus(thisObj) {
           if (seqtype === 'dna') {
             return this.dataManager().makeSequenceDescriptor(seqtype, ff)
           } else if (seqtype === 'transcript') {
-            return (t ? [t] : all ? ff.transcripts : []).map(tt => {
+            return (all ? ff.transcripts : (t ? [t] : [])).map(tt => {
               return this.dataManager().makeSequenceDescriptor(seqtype, ff, tt)
             })
           } else if (seqtype === 'composite transcript') {
             return this.dataManager().makeSequenceDescriptor('transcript', ff, ff.composite)
           } else if (seqtype === 'cds') {
-            return (c ? [t] : all ? ff.transcripts.filter(t => t.cds) : []).map(cc => {
-              return this.dataManager().makeSequenceDescriptor(seqtype, ff, cc)
+            return (all ? ff.transcripts.filter(t => t.cds) : (t.cds ? [t] : [])).map(tt => {
+              return this.dataManager().makeSequenceDescriptor(seqtype, ff, tt)
             })
           } else {
             u.fail('Unknown sequence type: ' + seqtype)
