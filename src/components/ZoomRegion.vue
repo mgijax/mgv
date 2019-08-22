@@ -245,6 +245,13 @@
             stroke-width="0.5"
             :transform="`translate(0,${spreadTranscripts ? featureHeight/2 : 0})`"
             />
+        </g>
+        <g
+          class="transcript"
+          v-for="(t, ti) in spreadTranscripts ? f.transcripts : f.composite.exons ? [f.composite] : []"
+          :key="t.ID+'.lbl'"
+          :transform="transcriptTransform(f, t, ti)"
+          >
           <!-- transcript label -->
           <text
             v-if="spreadTranscripts && showDetails && (showTranscriptLabels || transcriptHighlighted(t))"
@@ -256,7 +263,7 @@
             dominant-baseline="hanging"
             >{{t.cds ? t.cds.ID : t.ID}}</text>
         </g>
-        </g>
+        </g> <!-- if showDetails -->
         <!-- feature label -->
         <text
           class="symbol"
