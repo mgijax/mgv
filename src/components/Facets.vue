@@ -104,7 +104,8 @@ export default MComponent({
     getFacetState: function () {
       let active = this.$refs.facets.filter(f => f.active)
       return active.map(f => {
-        return { facet: f.name, values: f.selected }
+        const s = Array.isArray(f.selected) ? f.selected : [f.selected]
+        return { facet: f.name, values: s }
       })
     },
     facetStateChanged (facet) {

@@ -30,12 +30,12 @@
         ============ Facets (aka Filters) ==============
         -->
         <page-box
-          :message="activeFacets ? 'There are active filters. Some features may not be visible.' : ''"
+          :message="activeFacets.length ? 'There are active filters. Some features may not be visible.' : ''"
           label="Filters"
           icon="filter_list"
           >
           <facets
-            title="Limit what feature are displayed by different criteria."
+            title="Limit what features are displayed by different criteria."
             ref="facets"
             />
         </page-box>
@@ -75,7 +75,7 @@
         ============== Zoom View ==============
         -->
         <page-box
-          :message="activeFacets ? 'There are active filters. Some features may not be visible.' : ''"
+          :message="activeFacets.length ? `Active filters:\n${activeFacetsText}` : ''"
           label="ZoomView"
           icon="view_agenda"
           >
@@ -303,8 +303,8 @@ export default MComponent({
       currentListSet: null,
       // list currently being edited
       currentEditList: null,
-      // flag to indicate when there are currently enabled facets
-      activeFacets: false,
+      // list of currently active facets
+      activeFacets: [],
       // visible Height minus header and footer
       visHeight: 350
     }
@@ -318,6 +318,11 @@ export default MComponent({
     },
     vGenomes: function () {
       return this.strips.map(s => s.genome)
+    },
+    activeFacetsText: function () {
+      return this.activeFacets.map(f => {
+        return `${f.facet} [${f.values.join(", ")}]`
+      }).join("\n")
     }
   },
   methods: {
@@ -713,7 +718,7 @@ export default MComponent({
     })
     //
     this.$root.$on('facet-state', data => {
-      this.activeFacets = data.length > 0
+      this.activeFacets = data
     })
     //
     // Kick things off by getting all the genomes we know about and all their chomosomes 
