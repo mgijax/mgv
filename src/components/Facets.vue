@@ -4,7 +4,7 @@
      :class="{ someoneActive: someoneActive }"
      >
      <page-box
-       v-for="fd in facetData"
+       v-for="(fd,i) in facetData"
        :key="fd.name"
        :initiallyOpen="fd.initiallyOpen"
        :label="fd.name"

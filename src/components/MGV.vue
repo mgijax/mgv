@@ -30,7 +30,8 @@
         ============ Facets (aka Filters) ==============
         -->
         <page-box
-          :message="activeFacets.length ? 'There are active filters. Some features may not be visible.' : ''"
+          :message="activeFacets.length ? 'There are active filters. Click to clear.' : ''"
+          :messageClickHandler="clearFacets"
           label="Filters"
           icon="filter_list"
           >
@@ -76,7 +77,7 @@
         -->
         <page-box
           :message="activeFacets.length ? `Active filters (click to remove):\n${activeFacetsText}` : ''"
-          :messageClickHandler="foo"
+          :messageClickHandler="clearFacets"
           label="ZoomView"
           icon="view_agenda"
           >
@@ -330,7 +331,7 @@ export default MComponent({
     }
   },
   methods: {
-    foo: function () {
+    clearFacets: function () {
       this.$refs.facets.resetAll()
     },
     resize: function () {
