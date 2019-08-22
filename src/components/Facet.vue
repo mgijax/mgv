@@ -106,6 +106,13 @@ export default MComponent({
       if (!this.multi) return ""
       const v = this.values[i]
       return `Click to check/uncheck ${v}. Shift-click to check only ${this.values[i]}.`
+    },
+    inactivate: function () {
+      if (this.multi) {
+        this.selected = this.values
+      } else {
+        this.selected = 'dont care'
+      }
     }
   }
 })

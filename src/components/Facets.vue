@@ -34,6 +34,10 @@ export default MComponent({
   components: { Facet, PageBox },
   inject: ['featureColorMap'],
   data: function () {
+    // Each stanza defines a filter, givig its name, list of possible values, etc.
+    // The user selects 0, 1, or many of the values, depending on whether multi is true or not.
+    // The only tricky part is the mapper. This function is applied to each feature and returns a value.
+    // If the value is among those selected by the user, the feature is included, otherwise excluded.
     return {
       someoneActive: false,
       facetData: [{
@@ -77,7 +81,7 @@ export default MComponent({
         initiallyOpen: false,
         mapper: function (f) {
           if (this.selectedSet.has('dont care')) return 'dont care'
-	  if (!this.app.currentList) return false
+	  if (!this.app.currentList || this.app.currentList.length === 0) return Array.from(this.selectedSet)[0]
           return this.app.currentListSet.has(f.cID) || this.app.currentListSet.has(f.ID)
         },
         message: ""
@@ -89,9 +93,9 @@ export default MComponent({
         initiallyOpen: false,
         mapper: function (f) {
           if (this.selectedSet.has('dont care')) return 'dont care'
-	  const cs = this.app.currentSelection
-	  if (!cs || cs.length === 0) return true
-	  return cs.indexOf(f.cID) !== -1
+	  const cs = this.app.currentSelectionSet
+	  if (!cs || cs.size === 0) return Array.from(this.selectedSet)[0]
+	  return cs.has(f.cID) || cs.has(f.ID)
         },
         message: ""
       }]
@@ -115,7 +119,19 @@ export default MComponent({
       let state = this.getFacetState()
       this.someoneActive = state.length > 0
       this.$root.$emit('facet-state', state)
+    },
+    resetAll () {
+      this.$refs.facets.forEach(f => f.inactivate())
     }
+  },
+  created: function () {
+    this.$root.$on('selection-state-changed', () => {
+      const icsi = this.facetData.map(fd => fd.name).indexOf('Is currently selected')
+      const ics = this.$refs.facets[icsi]
+      if (ics.active) {
+        this.$root.$emit('facet-state', this.getFacetState())
+      }
+    })
   }
 })
 </script>

@@ -310,6 +310,9 @@ export default MComponent({
     }
   },
   computed: {
+    currentSelectionSet: function () {
+      return new Set(this.currentSelection)
+    },
     agIndex: function () {
       return this.allGenomes.reduce((ix, g) => { ix[g.name] = g; return ix }, {})
     },
@@ -524,6 +527,7 @@ export default MComponent({
         this.currentSelection = [fid]
       }
       this.detailFeatures = this.dataManager.getGenologs(f, this.vGenomes)
+      this.$root.$emit('selection-state-changed')
       this.$root.$emit('context-changed')
     },
     initKeyBindings () {
@@ -644,6 +648,7 @@ export default MComponent({
     // this.$root.$on('context', cxt => this.setContext(cxt))
     this.$root.$on('clear-selection', () => {
       this.currentSelection = []
+      this.$root.$emit('selection-state-changed')
       this.$root.$emit('context-changed')
     })
     //
