@@ -75,7 +75,8 @@
         ============== Zoom View ==============
         -->
         <page-box
-          :message="activeFacets.length ? `Active filters:\n${activeFacetsText}` : ''"
+          :message="activeFacets.length ? `Active filters (click to remove):\n${activeFacetsText}` : ''"
+          :messageClickHandler="foo"
           label="ZoomView"
           icon="view_agenda"
           >
@@ -329,6 +330,9 @@ export default MComponent({
     }
   },
   methods: {
+    foo: function () {
+      this.$refs.facets.resetAll()
+    },
     resize: function () {
       const sz = {width: u.wWidth(), height: u.wHeight()}
       this.visHeight = sz.height - 80
