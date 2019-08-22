@@ -155,11 +155,13 @@ export default [{
   }, {
     name: `Filters`,
     description: `Filters provide a way to limit the features that are drawn in the ${ref('ZoomView')}.
-       For example, if you only want to see protein coding genes, open the ${ref('FeatureType')} filter section
-       and shift-click on the checkbox next to protein_coding_gene. The ZoomView redraws with only those features.
+       Example: to see only protein coding genes, shift-click on the checkbox next to "protein_coding_gene"
+       in the ${ref('FeatureType')} filter.
        When a filter is "on" an alert icon is shown in the ZoomView header to remind you of that fact.
        `,
     items: [{
+      heading: "General notes"
+    }, {  
       what: `True/False filters`,
       how: `A true/false filter includes/excludes a given feature based on whether it meets some 
           condition or not. These filters have a third option, "Don't care", which essentially
@@ -167,32 +169,39 @@ export default [{
 	  `
     }, {  
       what: `Multi-select filters`,
-      how: `A multiselect filter offers a number of choices, of which any/all/none may be checked.
-          A given feature is included/excluded based on whether an attribute is among the checked items or not.
+      how: `A multiselect filter offers a set of choices, of which any number may be checked.
+          A feature is included or excluded based on whether a specific attribute is among the checked items or not.
+          Checking all items in a multi-select is equivalent to "Don't care" and effectively turns off the test.
+          Shift-clicking on a selection is a shortcut for selecting that item and unselecting everything else.
 	  `
     }, {  
+      heading: "Specific filters"
+    }, {  
       what: `Feature type`,
-      how: `Includes features whose types are among those checked.
-          Check/uncheck types individually, click the "Check all" or "Uncheck all" button, or
-	  shift-click a checkbox to make it the only selection.
+      how: `Tests that a feature's type is among those selected.
 	  `
     }, {  
       what: `Feature length`,
-      how: `Includes features whose genomic length is in one of the selected ranges.
-          Check/uncheck types individually, click the "Check all" or "Uncheck all" button, or
-	  shift-click a checkbox to make it the only selection.
+      how: `Tests that a feature's genomic length is in one of the selected ranges.
           `
     }, {  
       what: `Has canonical ID`,
-      how: `Includes features that do (true) or do not (false) have canonical IDs.
-	  "Don't care" is e
+      how: `Tests that a feature does/does not have a canonical ID.
           `
     }, {  
       what: `Is in current list`,
-      how: `Includes features that are (true) or are not (false) members of the currently displayed list.`
+      how: `Tests that a feature is/is not a member of the currently displayed list.
+          If no list is currently being displayed, the filter has no effect.
+          If the current list changes while this filter is active, the view updates accordingly.
+          `
     }, {  
       what: `Is currently selected`,
-      how: `Includes features that are (true) or are not (false) currently selected in the ZoomView.`
+      how: `Tests that a feature is/is not currently selected.
+         If there is no current selection, this filter has no effect.
+         If the current selection changes while this filter is active, the view updates accordingly.
+         (Reminder: click on a feature to select it. Shift-click to select multiple features.
+         Click on the background to unselect everything.)
+         `
     }]
   }, {
     name: `Sequences`,
