@@ -8,7 +8,8 @@
      <td>
      </td>
      <!-- column 2 - checkboxes -->
-     <td class="checkbox">
+     <td class="checkbox"
+       :title="itemHelp(i)" >
        <div
          :style="{
            width: '18px',
@@ -99,7 +100,12 @@ export default MComponent({
       }
     },
     checkOnly: function (value) {
-      this.selected = [value]
+      this.selected = this.multi ? [value] : value
+    },
+    itemHelp: function (i) {
+      if (!this.multi) return ""
+      const v = this.values[i]
+      return `Click to check/uncheck ${v}. Shift-click to check only ${this.values[i]}.`
     }
   }
 })
