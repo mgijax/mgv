@@ -566,29 +566,6 @@ export default MComponent({
     baseColor: function (b) {
       return this.cfg.baseColors[b] || 'black'
     },
-    spreadText: function () {
-      // get all the symbols (text nodes) in my region
-      let symbols = this.$el.querySelectorAll('.feature .symbol')
-      // get each symbol's bounding rect. Partition into lists at the same y-coordinate
-      let y2rects = {}
-      symbols.forEach(t => {
-        const x = parseFloat(t.getAttribute('x0')) // midpoint of text
-        const r = t.getBoundingClientRect()
-        const start = x - r.width / 2
-        if (!(r.y in y2rects)) y2rects[r.y] = []
-        y2rects[r.y].push({text: t, rect: { width: r.width, start: start, end: start + r.width - 1 }})
-      })
-      // spread text within each tier
-      for (let y in y2rects) {
-        let rects = y2rects[y]
-        let rs = rects.map(r => r.rect)
-        this.segLayout.layout(rs)
-        rs.forEach((r, i) => {
-          let t = rects[i].text
-          t.setAttribute('x', r.start + r.width / 2)
-        })
-      }
-    },
     // converts a pixel position (0-based, within the region) to base position
     p2b (p) {
       return Math.floor(this.region.start + this.bpp * p)
@@ -1033,9 +1010,6 @@ export default MComponent({
     this.segLayout = new SegmentLayout()
     this.initDrag()
     this.getFeatures()
-  },
-  updated: function () {
-    this.spreadText()
   }
 })
 </script>
