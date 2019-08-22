@@ -153,6 +153,48 @@ export default [{
           key, or command-drag on a region.`
     }]
   }, {
+    name: `Filters`,
+    description: `Filters provide a way to limit the features that are drawn in the ${ref('ZoomView')}.
+       For example, if you only want to see protein coding genes, open the ${ref('FeatureType')} filter section
+       and shift-click on the checkbox next to protein_coding_gene. The ZoomView redraws with only those features.
+       When a filter is "on" an alert icon is shown in the ZoomView header to remind you of that fact.
+       `,
+    items: [{
+      what: `True/False filters`,
+      how: `A true/false filter includes/excludes a given feature based on whether it meets some 
+          condition or not. These filters have a third option, "Don't care", which essentially
+	  turns off the test.
+	  `
+    }, {  
+      what: `Multi-select filters`,
+      how: `A multiselect filter offers a number of choices, of which any/all/none may be checked.
+          A given feature is included/excluded based on whether an attribute is among the checked items or not.
+	  `
+    }, {  
+      what: `Feature type`,
+      how: `Includes features whose types are among those checked.
+          Check/uncheck types individually, click the "Check all" or "Uncheck all" button, or
+	  shift-click a checkbox to make it the only selection.
+	  `
+    }, {  
+      what: `Feature length`,
+      how: `Includes features whose genomic length is in one of the selected ranges.
+          Check/uncheck types individually, click the "Check all" or "Uncheck all" button, or
+	  shift-click a checkbox to make it the only selection.
+          `
+    }, {  
+      what: `Has canonical ID`,
+      how: `Includes features that do (true) or do not (false) have canonical IDs.
+	  "Don't care" is e
+          `
+    }, {  
+      what: `Is in current list`,
+      how: `Includes features that are (true) or are not (false) members of the currently displayed list.`
+    }, {  
+      what: `Is currently selected`,
+      how: `Includes features that are (true) or are not (false) currently selected in the ZoomView.`
+    }]
+  }, {
     name: `Sequences`,
     description: `You can select sequences and download them in FASTA format or copy them to the clipboard.
         The ${ref('SequenceCart')} contains (descriptors of) sequences that you select plus
