@@ -36,7 +36,7 @@
           <!-- SNPs linkout -->
           <m-button
             icon="SNPs"
-            title="See SNPs at MGI in this region of B6 vs other displayed genomes."
+            title="See SNPs at MGI in this region of B6 vs displayed mouse genomes."
             @click="mgiSNPquery"
             :disabled="region && region.genome.name !== 'C57BL/6J'"
             />

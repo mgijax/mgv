@@ -286,21 +286,23 @@ class DataManager {
   // - chromosome (string) the chromosome
   // - start (int) start coordinate(s)
   // - length (int) length(s) of the region(s)
-  // - type (string) one of: 'dna', 'transcript', 'cds'
+  // - type (string) one of: 'dna', 'composite transcript', 'transcript', 'cds'
   // - reverseComplement (boolean) True iff the sequence should be reverse complemented 
   // - translate (boolean) True iff the sequence should be translated to protein
   // - selected (boolean) True iff the sequence is in the selected state
   //
   makeSequenceDescriptor (stype, f, t) {
-    const id = t ? (stype === 'cds' ? t.cds.ID : t.ID) : f.ID
-    const len = t ? (stype === 'cds' ? t.cds.length : t.length) : f.length
+    const target = stype === 'dna' ? f : stype === 'composite transcript' ? f : stype === 'transcript' ? t : t.cds
+    const id = target.ID
+    const len = target.length
     const sym = f.symbol || ''
     const gn = f.genome.name
-    const parts = t ? (stype === 'cds' ? t.cds.pieces : t.exons) : [f]
+    const parts = target.pieces || target.exons || [f]
     const starts = parts.map(p => p.start)
     const lengths = parts.map(p => p.end - p.start + 1)
     const d = {
       header: `${gn}::${id} ${sym} (${stype})`,
+      ID: id,
       genome: f.genome.name,
       genomeUrl: f.genome.url,
       type: stype,
