@@ -286,7 +286,7 @@
             >•</tspan><tspan
             :dy="featureInList(f) ? -0.3 * featureFontSize : 0"
             >{{f.symbol || f.ID}}</tspan></text>
-      </g> <!-- features -->
+      </g> <!-- feature -->
     <!-- Region delete button -->
     <g
       class="zrBtn delete"
@@ -473,7 +473,7 @@ export default MComponent({
       return parseInt(this.cfg.featureHeight)
     },
     laneGap: function () {
-      return parseInt(this.cfg.laneGap)
+      return parseInt(this.cfg.laneGap) + this.transcriptFontSize
     },
     featureFontSize: function () {
       return parseInt(this.cfg.featureFontSize)
