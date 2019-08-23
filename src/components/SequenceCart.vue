@@ -110,7 +110,7 @@ export default MComponent({
       return this.cart.length === 0
     },
     fetchUrl () {
-      return this.app.runtimeConfig.dataUrl + ".fetch.cgi"
+      return this.app.runtimeConfig.dataUrl + "fetch.cgi"
     }
   },
   methods: {
