@@ -530,11 +530,20 @@ export default MComponent({
       }
     },
     height: function () {
-      let h = (this.allMaxLaneP + this.allMaxLaneM) * (this.featureHeight + this.laneGap) + 2 * this.featureFontSize + 4
+      let h
+      if (this.showDetails && this.spreadTranscripts) {
+        h = (this.allMaxLaneP + this.allMaxLaneM) * (this.featureHeight + this.laneGap) + 2 * this.featureFontSize
+      } else {
+        h = (this.allMaxLaneP + this.allMaxLaneM) * (this.featureHeight + this.featureFontSize) + this.featureFontSize
+      }
       return Math.max(h, this.cfg.minHeight)
     },
     zeroOffset: function () {
-      return this.allMaxLaneP * (this.featureHeight + this.laneGap) + Math.max(2*this.featureFontSize, 10)
+      if (this.showDetails && this.spreadTranscripts) {
+        return this.sequenceFontSize * 2 + 10
+      } else {
+        return this.allMaxLaneP * (this.featureHeight + this.featureFontSize) + this.featureFontSize
+      }
     }
   },
   watch: {
@@ -590,7 +599,7 @@ export default MComponent({
       } else if (f.strand === '+') {
         return -f.layout.l1 * (this.featureHeight + this.featureFontSize)
       } else {
-        return (f.layout.l1 - 1) * (this.featureHeight + this.featureFontSize) + this.laneGap
+        return (f.layout.l1 - 1) * (this.featureHeight + this.featureFontSize) + this.featureFontSize
       }
     },
     featureH (f) {

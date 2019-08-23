@@ -53,7 +53,7 @@
         max="24"
         />
   </div>
-  <!-- =================== -->
+  <!-- =================== 
   <div
     title="Set the amount of space separating feature swim lanes."
     class="flexrow"
@@ -66,6 +66,7 @@
         max="24"
         />
   </div>
+  -->
   <!-- ============== TRANSCRIPTS section  ============== -->
   <label>Transcripts</label>
   <!-- =================== -->
