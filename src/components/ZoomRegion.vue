@@ -530,11 +530,11 @@ export default MComponent({
       }
     },
     height: function () {
-      let h = (this.allMaxLaneP + this.allMaxLaneM) * (this.featureHeight + this.laneGap) + 2 * this.laneGap + 4
+      let h = (this.allMaxLaneP + this.allMaxLaneM) * (this.featureHeight + this.laneGap) + 2 * this.featureFontSize + 4
       return Math.max(h, this.cfg.minHeight)
     },
     zeroOffset: function () {
-      return this.allMaxLaneP * (this.featureHeight + this.laneGap) + Math.max(this.laneGap, 10)
+      return this.allMaxLaneP * (this.featureHeight + this.laneGap) + Math.max(2*this.featureFontSize, 10)
     }
   },
   watch: {
@@ -551,6 +551,9 @@ export default MComponent({
       if (newval !== oldval) {
         this.$nextTick(() => this.$emit('region-draw', this))
       }
+    },
+    featureFontSize: function (old, newval) {
+      this.dataManager().assignLanes(this.features, this.showDetails ? this.ppb : null, this.featureFontSize)
     }
   },
   methods: {
@@ -583,11 +586,11 @@ export default MComponent({
     },
     featureY (f) {
       if (this.showDetails && this.spreadTranscripts) {
-        return f.layout.l2 * (this.featureHeight + this.laneGap) + this.laneGap
+        return f.layout.l2 * (this.featureHeight + this.laneGap) + this.featureFontSize
       } else if (f.strand === '+') {
-        return -f.layout.l1 * (this.featureHeight + this.laneGap)
+        return -f.layout.l1 * (this.featureHeight + this.featureFontSize)
       } else {
-        return (f.layout.l1 - 1) * (this.featureHeight + this.laneGap) + this.laneGap
+        return (f.layout.l1 - 1) * (this.featureHeight + this.featureFontSize) + this.laneGap
       }
     },
     featureH (f) {
