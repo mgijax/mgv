@@ -189,12 +189,35 @@ function deepCopy (obj) {
 }
 
 // ---------------------------------------------
-//
-function fetch (url, type) {
+// A higher-level fetch that parses responses.
+// Args:
+//  url: URL to fetch from or post to (if postData is provided)
+//  type: expected type of the response (text, json, or gff3)
+//  postData: if provided, a URL-encoded string, eg, "name=Joel&age=60"
+function fetch (url, type, postData) {
   const types = ['text', 'json', 'gff3']
   if (!type) type = 'text'
   if (types.indexOf(type) === -1) return Promise.reject('Unknown type: ' + type)
-  return self.fetch(url).then(r => {
+  //
+  function status(response) {
+    if (response.status >= 200 && response.status < 300) {
+        return Promise.resolve(response)
+    } else {
+        return Promise.reject(new Error(response.statusText))
+    }
+  }
+  //
+  let opts = undefined
+  if (postData) {
+    opts = {
+      method: 'POST',
+      headers: {
+        'Content-type': 'application/x-www-form-urlencoded; charset=UTF-8'
+      },
+      body: postData
+    }
+  }
+  return  self.fetch(url, opts).then(status).then(r => {
     switch (type) {
     case 'text':
       return r.text()

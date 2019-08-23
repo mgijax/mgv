@@ -254,8 +254,8 @@ class DataManager {
   }
   getSequences (descrs, filename) {
     const fparam = filename ? `&filename=${filename}` : ''
-    const url = `${this.fetchUrl}?descriptors=${JSON.stringify(descrs)}${fparam}`
-    return fetch(url).then(r => r.text())
+    const params = `descriptors=${JSON.stringify(descrs)}${fparam}`
+    return u.fetch(this.fetchUrl, 'text', params)
   }
   // 
   // Returns a promise for the genomic sequence of the specified range for the specified genome
