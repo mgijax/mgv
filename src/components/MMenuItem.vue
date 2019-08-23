@@ -9,7 +9,8 @@
     >
     <span
       v-if="label"
-      >{{getValue('label')}}</span>
+      v-html="getValue('label')"
+      ></span>
     <i
       class="material-icons"
       >{{cicon}}</i>
