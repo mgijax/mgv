@@ -42,9 +42,9 @@ function getMenus(thisObj) {
 	const ident = target ? target.ID : ''
         const all = which === 'all'
 	if (all) {
-	  return `${f.ID} and all genologs, ${type}`
+	  return `All ${type}`
 	} else {
-	  return `${ident} ${type}`
+	  return `${type} <span style="font-size: smaller;">(${ident})</span>`
 	}
       },
       helpText: cxt => {
@@ -113,16 +113,23 @@ function getMenus(thisObj) {
     }, {
      label: 'Add sequences to cart',
      helpText: 'Add sequences to cart',
-     menuItems: [
-      sequenceSelectionOption('dna','this'),
-      sequenceSelectionOption('composite transcript','this'),
-      sequenceSelectionOption('transcript','this'),
-      sequenceSelectionOption('cds','this'),
-      sequenceSelectionOption('dna','all'),
-      sequenceSelectionOption('composite transcript','all'),
-      sequenceSelectionOption('transcript','all'),
-      sequenceSelectionOption('cds','all')
-     ]
+     menuItems: [{
+       label: "This gene only",
+       menuItems: [
+         sequenceSelectionOption('dna','this'),
+         sequenceSelectionOption('composite transcript','this'),
+         sequenceSelectionOption('transcript','this'),
+         sequenceSelectionOption('cds','this'),
+       ]
+     }, {
+       label: "This gene and displayed genologs",
+       menuItems: [
+         sequenceSelectionOption('dna','all'),
+         sequenceSelectionOption('composite transcript','all'),
+         sequenceSelectionOption('transcript','all'),
+         sequenceSelectionOption('cds','all'),
+       ]
+     }]
     }
   ]
 
