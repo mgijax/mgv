@@ -42,7 +42,7 @@ function getMenus(thisObj) {
 	const ident = target ? target.ID : ''
         const all = which === 'all'
 	if (all) {
-	  return `All ${type}`
+	  return `All ${type}${type === 'dna' || type === 'cds' ? ' sequences' : 's'}`
 	} else {
 	  return `${type} <span style="font-size: smaller;">(${ident})</span>`
 	}
@@ -51,12 +51,13 @@ function getMenus(thisObj) {
         const f = cxt.feature
 	const t = cxt.transcript
 	const c = t ? t.cds : null
-	const ident = (c || t || f).ID
+	const target = type === 'dna' ? f : type === 'transcript' ? t : type === 'cds' ? c : f
+	const ident = target ? target.ID : ''
         const all = which === 'all'
 	if (all) {
-          return `Adds ${type} sequences to your cart for ${f.ID} from all currently displayed genomes.`
+          return `Adds all ${type} sequences to your cart for ${f.ID} and all currently displayed genomes.`
 	} else {
-          return `Adds ${type} sequence to your cart for feature ${ident}.`
+          return `Adds ${type} sequence ${ident} to your cart.`
 	}
       },
       disabled: cxt => {
@@ -113,23 +114,18 @@ function getMenus(thisObj) {
     }, {
      label: 'Add sequences to cart',
      helpText: 'Add sequences to cart',
-     menuItems: [{
-       label: "This gene only",
-       menuItems: [
+     menuItems: [
+         { label: 'This gene only' },
          sequenceSelectionOption('dna','this'),
          sequenceSelectionOption('composite transcript','this'),
          sequenceSelectionOption('transcript','this'),
          sequenceSelectionOption('cds','this'),
-       ]
-     }, {
-       label: "This gene and displayed genologs",
-       menuItems: [
+         { label: 'This gene and all genologs' },
          sequenceSelectionOption('dna','all'),
          sequenceSelectionOption('composite transcript','all'),
          sequenceSelectionOption('transcript','all'),
          sequenceSelectionOption('cds','all'),
-       ]
-     }]
+     ]
     }
   ]
 

@@ -1,7 +1,7 @@
 <template>
   <div
     class="menu-item flexrow"
-    :class="{ topLevel: topLevel, disabled: getValue('disabled') }"
+    :class="{ topLevel: topLevel, disabled: getValue('disabled'), separator: isSeparator }"
     @click.stop="clicked"
     @mouseenter="mouseenter"
     @mouseleave="mouseleave"
@@ -71,6 +71,9 @@ export default MComponent({
   computed: {
     cicon: function () {
       return this.icon || (this.menuItems ? 'keyboard_arrow_right' : '')
+    },
+    isSeparator: function () {
+      return !this.handler && !this.menuItems
     }
   },
   methods: {
@@ -107,6 +110,10 @@ export default MComponent({
   cursor: pointer;
   white-space: nowrap;
 }
+.menu-item.separator {
+  background-color: gray;
+  color: white;
+}
 .menu-item.disabled {
   color: lightgray;
 }
@@ -116,7 +123,7 @@ export default MComponent({
 .menu-item > * {
   padding: 4px;
 }
-.menu-item:not(.topLevel):not(.disabled):hover {
+.menu-item:not(.topLevel):not(.disabled):not(.separator):hover {
   background-color: #ccc;
 }
 .transparent {
