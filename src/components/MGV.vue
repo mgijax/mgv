@@ -257,8 +257,8 @@ export default MComponent({
       // predefined sets of genomes for easy selections
       genomeSets: [],
       // ----------------------------------------------------
-      //
-      scrollLock: false,
+      // when true, all regions scroll (and zoom and select sequenc) in sync.
+      scrollLock: true,
       // drawing mode
       dmode: 'direct', // one of: direct, landmark, mapped
       // Three ways to specify which regions to draw.
