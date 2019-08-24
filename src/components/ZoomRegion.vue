@@ -140,7 +140,7 @@
       <!-- ======= sequence string ======= -->
       <text
         v-if="showSequence"
-        :y="-sequenceFontSize"
+        :y="sequenceY"
         :font-size="sequenceFontSize"
         fill=black
         stroke=none
@@ -158,7 +158,7 @@
           v-for="(b,i) in scomplement"
           :key="-i-1"
           :x="b2p(seqStart + i + 1.5)"
-          :y="0"
+          :y="sequenceY + sequenceFontSize"
           :fill="baseColor(b)"
           text-anchor="middle"
           >{{b}}</tspan>
@@ -484,6 +484,13 @@ export default MComponent({
     sequenceFontSize: function () {
       return parseInt(this.cfg.sequenceFontSize)
     },
+    sequenceY: function () {
+      if (this.showDetails && this.spreadTranscripts) {
+        return -this.zeroOffset + this.sequenceFontSize
+      } else {
+        return -0.3 * this.sequenceFontSize
+      }
+    },
     // context string. watch for changes to feature range
     cxtString: function () {
       return `${this.region.genome.name}:${this.region.chr.name}:${this.region.start}:${this.region.end}:${this.pad}`
@@ -519,15 +526,17 @@ export default MComponent({
         return 1
       } else {
         let x = this.features.filter(f => f.strand === '+' && this.featureVisible(f)).reduce((v, f) => Math.max(v, f.layout.l1), 0)
-        return x
+        return Math.max(x, 1)
       }
     },
     maxLaneM: function () {
+      let m
       if (this.showDetails && this.spreadTranscripts) {
-        return this.features.filter(f => this.featureVisible(f)).reduce((v, f) => Math.max(v, f.layout.l2 + f.transcripts.length), 0)
+        m = this.features.filter(f => this.featureVisible(f)).reduce((v, f) => Math.max(v, f.layout.l2 + f.transcripts.length), 0)
       } else {
-        return this.features.filter(f => f.strand === '-' && this.featureVisible(f)).reduce((v, f) => Math.max(v, f.layout.l1), 0)
+        m = this.features.filter(f => f.strand === '-' && this.featureVisible(f)).reduce((v, f) => Math.max(v, f.layout.l1), 0)
       }
+      return Math.max(m, 1)
     },
     height: function () {
       let h
