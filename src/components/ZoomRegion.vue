@@ -270,7 +270,7 @@
           v-if="(showDetails && showFeatureLabels) || featureSelected(f) || featureMouseover(f) || featureInList(f)"
           :x="featureTextX(f)"
           :x0="featureTextX(f)"
-          :y="0"
+          :y="-3"
           :font-size="featureFontSize"
           :style="{
             textAnchor: 'start',
@@ -778,7 +778,9 @@ export default MComponent({
     },
     getEventObjects (e) {
       const f = e.target.closest('.feature')
-      if (!f) return
+      if (!f) {
+        return
+      }
       const fid = f.getAttribute('name')
       const feat = this.fIndex[fid]
       const t = e.target.closest('.transcript')
