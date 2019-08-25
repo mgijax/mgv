@@ -22,7 +22,7 @@ class DataManager {
     this.app = app
     this.url = this.app.runtimeConfig.dataUrl
     this.fetchUrl = this.url + "fetch.cgi"
-    this.cache = {} // { genome.name -> { chr.name -> P([ feats ]) } }
+    this.cache = {} // { genome.name -> { chr.name -> [features] } }
     this.pending = {} // genome.name -> pending promise
     this.id2feat = {} // ID -> feature
     this.cid2feats = {} // cID -> [ features ]
@@ -94,12 +94,14 @@ class DataManager {
   }
   // Returns a promise for all the feature of the specified genome, as a list, sorted by
   // chr and start position.
-  getAllFeatures (g) {
-    return this.ensureFeatures(g).then(() => this.getAllFeaturesNow(g))
+  getAllFeatures (g, c) {
+    return this.ensureFeatures(g).then(() => this.getAllFeaturesNow(g, c))
   }
   // Immediate version of getAllFeatures. Returns whatever is in the cache
-  getAllFeaturesNow (g) {
-    return u.concatAll(g.chromosomes.map(c => this.cache[g.name][c.name]))
+  getAllFeaturesNow (g, c) {
+    return u.concatAll(g.chromosomes.filter(
+           cc => (!c || c === cc) ? cc : null).map(
+           cc => this.cache[g.name][cc.name]))
   }
   // Returns a promise for the features in the specified range of the specified genome
   getGenes (g, c, s, e, includeTranscripts) {
