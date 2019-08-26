@@ -4,12 +4,14 @@
       :class="{ fixed: fixed }"
       :style="{ top: offset + 'px' }"
       >
-      <genome-selector
-        :allGenomes="context.allGenomes"
-        :strips="context.strips"
-        :genomeSets="context.genomeSets"
-        title="Specify which genome(s) to display."
-        />
+      <!-- scroll lock button -->
+      <div class="flexrow">
+        <m-button
+          :icon="context.scrollLock ? 'lock' : 'lock_open'"
+          @click="context.scrollLock = !context.scrollLock"
+          :title="context.scrollLock ? 'Scroll lock is ON. Click to turn OFF.' : 'Scroll lock is OFF. Click to turn ON'"
+          />
+        </div>
       <!-- Search box -->
       <div class="flexrow">
         <label
@@ -23,14 +25,6 @@
           @blur="findLandmark($event.target.value)"
           />
       </div>
-      <!-- aligned-on text 
-      <div
-        class="flexrow"
-        v-if="context.lcoords && context.lcoords.landmark"
-        >
-        <span>Aligned on {{ context.lcoords.landmark }}</span>
-        </div>
-      -->
       <!-- zoom/scroll controls -->
       <div class="flexrow">
         <m-button
@@ -52,14 +46,6 @@
           icon="chevron_right"
           @click="scroll($event.shiftKey ? -0.8 : -0.2)"
           title="Click to scroll right. Shift-click to scroll right more."
-          />
-        </div>
-      <!-- scroll lock button -->
-      <div class="flexrow">
-        <m-button
-          :icon="context.scrollLock ? 'lock' : 'lock_open'"
-          @click="context.scrollLock = !context.scrollLock"
-          :title="context.scrollLock ? 'Scroll lock is ON. Click to turn OFF.' : 'Scroll lock is OFF. Click to turn ON'"
           />
         </div>
       <!-- camera button -->

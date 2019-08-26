@@ -10,7 +10,7 @@
           v-model="genome"
           >
           <option
-            v-for="g in context.allGenomes"
+            v-for="g in vGenomes"
             :value="g"
             >{{g.name}}</option>
         </select>
@@ -151,6 +151,12 @@ export default MComponent({
     }
   },
   computed: {
+    vGenomes: function () {
+      const vgs = this.app.vGenomes
+      vgs.sort((a,b) => a.name < b.name ? -1 : a.name > b.name ? 1 : 0)
+      if (vgs.indexOf(this.genome) === -1) this.genome = vgs[0]
+      return vgs
+    },
     currListTitle: function () {
       const clist = this.context.currentList
       if (!clist) return 'No current list.'

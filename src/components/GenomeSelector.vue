@@ -1,42 +1,33 @@
 <template>
   <div
-    class="genome-selector"
+    class="genome-selector flexcolumn"
     >
-    <div
-      class="genome-selector-button flexrow"
-      @click="dropVisible = true"
-      >
-      <span>Genomes</span>
-      <i class="material-icons">arrow_drop_down</i>
-    </div>
-    <div
-      class="genome-selector-drop flexcolumn"
-      v-show="dropVisible"
-      >
-      <i
-        class="material-icons drop-close"
-        @click="dropVisible = false"
-        >close</i>
-      <label style="font-weight: bold; align-self: center;">Genomes</label>
-      <select
-        multiple
-        size=10
-        v-model="vGs"
-        @change="changed"
-        >
-        <option
+      <div class="table-container">
+      <table cellspacing="0px" >
+        <tr
           v-for="genome in allGenomes"
           :key="genome.name"
-          :value="genome.name"
-          >{{genome.name}}</option>
-      </select>
+          >
+          <td
+            >{{genome.name}}</td>
+          <td>
+            <input
+              type="checkbox"
+              :value="genome.name"
+              v-model="vGs"
+              @change="changed"
+              @click="clicked"
+              />
+          </td>
+        </tr>  
+      </table>
+      </div>
       <button
         v-for="(gs, i) in genomeSets"
         :key="i"
         :title="gs.description"
         @click="selectGenomeSet(gs)"
         >{{gs.label}}</button>
-    </div>
   </div>
 </template>
 
@@ -49,8 +40,9 @@ export default MComponent({
   inject: ['regionManager','dataManager'],
   data: function () {
     return {
-      dropVisible: false,
-      vGs: [] // list of visible genome names
+      vGs: [], // list of visible genome names
+      rg: null, // the reference genome
+      shifted: false
     }
   },
   mounted: function () {
@@ -65,8 +57,16 @@ export default MComponent({
       this.vGs = gs.genomes.split(/,/g)
       this.changed()
     },
-    changed: function () {
+    changed: function (e) {
+      if (this.shifted) {
+        e.target.checked = true
+        this.vGs = [e.target.value]
+      }
       this.regionManager().setStrips(this.vGs.map(g => this.dataManager().lookupGenome(g)))
+      this.shifted = false
+    },
+    clicked: function (e) {
+      this.shifted = e.shiftKey
     }
   },
   watch: {
@@ -78,32 +78,26 @@ export default MComponent({
 </script>
 
 <style scoped>
-.genome-selector-button {
-  cursor: pointer;
+.genome-selector tr:hover {
+  background-color: #ccc;
 }
-.genome-selector-drop {
-  position: absolute;
-  top: 15px;
-  left: 15px;
-  flex-grow: 0;
-  width: 140px;
-  background-color: #e0e0e0;
-  padding: 4px;
-  z-index: 100;
-  border: thin solid gray;
-  border-radius: 3px;
+.genome-selector .table-container {
+  max-height: 300px;
+  overflow: scroll;
 }
-.genome-selector-drop label {
-  align-self: flex-start;
+.genome-selector .table-container table {
+  width: 100%
 }
-.genome-selector-drop .flexrow {
-  justify-content: flex-start;
+.genome-selector td {
+  text-align: left;
 }
-.drop-close {
-  position: absolute;
-  top: 0px;
-  right: 0px;
-  font-size: 16px;
-  cursor: pointer;
+.genome-selector input[type="radio"] {
+  opacity: 0;
+}
+.genome-selector input[type="radio"]:checked {
+  opacity: 1;
+}
+.genome-selector tr:hover input[type="radio"] {
+  opacity: 1;
 }
 </style>

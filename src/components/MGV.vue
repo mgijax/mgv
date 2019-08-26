@@ -13,6 +13,20 @@
         :style="{ height: visHeight + 'px', overflow: 'scroll' }"
         >
         <!--
+        ============ Genomes ==============
+        -->
+        <page-box
+          label="Genomes"
+          icon="list"
+          >
+          <genome-selector
+            :allGenomes="allGenomes"
+            :strips="strips"
+            :genomeSets="genomeSets"
+            title="Specify which genome(s) to display."
+            />
+        </page-box>
+        <!--
         ============ Gene Lists ==============
         -->
         <page-box
