@@ -9,17 +9,6 @@
     <g name="tabgroup"
       >
       <rect
-        name="tab"
-        ref="tab"
-        :x="tabX"
-        :y="tabY"
-        :width="tabW"
-        :height="tabH"
-        :fill="fill"
-        fill-opacity="0.3"
-        :stroke="fill"
-        />
-      <rect
         name="tabhandleup"
         ref="tabhandleup"
         class="tabhandle"
@@ -42,6 +31,17 @@
         :fill="fill"
         fill-opacity="0"
         stroke="none"
+        />
+      <rect
+        name="tab"
+        ref="tab"
+        :x="tabX"
+        :y="tabY"
+        :width="tabW"
+        :height="tabH > 1 ? tabH : 1"
+        :fill="fill"
+        fill-opacity="0.3"
+        :stroke="fill"
         />
     </g>
   </g>

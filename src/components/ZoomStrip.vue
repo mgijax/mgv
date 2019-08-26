@@ -78,6 +78,7 @@
     <!-- busy indicator -->
     <g
       v-show="busyCount > 0"
+      @click="busyCount = 0"
       >
       <rect 
         x=0
