@@ -1,5 +1,4 @@
 import u from '@/lib/utils'
-import { translate } from '@/lib/genetic_code'
 
 function getMenus(thisObj) {
   //
@@ -15,19 +14,28 @@ function getMenus(thisObj) {
     }
   }
   //
-  function externalLinkOption (name, url) {
-    return {
-      icon: 'open_in_new',
-      label: `Feature@${name}`,
-      helpText: `See details for this feature at ${name}.`,
-      disabled: false,
-      extraArgs: [url],
-      handler: (function (cxt, url) {
-        const f = cxt.feature
-        const u = url + f.ID
-        window.open(u, '_blank')
-      }).bind(thisObj)
-    }
+  function externalLinkOptions () {
+     return {
+       icon: '',
+       label: `Link outs`,
+       menuItems: function(cxt) {
+         const f = cxt.feature
+         const lurls = this.app.runtimeConfig.linkUrls
+         const lnks = u.flatten(lurls.filter(l => l.genomes.indexOf(f.genome.name) !== -1).map(l => l.links))
+         return lnks.map(lnk => {
+           return {
+              icon: 'open_in_new',
+              label: `${lnk.text}`,
+              helpText: `See details for this feature at ${lnk.text}.`,
+              disabled: false,
+              handler: (function (cxt) {
+                const u = lnk.url + f.ID
+                window.open(u, '_blank')
+              }).bind(thisObj)
+           }
+         })
+       }
+     }
   }
   // type = one of: dna, transcript, cds
   // which = one of: this, all
@@ -101,32 +109,29 @@ function getMenus(thisObj) {
       }).bind(thisObj)
     }
   }
+  function sequenceCartOptions () {
+      return {
+        label: 'Add sequences to cart',
+        helpText: 'Add sequences to cart',
+        menuItems: [
+          { label: 'This gene only' },
+          sequenceSelectionOption('dna','this'),
+          sequenceSelectionOption('composite transcript','this'),
+          sequenceSelectionOption('transcript','this'),
+          sequenceSelectionOption('cds','this'),
+          { label: 'This gene and all genologs' },
+          sequenceSelectionOption('dna','all'),
+          sequenceSelectionOption('composite transcript','all'),
+          sequenceSelectionOption('transcript','all'),
+          sequenceSelectionOption('cds','all'),
+       ]
+     }
+  }
   //
   const mouseMenu = [
     alignOption(),
-    {
-      icon: '',
-      label: `Link outs`,
-      menuItems: [
-        externalLinkOption('MGI', 'http://www.informatics.jax.org/accession/'),
-        externalLinkOption('MouseMine', 'http://www.mousemine.org/mousemine/portal.do?class=Gene&externalids=')
-      ]
-    }, {
-     label: 'Add sequences to cart',
-     helpText: 'Add sequences to cart',
-     menuItems: [
-         { label: 'This gene only' },
-         sequenceSelectionOption('dna','this'),
-         sequenceSelectionOption('composite transcript','this'),
-         sequenceSelectionOption('transcript','this'),
-         sequenceSelectionOption('cds','this'),
-         { label: 'This gene and all genologs' },
-         sequenceSelectionOption('dna','all'),
-         sequenceSelectionOption('composite transcript','all'),
-         sequenceSelectionOption('transcript','all'),
-         sequenceSelectionOption('cds','all'),
-     ]
-    }
+    externalLinkOptions(),
+    sequenceCartOptions()
   ]
 
   return {

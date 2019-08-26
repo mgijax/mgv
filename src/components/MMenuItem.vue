@@ -16,7 +16,7 @@
       >{{cicon}}</i>
     <m-menu
       v-if="menuItems"
-      :menuItems="menuItems"
+      :menuItems="getValue('menuItems')"
       ref="subMenu"
       @menu-item-selected="$emit('menu-item-selected')"
       :contextObject="contextObject"
@@ -46,7 +46,7 @@ export default MComponent({
       type: Function
     },
     menuItems: {
-      type: Array
+      type: [Array, Function],
     },
     contextObject: {
       // if this is an item in a context menu, the content object (e.g., the feature)

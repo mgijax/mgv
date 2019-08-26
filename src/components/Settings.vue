@@ -141,7 +141,7 @@
         type="range"
         v-model="ZoomRegion.contrast"
         min="0"
-        max=".6"
+        max=".9"
         step=".1"
         />
   </div>

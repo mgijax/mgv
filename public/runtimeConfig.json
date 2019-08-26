@@ -1,3 +1,48 @@
 {
-    "dataUrl" : "http://proto.informatics.jax.org/prototypes/mgv-data/"
+    "dataUrl" : "http://proto.informatics.jax.org/prototypes/mgv-data/",
+    "linkUrls": [{
+        "genomes" : [
+            "129S1/SvImJ",
+            "A/J",
+            "AKR/J",
+            "BALB/cJ",
+            "C3H/HeJ",
+            "C57BL/6J",
+            "C57BL/6NJ",
+            "CAROLI/EiJ",
+            "CAST/EiJ",
+            "CBA/J",
+            "DBA/2J",
+            "FVB/NJ",
+            "LP/J",
+            "NOD/ShiLtJ",
+            "NZO/HlLtJ",
+            "PAHARI/EiJ",
+            "PWK/PhJ",
+            "SPRET/EiJ",
+            "WSB/EiJ"
+        ],
+        "links": [{
+            "text": "MGI",
+            "url" : "http://www.informatics.jax.org/accession/"
+        }, {
+            "text": "MouseMine",
+            "url" : "http://www.mousemine.org/mousemine/portal.do?class=Gene&externalids="
+        }]
+    }, {
+        "genomes" : ["H.sapiens"],
+        "links" : [{
+            "text" : "Ensembl",
+            "url" : "http://www.ensembl.org/id/"
+        }, {
+            "text" : "HumanMine",
+            "url" : "http://www.humanmine.org/humanmine/portal.do?class=Gene&externalids="
+        }]
+    }, {
+        "genomes" : ["R.norvegicus"],
+        "links" : [{
+            "text" : "Ensembl",
+            "url" : "http://www.ensembl.org/id/"
+        }]
+    }]
 }
