@@ -388,6 +388,8 @@ class RegionManager {
   // The promise resolves to a list of strips, each of which has a list of regions.
   // It is possible for there to be multiple copies of a landmark in a genome leading 
   // to multiple regions in that strip.
+  // It is also possible for there to be no landmark in a genome, in which case mapped
+  // region(s) are computed.
   computeLandmarkRegions (lcoords, genomes) {
     const ps = genomes.map(g => {
       return this.app.dataManager.ensureFeatures(g).then(() => {
@@ -400,19 +402,25 @@ class RegionManager {
   //--------------------------------------
   // Computes the region(s) around the given landmark in the given genome.
   // Assumes the genome has been loaded!
-  //
+  // Args:
+  //    lcoords (object) the landmark specification. Contains:
+  //        landmark (string) name of the landmark
+  //        length (number) size in bp around the landmark
+  //        delta (number) amount to shift the view from the landmark
+  //        lgenome (object) the genome where the landmark was selected
+  //        anchor (number from 0 to 1) Defines reference point on the landmark
+  //            to align to. Number specifies relative position, from 
+  //            start coordinate (0) to end coordinate (1).
+  //    genome (object) the genome for which to compute the corrdinates
   computeLandmarkRegion (lcoords, genome) {
     // landmark mode
     const delta = lcoords.delta
     const w = lcoords.length
     const alignOn = config.ZoomRegion.featureAlignment
     const lms = this.app.dataManager.getGenologs(lcoords.landmark, [genome]).filter(x => x)
+    //
     if (lms.length === 0) {
-      // Landmark does not exist in this genome! Fallback: first compute the
-      // landmark region in the landmark's own genome, then map that region 
-      // to this genome.
-      const r0 = this.computeLandmarkRegion(lcoords, lcoords.lgenome)
-      return this.mapRegionToGenome(r0.regions[0], genome)
+      return this.guessLandmarkRegion(lcoords, genome)
     }
     const regions = lms.map(lm => {
       let lmp
@@ -450,6 +458,74 @@ class RegionManager {
       genome: genome,
       regions: regions
     }
+  }
+  //--------------------------------------
+  // When a landmark does not exist in a given genome, infer a location instead.
+  // 
+  guessLandmarkRegion (lcoords, genome) {
+      const dm = this.app.dataManager
+      // landmark feature
+      const lmf = dm.getGenolog(lcoords.landmark, lcoords.lgenome)
+      // all genes on lm's chromosome
+      const neighbors = dm.getAllFeaturesNow(lcoords.lgenome, lmf.chr)
+      // landmark's index in list
+      const lmi = neighbors.indexOf(lmf)
+      // neighbor genologs (prox, dist)
+      const ngs = [null,null]
+      // neighbor genolog index
+      const ngi = [lmi-1,lmi+1]
+      //
+      function findNeighborGenolog (inc) {
+        const ii = inc === -1 ? 0 : 1
+        let ng
+        for ( ; !ng && neighbors[ngi[ii]]; ngi[ii] += inc) {
+          ng = dm.getGenolog(neighbors[ngi[ii]], genome)
+        }
+        return ng
+      }
+      let ng1 = findNeighborGenolog(-1)
+      let ng2 = findNeighborGenolog(+1)
+      //
+      if (!ng1 && !ng2) return null
+      if (!ng1) ng1 = ng2
+      if (!ng2) ng2 = ng1
+      if (ng1.chr === ng2.chr) {
+        const mp = (Math.min(ng1.start, ng2.start) + Math.max(ng1.end, ng2.end)) / 2
+        const s = Math.floor(mp - lcoords.length / 2)
+        const r = this.makeRegion({
+          genome: genome,
+          chr: ng1.chr,
+          start: s,
+          end: s + lcoords.length - 1
+        })
+        return {
+          genome: genome,
+          regions: [r]
+        }
+      } else {
+        const s1 = Math.floor(ng1.start - lcoords.length / 2)
+        const s2 = Math.floor(ng2.start - lcoords.length / 2)
+        return {
+          genome: genome,
+          regions: [{
+            genome: genome,
+            chr: ng1.chr,
+            start: s1,
+            end: s1 + lcoords.length - 1
+          }, {
+            genome: genome,
+            chr: ng2.chr,
+            start: s2,
+            end: s2 + lcoords.length - 1
+          }]
+        }
+        
+      }
+      // Landmark does not exist in this genome! Fallback: first compute the
+      // landmark region in the landmark's own genome, then map that region 
+      // to this genome.
+      // const r0 = this.computeLandmarkRegion(lcoords, lcoords.lgenome)
+      // return this.mapRegionToGenome(r0.regions[0], genome)
   }
   //--------------------------------------
   mergeUpdate (strips) {
