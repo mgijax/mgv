@@ -14,24 +14,6 @@ class Translator {
   // for mapping coordinates in aGenome to coordinates in bGenome.
   // Since creating a translator is expensive, the results are cached. 
   // Creating a translator from A to B simultaneously creates a translator from B to A (which is also cached).
-  etTranslator (aGenome, bGenome) {
-    if (this.n2block[aGenome.name] && this.n2block[aGenome.name][bGenome.name]) {
-      return Promise.resolve(this.n2block[aGenome.name][bGenome.name])
-    }
-    return this.app.dataManager.getAllFeatures(aGenome).then(afeats => {
-      return this.app.dataManager.getAllFeatures(bGenome).then(bfeats => {
-        console.log("Translator: generating synteny blocks for ", aGenome.name, bGenome.name)
-        let blocks = generateSyntenyBlocks(aGenome.name, afeats, bGenome.name, bfeats)
-        let n2bks = this.n2block
-        let a2b = n2bks[aGenome.name] = n2bks[aGenome.name] || {}
-        let b2a = n2bks[bGenome.name] = n2bks[bGenome.name] || {}
-        a2b[bGenome.name] = blocks[0]
-        b2a[aGenome.name] = blocks[1]
-        console.log("Translator: done. ", aGenome.name, bGenome.name)
-        return blocks[0]
-      })
-    })
-  }
   getTranslator (aGenome, bGenome) {
     const n2bks = this.n2block
     const aName = aGenome.name
