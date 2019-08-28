@@ -45,6 +45,22 @@ class ListManager {
     this.app.$nextTick(() => this.app.$root.$emit('list-click', { list: list, event: { shiftKey: true }}))
     return list
   }
+  // Returns a mapping from list (name) to (names of) lists that reference it in their formulas
+  buildDependencyGraph () {
+    return this.lists.reduce((a,l) => {
+      const ln = l.name
+      const deps = this.lfe.getDependencies(l)
+      deps.forEach(d => {
+        const dn = d.name
+        if (dn in a) {
+          a[dn].add(ln)
+        } else {
+          a[dn] = new Set([ln])
+        }
+      })
+      return a
+    }, {})
+  }
   updateList (list, updates) {
     if (updates.name && updates.name !== list.name) {
       updates.name = this.uniqify(updates.name)
@@ -80,14 +96,14 @@ class ListManager {
           this.lists.push(l)
           this.listByName[l.name] = l
         })
-        console.log(`ListManager: loaded ${this.lists.length} lists from store`)
+        // console.log(`ListManager: loaded ${this.lists.length} lists from store`)
       } else {
-        console.log(`ListManager: loaded 0 lists from store`)
+        // console.log(`ListManager: loaded 0 lists from store`)
       }
     })
   }
   saveToStore () {
-    console.log(`ListManager: saving ${this.lists.length} lists to store`)
+    // console.log(`ListManager: saving ${this.lists.length} lists to store`)
     return this.listStore.set('all', this.lists)
   }
   recoverVersion1Lists () {

@@ -1027,7 +1027,6 @@ export default MComponent({
     this.$root.$off('facet-state', this.cbFacetState)
     this.$root.$off('list-selection', this.cbListSelection)
     this.$emit('region-delete')
-    //console.log("Destroyed region ", this._uid)
   },
   mounted: function () {
     this.segLayout = new SegmentLayout()

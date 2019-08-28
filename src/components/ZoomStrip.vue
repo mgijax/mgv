@@ -223,7 +223,7 @@ export default MComponent({
     }, this.$root.$el)
   },
   beforeDestroy: function () {
-    console.log('Destroying', this.genome.name, this._uid)
+    // console.log('Destroying', this.genome.name, this._uid)
   }
 })
 </script>

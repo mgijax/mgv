@@ -298,7 +298,6 @@ export default MComponent({
           r.end += 5000000
         }
         this.$root.$emit('region-change', { vm: this, op: 'new', region: r })
-        console.log(r)
       }
     }, this.$parent.$el, this)
   }
