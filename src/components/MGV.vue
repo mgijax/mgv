@@ -598,7 +598,6 @@ export default MComponent({
       this.keyManager.register({
        key: 'ArrowRight',
        handler: (e) => {
-         console.log(e)
          this.$root.$emit('region-change', {
            op: 'scroll',
            amt: e.shiftKey ? -0.8 : -0.2
@@ -767,7 +766,7 @@ export default MComponent({
       // initial hash from page URL
       const ih = Object.assign({}, this.historyManager.initialHash)
       ih.width = u.wWidth()
-      console.log('MGV: setting initial context', ih)
+      // console.log('MGV: setting initial context', ih)
       this.setContext(ih, true)
     })
   }

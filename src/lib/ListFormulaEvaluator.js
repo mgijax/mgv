@@ -8,7 +8,7 @@ class ListFormulaEvaluator {
         this.queries = externalQueries
         this.parser = new ListFormulaParser()
     }
-    // Returns list of other lists references by this list's formula
+    // Returns list of other lists referenced by this list's formula
     getDependencies (lst) {
       if (!lst.formula) return []
       const deps = new Set()
@@ -25,6 +25,12 @@ class ListFormulaEvaluator {
       const ast = this.parser.parse(lst.formula)
       reach(ast)
       return Array.from(deps)
+    }
+    refresh (lst, path) {
+        this.refreshList(lst).then(() => {
+          const deps = this.listManager.getDependents(lst)
+          Promise.all(deps.map(dlst => this.refresh(dlst)))
+        })
     }
     // If list has a formula, reevaluates the formula and updates the list items.
     // Returns a promise for the items.
