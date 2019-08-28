@@ -479,6 +479,9 @@ class RegionManager {
         const ii = inc === -1 ? 0 : 1
         let ng
         for ( ; !ng && neighbors[ngi[ii]]; ngi[ii] += inc) {
+          const n = neighbors[ngi[ii]]
+          if (inc > 0 && n.start < lmf.end) continue
+          if (inc < 0 && n.end > lmf.start) continue
           ng = dm.getGenolog(neighbors[ngi[ii]], genome)
         }
         return ng
