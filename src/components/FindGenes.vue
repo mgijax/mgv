@@ -20,13 +20,13 @@
 
 <script>
 import MComponent from '@/components/MComponent'
-import MouseMineQueries from '@/lib/MouseMineQueries'
 
 export default MComponent({
   name: 'FindGenes',
+  inject: ['externalQueries'],
   data: function () {
     return {
-      searches: (new MouseMineQueries()).getQueries(),
+      searches: [],
       currentSelection: { label: '' }
     }
   },
@@ -56,6 +56,7 @@ export default MComponent({
     }
   },
   mounted: function () {
+    this.searches = this.externalQueries()
     this.currentSelection = this.searches[0]
   }
 

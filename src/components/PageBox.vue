@@ -159,6 +159,7 @@ export default MComponent({
       let d = this.ddData
       if (this.floating) d.dx = ev.clientX - d.xStart
       d.dy = ev.clientY - d.yStart
+      if (this.floating) return
       const mybb = this.$el.getBoundingClientRect()
       const osibs = d.sibs.map((s,i) => [s,i]).filter(s => {
         const overlaps = s[0].top <= mybb.bottom && s[0].bottom >= mybb.top
@@ -194,6 +195,7 @@ export default MComponent({
         this.y = Math.max(-1, this.y + d.dy)
       }
       d.dx = d.dy = 0
+      if (this.floating) return
       d.sibs.forEach(s => { s.component.ddData.dy = 0 })
     }
     // end D&D handlers

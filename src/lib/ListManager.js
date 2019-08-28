@@ -1,18 +1,21 @@
 import KeyStore from '@/lib/KeyStore'
 import config from '@/config'
 import u from '@/lib/utils'
+import ListFormulaEvaluator from '@/lib/ListFormulaEvaluator'
 
 class ListManager {
   constructor (app, lists) {
     this.app = app
     this.listStore = new KeyStore(config.ListManager.dbName)
     this.lists = lists
+    this.lfe = new ListFormulaEvaluator(this)
     this.listByName = {}
     this.app.$root.$on('list-delete', d => {
       this.deleteList(d.name)
     })
     this.app.$root.$on('query-returned', d => {
-      this.newList(`${d.queryType.name} = ${d.query}`, d.results)
+      const formula = `?"${d.queryType.name} = ${d.query}"`
+      this.newList(`${d.queryType.name} = ${d.query}`, d.results, null, formula)
     })
     this.initFromStore()
     this.recoverVersion1Lists()
@@ -45,9 +48,14 @@ class ListManager {
     this.app.$nextTick(() => this.app.$root.$emit('list-click', { list: list, event: { shiftKey: true }}))
     return list
   }
+  getDependents (lst) {
+    return this.lists.map(l => [l,this.lfe.getDependencies(l)]).filter(p => p[1].indexOf(lst) >= 0).map(p => p[0])
+  }
   updateList (list, updates) {
     if (updates.name && updates.name !== list.name) {
       updates.name = this.uniqify(updates.name)
+      delete this.listByName[list.name]
+      this.listByName[updates.name] = list
     }
     // cannot change the creation date
     const cdate = list.created

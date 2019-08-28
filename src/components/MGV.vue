@@ -215,6 +215,8 @@ import PreferencesManager from '@/lib/PreferencesManager'
 import RegionManager from '@/lib/RegionManager'
 import Translator from '@/lib/Translator'
 //
+import MouseMineQueries from '@/lib/MouseMineQueries'
+//
 export default MComponent({
   name: 'MGV',
   components: {
@@ -255,6 +257,9 @@ export default MComponent({
       }.bind(this),
       dataManager: function () {
         return this.dataManager
+      }.bind(this),
+      externalQueries: function () {
+        return this.externalQueries
       }.bind(this)
     }
   },
@@ -645,6 +650,8 @@ export default MComponent({
     this.regionManager = new RegionManager(this)
     //
     this.initKeyBindings()
+    //
+    this.externalQueries = (new MouseMineQueries()).getQueries()
   },
   mounted: function () {
     //
@@ -717,7 +724,7 @@ export default MComponent({
     //
     this.$root.$on('list-edit-new', data => {
       if (data) {
-        this.currentEditList = this.listManager.newList(data.name, data.items, data.color)
+        this.currentEditList = this.listManager.newList(data.name, data.items, data.color, data.formula, data.description)
       } else {
         this.currentEditList = null
         this.$refs.listEditor.open()

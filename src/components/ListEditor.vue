@@ -43,6 +43,7 @@
                @dragover="dragover"
                @dragleave="dragleave"
                @drop="drop"
+               :disabled="formula.length > 0"
                />
           </td>
         </tr>
@@ -92,6 +93,29 @@
            </div>
          </td>
         </tr>
+        <tr>
+          <td><label>Formula</label>
+              <br/>
+              <m-button
+                  icon="refresh"
+                  title="Click to refresh the list (replay the formula)."
+                  @click="refreshList"
+                  :disabled="formula.length === 0"
+                  />
+          </td>
+          <td><textarea
+                name="formula"
+                :class="{
+                  valid: formulaValid === true,
+                  invalid: formulaValid !== true && formulaValid !== null
+                }"
+                v-model="formula"
+                placeholder=""/>
+                <span
+                  v-if="formulaError"
+                  >{{formulaError}}</span>
+          </td>
+        </tr>
         <tr class="date">
           <td><label>Created</label></td>
           <td><span>{{ created }}</span></td>
@@ -116,6 +140,7 @@
 import MComponent from '@/components/MComponent'
 import MButton from '@/components/MButton'
 import { Chrome } from 'vue-color'
+import ListFormulaEvaluator from '@/lib/ListFormulaEvaluator'
 export default MComponent({
   name: 'ListEditor',
   components: {
@@ -125,13 +150,15 @@ export default MComponent({
   props: {
     list: Object
   },
-  inject: ['listManager'],
+  inject: ['listManager','externalQueries'],
   data: function () {
     return {
       name: '',
       created: '',
       modified: '',
       description: '',
+      formula: '',
+      formulaError: '',
       color: '#000000',
       items: [],
       pickerOpen: false,
@@ -147,6 +174,15 @@ export default MComponent({
         // let v = this.$refs.textarea.value
         // let titems = v.split(/\s+/).filter(x => x)
       }
+    },
+    formulaValid () {
+      const v = this.lfe.isValid(this.formula)
+      if (typeof(v) === "string") {
+        this.formulaError = v
+      } else {
+        this.formulaError = ""
+      }
+      return v
     }
   },
   watch: {
@@ -156,6 +192,9 @@ export default MComponent({
     pickerColor: function (c) {
       this.color = c.hex8 || c
     }
+  },
+  created: function () {
+    this.lfe = new ListFormulaEvaluator(this.listManager(), this.externalQueries())
   },
   mounted: function () {
     this.app.$root.$on('list-delete', d => {
@@ -203,14 +242,25 @@ export default MComponent({
       let list = this.listManager().getList(listName)
       let dtgt = this.getDropTarget(evt)
       let op = dtgt.getAttribute('name')
-      if (op === 'items') op = 'replace'
-      this[op](list)
+      let ops = {
+        intersection: '*',
+        union: '+',
+        difference: '-',
+        items: 'replace'
+      }
+      if (this.formula) {
+        this.formula = this.lfe.parser.format(this.lfe.parser.parse(`(${this.formula}) ${ops[op]} "${list.name}"`))
+      } else {
+        this.formula = `"${list.name}"`
+      }
+      this.refreshList()
     },
     reset: function () {
       if (this.list) {
         let l = this.list
         this.name = l.name
         this.description = l.description
+        this.formula = l.formula
         this.color = l.color
         this.created = l.created.toDateString() + ' ' + l.created.toLocaleTimeString()
         this.modified = l.modified.toDateString() + ' ' + l.modified.toLocaleTimeString()
@@ -220,6 +270,8 @@ export default MComponent({
         this.$parent.open()
       } else {
         this.name = ''
+        this.formula = ''
+        this.description = ''
         this.color = '#000000'
         this.created = ''
         this.modified = ''
@@ -275,6 +327,9 @@ export default MComponent({
     },
     intersectWithSelected: function () {
       this.intersection({items:this.app.currentSelection})
+    },
+    refreshList: function (e) {
+      this.lfe.refreshList(this.$data, e && e.shiftKey).then(ids => this.items = ids)
     }
   }
 })
@@ -302,6 +357,14 @@ textarea {
   -webkit-box-sizing: content-box;
   -moz-box-sizing: content-box;
   box-sizing: content-box;
+}
+.valid {
+  outline: 5px auto green;
+  outline-offset: -2px;
+}
+.invalid {
+  outline: 5px auto red;
+  outline-offset: -2px;
 }
 .dropzone {
   font-size: 48px;
