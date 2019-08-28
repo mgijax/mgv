@@ -186,7 +186,7 @@ class RegionManager {
   //--------------------------------------
   // Adds a new region. Adds a new strip if necessary, or adds r to the
   // end of existing strip, based on r's genome.
-  addRegion (r) {
+  addRegion (r, only) {
     r = this.makeRegion(r)
     const si = this.findStrip(r.genome)
     if (si === -1) {
@@ -194,7 +194,11 @@ class RegionManager {
     } else {
       const s = this.app.strips[si]
       r.width = s.regions.length ? s.regions[0].width : 1
-      s.regions.push(r)
+      if (only) {
+        s.regions = [r]
+      } else {
+        s.regions.push(r)
+      }
       this.layout()
     }
   }
@@ -661,7 +665,7 @@ class RegionManager {
     } else if (d.op === 'delete-strip') {
       this.deleteStrip(r.genome)
     } else if (d.op === 'new') {
-      this.addRegion(d.region)
+      this.addRegion(d.region, d.only)
     }
     if (!quietly) this.announce()
   }

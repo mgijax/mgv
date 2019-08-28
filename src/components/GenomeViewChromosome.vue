@@ -277,6 +277,7 @@ export default MComponent({
         this.dragRectY = d.p1
         this.dragRectHeight = 1
         this.dragging = true
+        d.shiftDrag = e.shiftKey
       },
       drag: function (e, d) {
         d.p2 = Math.min(this.chrLen, Math.max(0, convert(e, d)))
@@ -297,7 +298,7 @@ export default MComponent({
           r.start -= 5000000
           r.end += 5000000
         }
-        this.$root.$emit('region-change', { vm: this, op: 'new', region: r })
+        this.$root.$emit('region-change', { vm: this, op: 'new', region: r, only: !d.shiftDrag })
       }
     }, this.$parent.$el, this)
   }
