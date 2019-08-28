@@ -621,6 +621,17 @@ export default MComponent({
       }).then(() => {
         window.location.reload()
       })
+    },
+    purgeAndExit () {
+      const allKstores = [
+        config.CachingFetcher.dbName,
+        config.PreferencesManager.dbName,
+        config.ListManager.dbName,
+        config.SequenceCart.dbName,
+      ]
+      Promise.all(allKstores.map(ks => (new KeyStore(ks)).clear())).then(() => {
+        window.location = this.runtimeConfig.exitUrl
+      })
     }
   },
   beforeCreate: function () {
@@ -659,6 +670,12 @@ export default MComponent({
     this.$root.$on('clear-cache-and-reload', () => {
       if (confirm('Clear data cache and reload this page. Are you sure?')) {
         this.clearCacheAndReload()
+      }
+    })
+    //
+    this.$root.$on('purge-and-exit', () => {
+      if (confirm('Delete all data associated with this MGV instance. Includes lists, sequence cart items, preferences and cached data. Are you sure?')) {
+        this.purgeAndExit()
       }
     })
     //

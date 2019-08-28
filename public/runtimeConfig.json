@@ -44,5 +44,6 @@
             "text" : "Ensembl",
             "url" : "http://www.ensembl.org/id/"
         }]
-    }]
+    }],
+    "exitUrl": "http://www.informatics.jax.org"
 }

@@ -195,6 +195,18 @@
       color="#3a99fc"
       />
   </div>
+  <!-- =================== -->
+  <div
+    title="Purges all data for this MGV instance and exits. Includes lists, sequence cart items, preferences, and cached data."
+    class="flexrow"
+    >
+    <label>Purge and exit</label>
+    <m-button
+      icon="eject"
+      @click="$root.$emit('purge-and-exit')"
+      color="#fc3a3a"
+      />
+  </div>
   </form>
   </div>
 </template>
