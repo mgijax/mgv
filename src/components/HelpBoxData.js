@@ -65,10 +65,12 @@ export default [{
         `,
     items: [{
       what: `Add genomes to the view`,
-      how: `In ${ref('ZoomView')} open the "Genomes" dropdown list. 
-          Command-click the genomes you wish to add.
-          Alternatively, in the ${ref('GenomeView')}, select a genome from the dropdown,
-          then drag on a chromosome; that region is added to the ${ref('ZoomView')}.
+      how: `The ${ref('Genomes')} box lists all the genomes.
+          Check the box next to a genome to add it to the ${ref('ZoomView')};
+          uncheck the box to remove it.
+          To select one genome and remove all others, shift-click the box.
+          Several button add the bottom of the list provide convenient ways to
+          select specific sets.
           `
       }, {
       what: `Synchronized browsing`,
@@ -122,7 +124,8 @@ export default [{
       }, {
       what: `Metadata`,
       how: `
-          Metadata such as the genome build number is displayed when you mouse over the genome's name in the ${ref('ZoomView')}. 
+          Information such as the genome build number is displayed when you mouse over a
+          genome's name in the ${ref('Genomes')} box. 
           `
     }]
   }, {  
@@ -197,7 +200,7 @@ export default [{
     }, {  
       what: `Is currently selected`,
       how: `Tests that a feature is/is not currently selected.
-         If there is no current selection, this filter has no effect.
+         If there is no current selection, this filter has no effect (everything is shown).
          If the current selection changes while this filter is active, the view updates accordingly.
          (Reminder: click on a feature to select it. Shift-click to select multiple features.
          Click on the background to unselect everything.)
@@ -220,8 +223,10 @@ export default [{
       }, {
       what: `Select gene sequences`,
       how: `Right click on a gene to open its context menu. Choose one of the 
-          options under "Add sequences to cart." You can select genomic, transcript, or CDS
-          sequences, for the current gene or for that gene and its genologs.
+          options under "Add sequences to cart." You can select genomic, transcript,
+          composite transcript, or CDS sequences, for the current gene or for that
+          gene and its genologs. A composite transcript consists of the union of all the
+          exons in the gene.
           `
       }, {
       what: `Download sequences`,
@@ -286,7 +291,13 @@ export default [{
       what: `Display a list`,
       how: `Click on the list under MyLists. The positions of all list items are shown in the ${ref('GenomeView')}.
       In the ${ref('ZoomView')}, any list items currently in view are highlighted. To stop displaying a list,
-      click on it again. To step through the items in the list, shift-click the list repeatedly.`
+      click on it again.
+          `
+      }, {
+      what: `To step through a list`,
+      how: `Shift-click on a list to make it the current list and jump to the first gene.
+          Continue to shift-click to jump to successive list items.
+          `
       }, {
       what: `Edit a list`,
       how: `Click on the ${i('mode_edit')} button for the list to open the ${ref('ListEditor')}. You can
@@ -324,9 +335,6 @@ export default [{
     }, {
       what: `Height`,
       how: `Sets the height of the rectangles used to draw features.`
-    }, {
-      what: `Lane gap`,
-      how: `Sets the vertical distance between overlapping genes.`
     }, {
       heading: `Transcripts. Note that transcripts are only visible when the view region 
           size is below the details threshold.
@@ -377,7 +385,12 @@ export default [{
     }, {
       what: `Clear cache and reload`,
       how: `MGV caches data on your computer for performance. Clicking this button allows you to 
-          clear the cache and reload the page.
+          clear the cache and reload the page. This action asks for confirmation before proceeding.
+          `
+    }, {
+      what: `Purge and exit`,
+      how: `Click to remove all MGV data from your computer and leave the site.
+          This action asks for confirmation before proceeding.
           `
     }]
   }, {
