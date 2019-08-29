@@ -585,7 +585,7 @@ export default MComponent({
     clientXtoBase: function (x) {  
       const rx = this.$refs.underlay.getBoundingClientRect().left
       const baseOffset = (x - rx) * this.bpp
-      const pos = Math.round(this.region.start + baseOffset)
+      const pos = Math.round(this.region.reversed ? this.region.end - baseOffset : this.region.start + baseOffset)
       return pos
     },
     remove: function () {
@@ -733,20 +733,25 @@ export default MComponent({
     transcriptAxisPoints (f, t, ti) {
       let y = this.transcriptY(f, t, ti) + this.featureHeight / 2
       y = this.featureHeight / 2
-      let x1 = this.transcriptX1(t)
-      let x2 = this.transcriptX2(t)
+      let tx1 = this.transcriptX1(t)
+      let tx2 = this.transcriptX2(t)
+      let x1 = Math.min(tx1, tx2)
+      let x2 = Math.max(tx1, tx2)
       let ext = 10
       let h = 3
       if (!this.spreadTranscripts) {
         return `${x1} ${y} ${x2} ${y}`
       }
-      if (f.strand === '+') {
+      const rev = this.region.reversed
+      const dir = f.strand === "+" ? (rev ? 'left' : 'right') : (rev ? 'right' : 'left')
+      if (dir === 'right') {
+        // arrow pointing right
         x2 += ext
         return `${x1} ${y} ${x2} ${y} ${x2 - ext / 2} ${y - h} ${x2} ${y} ${x2 - ext / 2} ${y + h}`
       } else {
-        x1 = x2
-        x2 = this.transcriptX1(t) - ext
-        return `${x1} ${y} ${x2} ${y} ${x2 + ext / 2} ${y - h} ${x2} ${y} ${x2 + ext / 2} ${y + h}`
+        // arrow pointing left
+        x1 -= ext
+        return `${x2} ${y} ${x1} ${y} ${x1 + ext / 2} ${y - h} ${x1} ${y} ${x1 + ext / 2} ${y + h}`
       }
     },
     // Request features in my range, which will asynchromously cause a redraw.
@@ -859,7 +864,13 @@ export default MComponent({
       let f = this.getEventObjects(e)
       if (f) {
         // alt clicked on a feature
-        this.$root.$emit('feature-align', { region: this.region, feature: f.feature, transcript: f.transcript, event: e, basePos: this.clientXtoBase(e.clientX) })
+        this.$root.$emit('feature-align', {
+          region: this.region,
+          feature: f.feature,
+          transcript: f.transcript,
+          event: e,
+          basePos: this.clientXtoBase(e.clientX)
+        })
         e.stopPropagation()
       } else {
         // alt clicked on region background

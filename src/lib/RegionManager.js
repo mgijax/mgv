@@ -285,15 +285,21 @@ class RegionManager {
     const rr = this.findRegion(r)
     const si = rr[0], ri = rr[1]
     if (ri === -1) return
+    //
     const r2 = this.makeRegion(r)
     const w = r.width
     const l = r.end - r.start + 1
     const ll = Math.floor(frac * l)
-
+    //
     r.width = frac * w
-    r.end = r.start + ll - 1
     r2.width = (1 - frac) * w
-    r2.start = r.start + ll
+    if (r.reversed) {
+      r.start = r.end - ll + 1
+      r2.end -= ll
+    } else {
+      r.end = r.start + ll - 1
+      r2.start = r.start + ll
+    }
     this.app.strips[si].regions.splice(ri + 1, 0, r2)
     this.layout()
   }
