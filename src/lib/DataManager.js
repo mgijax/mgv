@@ -356,6 +356,38 @@ class DataManager {
       f.layout.l2 = fp.assignNext(start, end, 1 + f.transcripts.length, f.ID)
     })  
   }
+  //
+  flushAllGenomeData () {
+    this.app.allGenomes.forEach(g => this.flushGenome(g))
+  }
+  //
+  flushGenome (g) {
+     const gn = g.name || g
+     const gcache = this.cache[gn]
+     if (gcache) {
+       delete this.cache[gn]
+       for (let cn in gcache) {
+         const cfeats = gcache[cn]
+         cfeats.forEach(f => {
+           delete this.id2feat[f.ID]
+           const cidFeats = this.cid2feats[f.cID]
+           if (cidFeats) {
+             this.cid2feats[f.cID] = cidFeats.filter(ff => ff !== f)
+             if (this.cid2feats[f.cID].length === 0) {
+                delete this.cid2feats[f.cID]
+             }
+           }
+           if (f.symbol) {
+             const fs = f.symbol.toLowerCase()
+             this.symbol2feats[fs] = this.symbol2feats[fs].filter(ff => ff !== f)
+             if (this.symbol2feats[fs].length === 0) {
+               delete this.symbol2feats[fs]
+             }
+           }
+         }, this)
+       }
+     }
+  }
 }
 // Registers features for one chromsome of a genome
 class FeatureRegistrar {
@@ -420,38 +452,6 @@ class FeatureRegistrar {
     Object.freeze(f)
     //
     return f
-  }
-  //
-  flushAllGenomeData () {
-    this.app.allGenomes.forEach(g => this.flushGenome(g))
-  }
-  //
-  flushGenome (g) {
-     const gn = g.name || g
-     const gcache = this.cache[gn]
-     if (gcache) {
-       delete this.cache[gn]
-       for (let cn in gcache) {
-         const cfeats = gcache[cn]
-         cfeats.forEach(f => {
-           delete this.id2feat[f.ID]
-           const cidFeats = this.cid2feats[f.cID]
-           if (cidFeats) {
-             this.cid2feats[f.cID] = cidFeats.filter(ff => ff !== f)
-             if (this.cid2feats[f.cID].length === 0) {
-                delete this.cid2feats[f.cID]
-             }
-           }
-           if (f.symbol) {
-             const fs = f.symbol.toLowerCase()
-             this.symbol2feats[fs] = this.symbol2feats[fs].filter(ff => ff !== f)
-             if (this.symbol2feats[fs].length === 0) {
-               delete this.symbol2feats[fs]
-             }
-           }
-         }, this)
-       }
-     }
   }
 }
 

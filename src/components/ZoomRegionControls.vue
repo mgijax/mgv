@@ -83,11 +83,11 @@
             />
         </div>
 
-        <div class="flexrow">
+        <div class="flexrow" style="flex-grow: 0;">
           <!-- Forward/Reverse toggle -->
           <span class="small-label">F</span><m-button
             :icon="(region && region.reversed) ? 'toggle_on' : 'toggle_off'"
-            title="Draw this region in reverse orientation."
+            :title="region && region.reversed ? 'Region is shown in reverse orientation. Click for default.' : 'Region is shown in default orientation. Click to reverse.'"
             @click="reverse()"
             /><span class="small-label">R</span>
         </div>
@@ -157,7 +157,7 @@ export default MComponent({
       this.$root.$emit('region-change', { region: this.region, vm: this, op: 'scroll', amt: amt })
     },
     reverse: function () {
-      this.region.reversed = !this.region.reversed
+      this.$root.$emit('region-change', { region: this.region, vm: this, op: 'reverse' })
     },
     split: function () {
       this.app.scrollLock = false
@@ -294,7 +294,7 @@ export default MComponent({
   justify-content: space-around;
 }
 .small-label {
-  font-size: smaller;
+  font-size: 10px;
 }
 .mgibuttons  .m-button {
   font-size: 12px;

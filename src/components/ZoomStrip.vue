@@ -81,7 +81,7 @@
         :y="height - 3"
         text-anchor="middle"
         style="font-size: 12px; font-weight: bold;"
-        fill="gray"
+        :fill="someoneIsReversed ? 'red' : 'gray'"
         @click="reverseClicked"
         >R<title>Click to reverse region orientation.</title></text>
     </g>
@@ -144,6 +144,9 @@ export default MComponent({
       const isref = this.context.rRegion && this.context.rRegion.genome === this.genome
       return isref ? this.cfg.refEndCapColor : this.cfg.endCapColor
     },
+    someoneIsReversed: function () {
+      return this.regions.filter(r => r.reversed).length > 0
+    }
   },
   methods: {
     regionRdragstart: function (d) {
@@ -210,7 +213,7 @@ export default MComponent({
       this.$root.$emit('region-change', { region: { genome: this.genome }, op: 'delete-strip' })
     },
     reverseClicked () {
-      this.regions.forEach(r => r.reversed = !r.reversed)
+      this.regions.forEach(r => this.$root.$emit('region-change', { region: r, op: 'reverse' }))
     }
   },
   mounted: function () {
@@ -234,9 +237,6 @@ export default MComponent({
         self.$emit('dragend', { evt, data })
       }
     }, this.$root.$el)
-  },
-  beforeDestroy: function () {
-    // console.log('Destroying', this.genome.name, this._uid)
   }
 })
 </script>

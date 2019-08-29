@@ -120,6 +120,7 @@ class RegionManager {
         this.app.rRegion = null
       }
       this.app.strips.splice(i, 1)
+      this.app.dataManager.flushGenome(g)
       if (!quietly) this.announce()
     }
   }
@@ -279,6 +280,11 @@ class RegionManager {
     })
     this.layout()
     if (!quietly) this.announce()
+  }
+  //--------------------------------------
+  reverseRegion (r, quietly) {
+    r.reversed = !r.reversed
+    // if (!quietly) this.announce()
   }
   //--------------------------------------
   splitRegion (r, frac) {
@@ -667,6 +673,8 @@ class RegionManager {
     } else if (d.op === "split") {
       if (r === this.app.rRegion) this.app.rRegion = null
       this.splitRegion(r, d.pos)
+    } else if (d.op === "reverse") {
+      this.reverseRegion(r)
     } else if (d.op === "make-reference") {
       this.computeMappedRegions(r)
     } else if (d.op === 'delete-strip') {
