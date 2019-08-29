@@ -1,7 +1,7 @@
 <template>
   <g
     class="zoom-region"
-    :class="{ current: isCurrent, dragging: dragging || rDragging }"
+    :class="{ current: isCurrent, dragging: dragging || rDragging, reversed: region.reversed }"
     :transform="`translate(${region.deltaX + regionDragDelta}, 0)`"
     >
   <svg
@@ -67,18 +67,21 @@
       </g>
       <!-- ======= left end underlay, shows when you scroll past the beginning of the chr  ======= -->
       <rect
-        v-if="region.start - (region.end - region.start) < 0"
-        :x="b2p(-region.chr.length)"
+        class="left-end-underlay"
+        v-if="region.start - bpp * myDelta < 0"
+        :x="region.reversed ? b2p(0) : -myDelta"
         :y="-zeroOffset"
-        :width="b2p(0) - b2p(-region.chr.length)"
+        :width="Math.max(0, region.reversed ? (region.width - b2p(0) - myDelta) : (b2p(0) + myDelta))"
         :height="Math.max(height, 20)"
         fill="gray"
         />
       <!-- ======= right end underlay, shows when you scroll past the end of the chr  ======= -->
       <rect
-        :x="b2p(region.chr.length)"
+        class="right-end-underlay"
+        v-if="region.end - bpp * myDelta > region.chr.length"
+        :x="region.reversed ? -myDelta : b2p(region.chr.length)"
         :y="-zeroOffset"
-        :width="b2p(region.chr.length)"
+        :width="Math.max(0,ppb * (region.end - region.chr.length) - direction * myDelta)"
         :height="Math.max(height, 20)"
         fill="gray"
         />
@@ -90,8 +93,9 @@
         :height="Math.max(height, 20)"
         fill="white"
         fill-opacity="0"
-        stroke="black"
-        :stroke-opacity="isCurrent ? 1.0 : 0.5"
+        :stroke="region.reversed ? 'red' : 'black'"
+        :stroke-width="region.reversed ? 3 : 1"
+        stroke-opacity="0.5"
         class="underlay"
         ref="underlay"
         :transform="`translate(${-myDelta},0)`"
@@ -402,6 +406,9 @@ export default MComponent({
     }
   },
   computed: {
+    direction: function () {
+      return this.region.reversed ? -1 : 1
+    },
     coordinatesLabel: function () {
       const r = this.region
       const c = r.chr.name
@@ -589,15 +596,15 @@ export default MComponent({
     },
     // converts a pixel position (0-based, within the region) to base position
     p2b (p) {
-      return Math.floor(this.region.start + this.bpp * p)
+      return Math.floor(this.region.start + this.bpp * (this.region.reversed ? this.region.width - p : p))
     },
     // converts a base position to a pixel position
     b2p (b) {
-      const v = this.ppb * (b - this.region.start)
-      return v
+      const p = this.ppb * (b - this.region.start)
+      return this.region.reversed ? this.region.width - p : p
     },
     featureX (f) {
-      return this.b2p(f.start)
+      return this.b2p(this.region.reversed ? f.end : f.start)
     },
     featureW (f) {
       return Math.max(1, (f.end - f.start + 1) * this.ppb)
@@ -650,12 +657,17 @@ export default MComponent({
       return s && (s.has(f.cID) || s.has(f.ID))
     },
     featureVisible: function (f) {
-      let overlaps = f.start <= (this.region.end + this.deltaB) && f.end >= (this.region.start + this.deltaB)
+      let overlaps = f.start <= (this.region.end + this.direction*this.deltaB) && f.end >= (this.region.start + this.direction*this.deltaB)
       //return overlaps && this.getFacets().test(f)
       return overlaps
     },
     featureTextX: function (f) {
-      let s = Math.max(f.start, this.region.start + this.deltaB)
+      let s
+      if (this.region.reversed) 
+        s = Math.min(f.end, this.region.end - this.deltaB)
+      else {
+        s = Math.max(f.start, this.region.start + this.deltaB)
+      }
       return this.b2p(s)
     },
     featureStyle (f) {
@@ -680,7 +692,12 @@ export default MComponent({
       return this.b2p(Math.max.apply(null, t.exons.map(e => e.end)))
     },
     transcriptTextX: function (t) {
-      let s = Math.max(t.exons[0].start, this.region.start + this.deltaB)
+      let s
+      if (this.region.reversed) {
+        s = Math.min(t.exons[t.exons.length-1].end, this.region.end - this.deltaB)
+      } else {
+        s = Math.max(t.exons[0].start, this.region.start + this.deltaB)
+      }
       return this.b2p(s)
     },
     transcriptTransform (f, t, ti) {
@@ -695,7 +712,7 @@ export default MComponent({
       }
     },
     codonGlyph (f, t, which) {
-      const dir = f.strand === '+' ? 1 : -1
+      const dir = (f.strand === '+' ? 1 : -1) * (this.region.reversed ? -1 : 1)
       let pos
       if ((f.strand === '+' && which === 'start')
       || (f.strand === '-' && which === 'stop')) {

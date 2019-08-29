@@ -25,6 +25,7 @@ class RegionManager {
     rr.id = this.rCount++
     rr.width = rr.width === undefined ? 1 : rr.width
     rr.deltaX = rr.deltaX === undefined ? 0 : rr.deltaX
+    if (!('reversed' in rr)) rr.reversed = false
     return rr
   }
   //--------------------------------------
@@ -236,7 +237,7 @@ class RegionManager {
     // zoomed length
     const L2 = zAmt * L
     // scroll amount
-    const delta = sAmt * Math.max(L, L2)
+    const delta = sAmt * Math.max(L, L2) * (r.reversed ? -1 : 1)
     // ref point = midpoint of region
     const mid = (r.start + r.end) / 2
     // new start and end pos

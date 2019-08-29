@@ -74,17 +74,21 @@ export default MComponent({
       //   { cid -> { cid, strips: [ [ fetaures in strip with that cid ] ] }
       const ix = {}
       pel.querySelectorAll('.zoom-strip').forEach((zel, zi) => {
-        zel.querySelectorAll('.feature.highlight.visible').forEach(fel => {
+       zel.querySelectorAll('.zoom-region').forEach(rel => {
+        const rev = rel.classList.contains('reversed')
+        rel.querySelectorAll('.feature.highlight.visible').forEach(fel => {
           const cid = fel.getAttribute('canonical')
           if (!cid) return
           const cdata = ix[cid] ? ix[cid] : { cid:cid, strips: [] }
           const rects = cdata.strips[zi] || []
 	  const rect = fel.querySelector('.feature > rect').getBoundingClientRect()
 	  rect.strand = fel.getAttribute('strand')
+          if (rev) rect.strand = rect.strand === '+' ? '-' : '+'
           rects.push(rect)
           cdata.strips[zi] = rects
           ix[cid] = cdata
         })
+       })
       })
       //
       const result = []

@@ -74,6 +74,16 @@
         style="font-size: 20px; font-weight: bold;"
         fill="gray"
         >::<title>Drag up/down to reposition.</title></text>
+      <!-- reverse button -->
+      <text name="reverseBtn"
+        ref="reverseBtn"
+        :x="cfg.endCapWidth / 2"
+        :y="height - 3"
+        text-anchor="middle"
+        style="font-size: 12px; font-weight: bold;"
+        fill="gray"
+        @click="reverseClicked"
+        >R<title>Click to reverse region orientation.</title></text>
     </g>
     <!-- busy indicator -->
     <g
@@ -198,6 +208,9 @@ export default MComponent({
     },
     deleteClicked () {
       this.$root.$emit('region-change', { region: { genome: this.genome }, op: 'delete-strip' })
+    },
+    reverseClicked () {
+      this.regions.forEach(r => r.reversed = !r.reversed)
     }
   },
   mounted: function () {
@@ -251,6 +264,9 @@ export default MComponent({
   cursor: grabbing;
 }
 [name="deleteBtn"] {
+  cursor: pointer;
+}
+[name="reverseBtn"] {
   cursor: pointer;
 }
 .border-handle {
