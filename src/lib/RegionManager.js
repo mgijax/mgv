@@ -282,8 +282,12 @@ class RegionManager {
     if (!quietly) this.announce()
   }
   //--------------------------------------
-  reverseRegion (r, quietly) {
-    r.reversed = !r.reversed
+  reverseRegion (r, value, quietly) {
+    if (value === undefined) {
+      r.reversed = !r.reversed
+    } else {
+      r.reversed = value
+    }
     // if (!quietly) this.announce()
   }
   //--------------------------------------
@@ -674,7 +678,7 @@ class RegionManager {
       if (r === this.app.rRegion) this.app.rRegion = null
       this.splitRegion(r, d.pos)
     } else if (d.op === "reverse") {
-      this.reverseRegion(r)
+      this.reverseRegion(r, d.value)
     } else if (d.op === "make-reference") {
       this.computeMappedRegions(r)
     } else if (d.op === 'delete-strip') {

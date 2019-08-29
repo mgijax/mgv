@@ -212,8 +212,13 @@ export default MComponent({
     deleteClicked () {
       this.$root.$emit('region-change', { region: { genome: this.genome }, op: 'delete-strip' })
     },
-    reverseClicked () {
-      this.regions.forEach(r => this.$root.$emit('region-change', { region: r, op: 'reverse' }))
+    reverseClicked (e) {
+      const sir = this.someoneIsReversed
+      this.regions.forEach(r => this.$root.$emit('region-change', {
+        region: r,
+        op: 'reverse',
+        value: e.shiftKey ? undefined : !sir 
+      }))
     }
   },
   mounted: function () {
