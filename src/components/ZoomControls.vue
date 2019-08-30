@@ -47,12 +47,20 @@
           @click="scroll($event.shiftKey ? 0.8 : 0.2)"
           title="Click to scroll right. Shift-click to scroll right more."
           />
-        </div>
-      <!-- camera button -->
-      <m-button
-        icon="camera_alt"
-        @click="$emit('camera-click', $event)"
-        title="Click to download PNG image. Shift-click to download SVG."/>
+      </div>
+      <div class="flexrow">
+        <!-- sort button -->
+        <m-button
+          :icon="'sort'"
+          :title="'Sort genomes by name'"
+          @click="$root.$emit('sort-strips')"
+          />
+        <!-- camera button -->
+        <m-button
+          icon="camera_alt"
+          @click="$emit('camera-click', $event)"
+          title="Click to download PNG image. Shift-click to download SVG."/>
+      </div>
     </div>
 </template>
 
