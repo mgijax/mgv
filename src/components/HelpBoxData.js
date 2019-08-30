@@ -60,8 +60,9 @@ export default [{
           `
     }]
   }, {
-    name: `Genomes`,
+    name: `Genomes and regions`,
     description: `MGV lets you explore multiple regions from multiple genomes at once.
+        Each region is a mini-browser, and regions can be controlled individually or in sync.
         `,
     items: [{
       what: `Add genomes to the view`,
@@ -69,8 +70,20 @@ export default [{
           Check the box next to a genome to add it to the ${ref('ZoomView')};
           uncheck the box to remove it.
           To select one genome and remove all others, shift-click the box.
-          Several button add the bottom of the list provide convenient ways to
-          select specific sets.
+          Buttons at the bottom of the list provide ways to
+          select predefine sets of genomes.
+          `
+      }, {
+      what: `Metadata`,
+      how: `
+          Information such as the genome build number is displayed when you mouse over a
+          genome's name in the ${ref('Genomes')} box. 
+          `
+      }, {
+      what: `Add regions to the view`,
+      how: `Adding a genome creates a new region.
+          To add another region for the same genome, shift-drag on a chromosome in the GenomeView.
+          Alternatively, split an existing region, then navigate one side to the desired location.
           `
       }, {
       what: `Synchronized browsing`,
@@ -110,7 +123,17 @@ export default [{
           its background (not on a feature). Alternatively, click the ${i('compare')} button in the region's popup controls.
           `
       }, {
-      what: `Moving and sizing the pieces`,
+      what: `Reverse orientation`,
+      how: `By default, the forward strand direction is drawn left-to-right.
+          When comparing regions with inversions, it can be convenient to draw some 
+          left-to-right and some right-to-left, so that homologs line up vertically.
+          To reverse the orientation of a region, open it controls and click on the "F-R" toggle.
+          To reverse the orientation of all the regions in a strip, click the "R" in the left endcap.
+          Click again to revert to normal.
+          Regions in reverse orientation are outlined in red.
+          `
+      }, {
+      what: `Moving and re-sizing`,
       how: `
           In the ${ref('ZoomView')}, genomes are displayed as horizontal "strips".
           Strips (i.e. genomes) can be reordered by dragging;
@@ -120,12 +143,6 @@ export default [{
           at the top left corner of a region to move it left or right.
           Genome regions can be resized by dragging the gray divider bar between
           neighboring regions.
-          `
-      }, {
-      what: `Metadata`,
-      how: `
-          Information such as the genome build number is displayed when you mouse over a
-          genome's name in the ${ref('Genomes')} box. 
           `
     }]
   }, {  

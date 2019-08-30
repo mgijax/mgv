@@ -83,7 +83,7 @@
         style="font-size: 12px; font-weight: bold;"
         :fill="someoneIsReversed ? 'red' : 'gray'"
         @click="reverseClicked"
-        >R<title>Click to reverse region orientation.</title></text>
+        >R<title>Click to reverse orientation of all regions in this strip. You can reverse an individual region from its control panel (right-click on the region background).</title></text>
     </g>
     <!-- busy indicator -->
     <g
