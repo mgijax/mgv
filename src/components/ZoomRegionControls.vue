@@ -30,32 +30,6 @@
           />
       </div>
       <div class="row2 flexrow">
-        <!-- div v-if="region && region.genome.name === 'C57BL/6J'" -->
-        <div class="mgibuttons" v-show="region && region.genome.name === 'C57BL/6J'">
-          <label>MGI</label>
-          <!-- SNPs linkout -->
-          <m-button
-            icon="SNPs"
-            title="See SNPs at MGI in this region of B6 vs displayed mouse genomes."
-            @click="mgiSNPquery"
-            :disabled="region && region.genome.name !== 'C57BL/6J'"
-            />
-          <!-- QTL linkout -->
-          <m-button
-            icon="QTL"
-            title="See QTL at MGI in this region."
-            @click="mgiQTLquery"
-            :disabled="region && region.genome.name !== 'C57BL/6J'"
-            />
-          <!-- JBrowse linkout -->
-          <m-button
-            icon="JBrowse"
-            title="See the full details of this region in the MGI JBrowse genome browser."
-            @click="mgiJBquery"
-            :disabled="region && region.genome.name !== 'C57BL/6J'"
-            />
-        </div>
-
         <div class="navbuttons">
           <!-- zoom in -->
           <m-button
@@ -114,6 +88,33 @@
             />
         </div>
       </div>
+
+      <!-- MGI/Reference genome specific controls -->
+      <div class="row3 mgibuttons" v-show="region && region.genome.name === 'C57BL/6J'">
+        <label>MGI</label>
+        <!-- SNPs linkout -->
+        <m-button
+          icon="SNPs"
+          title="See SNPs at MGI in this region of B6 vs displayed mouse genomes."
+          @click="mgiSNPquery"
+          :disabled="region && region.genome.name !== 'C57BL/6J'"
+          />
+        <!-- QTL linkout -->
+        <m-button
+          icon="QTL"
+          title="See QTL at MGI in this region."
+          @click="mgiQTLquery"
+          :disabled="region && region.genome.name !== 'C57BL/6J'"
+          />
+        <!-- JBrowse linkout -->
+        <m-button
+          icon="JBrowse"
+          title="See the full details of this region in the MGI JBrowse genome browser."
+          @click="mgiJBquery"
+          :disabled="region && region.genome.name !== 'C57BL/6J'"
+          />
+      </div>
+
     </div>
 </template>
 
