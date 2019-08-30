@@ -39,12 +39,12 @@
           />
         <m-button
           icon="chevron_left"
-          @click="scroll($event.shiftKey ? 0.8 : 0.2)"
+          @click="scroll($event.shiftKey ? -0.8 : -0.2)"
           title="Click to scroll left. Shift-click to scroll left more."
           />
         <m-button
           icon="chevron_right"
-          @click="scroll($event.shiftKey ? -0.8 : -0.2)"
+          @click="scroll($event.shiftKey ? 0.8 : 0.2)"
           title="Click to scroll right. Shift-click to scroll right more."
           />
         </div>
@@ -93,7 +93,7 @@ export default MComponent({
     },
     scroll (amt) {
       this.app.scrollLock = true
-      this.$root.$emit('region-change', { op: 'scroll', amt: amt })
+      this.$root.$emit('region-change', { op: 'scroll', amt: amt, sType: "%" })
     },
     zoom (amt) {
       this.app.scrollLock = true

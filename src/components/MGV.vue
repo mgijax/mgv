@@ -595,7 +595,8 @@ export default MComponent({
        handler: (e) => {
          this.$root.$emit('region-change', {
            op: 'scroll',
-           amt: e.shiftKey ? -0.8 : -0.2
+           amt: e.shiftKey ? 0.8 : 0.2,
+           sType: '%'
          })
        },
        thisObj: this
@@ -605,7 +606,8 @@ export default MComponent({
        handler: (e) => {
          this.$root.$emit('region-change', {
            op: 'scroll',
-           amt: e.shiftKey ? 0.8 : 0.2
+           amt: e.shiftKey ? -0.8 : -0.2,
+           sType: '%'
          })
        },
        thisObj: this

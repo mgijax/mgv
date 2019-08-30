@@ -974,8 +974,8 @@ export default MComponent({
             })
           } else {
             // scroll
-            const amt = this.deltaB / (this.region.end - this.region.start + 1)
-            this.$root.$emit('region-change', { region: this.region, op: 'scroll', amt: amt })
+            //const amt = this.deltaB / (this.region.end - this.region.start + 1)
+            this.$root.$emit('region-change', { region: this.region, op: 'scroll', amt: this.myDelta })
           }
           
           //

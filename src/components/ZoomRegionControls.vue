@@ -69,17 +69,17 @@
             title="Zoom out."
             @click="zoom($event.shiftKey ? 10 : 2)"
             />
-          <!-- pan left -->
+          <!-- scroll left -->
           <m-button
             icon="chevron_left"
             title="Pan left."
-            @click="pan($event.shiftKey ? 0.8 : 0.2)"
+            @click="scroll($event.shiftKey ? -0.8 : -0.2)"
             />
-          <!-- pan right -->
+          <!-- scroll right -->
           <m-button
             icon="chevron_right"
             title="Pan right."
-            @click="pan($event.shiftKey ? -0.8 : -0.2)"
+            @click="scroll($event.shiftKey ? 0.8 : 0.2)"
             />
         </div>
 
@@ -152,9 +152,9 @@ export default MComponent({
       this.app.scrollLock = false
       this.$root.$emit('region-change', { region: this.region, vm: this, op: 'zoom', amt: amt })
     },
-    pan: function (amt) {
+    scroll: function (amt) {
       this.app.scrollLock = false
-      this.$root.$emit('region-change', { region: this.region, vm: this, op: 'scroll', amt: amt })
+      this.$root.$emit('region-change', { region: this.region, vm: this, op: 'scroll', amt: amt, sType: '%' })
     },
     reverse: function () {
       this.$root.$emit('region-change', { region: this.region, vm: this, op: 'reverse' })

@@ -226,33 +226,44 @@ class RegionManager {
     this.layout()
   }
   //--------------------------------------
+  zoomRegion (r, zAmt) {
+    const L = r.end - r.start + 1
+    const L2 = Math.round(zAmt * L)
+    const mp = (r.start + r.end) / 2
+    r.start = Math.round(mp - L2 / 2)
+    r.end = r.start + L2 - 1
+  }
+  //--------------------------------------
+  scrollRegion (r, sAmt, sType) {
+    const sPix = (!sType || sType === "px" ? sAmt : sAmt * r.width)
+    const rL = r.end - r.start + 1
+    const rPpb = r.width / rL
+    const sBp = sPix / rPpb * (r.reversed ? -1 : 1)
+    r.start -= sBp
+    r.end -= sBp
+  }
+  //--------------------------------------
   // Zooms and scrolls the given region by the specified amounts
   // Args:
   //  r - the region to update
   //  zAmt - zoom amount. Multiplied by region length to determine new region length
-  //  sAmt - scroll amount. Multiplied with the region length to determine direction and distance of scroll.
-  zoomScrollRegion (r, zAmt, sAmt) {
-    if (zAmt <= 0) u.fail("Bad parameter: zoom factor must be > 0")
-    // current region length
-    const L = r.end - r.start + 1
-    // zoomed length
-    const L2 = zAmt * L
-    // scroll amount
-    const delta = sAmt * Math.max(L, L2) * (r.reversed ? -1 : 1)
-    // ref point = midpoint of region
-    const mid = (r.start + r.end) / 2
-    // new start and end pos
-    const s2 = Math.floor(mid - L2 / 2 + delta + 1)
-    const e2 = Math.floor(s2 + L2 - 1)
-    //
-    r.start = s2
-    r.end = e2
-    return r
+  //  sAmt - scroll amount. Multiplies by region width to get pixel, then converted to bases
+  //  sType - the scroll amount (sAmt) may be specified either in pixels or as a fraction.
+  //          If sType is unspecified or 'px', sAmt is in pixels.
+  //          If sType is '%', then sAmt is a fraction (sorry, not technically a percentage!)
+  zoomScrollRegion (r, zAmt, sAmt, sType) {
+    if (zAmt <= 1) {
+      this.scrollRegion(r, sAmt, sType)
+      this.zoomRegion(r, zAmt)
+    } else {
+      this.zoomRegion(r, zAmt)
+      this.scrollRegion(r, sAmt, sType)
+    }
   }
   //--------------------------------------
-  zoomScrollAllRegions (zAmt, sAmt) {
+  zoomScrollAllRegions (zAmt, sAmt, sType) {
     this.app.strips.forEach(s => {
-      s.regions.forEach(r => this.zoomScrollRegion(r, zAmt, sAmt))
+      s.regions.forEach(r => this.zoomScrollRegion(r, zAmt, sAmt, sType))
     })
     if (this.app.lcoords && this.app.lcoords.landmark) {
       const lc = this.app.lcoords
@@ -310,6 +321,8 @@ class RegionManager {
       r.end = r.start + ll - 1
       r2.start = r.start + ll
     }
+    r.length = r.end - r.start + 1
+    r2.length = r2.end - r2.start + 1
     this.app.strips[si].regions.splice(ri + 1, 0, r2)
     this.layout()
   }
@@ -639,12 +652,12 @@ class RegionManager {
     const r = d.region || this.currRegion || this.app.strips[0].regions[0]
     if (d.op === 'scroll') {
       if (this.app.scrollLock) {
-        this.zoomScrollAllRegions(1, d.amt)
+        this.zoomScrollAllRegions(1, d.amt, d.sType)
       } else if (r === this.app.rRegion) {
-        this.zoomScrollRegion(r, 1, d.amt)
+        this.zoomScrollRegion(r, 1, d.amt, d.sType)
         this.computeMappedRegions(r)
       } else {
-        this.zoomScrollRegion(r, 1, d.amt)
+        this.zoomScrollRegion(r, 1, d.amt, d.sType)
       }
     } else if (d.op === 'zoom') {
       if (this.app.scrollLock) {
@@ -657,14 +670,14 @@ class RegionManager {
       }
     } else if (d.op === 'zoomscroll') {
       const zAmt = d.out ? 1 / d.plength : d.plength
-      const sAmt = (d.pstart - 0.5 + d.plength / 2) * (d.out ? -1 : 1)
+      const sAmt = r.width * (d.pstart - 0.5 + d.plength / 2) * (d.out ? 1 : -1)
       if (this.app.scrollLock) {
-        this.zoomScrollAllRegions(zAmt, sAmt)
+        this.zoomScrollAllRegions(zAmt, sAmt, 'px')
       } else if (r === this.app.rRegion) {
-        this.zoomScrollRegion(d.region, zAmt, sAmt)
+        this.zoomScrollRegion(d.region, zAmt, sAmt, 'px')
         this.computeMappedRegions(r)
       } else {
-        this.zoomScrollRegion(d.region, zAmt, sAmt)
+        this.zoomScrollRegion(d.region, zAmt, sAmt, 'px')
       }
     } else if (d.op === 'set') {
       this.setRegion(r, d.coords)
