@@ -374,6 +374,24 @@ function getBBoxes(components, sortedBy) {
   return kids
 }
 // ---------------------------------------------
+function sortBy (lst, key) {
+  let kf
+  const ktype = typeof(key)
+  if (ktype === "string") {
+    kf = x => x[key]
+  } else if (ktype === "function") {
+    kf = key
+  } else {
+    kf = x => x
+  }
+  const comp = function(a, b) {
+    const av = kf(a)
+    const bv = kf(b)
+    return av < bv ? -1 : av > bv ? 1 : 0
+  }
+  return lst.sort(comp)
+}
+// ---------------------------------------------
 export default {
   afterTicks,
   assert,
@@ -391,6 +409,7 @@ export default {
   prettyPrintBases,
   randomColor,
   removeDups,
+  sortBy,
   uniqueItems,
   unselectAllText,
   wHeight,
