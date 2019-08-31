@@ -1,6 +1,6 @@
 <template>
   <g class="zoom-strip"
-    :class="{ dragging: dragging }"
+    :class="{ dragging: dragging, rGenome: genome === rGenome }"
     :transform="`translate(0,${zoomY + dragY + 14})`"
   >
     <!-- list of ZoomRegions -->
@@ -121,7 +121,8 @@ export default MComponent({
     'width',
     'strip',
     'regions',
-    'synGenome'
+    'synGenome',
+    'rGenome'
   ],
   inject: ['translator', 'regionManager'],
   data: function () {
@@ -140,9 +141,11 @@ export default MComponent({
     }
   },
   computed: {
+    isReference : function () {
+      return this.genome === this.rGenome
+    },
     endCapColor: function () {
-      const isref = this.context.rRegion && this.context.rRegion.genome === this.genome
-      return isref ? this.cfg.refEndCapColor : this.cfg.endCapColor
+      return this.isReference ? this.cfg.refEndCapColor : this.cfg.endCapColor
     },
     someoneIsReversed: function () {
       return this.regions.filter(r => r.reversed).length > 0
@@ -242,6 +245,9 @@ export default MComponent({
         self.$emit('dragend', { evt, data })
       }
     }, this.$root.$el)
+  },
+  destroyed: function () {
+    this.$nextTick(() => this.$root.$emit('sort-strips'))
   }
 })
 </script>

@@ -8,6 +8,7 @@
           v-for="genome in allGenomes"
           :key="genome.name"
           :title="genomeTitleText(genome)"
+          :class="{ selected : vGs.indexOf(genome.name) >= 0 }"
           >
           <td
             >{{genome.name}}</td>
@@ -18,7 +19,18 @@
               v-model="vGs"
               @change="changed"
               @click="clicked"
-              title="Click to select/unselect. Shift-click to make this the ONLY selection."
+              title="Check box to view this genome. Uncheck to hide. Shift-click to view this genome and hide all others."
+              />
+          </td>
+          <td>
+            <input
+              name="refGenome"
+              type="radio"
+              :value="genome.name"
+              v-model="rG"
+              @click="rgClicked"
+              @change="rgChanged"
+              title="Click to make this the reference genome. Shift-click to turn off reference genome."
               />
           </td>
         </tr>  
@@ -38,12 +50,12 @@ import MComponent from '@/components/MComponent'
 import u from '@/lib/utils'
 export default MComponent({
   name: 'GenomeSelector',
-  props: ['allGenomes', 'strips', 'genomeSets'],
+  props: ['allGenomes', 'strips', 'genomeSets', 'rGenome'],
   inject: ['regionManager','dataManager'],
   data: function () {
     return {
       vGs: [], // list of visible genome names
-      rg: null, // the reference genome
+      rG: null, // the ref genome
       shifted: false
     }
   },
@@ -58,22 +70,49 @@ export default MComponent({
       return entries.map(e => `${e[0]}: ${e[1]}`).join('\n')
     },
     reset: function () {
+      this.rG = this.rGenome ? this.rGenome.name : null
       this.vGs = this.strips ? this.strips.map(s => s.genome.name) : []
     },
     selectGenomeSet (gs) {
       this.vGs = gs.genomes.split(/,/g)
+      this.rG = null
+      this.app.rGenome = null
       this.changed()
     },
     changed: function (e) {
       if (this.shifted) {
         e.target.checked = true
         this.vGs = [e.target.value]
+        this.rG = e.target.value
+      }
+      if (e && this.rG === e.target.value) {
+        e.target.checked = true
+        if (this.vGs.indexOf(this.rG) === -1) {
+          this.vGs.push(this.rG)
+        }
       }
       this.regionManager().setStrips(this.vGs.map(g => this.dataManager().lookupGenome(g)))
+      this.app.rGenome = this.dataManager().lookupGenome(this.rG)
       this.shifted = false
     },
     clicked: function (e) {
       this.shifted = e.shiftKey
+    },
+    rgChanged: function (e) {
+      const rgn = e.target.value
+      this.app.rGenome = this.dataManager().lookupGenome(rgn)
+      if (this.app.rGenome && this.vGs.indexOf(rgn) === -1) {
+        this.vGs.push(rgn)
+        this.changed()
+      }
+      this.$nextTick(() => this.$root.$emit('sort-strips', 'rgChanged'))
+    },
+    rgClicked: function (e) {
+      if (e.shiftKey) {
+        e.target.checked = false
+        this.rG = null
+        this.app.rGenome = null
+      }
     }
   },
   watch: {
@@ -85,7 +124,11 @@ export default MComponent({
 </script>
 
 <style scoped>
-.genome-selector tr:hover {
+.genome-selector tr.selected {
+  background-color: #bbb;
+}
+.genome-selector tr:hover,
+.genome-selector tr.selected:hover {
   background-color: #ccc;
 }
 .genome-selector .table-container {

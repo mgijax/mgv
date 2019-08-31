@@ -74,7 +74,7 @@ export default {
   },
   ZoomStrip: {
     endCapColor: '#ccc',
-    refEndCapColor: 'blue',
+    refEndCapColor: '#000',
     endCapWidth: 12
   },
   ZoomRegion: {

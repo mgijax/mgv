@@ -53,7 +53,7 @@
         <m-button
           :icon="'sort'"
           :title="'Sort genomes by name'"
-          @click="$root.$emit('sort-strips')"
+          @click="$root.$emit('sort-strips', 'name')"
           />
         <!-- camera button -->
         <m-button

@@ -25,6 +25,7 @@
       :key="zs.genome.name"
       :strip="zs"
       :genome="zs.genome"
+      :rGenome="context.rGenome"
       :context="context"
       :regions="zs.regions"
       :synGenome="synGenome(i)"
@@ -101,12 +102,18 @@ export default MComponent({
     setYs (orderBy) {
       let dy = 0
       let strips = this.getYs().map(y => y.strip)
-      if (!orderBy || orderBy === 'y') {
+      orderBy = orderBy ||'y'
+      if (orderBy === 'y') {
         // pass
       } else if (orderBy === 'name') {
         u.sortBy(strips, s => s.genome.name)
       } else if (orderBy === 'model') {
         u.sortBy(strips, s => this.context.strips.indexOf(s.strip))
+      }
+      const rgi = strips.map(s => s.genome).indexOf(this.context.rGenome)
+      if (orderBy !== 'y' && rgi > 0) {
+        const s = strips.splice(rgi,1)[0]
+        strips.splice(0,0,s)
       }
       strips.forEach((s,i) => {
         if(!s.dragging) s.zoomY = dy
@@ -147,8 +154,8 @@ export default MComponent({
       }
     })
     //
-    this.$root.$on('sort-strips', () => {
-        this.setYs('name')
+    this.$root.$on('sort-strips', (sortBy) => {
+        this.setYs(sortBy)
         this.$root.$emit('context-changed')
     })
   }

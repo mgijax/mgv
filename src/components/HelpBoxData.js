@@ -47,14 +47,12 @@ export default [{
           `
     }, {
       what: `Genomes and Regions`,
-      how: `MGV displays multiple chromosomal regions for multiple genomes.
-          In the ${ref('ZoomView')}, each region is its own "mini browser" 
+      how: `In the ${ref('ZoomView')}, each region is its own "mini browser" 
           that can be independently scrolled and zoomed. The size of a region
           ranges from one chromosome to a few bases.
           <p/>
-          Regions shown in the ${ref('GenomeView')} for a given genome and
-          the genome's strip in the ${ref('ZoomView')} correspond, and all changes
-          are reflect in both..
+          Regions shown in the ${ref('GenomeView')} and ${ref('ZoomView')} for a given
+          genome correspond, and changes in one are reflected in the other.
           Clicking in a genome region in the ${ref('ZoomView')} highlights the
           corresponding region in the ${ref('GenomeView')}, and vice versa.
           `
@@ -72,6 +70,27 @@ export default [{
           To select one genome and remove all others, shift-click the box.
           Buttons at the bottom of the list provide ways to
           select predefine sets of genomes.
+          `
+      }, {
+      what: `Moving genomes`,
+      how: `
+          In the ${ref('ZoomView')}, genomes are displayed as horizontal "strips".
+          Strips (i.e. genomes) can be reordered by dragging;
+          grab the center handle (<span style="font-weight: bold;">::</span>) in the left endcap 
+          and drag up or down.
+          `
+      }, {
+      what: `Reference genome`,
+      how: `You can optionally pick a genome to be the 'reference' by clicking the radio 
+          button that appears when you mouse over the name.
+          <ul><li>The corresponding strip rises to the top, and the left endcap has a different color.
+          The reference genome tends to stay at the top of the view, although you are still free
+          to drag it to a different position.
+          <li>The reference genome is always displayed: it is added to the view if not already present,
+          and you cannot uncheck its visibility box.
+          <li>To turn off reference genome behavior, pick a different reference, or
+          shift-click on the radio button to pick no reference.
+          </ul>
           `
       }, {
       what: `Metadata`,
@@ -131,6 +150,15 @@ export default [{
           To reverse the orientation of all the regions in a strip, click the "R" in the left endcap.
           Click again to revert to normal.
           Regions in reverse orientation are outlined in red.
+          `
+      }, {
+      what: `Moving and resizing regions`,
+      how: `
+          Multiple regions for a genome are displayed side-by-side in a strip.
+          Regions can be reordered by dragging; grab the handle (::)
+          at the top left corner of a region to move it left or right.
+          Genome regions can be resized by dragging the gray divider bar between
+          neighboring regions.
           `
       }, {
       what: `Moving and re-sizing`,

@@ -23,7 +23,9 @@
             :allGenomes="allGenomes"
             :strips="strips"
             :genomeSets="genomeSets"
+            :rGenome="rGenome"
             title="Specify which genome(s) to display."
+            ref="genomes"
             />
         </page-box>
         <!--
@@ -168,8 +170,8 @@
       <page-box
         label="MGV Help"
         :floating="true"
-        :initialX="0"
-        :initialY="0"
+        :initialX="350"
+        :initialY="150"
         :initiallyOpen="false"
         ref="helpBox"
         >
