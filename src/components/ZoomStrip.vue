@@ -62,7 +62,7 @@
         text-anchor="middle"
         style="font-size: 10px; font-weight: bold;"
         font-family="sans-serif"
-        fill="gray"
+        :fill="endCapFontColor"
         @click="deleteClicked"
         >X<title>Click to remove this strip.</title></text>
       <!-- drag handle  -->
@@ -72,7 +72,7 @@
         :y="height / 2 + 10"
         text-anchor="middle"
         style="font-size: 20px; font-weight: bold;"
-        fill="gray"
+        :fill="endCapFontColor"
         >::<title>Drag up/down to reposition.</title></text>
       <!-- reverse button -->
       <text name="reverseBtn"
@@ -81,7 +81,7 @@
         :y="height - 3"
         text-anchor="middle"
         style="font-size: 12px; font-weight: bold;"
-        :fill="someoneIsReversed ? 'red' : 'gray'"
+        :fill="someoneIsReversed ? 'red' : endCapFontColor"
         @click="reverseClicked"
         >{{someoneIsReversed ? '&lt;' : '&gt;'}}<title>Click to reverse orientation of all regions in this strip. You can reverse an individual region from its control panel (right-click on the region background).</title></text>
     </g>
@@ -146,6 +146,9 @@ export default MComponent({
     },
     endCapColor: function () {
       return this.isReference ? this.cfg.refEndCapColor : this.cfg.endCapColor
+    },
+    endCapFontColor: function () {
+      return this.isReference ? this.cfg.refEndCapFontColor : this.cfg.endCapFontColor
     },
     someoneIsReversed: function () {
       return this.regions.filter(r => r.reversed).length > 0

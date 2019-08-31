@@ -11,6 +11,7 @@
           :class="{ selected : vGs.indexOf(genome.name) >= 0 }"
           >
           <td
+            class="gname"
             >{{genome.name}}</td>
           <td>
             <input
@@ -124,8 +125,9 @@ export default MComponent({
 </script>
 
 <style scoped>
-.genome-selector tr.selected {
-  background-color: #bbb;
+.genome-selector tr.selected td.gname {
+  color: #1c80c6;
+  font-weight: bold;
 }
 .genome-selector tr:hover,
 .genome-selector tr.selected:hover {
