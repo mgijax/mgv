@@ -100,9 +100,7 @@ export default MComponent({
     //    model: orders by strips array in model
     // 
     setYs (orderBy) {
-      let dy = 0
       let strips = this.getYs().map(y => y.strip)
-      orderBy = orderBy ||'y'
       if (orderBy === 'y') {
         // pass
       } else if (orderBy === 'name') {
@@ -115,6 +113,7 @@ export default MComponent({
         const s = strips.splice(rgi,1)[0]
         strips.splice(0,0,s)
       }
+      let dy = 0
       strips.forEach((s,i) => {
         if(!s.dragging) s.zoomY = dy
         s.strip.order = i

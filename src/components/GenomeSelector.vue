@@ -84,7 +84,9 @@ export default MComponent({
       if (this.shifted) {
         e.target.checked = true
         this.vGs = [e.target.value]
-        this.rG = e.target.value
+        if (this.rG && this.rG !== e.target.value) {
+          this.vGs.push(this.rG)
+        }
       }
       if (e && this.rG === e.target.value) {
         e.target.checked = true
@@ -119,6 +121,9 @@ export default MComponent({
   watch: {
     strips: function () {
       this.reset()
+    },
+    rGenome: function () {
+      this.reset()
     }
   }
 })
@@ -149,7 +154,7 @@ export default MComponent({
 .genome-selector input[type="radio"]:checked {
   opacity: 1;
 }
-.genome-selector tr:hover input[type="radio"] {
+.genome-selector:hover input[type="radio"] {
   opacity: 1;
 }
 </style>

@@ -115,12 +115,19 @@ class RegionManager {
   deleteStrip (g, quietly) {
     const i = this.findStrip(g)
     if (i >= 0) {
+      // if strip contains the reference region, set it to null
       const rr = this.app.rRegion
       if (this.app.strips[i].regions.indexOf(rr) !== -1) {
         this.app.rRegion = null
       }
+      // if strip is the reference genome, set it to null
+      if (this.app.rGenome === g) {
+        this.app.rGenome = null
+      }
       this.app.strips.splice(i, 1)
+      // flush data for this genome
       this.app.dataManager.flushGenome(g)
+      // 
       if (!quietly) this.announce()
     }
   }
