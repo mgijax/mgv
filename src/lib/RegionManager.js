@@ -615,6 +615,7 @@ class RegionManager {
     r1.start = r2.start
     r1.end = r2.end
     r1.width = r2.width
+    r1.reversed = r2.reversed
   }
   //--------------------------------------
   //
@@ -749,7 +750,7 @@ class RegionManager {
     const strips = app.strips.concat()
     strips.sort((a,b) => a.order - b.order)
     const rs = strips.map(s => {
-      const rs = s.regions.map(r => `${r.chr.name}:${r.start}..${r.end}/${Math.floor(r.width)}`).join(',')
+      const rs = s.regions.map(r => `${r.chr.name}:${r.start}..${r.end}/${Math.floor(r.width) * (r.reversed ? -1 : 1)}`).join(',')
       return `${s.genome.name}::${rs}`
     }).join('|')
     parms = [
