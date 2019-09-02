@@ -409,9 +409,9 @@ class FeatureRegistrar {
     f.transcripts = []
     f.composite = {}
     f.sotype = f.type
-    delete f.score
-    delete f.phase
-    delete f.type
+    // delete f.score
+    // delete f.phase
+    // delete f.type
     f.genome = this.genome
     f.chr = this.chr
     //

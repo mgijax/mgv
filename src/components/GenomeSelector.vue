@@ -80,36 +80,44 @@ export default MComponent({
       this.app.rGenome = null
       this.changed()
     },
+    // Checkbox changed. 
     changed: function (e) {
+      // If user has the shift key down, make this and the reference
+      // genome the ONLY checked boxes.
       if (this.shifted) {
         e.target.checked = true
         this.vGs = [e.target.value]
         if (this.rG && this.rG !== e.target.value) {
           this.vGs.push(this.rG)
         }
+        this.shifted = false
       }
+      // If this is the reference genome, you cannot uncheck the box
       if (e && this.rG === e.target.value) {
         e.target.checked = true
         if (this.vGs.indexOf(this.rG) === -1) {
           this.vGs.push(this.rG)
         }
       }
-      this.regionManager().setStrips(this.vGs.map(g => this.dataManager().lookupGenome(g)))
-      this.app.rGenome = this.dataManager().lookupGenome(this.rG)
-      this.shifted = false
+      this.$root.$emit('genomes-changed', { rGenome: this.rG, vGenomes: this.vGs })
     },
+    // Checkbox clicked. This event is always received, and is followed immediately by a change event.
+    // Here we need to record whenther shift key is down because we don't get that in the change event.
     clicked: function (e) {
       this.shifted = e.shiftKey
     },
+    // Radio button changed. One receive this event if the value actually changed. (If user clicks again,
+    // no change event.)
     rgChanged: function (e) {
       const rgn = e.target.value
       this.app.rGenome = this.dataManager().lookupGenome(rgn)
       if (this.app.rGenome && this.vGs.indexOf(rgn) === -1) {
         this.vGs.push(rgn)
-        this.changed()
       }
+      this.changed()
       this.$nextTick(() => this.$root.$emit('sort-strips', 'rgChanged'))
     },
+    // Radio button clicked. This event is always received, whether the value changed or not.
     rgClicked: function (e) {
       if (e.shiftKey) {
         e.target.checked = false

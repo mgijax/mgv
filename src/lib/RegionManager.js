@@ -126,7 +126,7 @@ class RegionManager {
       }
       this.app.strips.splice(i, 1)
       // flush data for this genome
-      this.app.dataManager.flushGenome(g)
+      // this.app.dataManager.flushGenome(g)
       // 
       if (!quietly) this.announce()
     }
@@ -254,7 +254,7 @@ class RegionManager {
   // Args:
   //  r - the region to update
   //  zAmt - zoom amount. Multiplied by region length to determine new region length
-  //  sAmt - scroll amount. Multiplies by region width to get pixel, then converted to bases
+  //  sAmt - scroll amount
   //  sType - the scroll amount (sAmt) may be specified either in pixels or as a fraction.
   //          If sType is unspecified or 'px', sAmt is in pixels.
   //          If sType is '%', then sAmt is a fraction (sorry, not technically a percentage!)
@@ -272,6 +272,7 @@ class RegionManager {
     this.app.strips.forEach(s => {
       s.regions.forEach(r => this.zoomScrollRegion(r, zAmt, sAmt, sType))
     })
+    /*
     if (this.app.lcoords && this.app.lcoords.landmark) {
       const lc = this.app.lcoords
       const L2 = zAmt * lc.length
@@ -279,6 +280,7 @@ class RegionManager {
       lc.length = Math.round(L2)
       lc.delta = Math.round(d)
     }
+    */
   }
   //--------------------------------------
   jumpTo (coords, quietly) {
@@ -333,6 +335,26 @@ class RegionManager {
     this.app.strips[si].regions.splice(ri + 1, 0, r2)
     this.layout()
   }
+  //--------------------------------------
+  /*
+  guessRegion (g) {
+    const strips = this.app.strips
+    const s = strips[0]
+    if (!s || !s.regions[0]) {
+      return this.makeRegion({
+        genome: g,
+        chr: g.chromosomes[0],
+        start: 1,
+        end: Math.min(10000000, g.chromosomes[0].length)
+      })
+    }
+    const r0 = s.regions[0]
+    const dm = this.app.dataManager
+    const afeats = dm.getAllFeaturesNow(r0.genome, r0.chr).filter(f => gc.overlaps(f, r0))
+    const bfeats = afeats.map(af => dm.getGenolog(af, g))
+    console.log(afeats, bfeats)
+  }
+  */
   //--------------------------------------
   // Designates the specified region as the reference. The region's genome becomes the reference genome.
   // Other genomes' regions are recalculated based on synteny blocks.
@@ -502,6 +524,12 @@ class RegionManager {
   }
   //--------------------------------------
   // When a landmark does not exist in a given genome, infer a location instead.
+  // Args:
+  //  lcoords (object) defines the landmark in some genome
+  //    landmark
+  //    lgenome
+  //    length
+  //  genome (object) the genome you want to guess the location in
   // 
   guessLandmarkRegion (lcoords, genome) {
       const dm = this.app.dataManager

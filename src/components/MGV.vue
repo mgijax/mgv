@@ -682,6 +682,12 @@ export default MComponent({
       }
     })
     //
+    this.$root.$on('genomes-changed', d => {
+      this.regionManager.setStrips(d.vGenomes.map(n => this.dataManager.lookupGenome(n)))
+      this.rGenome = this.dataManager.lookupGenome(d.rGenome)
+      this.scrollLock = true
+    })
+    //
     this.$root.$on('no-align', () => this.unAlign())
     // listen for context events - how descendant component announce they want to redraw
     // this.$root.$on('context', cxt => this.setContext(cxt))

@@ -154,7 +154,6 @@ export default MComponent({
     vGenomes: function () {
       const vgs = this.app.vGenomes
       vgs.sort((a,b) => a.name < b.name ? -1 : a.name > b.name ? 1 : 0)
-      if (vgs.indexOf(this.genome) === -1) this.genome = vgs[0]
       return vgs
     },
     currListTitle: function () {
@@ -277,10 +276,18 @@ export default MComponent({
     this.$root.$on('resize', () => this.resize())
     this.$parent.$on('pagebox-open', () => this.nextTick(() => this.resize()))
     this.nextTick(() => { this.resize() })
-    this.$watch(
-      'context.currRegion',
-      () => { this.scrollDelta = 0 },
+    this.$root.$on('genomes-changed', d=> {
+      if (d.vGenomes.indexOf(this.genome.name) === -1) {
+        this.genome = this.app.dataManager.lookupGenome(d.vGenomes[0])
+      }
+    })
+    this.$watch('context.currRegion', () => {
+      this.scrollDelta = 0
+      },
       { deep: true })
+    this.$watch('context.rGenome', () => {
+      this.genome = this.context.rGenome || this.genome
+    })
     this.$watch(
       'context.currentList',
       () => this.computeCurrentListGenologs(),
