@@ -154,7 +154,7 @@ export default MComponent({
     vGenomes: function () {
       const vgs = this.app.vGenomes
       vgs.sort((a,b) => a.name < b.name ? -1 : a.name > b.name ? 1 : 0)
-      return vgs
+      return this.app.rGenome ? [this.app.rGenome] : vgs
     },
     currListTitle: function () {
       const clist = this.context.currentList
