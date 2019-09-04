@@ -224,12 +224,20 @@ export default MComponent({
     },
     brushed: function (data, rr) {
       if (!rr) return
-      rr.start = data.range[0]
-      rr.end = data.range[1]
+      let c = rr.chr
       if (data.vm.capturedBy) {
-        rr.chr = data.vm.capturedBy
+        c = data.vm.capturedBy
         data.vm.capturedBy = null
       }
+      this.$root.$emit('region-change', {
+        op: 'set',
+        region: rr,
+        coords: {
+          start: data.range[0],
+          end: data.range[1],
+          chr: c
+        }
+      })
     },
     clickedGlyph: function (f) {
       let id = f.cID || f.ID
