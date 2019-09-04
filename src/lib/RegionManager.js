@@ -62,6 +62,7 @@ class RegionManager {
   // Sets the strips to be for the given list of genomes.
   // Removes strips for genomes not in the list,
   // adds strips (if needed) for those that are.
+  // Returns a promise that resolces when the strips have been set.
   setStrips (genomes, quietly) {
    const current = this.app.strips.map(s => s.genome)
    const curset = new Set(current)
@@ -69,7 +70,7 @@ class RegionManager {
    const toRemove = current.filter(g => !newset.has(g))
    const toAdd = genomes.filter(g => !curset.has(g))
    toRemove.forEach(g => this.deleteStrip(g, true))
-   Promise.all(toAdd.map(g => this.addStrip(g))).then(() => {
+   return Promise.all(toAdd.map(g => this.addStrip(g))).then(() => {
 
      // because strips are added asynchronously, the final order
      // may not match the specified order. Resort according to specified order.
@@ -82,16 +83,12 @@ class RegionManager {
 
   //--------------------------------------
   // Add a strip to the display for genome g. 
-  // If r is specified, use that region as the initial region for the strip.
-  // Otherwise, if there is a current landmark the initial region should be there.
-  // Otherwise, if there is a current reference region, the initial region should be mapped.
-  // Otherwise, the initial region is the default (1:1..10000000)
   addStrip (g, r) {
     let p
     if (this.app.lcoords && this.app.lcoords.landmark) {
       p = this.computeLandmarkRegions(this.app.lcoords, [g]).then(strips => strips[0])
-    } else if (this.app.rRegion) {
-      p = this.mapRegionToGenome(this.app.rRegion, g)
+    } else if (this.app.rGenome && this.app.rStrip) {
+      p = this.mapRegionsToGenome(this.app.rStrip.regions, g)
     } else {
       const chr = g.chromosomes[0]
       p = Promise.resolve({
@@ -106,6 +103,7 @@ class RegionManager {
       })
     }
     return p.then(strip => {
+      strip.regions.forEach(r => r.width = r.end - r.start + 1)
       this.app.strips.push(this.layoutStrip(strip))
       return strip
     })
@@ -115,11 +113,6 @@ class RegionManager {
   deleteStrip (g, quietly) {
     const i = this.findStrip(g)
     if (i >= 0) {
-      // if strip contains the reference region, set it to null
-      const rr = this.app.rRegion
-      if (this.app.strips[i].regions.indexOf(rr) !== -1) {
-        this.app.rRegion = null
-      }
       // if strip is the reference genome, set it to null
       if (this.app.rGenome === g) {
         this.app.rGenome = null
@@ -336,63 +329,104 @@ class RegionManager {
     this.layout()
   }
   //--------------------------------------
-  /*
-  guessRegion (g) {
-    const strips = this.app.strips
-    const s = strips[0]
-    if (!s || !s.regions[0]) {
-      return this.makeRegion({
-        genome: g,
-        chr: g.chromosomes[0],
-        start: 1,
-        end: Math.min(10000000, g.chromosomes[0].length)
-      })
-    }
-    const r0 = s.regions[0]
-    const dm = this.app.dataManager
-    const afeats = dm.getAllFeaturesNow(r0.genome, r0.chr).filter(f => gc.overlaps(f, r0))
-    const bfeats = afeats.map(af => dm.getGenolog(af, g))
-    console.log(afeats, bfeats)
-  }
-  */
-  //--------------------------------------
-  // Designates the specified region as the reference. The region's genome becomes the reference genome.
-  // Other genomes' regions are recalculated based on synteny blocks.
-  //
-  // Maps a given region (genome+chr+start+end) to the equivalent regions in the given list of genomes
-  // Returns a promise for the list of strips
-  computeMappedRegions (r, genomes) {
-    const promises = (genomes || this.currentGenomes()).map(g => this.mapRegionToGenome(r, g))
+  // Map the region(s) being shown for the current reference genome to corresponding region(s)
+  // in each of the specified genomes
+  computeMappedRegions (genomes, quietly) {
+    genomes = genomes || this.currentGenomes()
+    const promises = genomes.map(g => {
+      if (g === this.app.rGenome) {
+        return Promise.resolve(this.app.rStrip)
+      } else {
+        return this.mapRegionsToGenome(this.app.rStrip.regions, g)
+      }
+    })
     return Promise.all(promises).then(strips => {
-      this.app.rRegion = r
       this.app.scrollLock = false
       this.app.lcoords = null
       strips.forEach(s => {
         s.regions.forEach(rr => { rr.width = rr.end - rr.start + 1 })
-        s.regions = s.regions.map(rr => rr === r ? r : this.makeRegion(rr))
+        s.regions = s.regions.map(rr => rr.genome === this.app.rGenome ? rr : this.makeRegion(rr))
       })
-      this.app.strips = this.layout(strips)
+      this.mergeUpdate(strips)
+      this.layout()
+      if (!quietly) this.announce()
     })
   }
   //--------------------------------------
-  // Maps a reference region r to genome g. Returns a promise for a strip.
-  mapRegionToGenome (r, g) {
-    if (r.genome === g) {
-      return Promise.resolve({
-        genome : g,
-        regions: [r]
-      })
-    }
-    const tr = this.app.translator
-    return tr.translate(r.genome, r.chr.name, r.start, r.end, g).then(rs => {
-      rs.forEach(rr => { rr.genome = g })
-      rs = this.combineRegions(rs)
-      rs.forEach(r => { r.width = r.end - r.start + 1 })
+  // Given region ra from genome ga, return corresponding region(s) in genome gb.
+  // Assumes both genomes have been loaded!
+  //
+  mapRegionsToGenome (ras, gb) {
+    const promises = ras.map(ra => this.mapRegionToGenome(ra, gb))
+    return Promise.all(promises).then(data => {
       return {
-        genome: g,
-        regions: rs
+        genome: gb,
+        regions: u.flatten(data)
       }
     })
+  }
+  mapRegionToGenome (ra, gb) {
+    if (ra.genome === gb) {
+      return Promise.resolve({
+        genome : gb,
+        regions: [ra]
+      })
+    }
+    const dm = this.app.dataManager
+    return dm.ensureFeatures(ra.genome).then(() => dm.ensureFeatures(gb)).then(() => {
+      // features from the A region
+      const afeats = dm.getAllFeaturesNow(ra.genome, ra.chr).filter(f => gc.overlaps(f, ra))
+      // homologs of the A features, in order
+      const bfeats = afeats.map(af => dm.getGenolog(af, gb)).filter(x => x)
+      // region A length
+      const ral = ra.end - ra.start + 1
+      // genome B regions
+      const rbs = []
+      bfeats.forEach(fb => {
+        // length of this B feature
+        const fblen = fb.end - fb.start + 1
+        // did we find a place for it?
+        let found = false
+        // check each region so far
+        // for(let rbi = 0 ; rbi < rbs.length ; rbi++) {
+        if (rbs.length) {
+          for(let rbi = 0 ; rbi < rbs.length ; rbi++) {
+            const rb = rbs[rbi]
+            if (rb.chr !== fb.chr) continue
+            const rblen = rb.end - rb.start + 1
+            const s = Math.min(rb.start, fb.start)
+            const e = Math.max(rb.end, fb.end)
+            const l = e - s + 1
+            // if (l < 2 * ral) {
+            if (gc.overlaps(fb, rb) || (l - rblen - fblen < 1000000)) {
+              rb.start = s
+              rb.end = e
+              found = true
+              break
+            }
+          }
+        }
+        if (!found) {
+          const delta = Math.round(fblen / 3)
+          rbs.push(this.makeRegion({
+            genome: gb,
+            chr: fb.chr,
+            start: fb.start - delta,
+            end: fb.end + delta
+          }))
+        }
+      })
+      if (rbs.length === 0) {
+        rbs.push(this.makeRegion({
+          genome: gb,
+          chr: gb.chromosomes[0],
+          start: 1,
+          end: Math.min(10000000, gb.chromosomes[0].length)
+        }))
+      }
+      return rbs
+    })
+
   }
   //--------------------------------------
   // Combine regions whose indexes form a sequence
@@ -433,7 +467,7 @@ class RegionManager {
     this.alignOnLandmark(lcoords, quietly)
   }
   //--------------------------------------
-  // High level call for lining up on a landmark. Computed the regions, does the update, sets the scroll locsk,
+  // High level call for lining up on a landmark. Computes the regions, does the update, sets the scroll lock,
   // and announces context change. 
   alignOnLandmark (lcoords, genomes, quietly) {
     this.computeLandmarkRegions(lcoords, (genomes || this.currentGenomes())).then(strips => {
@@ -441,7 +475,6 @@ class RegionManager {
       this.layout()
       this.app.scrollLock = true
       this.app.lcoords = lcoords
-      this.app.rRegion = null
       this.app.currentSelection = [lcoords.landmark]
       if (!quietly) this.announce()
     })
@@ -476,7 +509,6 @@ class RegionManager {
   //            start coordinate (0) to end coordinate (1).
   //    genome (object) the genome for which to compute the corrdinates
   computeLandmarkRegion (lcoords, genome) {
-    // landmark mode
     const delta = lcoords.delta
     const w = lcoords.length
     const alignOn = config.ZoomRegion.featureAlignment
@@ -524,6 +556,7 @@ class RegionManager {
   }
   //--------------------------------------
   // When a landmark does not exist in a given genome, infer a location instead.
+  // Assumes the genome has been loaded!
   // Args:
   //  lcoords (object) defines the landmark in some genome
   //    landmark
@@ -687,53 +720,60 @@ class RegionManager {
   regionChange (d, quietly) {
     const r = d.region || this.currRegion || this.app.strips[0].regions[0]
     if (d.op === 'scroll') {
-      if (this.app.scrollLock) {
-        this.zoomScrollAllRegions(1, d.amt, d.sType)
-      } else if (r === this.app.rRegion) {
+      if (r.genome === this.app.rGenome) {
         this.zoomScrollRegion(r, 1, d.amt, d.sType)
-        this.computeMappedRegions(r)
+        this.computeMappedRegions()
+        return
+      } else if (this.app.scrollLock) {
+        this.zoomScrollAllRegions(1, d.amt, d.sType)
       } else {
         this.zoomScrollRegion(r, 1, d.amt, d.sType)
       }
     } else if (d.op === 'zoom') {
-      if (this.app.scrollLock) {
-        this.zoomScrollAllRegions(d.amt, 0)
-      } else if (r === this.app.rRegion) {
+      if (r.genome === this.app.rGenome) {
         this.zoomScrollRegion(r, d.amt, 0)
-        this.computeMappedRegions(r)
+        this.computeMappedRegions()
+        return
+      } else if (this.app.scrollLock) {
+        this.zoomScrollAllRegions(d.amt, 0)
       } else {
         this.zoomScrollRegion(r, d.amt, 0)
       }
     } else if (d.op === 'zoomscroll') {
       const zAmt = d.out ? 1 / d.plength : d.plength
       const sAmt = r.width * (d.pstart - 0.5 + d.plength / 2) * (d.out ? 1 : -1)
-      if (this.app.scrollLock) {
-        this.zoomScrollAllRegions(zAmt, sAmt, 'px')
-      } else if (r === this.app.rRegion) {
+      if (r.genome === this.app.rGenome) {
         this.zoomScrollRegion(d.region, zAmt, sAmt, 'px')
-        this.computeMappedRegions(r)
+        this.computeMappedRegions()
+        return
+      } else if (this.app.scrollLock) {
+        this.zoomScrollAllRegions(zAmt, sAmt, 'px')
       } else {
         this.zoomScrollRegion(d.region, zAmt, sAmt, 'px')
       }
     } else if (d.op === 'set') {
       this.setRegion(r, d.coords)
-      if (r === this.app.rRegion) {
-        this.computeMappedRegions(r)
+      if (r.genome === this.app.rGenome) {
+        this.computeMappedRegions()
+        return
       }
     } else if (d.op === 'remove') {
-      if (r === this.app.rRegion) this.app.rRegion = null
       this.removeRegion(r)
     } else if (d.op === "split") {
-      if (r === this.app.rRegion) this.app.rRegion = null
       this.splitRegion(r, d.pos)
     } else if (d.op === "reverse") {
       this.reverseRegion(r, d.value)
     } else if (d.op === "make-reference") {
-      this.computeMappedRegions(r)
+      this.computeMappedRegions()
+      return
     } else if (d.op === 'delete-strip') {
       this.deleteStrip(r.genome)
     } else if (d.op === 'new') {
-      this.addRegion(d.region, d.only)
+      this.addRegion(r, d.only)
+      if (r.genome === this.app.rGenome) {
+        this.computeMappedRegions()
+        return
+      }
     }
     if (!quietly) this.announce()
   }
@@ -756,6 +796,7 @@ class RegionManager {
     parms = [
       `regions=${rs}`
     ]
+    if (app.rGenome) parms.push('ref=' + app.rGenome.name)
     return parms.join('&')
   }
 }

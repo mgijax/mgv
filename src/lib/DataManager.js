@@ -336,6 +336,7 @@ class DataManager {
     return genologs
   }
   // Returns the genolog of feature f from genome g, or undefined if none exists
+  // If there is more than one genolog, an arbitrary one is returned.
   getGenolog (f, g) {
     return this.getGenologs(f, [g])[0]
   }

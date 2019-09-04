@@ -266,8 +266,6 @@ export default MComponent({
       allGenomes: [],
       // current reference genome
       rGenome: { name: '' },
-      // current reference region
-      rRegion: null,
       //
       currRegion: null,
       // predefined sets of genomes for easy selections
@@ -344,6 +342,9 @@ export default MComponent({
       return this.activeFacets.map(f => {
         return `${f.facet} [${f.values.join(", ")}]`
       }).join("\n")
+    },
+    rStrip: function () {
+      return this.strips.filter(s => s.genome === this.rGenome)[0]
     }
   },
   methods: {
@@ -683,14 +684,12 @@ export default MComponent({
     })
     //
     this.$root.$on('genomes-changed', d => {
-      this.regionManager.setStrips(d.vGenomes.map(n => this.dataManager.lookupGenome(n)))
       this.rGenome = this.dataManager.lookupGenome(d.rGenome)
-      this.scrollLock = true
+      this.regionManager.setStrips(d.vGenomes.map(n => this.dataManager.lookupGenome(n)))
     })
     //
     this.$root.$on('no-align', () => this.unAlign())
-    // listen for context events - how descendant component announce they want to redraw
-    // this.$root.$on('context', cxt => this.setContext(cxt))
+    //
     this.$root.$on('clear-selection', () => {
       this.currentSelection = []
       this.$root.$emit('selection-state-changed')
@@ -781,7 +780,6 @@ export default MComponent({
       genomes = part1.concat(part2)
       // now set up the initial state
       this.allGenomes = genomes // all the genomes (at least one)
-      this.rGenome = genomes[0] 
       this.$refs.genomeView.genome = this.allGenomes[0]
       // initial hash from page URL
       const ih = Object.assign({}, this.historyManager.initialHash)
