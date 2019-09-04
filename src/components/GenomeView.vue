@@ -277,7 +277,9 @@ export default MComponent({
     this.$parent.$on('pagebox-open', () => this.nextTick(() => this.resize()))
     this.nextTick(() => { this.resize() })
     this.$root.$on('genomes-changed', d=> {
-      if (d.vGenomes.indexOf(this.genome.name) === -1) {
+      if (d.rGenome) {
+        this.genome = this.app.dataManager.lookupGenome(d.rGenome)
+      } else if (d.vGenomes.indexOf(this.genome.name) === -1) {
         this.genome = this.app.dataManager.lookupGenome(d.vGenomes[0])
       }
     })
@@ -293,13 +295,13 @@ export default MComponent({
       () => this.computeCurrentListGenologs(),
       { deep: true })
     this.$root.$on('region-current', d => {
-      if (d) {
-        this.genome = d.region.genome
+      if (!this.app.rGenome && d) {
+        this.genome = this.app.rGenome || d.region.genome
       }
     })
     this.$root.$on('region-change', d => {
       const r = d.region
-      if (r && r.genome) this.genome = r.genome
+      if (r && r.genome) this.genome = this.app.rGenome || r.genome
     })
   }
 })
