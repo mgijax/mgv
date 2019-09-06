@@ -23,8 +23,8 @@ class HistoryManager {
       this.settingHash = false
       return
     }
+    // console.log("Set context:", document.location.hash)
     let cxt = this.pqstring(document.location.hash.substring(1))
-    // console.log('HistoryManager: window state changed. Setting app context.', cxt)
     this.app.setContext(cxt, true)
   }
   // Uses the current app context to set the hash part of the
@@ -37,6 +37,7 @@ class HistoryManager {
     // interpret as a user-initiated back command. (see setAppContext)
     this.settingHash = true
     window.location.hash = newHash
+    // console.log("Set hash:", newHash)
   }
   // pqstring = Parse qstring. Parses the parameter portion of the URL.
   pqstring (qstring) {
@@ -58,7 +59,7 @@ class HistoryManager {
 
     // ----- regions ------------
     // Regions parameter allows for multiple regions across multiple genomes
-    // Example: "A/J::12:67900000..68800000,X:55622081..101002774|DBA/2J::1:1..1000000"
+    // Example: "A/J::12:67900000..68800000/500,X:55622081..101002774/500|DBA/2J::1:1..1000000/1000"
     //
     let regions = prms.get('regions')
     if (regions) {

@@ -8,8 +8,10 @@
       <div class="flexrow">
         <m-button
           :icon="context.scrollLock ? 'lock' : 'lock_open'"
-          @click="context.scrollLock = !context.scrollLock"
+          @click="lockClicked"
           :title="context.scrollLock ? 'Scroll lock is ON. Click to turn OFF.' : 'Scroll lock is OFF. Click to turn ON'"
+          :style="{ color: context.scrollLock ? 'rgb(255, 127, 14)' : 'black' }"
+
           />
         </div>
       <!-- Search box -->
@@ -107,20 +109,22 @@ export default MComponent({
       this.app.scrollLock = true
       this.$root.$emit('region-change', { op: 'zoom', amt: amt })
     },
+    lockClicked () {
+      this.$root.$emit('region-change', { op : this.context.scrollLock ? 'clear-lock-mode' : 'set-lock-mode'})
+    },
     findLandmark (n) {
       if (!n) return
       const f = this.dataManager().getFeaturesBy(n)[0]
       if (f) {
         // user entered a valid symbol
         this.app.scrollLock = true
-        this.$root.$emit('feature-align', { feature: f })
+        this.$root.$emit('region-change', { op : 'feature-align', feature: f })
       } else {
         // not a valid symbol. try parsing as coords.
         const c = gc.parse(n)
         if (c) {
-          this.app.scrollLock = true
-          this.context.scrollLock = true
-          this.$root.$emit('jump-to', { coords: c })
+          this.$root.$emit('set-scroll-lock')
+          this.$root.$emit('region-change', { op: 'jump-to', coords: c })
         } else {
           alert('Landmark not found: ' + n)
         }

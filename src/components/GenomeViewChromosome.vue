@@ -241,7 +241,7 @@ export default MComponent({
     },
     clickedGlyph: function (f) {
       let id = f.cID || f.ID
-      this.$root.$emit('feature-align', { feature: f })
+      this.$root.$emit('region-change', { op : 'feature-align', feature: f })
     },
     glyphX: function (f) {
       return (this.width/2 + this.glyphRadius) * (f.strand === '-' ? -1 : 1)

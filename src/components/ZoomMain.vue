@@ -58,10 +58,16 @@ export default MComponent({
   computed: {
     vgs: function () {
       return this.context.strips ? this.context.strips.map(s => s.genome.name).join(' ') : ''
+    },
+    rg: function () {
+      return this.context.rGenome
     }
   },
   watch: {
     vgs: function () {
+      this.$nextTick(() => { if (this.$refs.strips) this.setYs() })
+    },
+    rg: function () {
       if (this.$refs.strips) this.setYs()
     }
   },
@@ -139,6 +145,10 @@ export default MComponent({
       if (e.target.closest('.zoom-region')) {
         this.$root.$emit('clear-selection')
       }
+    },
+    sortStrips (sortBy) {
+      this.setYs(sortBy)
+      this.$root.$emit('context-changed')
     }
   },
   created: function () {
@@ -153,10 +163,7 @@ export default MComponent({
       }
     })
     //
-    this.$root.$on('sort-strips', (sortBy) => {
-        this.setYs(sortBy)
-        this.$root.$emit('context-changed')
-    })
+    this.$root.$on('sort-strips', d => this.sortStrips(d))
   }
 })
 </script>

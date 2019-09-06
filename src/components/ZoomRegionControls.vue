@@ -73,13 +73,12 @@
             title="Split this region."
             @click="split()"
             />
-          <!-- make reference region 
+          <!-- make reference region -->
           <m-button
             icon="room"
             title="Make this the reference region."
             @click="makeRef()"
             />
-            -->
           <!-- remove region -->
           <m-button
             icon="delete_forever"

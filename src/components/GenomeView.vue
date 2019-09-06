@@ -276,7 +276,7 @@ export default MComponent({
     this.$root.$on('resize', () => this.resize())
     this.$parent.$on('pagebox-open', () => this.nextTick(() => this.resize()))
     this.nextTick(() => { this.resize() })
-    this.$root.$on('genomes-changed', d=> {
+    this.$root.$on('set-genomes', d=> {
       if (d.rGenome) {
         this.genome = this.app.dataManager.lookupGenome(d.rGenome)
       } else if (d.vGenomes.indexOf(this.genome.name) === -1) {
@@ -287,6 +287,11 @@ export default MComponent({
       this.scrollDelta = 0
       },
       { deep: true })
+    this.$watch('vGenomes', () => {
+      if (this.vGenomes.indexOf(this.genome) === -1) {
+        this.genome = this.vGenomes[0]
+      }
+    })
     this.$watch('context.rGenome', () => {
       this.genome = this.context.rGenome || this.genome
     })

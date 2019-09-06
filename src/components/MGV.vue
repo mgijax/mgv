@@ -272,7 +272,7 @@ export default MComponent({
       genomeSets: [],
       // ----------------------------------------------------
       // when true, all regions scroll (and zoom and select sequenc) in sync.
-      scrollLock: true,
+      scrollLock: false,
       // drawing mode
       dmode: 'direct', // one of: direct, landmark, mapped
       // Three ways to specify which regions to draw.
@@ -371,15 +371,13 @@ export default MComponent({
       let nc
 
       //
-      newc.currentMouseover = cxt.currentMouseover
-      newc.currentMouseoverT = cxt.currentMouseoverT
       newc.currentSelection = cxt.currentSelection
-
-      newc.ref = this.rGenome
+      //
+      newc.ref = null
       if (cxt.ref) {
         // get specified ref genome name and look it up
         n = cxt.ref.name || cxt.ref
-        newc.ref = this.agIndex[n] || this.rGenome
+        newc.ref = this.agIndex[n] || null
       }
       //
       if (cxt.strips) {
@@ -402,7 +400,7 @@ export default MComponent({
         if (newc.strips.length === 0) newc.strips = this.strips
         //
         newc.genomes = newc.strips.map(r => r.genome)
-        if (newc.genomes.indexOf(newc.ref) === -1) newc.ref = newc.genomes[0]
+        if (newc.genomes.indexOf(newc.ref) === -1) newc.ref = null
         newc.lcoords = {
           landmark: null,
           delta: 0,
@@ -410,13 +408,6 @@ export default MComponent({
         }
         return Promise.resolve(newc)
       }
-      //
-      if (cxt.landmark === null) {
-        // explicit null means stop aligning on the landmark
-        newc.strips = this.strips
-        return Promise.resolve(newc)
-      }
-      // If here, the new context specifes either mapped or landmark coordinates
       //
       // Resolve genomes. Assume genomes are given in the desired order.
       if (cxt.genomes) {
@@ -482,7 +473,7 @@ export default MComponent({
     },
     setContext: function (cxt0, quietly) {
       this.sanitizeContext(cxt0).then(cxt => {
-        if (cxt.ref) this.rGenome = cxt.ref
+        this.rGenome = cxt.ref
         if (cxt.strips) {
           this.dmode = 'direct'
           this.regionManager.initializeRegions(cxt.strips)
@@ -496,9 +487,6 @@ export default MComponent({
           this.coords = cxt.coords
           this.regionManager.computeMappedRegions(cxt.coords, cxt.genomes)
         }
-        if (cxt.currentMouseover) this.currentMouseover = cxt.currentMouseover
-        if (cxt.currentMouseoverT) this.currentMouseoverT = cxt.currentMouseoverT
-        if (cxt.currentSelection) this.currentSelection = cxt.currentSelection
         if (!quietly) this.$root.$emit('context-changed')
       })
     },
@@ -683,11 +671,6 @@ export default MComponent({
       }
     })
     //
-    this.$root.$on('genomes-changed', d => {
-      this.rGenome = this.dataManager.lookupGenome(d.rGenome)
-      this.regionManager.setStrips(d.vGenomes.map(n => this.dataManager.lookupGenome(n)))
-    })
-    //
     this.$root.$on('no-align', () => this.unAlign())
     //
     this.$root.$on('clear-selection', () => {
@@ -731,7 +714,7 @@ export default MComponent({
       }
       let lm = lst.items[this.currentListItem]
       let lmf = this.dataManager.getFeaturesBy(lm)[0]
-      if (lmf) this.$root.$emit('feature-align', { feature: lmf })
+      if (lmf) this.$root.$emit('region-change', { op : 'feature-align', feature: lmf })
     })
     //
     this.$root.$on('list-delete', data => {

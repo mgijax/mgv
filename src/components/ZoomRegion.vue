@@ -864,7 +864,8 @@ export default MComponent({
       let f = this.getEventObjects(e)
       if (f) {
         // alt clicked on a feature
-        this.$root.$emit('feature-align', {
+        this.$root.$emit('region-change', {
+          op : 'feature-align',
           region: this.region,
           feature: f.feature,
           transcript: f.transcript,

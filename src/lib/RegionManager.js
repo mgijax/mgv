@@ -14,10 +14,13 @@ class RegionManager {
     this.currRegion = null
     this.rCount = 0
     //
-    this.app.$root.$on('region-current', r => { if (r) this.currRegion = r.region })
-    this.app.$root.$on('region-change', d => this.regionChange(d))
-    this.app.$root.$on('jump-to', d => this.jumpTo(d.coords))
-    this.app.$root.$on('feature-align', d => this.featureAlign(d))
+    this.app.$root.$on('region-current', r => {
+      if (r) this.currRegion = r.region
+    })
+    //
+    this.app.$root.$on('region-change', d => {
+      this.regionChange(d)
+    })
   }
   //--------------------------------------
   makeRegion (r) {
@@ -27,6 +30,23 @@ class RegionManager {
     rr.deltaX = rr.deltaX === undefined ? 0 : rr.deltaX
     if (!('reversed' in rr)) rr.reversed = false
     return rr
+  }
+  //--------------------------------------
+  setRefGenome (g) {
+    this.app.rGenome = g
+    this.app.scrollLock = false
+  }
+  //--------------------------------------
+  clearRefGenome () {
+    this.app.rGenome = null
+  }
+  //--------------------------------------
+  setLockMode () {
+    this.app.scrollLock = true
+    this.app.rGenome = null
+  }
+  clearLockMode () {
+    this.app.scrollLock = false
   }
   //--------------------------------------
   // Returns the index of the strip for genome g, or -1 if no such strip exists.
@@ -62,20 +82,15 @@ class RegionManager {
   // Sets the strips to be for the given list of genomes.
   // Removes strips for genomes not in the list,
   // adds strips (if needed) for those that are.
-  // Returns a promise that resolces when the strips have been set.
+  // Returns a promise that resolves when the strips have been set.
   setStrips (genomes, quietly) {
    const current = this.app.strips.map(s => s.genome)
    const curset = new Set(current)
    const newset = new Set(genomes)
    const toRemove = current.filter(g => !newset.has(g))
    const toAdd = genomes.filter(g => !curset.has(g))
-   toRemove.forEach(g => this.deleteStrip(g, true))
+   toRemove.forEach(g => this.deleteStrip(g))
    return Promise.all(toAdd.map(g => this.addStrip(g))).then(() => {
-
-     // because strips are added asynchronously, the final order
-     // may not match the specified order. Resort according to specified order.
-
-
      this.layout()
      if (!quietly) this.announce()
    })
@@ -110,18 +125,15 @@ class RegionManager {
   }
   //--------------------------------------
   // Removes the strip for genome g.
-  deleteStrip (g, quietly) {
+  deleteStrip (g) {
     const i = this.findStrip(g)
     if (i >= 0) {
       // if strip is the reference genome, set it to null
       if (this.app.rGenome === g) {
-        this.app.rGenome = null
+        this.clearRefGenome()
       }
       this.app.strips.splice(i, 1)
-      // flush data for this genome
       // this.app.dataManager.flushGenome(g)
-      // 
-      if (!quietly) this.announce()
     }
   }
   //--------------------------------------
@@ -213,17 +225,23 @@ class RegionManager {
     if (r.end !== coords.end) r.end = Math.floor(coords.end)
   }
   //--------------------------------------
-  removeRegion (r) {
+  removeRegion (r, allBut) {
     const rr = this.findRegion(r)
     const si = rr[0], ri = rr[1]
     if (ri === -1) return
     const s = this.app.strips[si]
-    if (s.regions.length === 1) {
-      this.deleteStrip(s.genome, true)
+    if (allBut) {
+      s.regions = [r]
+    } else if (s.regions.length === 1) {
+      this.deleteStrip(s.genome)
     } else {
       s.regions.splice(ri, 1)
     }
     this.layout()
+  }
+  //--------------------------------------
+  removeAllBut (r) {
+    this.removeRegion(r, true)
   }
   //--------------------------------------
   zoomRegion (r, zAmt) {
@@ -292,16 +310,14 @@ class RegionManager {
       this.setRegion(r, cc)
     })
     this.layout()
-    if (!quietly) this.announce()
   }
   //--------------------------------------
-  reverseRegion (r, value, quietly) {
+  reverseRegion (r, value) {
     if (value === undefined) {
       r.reversed = !r.reversed
     } else {
       r.reversed = value
     }
-    // if (!quietly) this.announce()
   }
   //--------------------------------------
   splitRegion (r, frac) {
@@ -331,7 +347,7 @@ class RegionManager {
   //--------------------------------------
   // Map the region(s) being shown for the current reference genome to corresponding region(s)
   // in each of the specified genomes
-  computeMappedRegions (genomes, quietly) {
+  computeMappedRegions (genomes) {
     genomes = genomes || this.currentGenomes()
     const promises = genomes.map(g => {
       if (g === this.app.rGenome) {
@@ -349,7 +365,6 @@ class RegionManager {
       })
       this.mergeUpdate(strips)
       this.layout()
-      if (!quietly) this.announce()
     })
   }
   //--------------------------------------
@@ -448,7 +463,7 @@ class RegionManager {
     return regions
   }
   //--------------------------------------
-  featureAlign (d, quietly) {
+  featureAlign (d) {
     const f = d.feature
     const anchor = d.basePos ? ((d.basePos - f.start + 1) / (f.end - f.start + 1)) : null
     let l
@@ -464,19 +479,18 @@ class RegionManager {
       delta: 0,
       length: l
     }
-    this.alignOnLandmark(lcoords, quietly)
+    return this.alignOnLandmark(lcoords)
   }
   //--------------------------------------
   // High level call for lining up on a landmark. Computes the regions, does the update, sets the scroll lock,
   // and announces context change. 
-  alignOnLandmark (lcoords, genomes, quietly) {
-    this.computeLandmarkRegions(lcoords, (genomes || this.currentGenomes())).then(strips => {
+  alignOnLandmark (lcoords, genomes) {
+    this.setLockMode()
+    return this.computeLandmarkRegions(lcoords, (genomes || this.currentGenomes())).then(strips => {
       this.mergeUpdate(strips)
       this.layout()
-      this.app.scrollLock = true
       this.app.lcoords = lcoords
       this.app.currentSelection = [lcoords.landmark]
-      if (!quietly) this.announce()
     })
   }
   //--------------------------------------
@@ -717,24 +731,16 @@ class RegionManager {
   //    amt (When op = zoom) Zoom factor 
   //    pos (when op = split) Position of the split. (0..1)
   //
-  regionChange (d, quietly) {
-    const r = d.region || this.currRegion || this.app.strips[0].regions[0]
+  regionChange (d) {
+    const r = d.region || (this.app.rStrip && this.app.rStrip.regions[0]) || this.currRegion || this.app.strips[0].regions[0]
     if (d.op === 'scroll') {
-      if (r.genome === this.app.rGenome) {
-        this.zoomScrollRegion(r, 1, d.amt, d.sType)
-        this.computeMappedRegions()
-        return
-      } else if (this.app.scrollLock) {
+      if (this.app.scrollLock) {
         this.zoomScrollAllRegions(1, d.amt, d.sType)
       } else {
         this.zoomScrollRegion(r, 1, d.amt, d.sType)
       }
     } else if (d.op === 'zoom') {
-      if (r.genome === this.app.rGenome) {
-        this.zoomScrollRegion(r, d.amt, 0)
-        this.computeMappedRegions()
-        return
-      } else if (this.app.scrollLock) {
+      if (this.app.scrollLock) {
         this.zoomScrollAllRegions(d.amt, 0)
       } else {
         this.zoomScrollRegion(r, d.amt, 0)
@@ -742,47 +748,60 @@ class RegionManager {
     } else if (d.op === 'zoomscroll') {
       const zAmt = d.out ? 1 / d.plength : d.plength
       const sAmt = r.width * (d.pstart - 0.5 + d.plength / 2) * (d.out ? 1 : -1)
-      if (r.genome === this.app.rGenome) {
-        this.zoomScrollRegion(d.region, zAmt, sAmt, 'px')
-        this.computeMappedRegions()
-        return
-      } else if (this.app.scrollLock) {
+      if (this.app.scrollLock) {
         this.zoomScrollAllRegions(zAmt, sAmt, 'px')
       } else {
         this.zoomScrollRegion(d.region, zAmt, sAmt, 'px')
       }
     } else if (d.op === 'set') {
       this.setRegion(r, d.coords)
-      if (r.genome === this.app.rGenome) {
-        this.computeMappedRegions()
-        return
-      }
-    } else if (d.op === 'remove') {
-      this.removeRegion(r)
     } else if (d.op === "split") {
       this.splitRegion(r, d.pos)
     } else if (d.op === "reverse") {
       this.reverseRegion(r, d.value)
     } else if (d.op === "make-reference") {
-      this.computeMappedRegions()
-      return
+      this.app.rGenome = r.genome
+      this.removeAllBut(r)
     } else if (d.op === 'delete-strip') {
       this.deleteStrip(r.genome)
+    } else if (d.op === 'remove') {
+      this.removeRegion(r)
     } else if (d.op === 'new') {
       this.addRegion(r, d.only)
-      if (r.genome === this.app.rGenome) {
-        this.computeMappedRegions()
+    } else if (d.op === 'jump-to') {
+      this.jumpTo(d.coords)
+    } else if (d.op === 'feature-align') {
+      this.featureAlign(d).then(() => this.announce())
+      return
+    } else if (d.op === 'set-ref-genome') {
+      this.setRefGenome(d.genome)
+      this.computeMappedRegions().then(() => this.announce())
+      return
+    } else if (d.op === 'clear-ref-genome') {
+      this.clearRefGenome()
+    } else if (d.op === 'set-lock-mode') {
+      this.setLockMode()
+    } else if (d.op === 'clear-lock-mode') {
+      this.clearLockMode()
+    } else if (d.op === 'set-genomes') {
+      this.setStrips(d.vGenomes.map(n => this.app.dataManager.lookupGenome(n))).then(() => {
+        this.setRefGenome(this.app.dataManager.lookupGenome(d.rGenome))
+        this.announce()
         return
-      }
+      })
     }
-    if (!quietly) this.announce()
+    //
+    if (r.genome === this.app.rGenome) {
+      this.computeMappedRegions().then(() => this.announce())
+    } else {
+      this.announce()
+    }
   }
   //--------------------------------------
   //
   announce () {
     this.app.$root.$emit('context-changed')
   }
-  //--------------------------------------
   //
   getParameterString () {
     let parms

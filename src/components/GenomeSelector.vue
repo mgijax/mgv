@@ -8,7 +8,7 @@
           v-for="genome in allGenomes"
           :key="genome.name"
           :title="genomeTitleText(genome)"
-          :class="{ selected : vGs.indexOf(genome.name) >= 0 }"
+          :class="{ selected : vGs.indexOf(genome.name) >= 0, reference: genome === rGenome }"
           >
           <td
             class="gname"
@@ -23,6 +23,7 @@
               title="Check box to view this genome. Uncheck to hide. Shift-click to view this genome and hide all others."
               />
           </td>
+            <!--
           <td>
             <input
               name="refGenome"
@@ -34,6 +35,7 @@
               title="Click to make this the reference genome. Shift-click to turn off reference genome."
               />
           </td>
+            -->
         </tr>  
       </table>
       </div>
@@ -56,8 +58,8 @@ export default MComponent({
   data: function () {
     return {
       vGs: [], // list of visible genome names
-      rG: null, // the ref genome
-      shifted: false
+      rG: null, // the ref genome (if any). rG must be present in vGs
+      shifted: false // needed for implementing shift-click behavior on radio buttons
     }
   },
   mounted: function () {
@@ -99,14 +101,14 @@ export default MComponent({
           this.vGs.push(this.rG)
         }
       }
-      this.$root.$emit('genomes-changed', { rGenome: this.rG, vGenomes: this.vGs })
+      this.$root.$emit('region-change', { op : 'set-genomes', rGenome: this.rG, vGenomes: this.vGs })
     },
     // Checkbox clicked. This event is always received, and is followed immediately by a change event.
     // Here we need to record whenther shift key is down because we don't get that in the change event.
     clicked: function (e) {
       this.shifted = e.shiftKey
     },
-    // Radio button changed. One receive this event if the value actually changed. (If user clicks again,
+    // Radio button changed. We only receive this event if the value actually changed. (If user clicks again,
     // no change event.)
     rgChanged: function (e) {
       const rgn = e.target.value
@@ -115,7 +117,6 @@ export default MComponent({
         this.vGs.push(rgn)
       }
       this.changed()
-      this.$nextTick(() => this.$root.$emit('sort-strips', 'rgChanged'))
     },
     // Radio button clicked. This event is always received, whether the value changed or not.
     rgClicked: function (e) {
@@ -141,6 +142,10 @@ export default MComponent({
 .genome-selector tr.selected td.gname {
   color: #1c80c6;
   font-weight: bold;
+}
+.genome-selector tr.reference td.gname:before {
+  color: rgb(255, 127, 14);
+  content: "\2022";
 }
 .genome-selector tr:hover,
 .genome-selector tr.selected:hover {

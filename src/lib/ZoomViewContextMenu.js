@@ -9,7 +9,8 @@ function getMenus(thisObj) {
       disabled: false,
       helpText: 'Aligns the displayed genomes around this feature.',
       handler: (function (cxt) {
-        this.$root.$emit('feature-align', cxt)
+        cxt.op = 'feature-align'
+        this.$root.$emit('region-change', cxt)
       }).bind(thisObj)
     }
   }

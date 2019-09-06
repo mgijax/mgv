@@ -54,17 +54,17 @@
         :height="height + 1"
         :fill="endCapColor"
         />
-      <!-- delete button  -->
-      <text name="deleteBtn"
+      <!-- Reference genome button -->
+      <text name="rGenomeBtn"
+        ref="rGenomeBtn"
+        dominant-baseline="hanging"
         :x="cfg.endCapWidth / 2"
         :y="2"
-        dominant-baseline="hanging"
         text-anchor="middle"
-        style="font-size: 10px; font-weight: bold;"
-        font-family="sans-serif"
+        style="font-size: 12px; font-weight: bold;"
         :fill="endCapFontColor"
-        @click="deleteClicked"
-        >X<title>Click to remove this strip.</title></text>
+        @click="rGenomeClicked"
+        >R<title>Make this the reference genome.</title></text>
       <!-- drag handle  -->
       <text name="draghandle"
         ref="draghandle"
@@ -77,13 +77,24 @@
       <!-- reverse button -->
       <text name="reverseBtn"
         ref="reverseBtn"
+        dominant-baseline="hanging"
         :x="cfg.endCapWidth / 2"
-        :y="height - 3"
+        :y="height / 4"
         text-anchor="middle"
         style="font-size: 12px; font-weight: bold;"
         :fill="someoneIsReversed ? 'red' : endCapFontColor"
         @click="reverseClicked"
         >{{someoneIsReversed ? '&lt;' : '&gt;'}}<title>Click to reverse orientation of all regions in this strip. You can reverse an individual region from its control panel (right-click on the region background).</title></text>
+      <!-- delete button  -->
+      <text name="deleteBtn"
+        :x="cfg.endCapWidth / 2"
+        :y="height - 3"
+        text-anchor="middle"
+        style="font-size: 10px; font-weight: bold;"
+        font-family="sans-serif"
+        :fill="endCapFontColor"
+        @click="deleteClicked"
+        >X<title>Click to remove this strip.</title></text>
     </g>
     <!-- busy indicator -->
     <g
@@ -225,6 +236,13 @@ export default MComponent({
         op: 'reverse',
         value: e.shiftKey ? undefined : !sir 
       }))
+    },
+    rGenomeClicked (e) {
+      if (this.genome === this.app.rGenome) {
+        this.$root.$emit('region-change', { op : 'clear-ref-genome' })
+      } else {
+        this.$root.$emit('region-change', { op : 'set-ref-genome', genome : this.genome })
+      }
     }
   },
   mounted: function () {
@@ -250,7 +268,7 @@ export default MComponent({
     }, this.$root.$el)
   },
   destroyed: function () {
-    this.$nextTick(() => this.$root.$emit('sort-strips'))
+    // this.$nextTick(() => this.$root.$emit('sort-strips'))
   }
 })
 </script>
@@ -281,6 +299,9 @@ export default MComponent({
   cursor: pointer;
 }
 [name="reverseBtn"] {
+  cursor: pointer;
+}
+[name="rGenomeBtn"] {
   cursor: pointer;
 }
 .border-handle {
