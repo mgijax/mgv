@@ -578,10 +578,17 @@ export default MComponent({
       }
     },
     featureFontSize: function (old, newval) {
-      this.dataManager().assignLanes(this.features, this.showDetails ? this.ppb : null, this.featureFontSize)
+      this.assignLanes()
+    },
+    showFeatureLabels: function () {
+      this.assignLanes()
     }
   },
   methods: {
+    assignLanes () {
+      this.dataManager().assignLanes(this.features, this.showFeatureLabels && this.showDetails ? this.ppb : null, this.featureFontSize)
+      this.$nextTick(() => this.$emit('region-draw', this))
+    },
     clientXtoBase: function (x) {  
       const rx = this.$refs.underlay.getBoundingClientRect().left
       const baseOffset = (x - rx) * this.bpp
@@ -780,7 +787,7 @@ export default MComponent({
       this.dataManager().getGenes(r.genome, r.chr, r.start - delta, r.end + delta, this.showDetails).then(feats => {
         this.busy = false
         this.features = feats.filter(f => this.getFacets().test(f))
-	this.dataManager().assignLanes(this.features, this.showDetails ? this.ppb : null, this.featureFontSize)
+        this.assignLanes()
         this.nextTick(() => {
           this.$emit('busy-end')
           this.$emit('region-draw', this)
