@@ -733,16 +733,23 @@ class RegionManager {
   //
   regionChange (d) {
     const r = d.region || (this.app.rStrip && this.app.rStrip.regions[0]) || this.currRegion || this.app.strips[0].regions[0]
+    const clearRefIf = () => {
+      if (this.app.rGenome && this.app.rGenome !== r.genome) {
+        this.clearRefGenome()
+      }
+    }
     if (d.op === 'scroll') {
       if (this.app.scrollLock) {
         this.zoomScrollAllRegions(1, d.amt, d.sType)
       } else {
+        clearRefIf()
         this.zoomScrollRegion(r, 1, d.amt, d.sType)
       }
     } else if (d.op === 'zoom') {
       if (this.app.scrollLock) {
         this.zoomScrollAllRegions(d.amt, 0)
       } else {
+        clearRefIf()
         this.zoomScrollRegion(r, d.amt, 0)
       }
     } else if (d.op === 'zoomscroll') {
@@ -751,13 +758,17 @@ class RegionManager {
       if (this.app.scrollLock) {
         this.zoomScrollAllRegions(zAmt, sAmt, 'px')
       } else {
+        clearRefIf()
         this.zoomScrollRegion(d.region, zAmt, sAmt, 'px')
       }
     } else if (d.op === 'set') {
+      clearRefIf()
       this.setRegion(r, d.coords)
     } else if (d.op === "split") {
+      clearRefIf()
       this.splitRegion(r, d.pos)
     } else if (d.op === "reverse") {
+      clearRefIf()
       this.reverseRegion(r, d.value)
     } else if (d.op === "make-reference") {
       this.app.rGenome = r.genome
