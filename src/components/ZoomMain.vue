@@ -98,6 +98,10 @@ export default MComponent({
       ys.sort((a, b) => a.y - b.y)
       return ys
     },
+    // Returns the strip with the min Y coordinate
+    getTopStrip: function () {
+      return this.getYs()[0].strip
+    },
     // Sets the y coordinate of each zoom strip while dragging.
     // Args:
     //  orderBy (string) One of: 'y', 'name', 'model'. Default is 'y'.

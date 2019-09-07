@@ -62,6 +62,9 @@ export default MComponent({
     }
   },
   methods: {
+    getTopStrip: function () {
+      return this.$refs.main.getTopStrip()
+    },
     cameraClick: function (e) {
       this.$refs.main.downloadImage(e)
     },

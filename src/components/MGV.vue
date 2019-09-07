@@ -553,7 +553,21 @@ export default MComponent({
       })
       this.keyManager.register({
        key: 'l',
-       handler: () => { this.scrollLock = !this.scrollLock },
+       handler: () => {
+         this.$root.$emit('region-change', { op : this.scrollLock ? 'clear-lock-mode' : 'set-lock-mode'})
+       },
+       thisObj: this
+      })
+      this.keyManager.register({
+       key: 'r',
+       handler: () => {
+         if (this.rGenome) {
+           this.$root.$emit('region-change', { op: 'clear-ref-genome' })
+         } else {
+           const s = this.$refs.zoomView.getTopStrip()
+           s && this.$root.$emit('region-change', { op: 'set-ref-genome', genome: s.genome })
+         }
+       },
        thisObj: this
       })
       this.keyManager.register({
