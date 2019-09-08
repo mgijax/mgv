@@ -380,6 +380,8 @@ export default MComponent({
         newc.ref = this.agIndex[n] || null
       }
       //
+      newc.locked = !cxt.ref && (cxt.locked === "on")
+      //
       if (cxt.strips) {
         newc.strips = cxt.strips.map(r => {
           // validate region
@@ -474,6 +476,7 @@ export default MComponent({
     setContext: function (cxt0, quietly) {
       this.sanitizeContext(cxt0).then(cxt => {
         this.rGenome = cxt.ref
+        this.scrollLock = cxt.locked
         if (cxt.strips) {
           this.dmode = 'direct'
           this.regionManager.initializeRegions(cxt.strips)

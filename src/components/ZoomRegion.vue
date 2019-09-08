@@ -965,11 +965,12 @@ export default MComponent({
           //
           if (d.altDrag) {
             // selecting genomic sequence
+            this.$root.$emit('sequence-selected', { sequences : [], unselectAll : true })
             this.$root.$emit('region-selected', {
               region: this.region,
               pstart: pstart,
               plength: plength,
-              reverseComplement: e.clientX < d.startX
+              reverseComplement: this.region.reversed ? e.clientX > d.startX : e.clientX < d.startX
             })
           } else if (d.shiftDrag || d.metaDrag) {
             // zoom in/out of dragged region === composition of centered zoom plus a scroll
@@ -1038,7 +1039,7 @@ export default MComponent({
           selected: true,
           totalLength: end - start + 1
         }
-        this.$root.$emit('sequence-selected', [seq])
+        this.$root.$emit('sequence-selected', { sequences : [seq], unselectAll : false })
       }
     }
     this.cbFacetState = d => {

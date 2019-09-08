@@ -194,7 +194,7 @@ export default MComponent({
       let d = this.ddData
       if (this.floating) {
         this.x = Math.max(0, this.x + d.dx)
-        this.y = Math.max(-1, this.y + d.dy)
+        this.y = Math.max(-50, this.y + d.dy)
       }
       d.dx = d.dy = 0
       if (!this.floating) d.sibs.forEach(s => { s.component.ddData.dy = 0 })

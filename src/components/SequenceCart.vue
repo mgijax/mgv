@@ -201,8 +201,8 @@ export default MComponent({
   },
   mounted: function () {
     this.$root.$on('sequence-selected', rs => {
-      this.unselectAll()
-      rs.forEach(r => this.add(r))
+      rs.unselectAll && this.unselectAll()
+      rs.sequences.forEach(r => this.add(r))
     })
     this.kstore = new KeyStore(this.cfg.dbName)
     this.restore()

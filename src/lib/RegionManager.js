@@ -360,8 +360,12 @@ class RegionManager {
       this.app.scrollLock = false
       this.app.lcoords = null
       strips.forEach(s => {
-        s.regions.forEach(rr => { rr.width = rr.end - rr.start + 1 })
-        s.regions = s.regions.map(rr => rr.genome === this.app.rGenome ? rr : this.makeRegion(rr))
+        if (s.genome !== this.app.rGenome) {
+          s.regions = s.regions.map(rr => {
+            rr.width = rr.end - rr.start + 1
+            return this.makeRegion(rr)
+          })
+        }
       })
       this.mergeUpdate(strips)
       this.layout()
@@ -732,7 +736,7 @@ class RegionManager {
   //    pos (when op = split) Position of the split. (0..1)
   //
   regionChange (d) {
-    const r = d.region || (this.app.rStrip && this.app.rStrip.regions[0]) || this.currRegion || this.app.strips[0].regions[0]
+    const r = d.region || this.currRegion || (this.app.rStrip && this.app.rStrip.regions[0]) || this.app.strips[0].regions[0]
     const clearRefIf = () => {
       if (this.app.rGenome && this.app.rGenome !== r.genome) {
         this.clearRefGenome()
@@ -776,7 +780,11 @@ class RegionManager {
     } else if (d.op === 'delete-strip') {
       this.deleteStrip(r.genome)
     } else if (d.op === 'remove') {
+      clearRefIf()
       this.removeRegion(r)
+    } else if (d.op === 'remove-all-but') {
+      clearRefIf()
+      this.removeRegion(r, true)
     } else if (d.op === 'new') {
       this.addRegion(r, d.only)
     } else if (d.op === 'jump-to') {
@@ -827,6 +835,7 @@ class RegionManager {
       `regions=${rs}`
     ]
     if (app.rGenome) parms.push('ref=' + app.rGenome.name)
+    else if (app.scrollLock) parms.push('lock=on')
     return parms.join('&')
   }
 }

@@ -73,18 +73,25 @@
             title="Split this region."
             @click="split()"
             />
-          <!-- make reference region -->
+          <!-- make reference region
           <m-button
             icon="room"
             title="Make this the reference region."
             @click="makeRef()"
             />
+            -->
           <!-- remove region -->
           <m-button
             icon="delete_forever"
             color="red"
-            title="Remove this region."
-            @click="remove()"
+            title="Click to remove this region."
+            @click="remove"
+            />
+          <m-button
+            icon="delete_forever"
+            color="green"
+            title="Click to remove all BUT this region."
+            @click="removeAllBut"
             />
         </div>
       </div>
@@ -171,6 +178,10 @@ export default MComponent({
     },
     remove: function () {
       this.$root.$emit('region-change', { region: this.region, vm: this, op: 'remove' })
+      this.close()
+    },
+    removeAllBut: function () {
+      this.$root.$emit('region-change', { region: this.region, vm: this, op: 'remove-all-but' })
       this.close()
     },
     setCoords: function () {

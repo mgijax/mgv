@@ -47,7 +47,7 @@ export default [{
           `
     }, {
       what: `Genomes and Regions`,
-      how: `In the ${ref('ZoomView')}, each region is its own "mini browser" 
+      how: `In the ${ref('ZoomView')}, each genomic region is displayed in its own "mini browser" 
           that can be independently scrolled and zoomed. The size of a region
           ranges from one chromosome to a few bases.
           <p/>
@@ -72,7 +72,7 @@ export default [{
           select predefine sets of genomes.
           `
       }, {
-      what: `Moving genomes`,
+      what: `Rearranging genomes`,
       how: `
           In the ${ref('ZoomView')}, genomes are displayed as horizontal "strips".
           Strips (i.e. genomes) can be reordered by dragging;
@@ -81,15 +81,13 @@ export default [{
           `
       }, {
       what: `Reference genome`,
-      how: `You can optionally pick a genome to be the 'reference' by clicking the radio 
-          button that appears when you mouse over the name.
-          <ul><li>The corresponding strip rises to the top, and the left endcap has a different color.
-          The reference genome tends to stay at the top of the view, although you are still free
-          to drag it to a different position.
-          <li>The reference genome is always displayed: it is added to the view if not already present,
-          and you cannot uncheck its visibility box.
-          <li>To turn off reference genome behavior, pick a different reference, or
-          shift-click on the radio button to pick no reference.
+      how: `You can optionally pick a genome to be the "reference" by clicking the "R" in that genome's end cap.
+          <ul><li>The corresponding strip rises to the top, and its left end cap has a different color.
+          <li>All other genome regions are calculated based on the reference and are updated with every change in the refernce region.
+          <li>The reference genome always stays at the top of the view; other genomes may still be rearranged.
+          <li>The reference genome is always displayed; you cannot turn off its checkox (in ${ref('Genomes')}) while it is the reference.
+          <li>To "turn off" the reference genome, click its "R" again.
+          <li>Hitting is "R" key is a quick way to turn on/off the reference genome.
           </ul>
           `
       }, {
@@ -173,6 +171,22 @@ export default [{
           neighboring regions.
           `
     }]
+  }, {  
+    name: `Modes`,
+    description: `MGV has three modes which determine how the displayed regions are calculated and how actions synchronize (or not). Transitions between modes are designed to be fluid and natural.
+      `,
+    items: [{
+      what: `Reference`,
+      how: `<span style="color: white; background-color: rgb(255, 127, 14); width: 16px;">&nbsp;R&nbsp;</span> One genome is chosen as the reference. Coordinates are specified for the reference; coordinates for all other genomes are calculated. Navigating in the reference genome causes all other genomes to update. Navigating in a non-reference genome causes MGV to go to unrestricted mode.`
+    }, {
+      what: `Lockstep`,
+      how: `<i class="material-icons" style="color: rgb(255, 127, 14); font-size: 20px;">lock</i> In lockstep mode, all displayed regions act as one. Zooming, scrolling, and selecting genomic sequence happen in all regions simultaneously. This mode is most useful when the regions are aligned around a landmark, such as when the user alt-clicks on a gene. To exit lockstep, click the lock icon.
+      `,
+    }, {
+      what: `Unrestricted`,
+      how: `In unrestricted mode, each region acts independently, i.e., scrolling/zooming a region affects only that region.`
+    }]
+
   }, {  
     name: `Navigation`,
     description: `The following commands all apply to the ${ref('ZoomView')}.`,
@@ -450,6 +464,9 @@ export default [{
       how: `Same as clicking the lock icon. Flips synchronization mode between synchronized
           (${i('lock')}) and not synchronized (${i('lock_open')}).
           `
+    },{
+      what: `r`,
+      how: `Turn reference genome on/off. The top genome in the view is made the reference. Same as clicking the R in the genome's left end cap.`
     },{
       what: `t`,
       how: `Open/close the left-side tool panel.`

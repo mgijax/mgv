@@ -106,7 +106,7 @@ function getMenus(thisObj) {
             u.fail('Unknown sequence type: ' + seqtype)
           }
         }))
-        this.$root.$emit('sequence-selected', seqs)
+        this.$root.$emit('sequence-selected', { sequences : seqs, unselectAll : true })
       }).bind(thisObj)
     }
   }

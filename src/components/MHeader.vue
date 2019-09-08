@@ -26,6 +26,7 @@
       />
     <m-button
       name="infoBtn"
+      title="Click for help."
       icon="info"
       @click="openHelp"
       color="white"
