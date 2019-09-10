@@ -13,20 +13,20 @@ export default {
   // Timestamp used at page load to determine whether to flush user's setting cache.
   //
   // IMPORTANT!!! You MUST update this value whenever this config file changes!!!
-  TIMESTAMP: 'Tue Apr  30 06:59:39 EST 2019',
+  TIMESTAMP: 'Tue May 1 06:59:39 EST 2019',
   ///////////////////////////////////////////
 
   //
   // global config settings, applied to every class
   //
   all: {
-    VERSION: '2.0.0-prealpha', // code version.
+    VERSION: '2.0.0-beta', // code version.
     animDur: 0.5 // default animation duration in sec
   },
   PageBox: {
   },
   MGV: {
-    defaultHash: 'regions=C57BL/6J::14:46376992..46398402/886|A/J::14:38855700..38877110/886|CAROLI/EiJ::14:38235123..38256533/886&highlight=MGI:88180',
+    defaultHash: 'regions=C57BL/6J::14:44798909..46294274/1019|CAROLI/EiJ::14:36689781..38185146/1019|A/J::14:37282962..38778327/1019&lock=on&highlight=MGI:2385001',
     genomeSets: [{
       label: 'DO/CC founders',
       genomes: '129S1/SvImJ,A/J,C57BL/6J,CAST/EiJ,NOD/ShiLtJ,NZO/HlLtJ,PWK/PhJ,WSB/EiJ',
@@ -90,8 +90,8 @@ export default {
     sequenceFontSize: 10,
     trackMouse: true,
     detailThreshold: 3000000,
-    detailThresholdLimit: 10000000,
-    spreadTranscripts: true,
+    detailThresholdLimit: 20000000,
+    spreadTranscripts: false,
     showFeatureLabels: true,
     showTranscriptLabels: false,
     showStartStopCodons: true,
