@@ -970,7 +970,7 @@ export default MComponent({
               region: this.region,
               pstart: pstart,
               plength: plength,
-              reverseComplement: this.region.reversed ? e.clientX > d.startX : e.clientX < d.startX
+              dragDirection: e.clientX > d.startX ? 'l-to-r' : 'r-to-l'
             })
           } else if (d.shiftDrag || d.metaDrag) {
             // zoom in/out of dragged region === composition of centered zoom plus a scroll
@@ -1026,7 +1026,9 @@ export default MComponent({
         const end = Math.floor(start + d.plength * L - 1)
 	const gname = this.region.genome.name
 	const cname = this.region.chr.name
-	const rc = d.reverseComplement ? 'reverse complemented' : ''
+        const reverseComplement =
+          d.dragDirection === 'l-to-r' && r.reversed || d.dragDirection === 'r-to-l' && !r.reversed
+	const rc = reverseComplement ? 'reverse complemented' : ''
         const seq = {
 	  header: `>${gname}::${cname}:${start}..${end} ${rc} (dna)`,
           genome: this.region.genome.name,
@@ -1035,7 +1037,7 @@ export default MComponent({
           start: [start],
           length: [end - start + 1],
           type: 'dna',
-          reverseComplement: d.reverseComplement,
+          reverseComplement: reverseComplement,
           selected: true,
           totalLength: end - start + 1
         }

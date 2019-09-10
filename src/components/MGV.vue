@@ -475,6 +475,7 @@ export default MComponent({
     },
     setContext: function (cxt0, quietly) {
       this.sanitizeContext(cxt0).then(cxt => {
+        this.currentSelection = cxt.currentSelection
         this.rGenome = cxt.ref
         this.scrollLock = cxt.locked
         if (cxt.strips) {
