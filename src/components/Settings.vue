@@ -147,7 +147,7 @@
   </div>
   <!-- =================== -->
   <div
-    title="For selected features, show connectors between genologs."
+    title="For selected features, show connectors between homologs."
     class="flexrow"
     >
     <label>Show connectors</label>

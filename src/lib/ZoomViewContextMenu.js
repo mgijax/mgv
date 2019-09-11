@@ -64,7 +64,7 @@ function getMenus(thisObj) {
 	const ident = target ? target.ID : ''
         const all = which === 'all'
 	if (all) {
-          return `Adds all ${type} sequences to your cart for ${f.ID} and all currently displayed genomes.`
+          return `Adds all ${type} sequences to your cart for ${f.ID} and homologs from all currently displayed genomes.`
 	} else {
           return `Adds ${type} sequence ${ident} to your cart.`
 	}
@@ -120,7 +120,7 @@ function getMenus(thisObj) {
           sequenceSelectionOption('composite transcript','this'),
           sequenceSelectionOption('transcript','this'),
           sequenceSelectionOption('cds','this'),
-          { label: 'This gene and all genologs' },
+          { label: 'This gene and all homologs' },
           sequenceSelectionOption('dna','all'),
           sequenceSelectionOption('composite transcript','all'),
           sequenceSelectionOption('transcript','all'),

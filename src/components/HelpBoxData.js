@@ -284,7 +284,7 @@ export default [{
       how: `Right click on a gene to open its context menu. Choose one of the 
           options under "Add sequences to cart." You can select genomic, transcript,
           composite transcript, or CDS sequences, for the current gene or for that
-          gene and its genologs. A composite transcript consists of the union of all the
+          gene and its homologs. A composite transcript consists of the union of all the
           exons in the gene.
           `
       }, {
