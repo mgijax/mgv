@@ -114,7 +114,7 @@ export default MComponent({
     },
     findLandmark (n) {
       if (!n) return
-      const f = this.dataManager().getFeaturesBy(n)[0]
+      const f = this.dataManager().getFeaturesBy(n).filter(f => this.app.vGenomes.indexOf(f.genome) !== -1)[0]
       if (f) {
         // user entered a valid symbol
         this.app.scrollLock = true

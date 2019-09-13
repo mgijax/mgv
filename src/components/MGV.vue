@@ -215,7 +215,6 @@ import KeyStore from '@/lib/KeyStore'
 import ListManager from '@/lib/ListManager'
 import PreferencesManager from '@/lib/PreferencesManager'
 import RegionManager from '@/lib/RegionManager'
-import Translator from '@/lib/Translator'
 //
 export default MComponent({
   name: 'MGV',
@@ -245,9 +244,6 @@ export default MComponent({
       }.bind(this),
       preferencesManager: function () {
         return this.preferencesManager
-      }.bind(this),
-      translator: function () {
-        return this.translator
       }.bind(this),
       listManager: function () {
         return this.listManager
@@ -660,8 +656,6 @@ export default MComponent({
     this.historyManager = new HistoryManager(this)
     //
     this.listManager = new ListManager(this, this.lists)
-    //
-    this.translator = new Translator(this)
     //
     this.regionManager = new RegionManager(this)
     //

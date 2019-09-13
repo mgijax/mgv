@@ -351,8 +351,7 @@ export default MComponent({
   inject: [
     'dataManager',
     'featureColorMap',
-    'getFacets',
-    'translator'
+    'getFacets'
   ],
   props: {
     // the app context
@@ -772,18 +771,7 @@ export default MComponent({
       this.seqStart = r.start
       this.busy = true
       this.$emit('busy-start')
-      if (this.synGenome) {
-        this.translator()
-          .getBlocksInRange(
-            r.genome,
-            r.chr.name,
-            r.start - delta,
-            r.end + delta,
-            this.synGenome)
-          .then(bs => { this.blocks = bs })
-      } else {
-        this.blocks = []
-      }
+      this.blocks = []
       this.dataManager().getGenes(r.genome, r.chr, r.start - delta, r.end + delta, this.showDetails).then(feats => {
         this.busy = false
         this.features = feats.filter(f => this.getFacets().test(f))

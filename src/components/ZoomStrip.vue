@@ -135,7 +135,7 @@ export default MComponent({
     'synGenome',
     'rGenome'
   ],
-  inject: ['translator', 'regionManager'],
+  inject: ['regionManager'],
   data: function () {
     return {
       height: 60,
