@@ -736,7 +736,11 @@ class RegionManager {
   //    pos (when op = split) Position of the split. (0..1)
   //
   regionChange (d) {
-    const r = d.region || this.currRegion || (this.app.rStrip && this.app.rStrip.regions[0]) || this.app.strips[0].regions[0]
+    const r = d.region ||
+      this.currRegion ||
+      (this.app.rStrip && this.app.rStrip.regions[0]) ||
+      (this.app.strips[0] && this.app.strips[0].regions[0]) ||
+      null
     const clearRefIf = () => {
       if (this.app.rGenome && this.app.rGenome !== r.genome) {
         this.clearRefGenome()
@@ -810,7 +814,7 @@ class RegionManager {
       })
     }
     //
-    if (r.genome === this.app.rGenome) {
+    if (r && (r.genome === this.app.rGenome)) {
       this.computeMappedRegions().then(() => this.announce())
     } else {
       this.announce()
