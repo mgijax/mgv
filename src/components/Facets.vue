@@ -8,6 +8,7 @@
        :key="fd.name"
        :initiallyOpen="fd.initiallyOpen"
        :label="fd.name"
+       :title="fd.description"
        :draggable="false"
        :message="fd.message"
        >
@@ -32,7 +33,7 @@ import PageBox from '@/components/PageBox'
 export default MComponent({
   name: 'Facets',
   components: { Facet, PageBox },
-  inject: ['featureColorMap'],
+  inject: ['featureColorMap','dataManager'],
   data: function () {
     // Each stanza defines a filter, givig its name, list of possible values, etc.
     // The user selects 0, 1, or many of the values, depending on whether multi is true or not.
@@ -42,6 +43,7 @@ export default MComponent({
       someoneActive: false,
       facetData: [{
         name: 'Feature type',
+        description: 'Limit the display to show only features of the selected types.',
         values: this.featureColorMap.getTypes(),
         initialSelection: this.featureColorMap.getTypes(),
         colors: this.featureColorMap.getColors(),
@@ -53,6 +55,7 @@ export default MComponent({
         message: ""
       }, {
         name: 'Feature length',
+        description: 'Limit the display to show only features with total genomic length in the selected ranges.',
         values: ['< 1kb', '1-10kb', '10-100kb', '100kb - 1Mb', '> 1Mb'],
         initialSelection: ['< 1kb', '1-10kb', '10-100kb', '100kb - 1Mb', '> 1Mb'],
         multi: true,
@@ -62,8 +65,10 @@ export default MComponent({
           return n < 1000 ? '< 1kb' : n <= 10000 ? '1-10kb' : n <= 100000 ? '10-100kb' : n <= 1000000 ? '100kb - 1Mb' : '> 1Mb'
         },
         message: ""
+      /*
       }, {
         name: 'Has canonical ID',
+        description: 'If true, true limit display to features having a canonical id. If false, limit to those without. Features lacking a canonical ID may indicate uniqueness to a genome (but may also indicate assembly/annotation issues).',
         values: [true, false, 'dont care'],
         initialSelection: 'dont care',
         multi: false,
@@ -73,8 +78,24 @@ export default MComponent({
           return f.cID !== null
         },
         message: ""
+      */
+      }, {
+        name: 'Present in all* genomes',
+        description: 'If true, only shows features that occur in all *displayed* genomes. If false, only shows features that are missing in some displayed genome. Features missing from a genome may indicate a structural difference, but may also indicate assembly/annotation issues.',
+        values: [true, false, 'dont care'],
+        initialSelection: 'dont care',
+        multi: false,
+        initiallyOpen: false,
+        mapper: function (f) {
+          if (this.selectedSet.has('dont care')) return 'dont care'
+          const genologs = this.app.dataManager.getGenologs(f, this.app.vGenomes).filter(x => x)
+          const genomes = new Set(genologs.map(f => f.genome))
+          return genomes.size === this.app.vGenomes.length
+        },
+        message: ""
       }, {
         name: 'Is in current list',
+        description: 'If true limits display to features in the currently selected list. If false, limits to features not in the list. Click a list in "Lists and Searches" to make it current.',
         values: [true, false, 'dont care'],
         initialSelection: 'dont care',
         multi: false,
@@ -87,6 +108,7 @@ export default MComponent({
         message: ""
       }, {
         name: 'Is currently selected',
+        description: 'If true and some features are currently selected, limits display to those features. Good for looking at one feature at a time. If false, removes those features from display.',
         values: [true, false, 'dont care'],
         initialSelection: 'dont care',
         multi: false,
