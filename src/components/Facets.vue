@@ -65,23 +65,12 @@ export default MComponent({
           return n < 1000 ? '< 1kb' : n <= 10000 ? '1-10kb' : n <= 100000 ? '10-100kb' : n <= 1000000 ? '100kb - 1Mb' : '> 1Mb'
         },
         message: ""
-      /*
       }, {
-        name: 'Has canonical ID',
-        description: 'If true, true limit display to features having a canonical id. If false, limit to those without. Features lacking a canonical ID may indicate uniqueness to a genome (but may also indicate assembly/annotation issues).',
-        values: [true, false, 'dont care'],
-        initialSelection: 'dont care',
-        multi: false,
-        initiallyOpen: false,
-        mapper: function (f) {
-          if (this.selectedSet.has('dont care')) return 'dont care'
-          return f.cID !== null
-        },
-        message: ""
-      */
-      }, {
-        name: 'Present in all* genomes',
-        description: 'If true, only shows features that occur in all *displayed* genomes. If false, only shows features that are missing in some displayed genome. Features missing from a genome may indicate a structural difference, but may also indicate assembly/annotation issues.',
+        name: 'Missing from some* genome',
+        description: `
+        If false, only shows features that are missing in some *displayed* genome.
+        If true, only shows features that occur in all displayed genomes.
+        Features missing from a genome may indicate a structural difference, but may also indicate assembly/annotation issues.`,
         values: [true, false, 'dont care'],
         initialSelection: 'dont care',
         multi: false,
@@ -90,7 +79,7 @@ export default MComponent({
           if (this.selectedSet.has('dont care')) return 'dont care'
           const genologs = this.app.dataManager.getGenologs(f, this.app.vGenomes).filter(x => x)
           const genomes = new Set(genologs.map(f => f.genome))
-          return genomes.size === this.app.vGenomes.length
+          return genomes.size !== this.app.vGenomes.length
         },
         message: ""
       }, {
