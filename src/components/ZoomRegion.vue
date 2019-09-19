@@ -664,7 +664,6 @@ export default MComponent({
     },
     featureVisible: function (f) {
       let overlaps = f.start <= (this.region.end + this.direction*this.deltaB) && f.end >= (this.region.start + this.direction*this.deltaB)
-      //return overlaps && this.getFacets().test(f)
       return overlaps
     },
     featureTextX: function (f) {
@@ -1016,9 +1015,9 @@ export default MComponent({
 	const cname = this.region.chr.name
         const reverseComplement =
           d.dragDirection === 'l-to-r' && r.reversed || d.dragDirection === 'r-to-l' && !r.reversed
-	const rc = reverseComplement ? 'reverse complemented' : ''
+	const rc = reverseComplement ? 'reverse complement ' : ''
         const seq = {
-	  header: `>${gname}::${cname}:${start}..${end} ${rc} (dna)`,
+	  header: `>${gname}::${cname}:${start}..${end} (${rc}dna)`,
           genome: this.region.genome.name,
           genomeUrl: this.region.genome.url,
           chromosome: this.region.chr.name,

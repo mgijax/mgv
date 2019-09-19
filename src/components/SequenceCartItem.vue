@@ -6,7 +6,7 @@
     <!-- Selected checkbox -->
     <m-button
       :icon="item.selected ? 'check_box' : 'check_box_outline_blank'"
-      @click.stop="item.selected = !item.selected"
+      @click.stop="toggleSelect"
       />
     <!-- Sequence header -->
     <div class="flexcolumn seqheader" style="align-items: flex-start;">
@@ -22,14 +22,14 @@
       :icon="item.reverseComplement ? 'AG' : 'CT'"
       :style="{ transform: `rotate(${item.reverseComplement ? 180 : 0}deg)` }"
       :title="`Reverse complement is ${item.reverseComplement ? 'ON' : 'OFF'}. Click to turn ${item.reverseComplement ? 'OFF' : 'ON'}.`"
-      @click.stop="item.reverseComplement = !item.reverseComplement"
+      @click.stop="toggleReverseComplement"
       />
     <!-- Translate button (for CDS sequence only) -->
     <m-button
       v-if="item.type==='cds'"
       :icon="item.translate ? 'M' : 'ATG'"
       :title="`Protein translation is ${item.translate ? 'ON' : 'OFF'}. Click to turn ${item.translate ? 'OFF' : 'ON'}.`"
-      @click.stop="item.translate = !item.translate"
+      @click.stop="toggleTranslate"
       />
     <!-- Delete button -->
     <m-button
@@ -68,6 +68,20 @@ export default MComponent({
     },
     toggleSelect: function () {
       this.item.selected = !this.item.selected
+    },
+    toggleTranslate: function () {
+      const i = this.item
+      i.translate = !i.translate
+      const h1 = '(cds)'
+      const h2 = '(translated cds)'
+      i.header = i.translate ? i.header.replace(h1,h2) : i.header.replace(h2,h1)
+    },
+    toggleReverseComplement: function () {
+      const i = this.item
+      i.reverseComplement = !i.reverseComplement
+      const h1 = '(dna)'
+      const h2 = '(reverse complement dna)'
+      i.header = i.reverseComplement ? i.header.replace(h1,h2) : i.header.replace(h2,h1)
     },
     prettyPrint (len) {
       if (this.item.translate) {
