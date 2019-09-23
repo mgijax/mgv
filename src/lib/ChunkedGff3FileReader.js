@@ -31,7 +31,7 @@ class ChunkedGff3FileReader {
       p = this.fetcher.fetch(url, 'gff3')
     } else {
       const minBlk = Math.max(0, Math.floor(s / this.chunkSize))
-      const maxBlk = Math.max(minBlk, Math.floor(e / this.chunkSize))
+      const maxBlk = Math.max(minBlk, Math.floor(Math.min(e, c.length) / this.chunkSize))
       const ps = []
       for (let i = minBlk; i <= maxBlk; i++) {
         url = `${this.url}/${this.name}/${c.name}/${i}`

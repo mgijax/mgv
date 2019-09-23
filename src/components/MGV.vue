@@ -497,7 +497,7 @@ export default MComponent({
     },
     getContextString: function () {
       let cs = this.regionManager.getParameterString()
-      if (this.currentSelection.length) {
+      if (this.currentSelection && this.currentSelection.length) {
         cs = cs + '&' + `highlight=${this.currentSelection.join('+')}`
       }
       return cs
