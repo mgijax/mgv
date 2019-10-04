@@ -106,6 +106,7 @@ export default MComponent({
   },
   mounted: function () {
     this.$watch('item', function () {this.$emit('item-changed')}, {deep:true})
+    this.$el.scrollIntoView()
   }
 })
 </script>

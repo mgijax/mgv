@@ -203,6 +203,12 @@ export default MComponent({
     this.$root.$on('sequence-selected', rs => {
       rs.unselectAll && this.unselectAll()
       rs.sequences.forEach(r => this.add(r))
+      this.app.openDrawer()
+      this.$parent.open()
+      this.$el.scrollIntoView()
+      if (rs.sequences.length) {
+        this.$root.$emit('message', { message: `Added ${rs.sequences.length} sequences to cart` })
+      }
     })
     this.kstore = new KeyStore(this.cfg.dbName)
     this.restore()
