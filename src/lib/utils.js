@@ -329,6 +329,10 @@ function niceBounds(axis_start, axis_end, num_ticks){
     }
 }
 //--------------------------------------
+// Merges array B into array A.
+// Calls mergeItems for each pair of items (a,b)
+// Truncates A if B is shorter.
+// Extends A if B is longer (just appends the b's)
 function mergeArrays (A, B, mergeItems) {
   const alen = A.length
   const blen = B.length
