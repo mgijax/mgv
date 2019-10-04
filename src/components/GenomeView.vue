@@ -104,16 +104,27 @@
     </svg>
     <!-- view footer -->
     <div class="flexrow" style="justify-content: space-between; min-height: 30px;">
-      <div>
-      </div>
-      <div>
+      <div></div>
+      <div class="flexcolumn" style="text-align: left;">
         <!-- current list -->
-        <span
-          v-if="context.currentList"
-          class="listGlyph"
-          :style="{ backgroundColor: context.currentList.color, marginRight: '5px' }"
-          />
-        <span>{{currListTitle}}</span>
+        <div>
+          <span
+            v-if="context.currentList"
+            class="listGlyph"
+            :style="{ backgroundColor: context.currentList.color, marginRight: '5px' }"
+            />
+          <span>{{currListTitle}}</span>
+        </div>
+        <div
+          v-if="currentFacets.length > 0 && context.currentList"
+          class="flexcolumn"
+          >
+          <span><i class="material-icons" style="font-size: 14px; color: #ff9800">warning</i> There are active filters. List may be truncated.</span>
+          <span
+            v-for="f in currentFacets"
+            :key="f.facet"
+            >{{formatFacet(f)}}</span>
+        </div>
       </div>
     </div>
   </div>
@@ -131,11 +142,12 @@ export default MComponent({
   props: [
     'context'
   ],
-  inject: ['dataManager'],
+  inject: ['dataManager','getFacets'],
   data: function () {
     return {
       genome: null, // the genome to show
       currentListGenologs: [],
+      currentFacets: [],
       isOpen: true, // when open, shows all chrs (vertical); when closed, shows 1 chr (horiz).
       width: 600, // view width
       chrWidth: 20, // how wide to make each chr
@@ -250,7 +262,7 @@ export default MComponent({
         this.dataManager().ensureFeatures(this.genome).then(() => {
           this.currentListGenologs = this.context.currentList.items.map(id => {
             return this.dataManager().getGenologs(id, [this.genome])
-          }).reduce((a,v) => a.concat(v), []).filter(x => x)
+          }).reduce((a,v) => a.concat(v), []).filter(x => x && this.getFacets().test(x))
           this.currentListGenologsByChr = this.currentListGenologs.slice(0, this.maxListLegth).reduce((a,g) => {
             const n = g.chr.name
             if (!a[n]) a[n] = []
@@ -259,6 +271,9 @@ export default MComponent({
           }, {})
         })
       }
+    },
+    formatFacet (f) {
+      return `${f.facet} [${f.values}]`
     }
   },
   watch: {
@@ -282,6 +297,10 @@ export default MComponent({
       } else if (d.vGenomes.indexOf(this.genome.name) === -1) {
         this.genome = this.app.dataManager.lookupGenome(d.vGenomes[0])
       }
+    })
+    this.$root.$on('facet-state', facets => {
+      this.currentFacets = facets
+      this.computeCurrentListGenologs()
     })
     this.$watch('context.currRegion', () => {
       this.scrollDelta = 0
