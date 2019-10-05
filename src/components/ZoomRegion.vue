@@ -16,7 +16,7 @@
     <g
       :transform="`translate(${myDelta},${zeroOffset})`"
       >
-      <!-- ======= synteny blocks ======= -->
+      <!-- ======= synteny blocks =======
       <g class="sblocks">
         <rect
          v-for="(b,i) in blocks"
@@ -29,6 +29,7 @@
          opacity="0.2"
          />
       </g>
+      -->
       <!-- ======= axis line ======= -->
       <line
         class="axis"
@@ -413,7 +414,8 @@ export default MComponent({
       const c = r.chr.name
       const s = u.prettyPrintBases(r.start + this.deltaB, true)
       const e = u.prettyPrintBases(r.end + this.deltaB, true)
-      return `${c}:${s}..${e}`
+      const pp = u.prettyPrintBases(r.end - r.start + 1)
+      return `${c}:${s}..${e} (${pp})`
     },
     tickPositions: function () {
       const r = this.region
