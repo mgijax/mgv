@@ -385,29 +385,61 @@ class RegionManager {
     })
   }
   mapRegionToGenome (ra, gb) {
+    // if A and B are the same genome, region maps to itself
     if (ra.genome === gb) {
       return Promise.resolve({
         genome : gb,
         regions: [ra]
       })
     }
+    // 
     const dm = this.app.dataManager
     return dm.ensureFeatures(ra.genome).then(() => dm.ensureFeatures(gb)).then(() => {
       // features from the A region
       const afeats = dm.getAllFeaturesNow(ra.genome, ra.chr).filter(f => gc.overlaps(f, ra))
-      // homologs of the A features, in order
-      const bfeats = afeats.map(af => dm.getGenolog(af, gb)).filter(x => x)
-      // region A length
-      const ral = ra.end - ra.start + 1
-      // genome B regions
+      //  homologs of the A features
+      const bfeats = afeats.map(af => [af, dm.getGenolog(af, gb)]).filter(x => x[1]).map(abf => {
+        const af = abf[0]
+        const bf = abf[1]
+        const inverted = af.strand !== bf.strand
+        // If the A feature is only partly contained by the A region, then need to adjust
+        // the mapped B feature coordinates accordingly.
+        let bfs = bf.start
+        let bfe = bf.end
+        if (ra.start > af.start) {
+          const ps = (ra.start - af.start) / af.length
+          const delta = ps * bf.length
+          if (inverted) {
+            bfe = Math.round(bfe - delta)
+          } else {
+            bfs = Math.round(bfs + delta)
+          }
+        }
+        if (ra.end < af.end) {
+          const pe = (af.end - ra.end) / af.length
+          const delta = pe * bf.length
+          if (inverted) {
+            bfs = Math.round(bfs + delta)
+          } else {
+            bfe = Math.round(bfe - delta)
+          }
+        }
+        return {
+          genome: bf.genome,
+          chr: bf.chr,
+          start: bfs,
+          end: bfe,
+          length: bfe - bfs + 1,
+          strand: bf.strand
+        }
+      })
+      // Ok, we've mapped each A feature to (the possibly clipped coordinates of) its B homolog
+      // Now compute region(s) that contain them all
       const rbs = []
+      // For each B feature, find a region that it overlaps or is within a max distance (1Mb) 
+      // and add B to it. Otherwise start a new region with that feature.
       bfeats.forEach(fb => {
-        // length of this B feature
-        const fblen = fb.end - fb.start + 1
-        // did we find a place for it?
-        let found = false
-        // check each region so far
-        // for(let rbi = 0 ; rbi < rbs.length ; rbi++) {
+        let found = false // have we found a place for fb?
         if (rbs.length) {
           for(let rbi = 0 ; rbi < rbs.length ; rbi++) {
             const rb = rbs[rbi]
@@ -416,22 +448,23 @@ class RegionManager {
             const s = Math.min(rb.start, fb.start)
             const e = Math.max(rb.end, fb.end)
             const l = e - s + 1
-            // if (l < 2 * ral) {
-            if (gc.overlaps(fb, rb) || (l - rblen - fblen < 1000000)) {
+            if (gc.overlaps(fb, rb) || (l - rblen - fb.length < 1000000)) {
               rb.start = s
               rb.end = e
+              rb.length = e - s + 1
               found = true
               break
             }
           }
         }
         if (!found) {
-          const delta = Math.round(fblen / 3)
+          const delta = Math.round(fb.length / 3)
           rbs.push(this.makeRegion({
             genome: gb,
             chr: fb.chr,
             start: fb.start - delta,
-            end: fb.end + delta
+            end: fb.end + delta,
+            length: fb.end - fb.start + 1 + 2*delta
           }))
         }
       })
@@ -776,7 +809,6 @@ class RegionManager {
       clearRefIf()
       this.splitRegion(r, d.pos)
     } else if (d.op === "reverse") {
-      clearRefIf()
       this.reverseRegion(r, d.value)
     } else if (d.op === "make-reference") {
       this.app.rGenome = r.genome
