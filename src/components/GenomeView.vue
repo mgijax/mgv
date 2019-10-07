@@ -12,7 +12,7 @@
           <option
             v-for="g in vGenomes"
             :value="g"
-            >{{g.name}}</option>
+            >{{g === context.rGenome ? '*' : ''}}{{g.name}}</option>
         </select>
       </div>
       <!-- -->
@@ -166,7 +166,7 @@ export default MComponent({
     vGenomes: function () {
       const vgs = this.app.vGenomes
       vgs.sort((a,b) => a.name < b.name ? -1 : a.name > b.name ? 1 : 0)
-      return this.app.rGenome ? [this.app.rGenome] : vgs
+      return vgs
     },
     currListTitle: function () {
       const clist = this.context.currentList
@@ -319,13 +319,13 @@ export default MComponent({
       () => this.computeCurrentListGenologs(),
       { deep: true })
     this.$root.$on('region-current', d => {
-      if (!this.app.rGenome && d) {
-        this.genome = this.app.rGenome || d.region.genome
+      if (d) {
+        this.genome = d.region.genome
       }
     })
     this.$root.$on('region-change', d => {
       const r = d.region
-      if (r && r.genome) this.genome = this.app.rGenome || r.genome
+      if (r && r.genome) this.genome = r.genome
     })
   }
 })
