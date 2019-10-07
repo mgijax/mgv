@@ -103,10 +103,24 @@ function overlaps (f, g) {
   return (f.chr.name || f.chr) === (g.chr.name || g.chr) && f.start <= g.end && f.end >= g.start
 }
 
+function overlapAmount (f, g) {
+  if ((f.chr.name || f.chr) === (g.chr.name || g.chr)) {
+    const s = Math.max(f.start, g.start)
+    const e = Math.min(f.end, g.end)
+    return e - s + 1
+  } else {
+    return -Infinity
+  }
+}
+
+function distanceBetween (f, g) {
+  return -overlapAmount(f, g)
+}
+
 function length (f) {
   return f.end - f.start + 1
 }
 
 export default {
-  fail, validate, parse, setWidth, pan, zoom, overlaps, length
+  fail, validate, parse, setWidth, pan, zoom, overlaps, length, overlapAmount, distanceBetween
 }

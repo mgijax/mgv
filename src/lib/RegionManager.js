@@ -104,6 +104,8 @@ class RegionManager {
       p = this.computeLandmarkRegions(this.app.lcoords, [g]).then(strips => strips[0])
     } else if (this.app.rGenome && this.app.rStrip) {
       p = this.mapRegionsToGenome(this.app.rStrip.regions, g)
+    } else if (this.app.strips.length) {
+      p = this.mapRegionsToGenome(this.app.strips[0].regions, g)
     } else {
       const chr = g.chromosomes[0]
       p = Promise.resolve({
@@ -357,7 +359,6 @@ class RegionManager {
       }
     })
     return Promise.all(promises).then(strips => {
-      this.app.scrollLock = false
       this.app.lcoords = null
       strips.forEach(s => {
         if (s.genome !== this.app.rGenome) {
@@ -372,18 +373,38 @@ class RegionManager {
     })
   }
   //--------------------------------------
-  // Given region ra from genome ga, return corresponding region(s) in genome gb.
-  // Assumes both genomes have been loaded!
   //
   mapRegionsToGenome (ras, gb) {
     const promises = ras.map(ra => this.mapRegionToGenome(ra, gb))
     return Promise.all(promises).then(data => {
       return {
         genome: gb,
-        regions: u.flatten(data)
+        regions: this.mergeRegions(gb, u.flatten(data))
       }
     })
   }
+  //
+  mergeRegions (g, regions) {
+    return regions.reduce((newRs, r) => {
+      let merged = false
+      for (let i = 0; i < newRs.length; i++) {
+        const r0 = newRs[i]
+        const db = gc.distanceBetween(r0, r)
+        const tlen = r0.length + r.length
+        if (db < 1000000) {
+          r0.start = Math.min(r0.start, r.start)
+          r0.end = Math.max(r0.end, r.end)
+          r0.length = r0.end - r0.start + 1
+          merged = true
+          break
+        }
+      }
+      !merged && newRs.push(r)
+      return newRs
+    }, [])
+  }
+  // Given region ra from genome ga, return corresponding region(s) in genome gb.
+  // Assumes both genomes have been loaded!
   mapRegionToGenome (ra, gb) {
     // if A and B are the same genome, region maps to itself
     if (ra.genome === gb) {
@@ -479,25 +500,6 @@ class RegionManager {
       return rbs
     })
 
-  }
-  //--------------------------------------
-  // Combine regions whose indexes form a sequence
-  // Only applies to computed (mapped) regions.
-  combineRegions (regions) {
-    regions.sort((a, b) => a.index - b.index)
-    regions = regions.reduce((nrs, r) => {
-      let prev = nrs[nrs.length - 1]
-      if (prev && prev.index === r.index) {
-        return nrs
-      } else if (prev && prev.index + 1 === r.index) {
-        prev.end = r.end
-        prev.index = r.index
-      } else {
-        nrs.push(r)
-      }
-      return nrs
-    }, [])
-    return regions
   }
   //--------------------------------------
   featureAlign (d) {
@@ -606,7 +608,8 @@ class RegionManager {
     }
   }
   //--------------------------------------
-  // When a landmark does not exist in a given genome, infer a location instead.
+  // When a landmark does not exist in a given genome, guess a location instead.
+  // Guesses by interpolating from flanking genes and their homologs.
   // Assumes the genome has been loaded!
   // Args:
   //  lcoords (object) defines the landmark in some genome
@@ -623,12 +626,14 @@ class RegionManager {
       const neighbors = dm.getAllFeaturesNow(lcoords.lgenome, lmf.chr)
       // landmark's index in list
       const lmi = neighbors.indexOf(lmf)
-      // neighbor genologs (prox, dist)
+      // neighbor homologs (prox, dist)
       const ngs = [null,null]
-      // neighbor genolog index
+      // neighbor homolog index
       const ngi = [lmi-1,lmi+1]
-      //
-      function findNeighborGenolog (inc) {
+      // Returns the homolog of my neighbor in the indicated direction (1/-1)
+      // If neighbor has no homolog, go to next and so on until we find one.
+      // Returns undefined if we reach the end on the chromosome and none found.
+      function findNeighborHomolog (inc) {
         const ii = inc === -1 ? 0 : 1
         let ng
         for ( ; !ng && neighbors[ngi[ii]]; ngi[ii] += inc) {
@@ -639,8 +644,10 @@ class RegionManager {
         }
         return ng
       }
-      let ng1 = findNeighborGenolog(-1)
-      let ng2 = findNeighborGenolog(+1)
+      // upstream neighbor's homolog
+      let ng1 = findNeighborHomolog(-1)
+      // downstream neighbor's homolog
+      let ng2 = findNeighborHomolog(+1)
       //
       if (!ng1 && !ng2) return null
       if (!ng1) ng1 = ng2
@@ -769,28 +776,23 @@ class RegionManager {
   //    pos (when op = split) Position of the split. (0..1)
   //
   regionChange (d) {
+    //
     const r = d.region ||
       this.currRegion ||
       (this.app.rStrip && this.app.rStrip.regions[0]) ||
       (this.app.strips[0] && this.app.strips[0].regions[0]) ||
       null
-    const clearRefIf = () => {
-      if (this.app.rGenome && this.app.rGenome !== r.genome) {
-        this.clearRefGenome()
-      }
-    }
+    //
     if (d.op === 'scroll') {
       if (this.app.scrollLock) {
         this.zoomScrollAllRegions(1, d.amt, d.sType)
       } else {
-        clearRefIf()
         this.zoomScrollRegion(r, 1, d.amt, d.sType)
       }
     } else if (d.op === 'zoom') {
       if (this.app.scrollLock) {
         this.zoomScrollAllRegions(d.amt, 0)
       } else {
-        clearRefIf()
         this.zoomScrollRegion(r, d.amt, 0)
       }
     } else if (d.op === 'zoomscroll') {
@@ -799,14 +801,11 @@ class RegionManager {
       if (this.app.scrollLock) {
         this.zoomScrollAllRegions(zAmt, sAmt, 'px')
       } else {
-        clearRefIf()
         this.zoomScrollRegion(d.region, zAmt, sAmt, 'px')
       }
     } else if (d.op === 'set') {
-      clearRefIf()
       this.setRegion(r, d.coords)
     } else if (d.op === "split") {
-      clearRefIf()
       this.splitRegion(r, d.pos)
     } else if (d.op === "reverse") {
       this.reverseRegion(r, d.value)
@@ -816,10 +815,8 @@ class RegionManager {
     } else if (d.op === 'delete-strip') {
       this.deleteStrip(r.genome)
     } else if (d.op === 'remove') {
-      clearRefIf()
       this.removeRegion(r)
     } else if (d.op === 'remove-all-but') {
-      clearRefIf()
       this.removeRegion(r, true)
     } else if (d.op === 'new') {
       this.addRegion(r, d.only)
@@ -840,10 +837,9 @@ class RegionManager {
       this.clearLockMode()
     } else if (d.op === 'set-genomes') {
       this.setStrips(d.vGenomes.map(n => this.app.dataManager.lookupGenome(n))).then(() => {
-        this.setRefGenome(this.app.dataManager.lookupGenome(d.rGenome))
         this.announce()
-        return
       })
+      return
     }
     //
     if (r && (r.genome === this.app.rGenome)) {
