@@ -141,7 +141,7 @@
         font-family="sans-serif"
         :font-weight="isCurrent ? 'bold' : 'normal'"
         :transform="`translate(${-myDelta},0)`"
-        >{{coordinatesLabel}}</text>
+        >{{coordinatesLabel}}<title>{{coordinatesLabel}}</title></text>
       <!-- ======= sequence string ======= -->
       <text
         v-if="showSequence"
