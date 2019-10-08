@@ -385,7 +385,7 @@ class RegionManager {
   }
   //
   mergeRegions (g, regions) {
-    return regions.reduce((newRs, r) => {
+    const rs = regions.reduce((newRs, r) => {
       let merged = false
       for (let i = 0; i < newRs.length; i++) {
         const r0 = newRs[i]
@@ -402,6 +402,7 @@ class RegionManager {
       !merged && newRs.push(r)
       return newRs
     }, [])
+    return rs
   }
   // Given region ra from genome ga, return corresponding region(s) in genome gb.
   // Assumes both genomes have been loaded!
@@ -604,7 +605,7 @@ class RegionManager {
     })
     return {
       genome: genome,
-      regions: regions
+      regions: this.mergeRegions(genome, regions)
     }
   }
   //--------------------------------------
