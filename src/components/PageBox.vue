@@ -143,8 +143,13 @@ export default MComponent({
       d.dx = 0
       d.dy = 0
       //
-      d.sibs = u.getBBoxes(this.$parent.$children, 'y')
-      d.myIndex = d.sibs.map(s => s.component).indexOf(this)
+      if (this.floating) {
+        d.sibs = []
+        d.myIndex = -1
+      } else {
+        d.sibs = u.getBBoxes(this.$parent.$children, 'y')
+        d.myIndex = d.sibs.map(s => s.component).indexOf(this)
+      }
       //
       // Firefox drag event does not expose clientX, clientY 
       // (among others) - they are always 0. The workaround is to attach dragover listeners on

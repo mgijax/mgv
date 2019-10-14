@@ -178,14 +178,14 @@
         <help-box
           />
       </page-box>
-      <!--
-      ============ Messages  ==============
-      -->
-      <messages
-        ref="messages"
-        />
     </div>
     <m-footer version="1.0.0"></m-footer>
+    <!--
+    ============ Messages  ==============
+    -->
+    <messages
+      ref="messages"
+      />
   </div>
 </template>
 
