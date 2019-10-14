@@ -26,6 +26,7 @@ class DataManager {
     this.pending = {} // genome.name -> pending promise
     this.id2feat = {} // ID -> feature
     this.cid2feats = {} // cID -> [ features ]
+    this.hid2feats = {} // hID -> [ features ]
     this.symbol2feats = {} // symbol -> [ features ]
     this.greg = new GenomeRegistrar()
     this.genomes = this.greg.register(this.url)
@@ -35,6 +36,9 @@ class DataManager {
   }
   getFeaturesByCid (cid) {
     return this.cid2feats[cid]
+  }
+  getFeaturesByHid (hid) {
+    return this.hid2feats[hid]
   }
   getFeaturesBySymbol (symbol) {
     return this.symbol2feats[symbol.toLowerCase()]
@@ -87,7 +91,7 @@ class DataManager {
   }
   //
   _registerChr (g, c, feats) {
-    let freg = new FeatureRegistrar(g, c, this.id2feat, this.cid2feats, this.symbol2feats)
+    let freg = new FeatureRegistrar(g, c, this.id2feat, this.cid2feats, this.hid2feats, this.symbol2feats)
     let cfeats = feats.map(f => freg.register(f)).filter(x => x)
     this.cache[g.name][c.name] = cfeats
     return cfeats
@@ -378,6 +382,13 @@ class DataManager {
                 delete this.cid2feats[f.cID]
              }
            }
+           const hidFeats = this.hid2feats[f.hID]
+           if (hidFeats) {
+             this.hid2feats[f.hID] = hidFeats.filter(ff => ff !== f)
+             if (this.hid2feats[f.hID].length === 0) {
+                delete this.hid2feats[f.hID]
+             }
+           }
            if (f.symbol) {
              const fs = f.symbol.toLowerCase()
              this.symbol2feats[fs] = this.symbol2feats[fs].filter(ff => ff !== f)
@@ -392,7 +403,7 @@ class DataManager {
 }
 // Registers features for one chromsome of a genome
 class FeatureRegistrar {
-  constructor (g, c, id2f, cid2f, sym2f) {
+  constructor (g, c, id2f, cid2f, hid2f, sym2f) {
     // each chromosome of each genome has its own registrar
     this.genome = g
     this.chr = c
@@ -400,6 +411,8 @@ class FeatureRegistrar {
     this.id2feat = id2f
     // map feature.cID => [ features ]
     this.cid2feats = cid2f
+    // map feature.hID => [ features ]
+    this.hid2feats = hid2f
     // map feature.symbol => [ features ]
     this.symbol2feats = sym2f
   }
@@ -429,12 +442,19 @@ class FeatureRegistrar {
     //
     this.id2feat[f.ID] = f
     if (f.cID) {
-
       let d = this.cid2feats[f.cID]
       if (!d) d = this.cid2feats[f.cID] = []
       d.push(f)
     } else {
       f.cID = null // make sure it's not undefined
+    }
+    //
+    if (f.hID) {
+      let d = this.hid2feats[f.hID]
+      if (!d) d = this.hid2feats[f.hID] = []
+      d.push(f)
+    } else {
+      f.hID = null // make sure it's not undefined
     }
     //
     f.symbol = f.symbol || f.Name

@@ -491,6 +491,8 @@ class RegionManager {
         }
       })
       if (rbs.length === 0) {
+        // Could not map the region - no homologs found.
+        // Have a flower instead...
         rbs.push(this.makeRegion({
           genome: gb,
           chr: gb.chromosomes[0],

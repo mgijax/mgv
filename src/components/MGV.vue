@@ -522,7 +522,6 @@ export default MComponent({
     },
     // FIXME All these handlers for features really belong somewhere else
     featureOver: function (f, t, e) {
-      let fid = f.cID || f.ID
       this.currentMouseover = f
       this.currentMouseoverT = t
       if (e.ctrlKey || e.altKey) this.detailFeatures = this.dataManager.getGenologs(f, this.vGenomes)
