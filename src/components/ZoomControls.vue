@@ -82,7 +82,6 @@ export default MComponent({
   inject: ['dataManager'],
   data: function () {
     return {
-      my: this.copyProps(),
       fixed: false,
       offset: 0
     }
@@ -95,9 +94,6 @@ export default MComponent({
     })
   },
   methods: {
-    copyProps () {
-      return Object.assign({rGenome: this.context.rGenome}, this.context.coords, this.context.lcoords)
-    },
     blurOnEnter (e) {
       if (e.keyCode === 13) e.target.blur()
     },
