@@ -2,7 +2,7 @@
   <div class="settings flexcolumn">
   <form>
   <!-- ============== FEATURES section  ============== -->
-  <label>Features</label>
+  <div class="section"><label>Features</label></div>
   <!-- =================== -->
   <div
     title="Above this threshold, features are simply boxes. Below this threshold, exon structure becomes visible."
@@ -68,7 +68,7 @@
   </div>
   -->
   <!-- ============== TRANSCRIPTS section  ============== -->
-  <label>Transcripts</label>
+  <div class="section"><label>Transcripts</label></div>
   <!-- =================== -->
   <div
     title="When checked, spreads transcripts so you can see them all. When unchecked, piles them on top of one another for a compact view. In spread view, strand is indicated by arrows. In the collapsed view, strand is indicated by position above (+) or below (-) the axis line."
@@ -116,7 +116,7 @@
         />
   </div>
   <!-- ============== SEQUENCES section  ============== -->
-  <label>Sequences</label>
+  <div class="section"><label>Sequences</label></div>
   <div
     title="Set the font size of displayed sequences."
     class="flexrow"
@@ -130,10 +130,35 @@
         />
   </div>
   <!-- ============== FIDUCIALS section  ============== -->
-  <label>Selections</label>
+  <div class="section"><label>Connectors</label></div>
   <!-- =================== -->
   <div
-    title="Make selected features stand out more by fading unselected features."
+    title="Specify how to connect features across genomes."
+    class="flexrow"
+    >
+    <label>Based on</label>
+    <div class="flexcolumn">
+      <div class="flexrow" style="justify-content: flex-start;">
+        <input
+          type="radio"
+          v-model="MGV.homologyAttr"
+          value="cID"
+          />
+        <label>Canonical ID</label>
+      </div>
+      <div class="flexrow" style="justify-content: flex-start;">
+        <input
+          type="radio"
+          v-model="MGV.homologyAttr"
+          value="hID"
+          />
+        <label>Orthology+Parology</label>
+      </div>
+    </div>
+  </div>
+  <!-- =================== -->
+  <div
+    title="Make connected features stand out more by fading unconnected features."
     class="flexrow"
     >
     <label>Contrast</label>
@@ -171,7 +196,7 @@
         />
   </div>
   <!-- ============== MISC section  ============== -->
-  <label>Misc</label>
+  <div class="section"><label>Misc</label></div>
   <!-- =================== -->
   <div
     title="When checked, shows a vertical reference line indicating the base position that follows the mouse around. When unchecked, only shows during drag operations."
@@ -266,6 +291,10 @@ export default MComponent({
 <style scoped>
 .settings {
   white-space: nowrap;
+}
+.section {
+  width: 100%;
+  background-color: #ccc;
 }
 .flexrow {
   justify-content: space-between;

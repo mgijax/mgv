@@ -43,7 +43,9 @@ export default {
       //label: 'All',
       //genomes: '129S1/SvImJ,A/J,AKR/J,BALB/cJ,C3H/HeJ,C57BL/6J,C57BL/6NJ,CAROLI/EiJ,CAST/EiJ,CBA/J,DBA/2J,FVB/NJ,LP/J,PAHARI/EiJ,NOD/ShiLtJ,NZO/HlLtJ,PWK/PhJ,SPRET/EiJ,WSB/EiJ,C57BL/6J',
       //description: 'View all 19 strains (WARNING: may take a while to load and will be sluggish drawing large regions.)'
-    }]
+    }],
+    // Name of feature attribute to use for connecting features across genomes
+    homologyAttr: 'cID' // one of: cID, hID
   },
   FeatureColorMap: {
     colors: [{
