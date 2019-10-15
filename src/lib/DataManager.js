@@ -320,8 +320,12 @@ class DataManager {
     }
     return d
   }
-  // Returns the genologs of feature f from the specified genomes in the specified order.
-  // If a genolog does not exist in a given genome, that entry in the returned list === undefined.
+  // Returns the orthology id for the feature.
+  getFeatureOid (f) {
+    return f[config.MGV.homologyAttr]
+  }
+  // Returns the homologs of feature f from the specified genomes in the specified order.
+  // If a homologs does not exist in a given genome, that entry in the returned list === undefined.
   getHomologs (f, genomes) {
     let feats
     if (typeof f === 'string') {
@@ -330,17 +334,19 @@ class DataManager {
     if (!f) {
       return []
     }
-    if (f.cID) {
-      feats = this.cid2feats[f.cID]
+    const cid = this.getFeatureOid(f)
+    const cindex = this[config.MGV.homologyAttr === 'cID' ? 'cid2feats' : 'hid2feats']
+    if (cid) {
+      feats = cindex[cid]
     } else {
       feats = [f]
     }
     let fix = u.index(feats, f => f.genome.name, false)
-    let genologs = genomes.map(g => fix[g.name]).reduce((a,v) => a.concat(v), [])
-    return genologs
+    let homologs = genomes.map(g => fix[g.name]).reduce((a,v) => a.concat(v), [])
+    return homologs
   }
-  // Returns the genolog of feature f from genome g, or undefined if none exists
-  // If there is more than one genolog, an arbitrary one is returned.
+  // Returns the homologs of feature f from genome g, or undefined if none exists
+  // If there is more than one homologs, an arbitrary one is returned.
   getHomolog (f, g) {
     return this.getHomologs(f, [g])[0]
   }

@@ -44,7 +44,8 @@ export default MComponent({
       return cmo && cmo.ID === f.ID
     },
     makeLink: function (f) {
-      if (!f || !f.cID || !f.cID.startsWith('MGI:')) return '.'
+      if (!f || !f.cID) return '.'
+      if (!f.cID.startsWith('MGI:')) return f.cID
       return `<a target="_blank" href="http://www.informatics.jax.org/accession/${f.cID}">${f.cID}</a>`
 
     }

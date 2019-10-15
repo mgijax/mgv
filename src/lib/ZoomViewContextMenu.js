@@ -85,11 +85,11 @@ function getMenus(thisObj) {
 	const t = cxt.transcript
 	const c = t ? t.cds : null
         const all = which === 'all'
-	const genologs = all ?
+	const homologs = all ?
 	  this.dataManager().getHomologs(f, this.context.strips.map(
 	      s => s.genome)).filter(x => x)
 	  : [f]
-        const seqs = u.flatten(genologs.map(ff => {
+        const seqs = u.flatten(homologs.map(ff => {
           if (seqtype === 'dna') {
             return this.dataManager().makeSequenceDescriptor(seqtype, ff)
           } else if (seqtype === 'transcript') {

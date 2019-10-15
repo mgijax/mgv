@@ -530,19 +530,21 @@ export default MComponent({
       this.currentMouseoverT = null
     },
     featureClick: function (f, t, e) {
-      let fid = f.cID || f.ID
-      let csel = this.currentSelection
-      if (e.shiftKey) {
-        let i = csel.indexOf(fid)
-        if (i >= 0) {
-          delete csel.splice(i, 1)
-        } else {
-          csel.push(fid)
-        }
-      } else {
-        this.currentSelection = [fid]
-      }
       this.detailFeatures = this.dataManager.getHomologs(f, this.vGenomes)
+      const fids = Array.from(new Set(this.detailFeatures.filter(x => x).map(f => f.cID || f.ID)))
+      const csel = this.currentSelection
+      if (e.shiftKey) {
+        fids.forEach(fid => {
+          let i = csel.indexOf(fid)
+          if (i >= 0) {
+            delete csel.splice(i, 1)
+          } else {
+            csel.push(fid)
+          }
+        })
+      } else {
+        this.currentSelection = fids
+      }
       this.$root.$emit('selection-state-changed')
       this.$root.$emit('context-changed')
     },

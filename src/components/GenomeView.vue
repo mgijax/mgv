@@ -90,8 +90,8 @@
           :orientation="orientation"
           :height="chrLen(c)"
           :width="chrWidth"
-          :glyphStyle="currentListGenologs.length >= 200 ? 'bigList' : 'smallList'"
-          :currentList="currentListGenologsByChr[c.name] || []"
+          :glyphStyle="currentListHomologs.length >= 200 ? 'bigList' : 'smallList'"
+          :currentList="currentListHomologsByChr[c.name] || []"
           :currentListColor="context.currentList ? context.currentList.color : 'gray'"
           :currRegion="context.currRegion"
           :showLabels="showLabels"
@@ -146,7 +146,7 @@ export default MComponent({
   data: function () {
     return {
       genome: null, // the genome to show
-      currentListGenologs: [],
+      currentListHomologs: [],
       currentFacets: [],
       isOpen: true, // when open, shows all chrs (vertical); when closed, shows 1 chr (horiz).
       width: 600, // view width
@@ -172,7 +172,7 @@ export default MComponent({
       const clist = this.context.currentList
       if (!clist) return 'No current list.'
       const clen = clist.items.length 
-      const cglen = this.currentListGenologs.length
+      const cglen = this.currentListHomologs.length
       const s = clen === 1 ? '' : 's'
       const sz = cglen === clen ? `${clen} item${s}` : `${cglen} of ${clen} item${s} found in this genome`
       const lim = cglen > this.maxListLength ? ` ${this.maxListLength} shown` : ''
@@ -254,16 +254,16 @@ export default MComponent({
     toggleHeight: function () {
       this.fixedHeight = !this.fixedHeight
     },
-    computeCurrentListGenologs () {
+    computeCurrentListHomologs () {
       if (!this.context.currentList) {
-        this.currentListGenologs = []
-        this.currentListGenologsByChr = {}
+        this.currentListHomologs = []
+        this.currentListHomologsByChr = {}
       } else {
         this.dataManager().ensureFeatures(this.genome).then(() => {
-          this.currentListGenologs = this.context.currentList.items.map(id => {
+          this.currentListHomologs = this.context.currentList.items.map(id => {
             return this.dataManager().getHomologs(id, [this.genome])
           }).reduce((a,v) => a.concat(v), []).filter(x => x && this.getFacets().test(x))
-          this.currentListGenologsByChr = this.currentListGenologs.slice(0, this.maxListLegth).reduce((a,g) => {
+          this.currentListHomologsByChr = this.currentListHomologs.slice(0, this.maxListLegth).reduce((a,g) => {
             const n = g.chr.name
             if (!a[n]) a[n] = []
             a[n].push(g)
@@ -284,7 +284,7 @@ export default MComponent({
       this.scrollDelta = 0
     },
     genome: function () {
-      this.computeCurrentListGenologs()
+      this.computeCurrentListHomologs()
     }
   },
   mounted: function () {
@@ -300,7 +300,7 @@ export default MComponent({
     })
     this.$root.$on('facet-state', facets => {
       this.currentFacets = facets
-      this.computeCurrentListGenologs()
+      this.computeCurrentListHomologs()
     })
     this.$watch('context.currRegion', () => {
       this.scrollDelta = 0
@@ -316,7 +316,7 @@ export default MComponent({
     })
     this.$watch(
       'context.currentList',
-      () => this.computeCurrentListGenologs(),
+      () => this.computeCurrentListHomologs(),
       { deep: true })
     this.$root.$on('region-current', d => {
       if (d) {
