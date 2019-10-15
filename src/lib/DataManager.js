@@ -322,7 +322,7 @@ class DataManager {
   }
   // Returns the genologs of feature f from the specified genomes in the specified order.
   // If a genolog does not exist in a given genome, that entry in the returned list === undefined.
-  getGenologs (f, genomes) {
+  getHomologs (f, genomes) {
     let feats
     if (typeof f === 'string') {
       f = (this.getFeaturesBy(f) || [])[0]
@@ -341,8 +341,8 @@ class DataManager {
   }
   // Returns the genolog of feature f from genome g, or undefined if none exists
   // If there is more than one genolog, an arbitrary one is returned.
-  getGenolog (f, g) {
-    return this.getGenologs(f, [g])[0]
+  getHomolog (f, g) {
+    return this.getHomologs(f, [g])[0]
   }
   //
   assignLanes (feats, ppb, fsize) {

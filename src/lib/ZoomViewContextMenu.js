@@ -86,7 +86,7 @@ function getMenus(thisObj) {
 	const c = t ? t.cds : null
         const all = which === 'all'
 	const genologs = all ?
-	  this.dataManager().getGenologs(f, this.context.strips.map(
+	  this.dataManager().getHomologs(f, this.context.strips.map(
 	      s => s.genome)).filter(x => x)
 	  : [f]
         const seqs = u.flatten(genologs.map(ff => {

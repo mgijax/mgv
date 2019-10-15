@@ -270,11 +270,10 @@ export default MComponent({
       allGenomes: [],
       // current reference genome
       rGenome: { name: '' },
-      //
+      // current region = most recently clicked
       currRegion: null,
       // predefined sets of genomes for easy selections
       genomeSets: [],
-      // ----------------------------------------------------
       // when true, all regions scroll (and zoom and select sequenc) in sync.
       scrollLock: false,
       // drawing mode
@@ -448,7 +447,7 @@ export default MComponent({
         // so we can resolve landmarks
         return this.dataManager.ensureFeatures(newc.ref).then(() => {
           // handle landmark spec
-          let lm = this.dataManager.getGenolog(cxt.landmark || this.lcoords.landmark, newc.ref)
+          let lm = this.dataManager.getHomolog(cxt.landmark || this.lcoords.landmark, newc.ref)
           if (lm) {
             newc.lcoords = {
               landmark: lm.cID || lm.ID,
@@ -524,7 +523,7 @@ export default MComponent({
     featureOver: function (f, t, e) {
       this.currentMouseover = f
       this.currentMouseoverT = t
-      if (e.ctrlKey || e.altKey) this.detailFeatures = this.dataManager.getGenologs(f, this.vGenomes)
+      if (e.ctrlKey || e.altKey) this.detailFeatures = this.dataManager.getHomologs(f, this.vGenomes)
     },
     featureOff: function (f, t, e) {
       this.currentMouseover = null
@@ -543,7 +542,7 @@ export default MComponent({
       } else {
         this.currentSelection = [fid]
       }
-      this.detailFeatures = this.dataManager.getGenologs(f, this.vGenomes)
+      this.detailFeatures = this.dataManager.getHomologs(f, this.vGenomes)
       this.$root.$emit('selection-state-changed')
       this.$root.$emit('context-changed')
     },

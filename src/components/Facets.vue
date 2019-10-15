@@ -77,7 +77,7 @@ export default MComponent({
         initiallyOpen: false,
         mapper: function (f) {
           if (this.selectedSet.has('dont care')) return 'dont care'
-          const genologs = this.app.dataManager.getGenologs(f, this.app.vGenomes).filter(x => x)
+          const genologs = this.app.dataManager.getHomologs(f, this.app.vGenomes).filter(x => x)
           const genomes = new Set(genologs.map(f => f.genome))
           return genomes.size !== this.app.vGenomes.length
         },

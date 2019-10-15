@@ -420,7 +420,7 @@ class RegionManager {
     // features from the A region
     const afeats = dm.getAllFeaturesNow(ra.genome, ra.chr).filter(f => gc.overlaps(f, ra))
     //  homologs of the A features
-    const bfeats = afeats.map(af => [af, dm.getGenolog(af, gb)]).filter(x => x[1])
+    const bfeats = afeats.map(af => [af, dm.getHomolog(af, gb)]).filter(x => x[1])
     //
     if (bfeats.length === 0) {
       const ra2 = Object.assign({}, ra)
@@ -589,7 +589,7 @@ class RegionManager {
     const delta = lcoords.delta
     const w = lcoords.length
     const alignOn = config.ZoomRegion.featureAlignment
-    const lms = this.app.dataManager.getGenologs(lcoords.landmark, [genome]).filter(x => x)
+    const lms = this.app.dataManager.getHomologs(lcoords.landmark, [genome]).filter(x => x)
     //
     if (lms.length === 0) {
       return null
@@ -636,7 +636,7 @@ class RegionManager {
   // 
   mapLandmarkRegion (lcoords, genome) {
       const dm = this.app.dataManager
-      const lmf = dm.getGenolog(lcoords.landmark, lcoords.lgenome)
+      const lmf = dm.getHomolog(lcoords.landmark, lcoords.lgenome)
       const mp = (lmf.start + lmf.end) / 2
       const s = Math.round(mp - lcoords.length / 2)
       const e = s + lcoords.length - 1
