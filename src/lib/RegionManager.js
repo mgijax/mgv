@@ -347,6 +347,28 @@ class RegionManager {
     this.layout()
   }
   //--------------------------------------
+  //
+  mergeRegions (g, regions) {
+    const rs = regions.reduce((newRs, r) => {
+      let merged = false
+      for (let i = 0; i < newRs.length; i++) {
+        const r0 = newRs[i]
+        const db = gc.distanceBetween(r0, r)
+        const tlen = r0.length + r.length
+        if (db < 1000000) {
+          r0.start = Math.min(r0.start, r.start)
+          r0.end = Math.max(r0.end, r.end)
+          r0.length = r0.end - r0.start + 1
+          merged = true
+          break
+        }
+      }
+      !merged && newRs.push(r)
+      return newRs
+    }, [])
+    return rs
+  }
+  //--------------------------------------
   // Map the region(s) being shown for the current reference genome to corresponding region(s)
   // in each of the specified genomes
   computeMappedRegions (genomes) {
@@ -383,126 +405,114 @@ class RegionManager {
       }
     })
   }
-  //
-  mergeRegions (g, regions) {
-    const rs = regions.reduce((newRs, r) => {
-      let merged = false
-      for (let i = 0; i < newRs.length; i++) {
-        const r0 = newRs[i]
-        const db = gc.distanceBetween(r0, r)
-        const tlen = r0.length + r.length
-        if (db < 1000000) {
-          r0.start = Math.min(r0.start, r.start)
-          r0.end = Math.max(r0.end, r.end)
-          r0.length = r0.end - r0.start + 1
-          merged = true
-          break
+  //--------------------------------------
+  // Maps region ra to corresponding region(s) in genome gb, based on homology relationships.
+  mapRegionToGenome (ra, gb) {
+    const dm = this.app.dataManager
+    return dm.ensureFeatures(ra.genome).then(
+      () => dm.ensureFeatures(gb)).then(
+      () => this.mapRegionToGenomeNow(ra,gb))
+  }
+  //--------------------------------------
+  // Maps region ra to genome gb immediately, ie, assumes genomes have been loaded.
+  mapRegionToGenomeNow (ra, gb) {
+    const dm = this.app.dataManager
+    // features from the A region
+    const afeats = dm.getAllFeaturesNow(ra.genome, ra.chr).filter(f => gc.overlaps(f, ra))
+    //  homologs of the A features
+    const bfeats = afeats.map(af => [af, dm.getGenolog(af, gb)]).filter(x => x[1])
+    //
+    if (bfeats.length === 0) {
+      const ra2 = Object.assign({}, ra)
+      const w = ra.end - ra.start + 1
+      if (w < ra.chr.length) {
+        ra2.start -= w
+        ra2.end += w
+        return this.mapRegionToGenomeNow (ra2, gb)
+      }
+    }
+    //
+    const bfeatsClipped = bfeats.map(abf => {
+      const af = abf[0]
+      const bf = abf[1]
+      const inverted = af.strand !== bf.strand
+      // If the A feature is only partly contained by the A region, then need to adjust
+      // the mapped B feature coordinates accordingly.
+      let bfs = bf.start
+      let bfe = bf.end
+      if (ra.start > af.start) {
+        const ps = (ra.start - af.start) / af.length
+        const delta = ps * bf.length
+        if (inverted) {
+          bfe = Math.round(bfe - delta)
+        } else {
+          bfs = Math.round(bfs + delta)
         }
       }
-      !merged && newRs.push(r)
-      return newRs
-    }, [])
-    return rs
-  }
-  // Given region ra from genome ga, return corresponding region(s) in genome gb.
-  // Assumes both genomes have been loaded!
-  mapRegionToGenome (ra, gb) {
-    // if A and B are the same genome, region maps to itself
-    if (ra.genome === gb) {
-      return Promise.resolve({
-        genome : gb,
-        regions: [ra]
-      })
-    }
-    // 
-    const dm = this.app.dataManager
-    return dm.ensureFeatures(ra.genome).then(() => dm.ensureFeatures(gb)).then(() => {
-      // features from the A region
-      const afeats = dm.getAllFeaturesNow(ra.genome, ra.chr).filter(f => gc.overlaps(f, ra))
-      //  homologs of the A features
-      const bfeats = afeats.map(af => [af, dm.getGenolog(af, gb)]).filter(x => x[1]).map(abf => {
-        const af = abf[0]
-        const bf = abf[1]
-        const inverted = af.strand !== bf.strand
-        // If the A feature is only partly contained by the A region, then need to adjust
-        // the mapped B feature coordinates accordingly.
-        let bfs = bf.start
-        let bfe = bf.end
-        if (ra.start > af.start) {
-          const ps = (ra.start - af.start) / af.length
-          const delta = ps * bf.length
-          if (inverted) {
-            bfe = Math.round(bfe - delta)
-          } else {
-            bfs = Math.round(bfs + delta)
+      if (ra.end < af.end) {
+        const pe = (af.end - ra.end) / af.length
+        const delta = pe * bf.length
+        if (inverted) {
+          bfs = Math.round(bfs + delta)
+        } else {
+          bfe = Math.round(bfe - delta)
+        }
+      }
+      return {
+        genome: bf.genome,
+        chr: bf.chr,
+        start: bfs,
+        end: bfe,
+        length: bfe - bfs + 1,
+        strand: bf.strand
+      }
+    })
+    // Ok, we've mapped each A feature to (the possibly clipped coordinates of) its B homolog
+    // Now compute region(s) that contain them all
+    const rbs = []
+    // For each B feature, find a region that it overlaps or is within a max distance (1Mb) 
+    // and add B to it. Otherwise start a new region with that feature.
+    bfeatsClipped.forEach(fb => {
+      let found = false // have we found a place for fb?
+      if (rbs.length) {
+        for(let rbi = 0 ; rbi < rbs.length ; rbi++) {
+          const rb = rbs[rbi]
+          if (rb.chr !== fb.chr) continue
+          const rblen = rb.end - rb.start + 1
+          const s = Math.min(rb.start, fb.start)
+          const e = Math.max(rb.end, fb.end)
+          const l = e - s + 1
+          if (gc.overlaps(fb, rb) || (l - rblen - fb.length < 1000000)) {
+            rb.start = s
+            rb.end = e
+            rb.length = e - s + 1
+            found = true
+            break
           }
         }
-        if (ra.end < af.end) {
-          const pe = (af.end - ra.end) / af.length
-          const delta = pe * bf.length
-          if (inverted) {
-            bfs = Math.round(bfs + delta)
-          } else {
-            bfe = Math.round(bfe - delta)
-          }
-        }
-        return {
-          genome: bf.genome,
-          chr: bf.chr,
-          start: bfs,
-          end: bfe,
-          length: bfe - bfs + 1,
-          strand: bf.strand
-        }
-      })
-      // Ok, we've mapped each A feature to (the possibly clipped coordinates of) its B homolog
-      // Now compute region(s) that contain them all
-      const rbs = []
-      // For each B feature, find a region that it overlaps or is within a max distance (1Mb) 
-      // and add B to it. Otherwise start a new region with that feature.
-      bfeats.forEach(fb => {
-        let found = false // have we found a place for fb?
-        if (rbs.length) {
-          for(let rbi = 0 ; rbi < rbs.length ; rbi++) {
-            const rb = rbs[rbi]
-            if (rb.chr !== fb.chr) continue
-            const rblen = rb.end - rb.start + 1
-            const s = Math.min(rb.start, fb.start)
-            const e = Math.max(rb.end, fb.end)
-            const l = e - s + 1
-            if (gc.overlaps(fb, rb) || (l - rblen - fb.length < 1000000)) {
-              rb.start = s
-              rb.end = e
-              rb.length = e - s + 1
-              found = true
-              break
-            }
-          }
-        }
-        if (!found) {
-          const delta = Math.round(fb.length / 3)
-          rbs.push(this.makeRegion({
-            genome: gb,
-            chr: fb.chr,
-            start: fb.start - delta,
-            end: fb.end + delta,
-            length: fb.end - fb.start + 1 + 2*delta
-          }))
-        }
-      })
-      if (rbs.length === 0) {
-        // Could not map the region - no homologs found.
-        // Have a flower instead...
+      }
+      if (!found) {
+        const delta = Math.round(fb.length / 3)
         rbs.push(this.makeRegion({
           genome: gb,
-          chr: gb.chromosomes[0],
-          start: 1,
-          end: Math.min(10000000, gb.chromosomes[0].length)
+          chr: fb.chr,
+          start: fb.start - delta,
+          end: fb.end + delta,
+          length: fb.end - fb.start + 1 + 2*delta
         }))
       }
-      return rbs
     })
-
+    if (rbs.length === 0) {
+      // Could not map the region - no homologs found.
+      // Have a flower instead...
+      rbs.push(this.makeRegion({
+        genome: gb,
+        chr: gb.chromosomes[0],
+        start: 1,
+        end: Math.min(10000000, gb.chromosomes[0].length)
+      }))
+    }
+    return rbs
   }
   //--------------------------------------
   featureAlign (d) {
@@ -543,12 +553,23 @@ class RegionManager {
   // It is also possible for there to be no landmark in a genome, in which case mapped
   // region(s) are computed.
   computeLandmarkRegions (lcoords, genomes) {
-    const ps = genomes.map(g => {
-      return this.app.dataManager.ensureFeatures(g).then(() => {
-        return this.computeLandmarkRegion(lcoords, g)
+    // ensure the landmark genome has been loaded
+    return this.app.dataManager.ensureFeatures(lcoords.lgenome).then(() => {
+      // for each target genome
+      const ps = genomes.map(g => {
+        // ensure that genome has been loaded
+        return this.app.dataManager.ensureFeatures(g).then(() => {
+          // compute the landmark region in the target genome
+          const lmr = this.computeLandmarkRegion(lcoords, g)
+          if (lmr) return lmr
+          // landmark does not exist in target genome.
+          // Try mapping the region instead
+          const mr = this.mapLandmarkRegion(lcoords, g)
+          return mr
+        })
       })
+      return Promise.all(ps)
     })
-    return Promise.all(ps)
   }
   //
   //--------------------------------------
@@ -563,7 +584,7 @@ class RegionManager {
   //        anchor (number from 0 to 1) Defines reference point on the landmark
   //            to align to. Number specifies relative position, from 
   //            start coordinate (0) to end coordinate (1).
-  //    genome (object) the genome for which to compute the corrdinates
+  //    genome (object) the genome for which to compute the coordinates
   computeLandmarkRegion (lcoords, genome) {
     const delta = lcoords.delta
     const w = lcoords.length
@@ -571,7 +592,7 @@ class RegionManager {
     const lms = this.app.dataManager.getGenologs(lcoords.landmark, [genome]).filter(x => x)
     //
     if (lms.length === 0) {
-      return this.guessLandmarkRegion(lcoords, genome)
+      return null
     }
     const regions = lms.map(lm => {
       let lmp
@@ -611,87 +632,24 @@ class RegionManager {
     }
   }
   //--------------------------------------
-  // When a landmark does not exist in a given genome, guess a location instead.
-  // Guesses by interpolating from flanking genes and their homologs.
-  // Assumes the genome has been loaded!
-  // Args:
-  //  lcoords (object) defines the landmark in some genome
-  //    landmark
-  //    lgenome
-  //    length
-  //  genome (object) the genome you want to guess the location in
+  // When a landmark does not exist in a given genome, use mapping as a fallback.
   // 
-  guessLandmarkRegion (lcoords, genome) {
+  mapLandmarkRegion (lcoords, genome) {
       const dm = this.app.dataManager
-      // landmark feature
       const lmf = dm.getGenolog(lcoords.landmark, lcoords.lgenome)
-      // all genes on lm's chromosome
-      const neighbors = dm.getAllFeaturesNow(lcoords.lgenome, lmf.chr)
-      // landmark's index in list
-      const lmi = neighbors.indexOf(lmf)
-      // neighbor homologs (prox, dist)
-      const ngs = [null,null]
-      // neighbor homolog index
-      const ngi = [lmi-1,lmi+1]
-      // Returns the homolog of my neighbor in the indicated direction (1/-1)
-      // If neighbor has no homolog, go to next and so on until we find one.
-      // Returns undefined if we reach the end on the chromosome and none found.
-      function findNeighborHomolog (inc) {
-        const ii = inc === -1 ? 0 : 1
-        let ng
-        for ( ; !ng && neighbors[ngi[ii]]; ngi[ii] += inc) {
-          const n = neighbors[ngi[ii]]
-          if (inc > 0 && n.start < lmf.end) continue
-          if (inc < 0 && n.end > lmf.start) continue
-          ng = dm.getGenolog(neighbors[ngi[ii]], genome)
-        }
-        return ng
+      const mp = (lmf.start + lmf.end) / 2
+      const s = Math.round(mp - lcoords.length / 2)
+      const e = s + lcoords.length - 1
+      const lmr = {
+        genome: lcoords.lgenome,
+        chr: lmf.chr,
+        start: s,
+        end: e
       }
-      // upstream neighbor's homolog
-      let ng1 = findNeighborHomolog(-1)
-      // downstream neighbor's homolog
-      let ng2 = findNeighborHomolog(+1)
-      //
-      if (!ng1 && !ng2) return null
-      if (!ng1) ng1 = ng2
-      if (!ng2) ng2 = ng1
-      if (ng1.chr === ng2.chr) {
-        const mp = (Math.min(ng1.start, ng2.start) + Math.max(ng1.end, ng2.end)) / 2
-        const s = Math.floor(mp - lcoords.length / 2)
-        const r = this.makeRegion({
-          genome: genome,
-          chr: ng1.chr,
-          start: s,
-          end: s + lcoords.length - 1
-        })
-        return {
-          genome: genome,
-          regions: [r]
-        }
-      } else {
-        const s1 = Math.floor(ng1.start - lcoords.length / 2)
-        const s2 = Math.floor(ng2.start - lcoords.length / 2)
-        return {
-          genome: genome,
-          regions: [{
-            genome: genome,
-            chr: ng1.chr,
-            start: s1,
-            end: s1 + lcoords.length - 1
-          }, {
-            genome: genome,
-            chr: ng2.chr,
-            start: s2,
-            end: s2 + lcoords.length - 1
-          }]
-        }
-        
+      return {
+        genome: genome,
+        regions: this.mapRegionToGenomeNow(lmr, genome)
       }
-      // Landmark does not exist in this genome! Fallback: first compute the
-      // landmark region in the landmark's own genome, then map that region 
-      // to this genome.
-      // const r0 = this.computeLandmarkRegion(lcoords, lcoords.lgenome)
-      // return this.mapRegionToGenome(r0.regions[0], genome)
   }
   //--------------------------------------
   mergeUpdate (strips) {
