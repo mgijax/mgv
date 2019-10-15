@@ -538,11 +538,14 @@ class RegionManager {
   // and announces context change. 
   alignOnLandmark (lcoords, genomes) {
     this.setLockMode()
-    return this.computeLandmarkRegions(lcoords, (genomes || this.currentGenomes())).then(strips => {
+    genomes = genomes || this.currentGenomes()
+    return this.computeLandmarkRegions(lcoords, genomes).then(strips => {
       this.mergeUpdate(strips)
       this.layout()
       this.app.lcoords = lcoords
-      this.app.currentSelection = [lcoords.landmark]
+      const dm = this.app.dataManager
+      const oids =dm.getHomologs(lcoords.landmark, genomes).filter(x => x).map(f => f.cID)
+      this.app.currentSelection = Array.from(new Set(oids))
     })
   }
   //--------------------------------------
