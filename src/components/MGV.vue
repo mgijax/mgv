@@ -447,7 +447,7 @@ export default MComponent({
         // so we can resolve landmarks
         return this.dataManager.ensureFeatures(newc.ref).then(() => {
           // handle landmark spec
-          let lm = this.dataManager.getHomolog(cxt.landmark || this.lcoords.landmark, newc.ref)
+          let lm = this.dataManager.getHomologs(cxt.landmark || this.lcoords.landmark, newc.ref)[0]
           if (lm) {
             newc.lcoords = {
               landmark: lm.cID || lm.ID,

@@ -18,7 +18,7 @@
       :fill="color(p[0], p[1])"
       :fill-opacity="cfg.fillOpacity"
       :stroke="color(p[0], p[1])"
-      stroke-opacity="0.3"
+      :stroke-opacity="cfg.fillOpacity"
       />
     </g>
   </g>
@@ -43,14 +43,14 @@ export default MComponent({
       return `translate(${-pbb.x}, ${-pbb.y})`
     },
     color: function (r1, r2) {
-      return r1.strand === r2.strand ? 'black' : 'red'
+      return (!this.cfg.showInversions || r1.strand === r2.strand) ? 'black' : 'red'
     },
     points: function (r1, r2) {
       const p1 = `${r1.x},${r1.y + r1.height}`
       const p2 = `${r2.x},${r2.y}`
       const p3 = `${r2.x + r2.width},${r2.y}`
       const p4 = `${r1.x + r1.width},${r1.y + r1.height}`
-      if (r1.strand === r2.strand) {
+      if (r1.strand === r2.strand || !this.cfg.showInversions) {
 	  return `${p1} ${p2} ${p3} ${p4}`
       } else {
 	  return `${p1} ${p3} ${p2} ${p4}`

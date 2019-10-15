@@ -130,7 +130,7 @@
         />
   </div>
   <!-- ============== FIDUCIALS section  ============== -->
-  <div class="section"><label>Connectors</label></div>
+  <div class="section"><label>Connections</label></div>
   <!-- =================== -->
   <div
     title="Specify how to connect features across genomes."
@@ -158,6 +158,28 @@
   </div>
   <!-- =================== -->
   <div
+    title="For selected features, show connectors between homologs."
+    class="flexrow"
+    >
+    <label>Show connectors</label>
+    <input
+        type="checkbox"
+        v-model="ZoomFiducials.showConnectors"
+        />
+  </div>
+  <!-- =================== -->
+  <div
+    title="Draw inversions with a twist and using a different color."
+    class="flexrow"
+    >
+    <label>Show inversions</label>
+    <input
+        type="checkbox"
+        v-model="ZoomFiducials.showInversions"
+        />
+  </div>
+  <!-- =================== -->
+  <div
     title="Make connected features stand out more by fading unconnected features."
     class="flexrow"
     >
@@ -168,17 +190,6 @@
         min="0"
         max=".9"
         step=".1"
-        />
-  </div>
-  <!-- =================== -->
-  <div
-    title="For selected features, show connectors between homologs."
-    class="flexrow"
-    >
-    <label>Show connectors</label>
-    <input
-        type="checkbox"
-        v-model="ZoomFiducials.showConnectors"
         />
   </div>
   <!-- =================== -->

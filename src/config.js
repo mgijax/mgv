@@ -13,7 +13,7 @@ export default {
   // Timestamp used at page load to determine whether to flush user's setting cache.
   //
   // IMPORTANT!!! You MUST update this value whenever this config file changes!!!
-  TIMESTAMP: 'Tue May 2 06:59:39 EST 2019',
+  TIMESTAMP: 'Tue May 3 06:59:39 EST 2019',
   ///////////////////////////////////////////
 
   //
@@ -120,7 +120,8 @@ export default {
   ZoomFiducials: {
     showConnectors: true,
     fillOpacity: 0.05,
-    connectorStyle: 'combinatorial'  // one of: linear, combinatorial
+    connectorStyle: 'combinatorial', // one of: linear, combinatorial
+    showInversions: true
   },
   GenomeView: {
     openHeight: 250,
