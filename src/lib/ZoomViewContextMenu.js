@@ -30,7 +30,7 @@ function getMenus(thisObj) {
               helpText: `See details for this feature at ${lnk.text}.`,
               disabled: false,
               handler: (function (cxt) {
-                const u = lnk.url + f.ID
+                const u = lnk.url + f[lnk.attr || "ID"]
                 window.open(u, '_blank')
               }).bind(thisObj)
            }

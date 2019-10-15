@@ -25,25 +25,42 @@
         ],
         "links": [{
             "text": "MGI",
-            "url" : "http://www.informatics.jax.org/accession/"
+            "url" : "http://www.informatics.jax.org/accession/",
+            "attr": "ID"
         }, {
             "text": "MouseMine",
-            "url" : "http://www.mousemine.org/mousemine/portal.do?class=Gene&externalids="
+            "url" : "http://www.mousemine.org/mousemine/portal.do?class=Gene&externalids=",
+            "attr": "ID"
+        }, {
+            "text": "Alliance",
+            "url" : "https://www.alliancegenome.org/gene/",
+            "attr": "cID"
         }]
     }, {
         "genomes" : ["H.sapiens"],
         "links" : [{
             "text" : "Ensembl",
-            "url" : "http://www.ensembl.org/id/"
+            "url" : "http://www.ensembl.org/id/",
+            "attr": "ID"
         }, {
             "text" : "HumanMine",
-            "url" : "http://www.humanmine.org/humanmine/portal.do?class=Gene&externalids="
+            "url" : "http://www.humanmine.org/humanmine/portal.do?class=Gene&externalids=",
+            "attr": "ID"
+        }, {
+            "text": "Alliance",
+            "url" : "https://www.alliancegenome.org/gene/",
+            "attr": "cID"
         }]
     }, {
         "genomes" : ["R.norvegicus"],
         "links" : [{
             "text" : "Ensembl",
-            "url" : "http://www.ensembl.org/id/"
+            "url" : "http://www.ensembl.org/id/",
+            "attr": "ID"
+        }, {
+            "text": "Alliance",
+            "url" : "https://www.alliancegenome.org/gene/",
+            "attr": "cID"
         }]
     }],
     "exitUrl": "http://www.informatics.jax.org"
