@@ -420,7 +420,11 @@ class RegionManager {
     // features from the A region
     const afeats = dm.getAllFeaturesNow(ra.genome, ra.chr).filter(f => gc.overlaps(f, ra))
     //  homologs of the A features
-    const bfeats = afeats.map(af => [af, dm.getHomolog(af, gb)]).filter(x => x[1])
+    const bfeats = afeats.reduce((abpairs, a) => {
+      const blist = dm.getHomologs(a, [gb])
+      blist.forEach(b => b && abpairs.push([a,b]))
+      return abpairs
+    }, [])
     //
     if (bfeats.length === 0) {
       const ra2 = Object.assign({}, ra)
