@@ -178,7 +178,7 @@
          v-for="f in features"
         :key="f.ID"
         :name="f.ID"
-        :canonical="featureOid(f)"
+        :canonical="f.hID || f.cID || f.ID"
 	:strand="f.strand"
         class="feature"
         :class="{ highlight: featureHighlighted(f), visible: featureVisible(f)}"
@@ -649,15 +649,10 @@ export default MComponent({
     featureHighlighted: function (f) {
       return this.featureMouseover(f) || this.featureSelected(f) || this.featureInList(f)
     },
-    featureOid: function (f) {
-      return this.dataManager().getFeatureOid(f)
-    },
     featureMouseover: function (f) {
       let c = this.context.currentMouseover
       if (!c) return false
-      let ccid = this.featureOid(c)
-      let fcid = this.featureOid(f)
-      return c.ID === f.ID || (ccid && ccid === fcid)
+      return this.dataManager().equivalent(f, c)
     },
     transcriptHighlighted: function (t) {
       return t === this.context.currentMouseoverT

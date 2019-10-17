@@ -30,6 +30,7 @@ import u from '@/lib/utils'
 export default MComponent({
   name: 'ZoomFiducials',
   props: ['features', 'currentMouseover',  'currentMouseoverT', 'height'],
+  inject: ['dataManager'],
   data: function () {
     return {
       deltaX: 0,
@@ -68,20 +69,25 @@ export default MComponent({
     },
     //
     getStacks_combinatorial () {
+      const dm = this.dataManager()
+      const inclParas = this.app.cfg.includeParalogs
       const pel = this.$parent.$el
       if (!pel) return []
       // build index from canonical id -> lists (one per strip) of features with that cid
-      //   { cid -> { cid, strips: [ [ fetaures in strip with that cid ] ] }
+      //   { cid -> { cid, strips: [ [ features in strip with that cid ] ] }
       const ix = {}
       pel.querySelectorAll('.zoom-strip').forEach((zel, zi) => {
        zel.querySelectorAll('.zoom-region').forEach(rel => {
         const rev = rel.classList.contains('reversed')
         rel.querySelectorAll('.feature.highlight.visible').forEach(fel => {
+          const fid = fel.getAttribute('name')
+          const f = this.dataManager().getFeatureById(fid)
           const cid = fel.getAttribute('canonical')
           if (!cid) return
           const cdata = ix[cid] ? ix[cid] : { cid:cid, strips: [] }
           const rects = cdata.strips[zi] || []
 	  const rect = fel.querySelector('.feature > rect').getBoundingClientRect()
+          rect.feature = f
 	  rect.strand = fel.getAttribute('strand')
           if (rev) rect.strand = rect.strand === '+' ? '-' : '+'
           rects.push(rect)
@@ -101,6 +107,8 @@ export default MComponent({
           if (i === 0) return
           const prevRects = cdata.strips[i - 1]
           prevRects.forEach(r1 => rects.forEach(r2 => {
+            const paras = dm.paralogs(r1.feature, r2.feature)
+            if (paras && !inclParas) return
             currRec.pairs.push([r1, r2])
           }))
         })

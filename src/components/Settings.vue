@@ -133,28 +133,14 @@
   <div class="section"><label>Connections</label></div>
   <!-- =================== -->
   <div
-    title="Specify how to connect features across genomes."
+    title="Include paralogs in position calcuations and drawing."
     class="flexrow"
     >
-    <label>Based on</label>
-    <div class="flexcolumn">
-      <div class="flexrow" style="justify-content: flex-start;">
-        <input
-          type="radio"
-          v-model="MGV.homologyAttr"
-          value="cID"
-          />
-        <label>Canonical ID</label>
-      </div>
-      <div class="flexrow" style="justify-content: flex-start;">
-        <input
-          type="radio"
-          v-model="MGV.homologyAttr"
-          value="hID"
-          />
-        <label>Orthology+Parology</label>
-      </div>
-    </div>
+    <label>Include paralogs</label>
+    <input
+        type="checkbox"
+        v-model="MGV.includeParalogs"
+        />
   </div>
   <!-- =================== -->
   <div

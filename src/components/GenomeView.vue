@@ -260,9 +260,15 @@ export default MComponent({
         this.currentListHomologsByChr = {}
       } else {
         this.dataManager().ensureFeatures(this.genome).then(() => {
+          const seen = new Set()
           this.currentListHomologs = this.context.currentList.items.map(id => {
             return this.dataManager().getHomologs(id, [this.genome])
-          }).reduce((a,v) => a.concat(v), []).filter(x => x && this.getFacets().test(x))
+          }).reduce((a,v) => a.concat(v), []).filter(x => {
+            if (!x) return false
+            if (seen.has(x.ID)) return false
+            seen.add(x.ID)
+            return this.getFacets().test(x)
+          })
           this.currentListHomologsByChr = this.currentListHomologs.slice(0, this.maxListLegth).reduce((a,g) => {
             const n = g.chr.name
             if (!a[n]) a[n] = []

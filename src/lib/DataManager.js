@@ -320,30 +320,50 @@ class DataManager {
     }
     return d
   }
-  // Returns the orthology id for the feature.
-  getFeatureOid (f) {
-    return f[config.MGV.homologyAttr]
+  // Returns true iff genomes ga and gb are equivalent
+  equivalentGenomes (ga, gb) {
+    const txa = ga.metadata.taxonid
+    const txb = gb.metadata.taxonid
+    return txa === txb || 
+      // FIXME: hardcoded special case for mouse subspecies.
+      (txa.startsWith('100') && txa.length === 5 && txb.startsWith('100') && txb.length === 5)
+  }
+  // Returns true iff feature a and b are equivalent
+  equivalent (a, b) {
+    const eqgs = this.equivalentGenomes(a.genome, b.genome)
+    return a === b ||
+      a.ID === b.ID ||
+      a.cID && a.cID === b.cID ||
+      a.hID && a.hID === b.hID && (!eqgs || this.app.cfg.includeParalogs)
+  }
+  // Returns true iff features a and b are paralogs
+  paralogs (a, b) {
+    return a.hID &&
+        a.hID === b.hID && 
+        a.cID !== b.cID &&
+        this.equivalentGenomes(a.genome, b.genome)
   }
   // Returns the homologs of feature f from the specified genomes in the specified order.
-  // If a homologs does not exist in a given genome, that entry in the returned list === undefined.
+  // If a homolog does not exist in a given genome, that entry in the returned list === undefined.
   getHomologs (f, genomes) {
-    let feats
     if (typeof f === 'string') {
       f = (this.getFeaturesBy(f) || [])[0]
     }
     if (!f) {
       return []
     }
-    const cid = this.getFeatureOid(f)
-    const cindex = this[config.MGV.homologyAttr === 'cID' ? 'cid2feats' : 'hid2feats']
-    if (cid) {
-      feats = cindex[cid]
-    } else {
-      feats = [f]
-    }
-    let fix = u.index(feats, f => f.genome.name, false)
-    let homologs = genomes.map(g => fix[g.name]).reduce((a,v) => a.concat(v), [])
-    return homologs
+    const homs = genomes.map(g => {
+      const eqgs = this.equivalentGenomes(f.genome, g)
+      let gfeats
+      if (!eqgs || this.app.cfg.includeParalogs) {
+        gfeats = this.hid2feats[f.hID]
+      } else {
+        gfeats = this.cid2feats[f.cID] 
+      }
+      return (gfeats || []).filter(ff => ff.genome === g)
+    })
+
+    return homs.reduce((a,v) => a.concat(v), [])
   }
   // Returns the homologs of feature f from genome g, or undefined if none exists
   // If there is more than one homologs, an arbitrary one is returned.

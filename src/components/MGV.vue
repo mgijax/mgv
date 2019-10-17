@@ -537,7 +537,7 @@ export default MComponent({
         fids.forEach(fid => {
           let i = csel.indexOf(fid)
           if (i >= 0) {
-            delete csel.splice(i, 1)
+            // delete csel.splice(i, 1)
           } else {
             csel.push(fid)
           }
