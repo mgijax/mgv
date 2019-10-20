@@ -29,7 +29,7 @@ import MComponent from '@/components/MComponent'
 import u from '@/lib/utils'
 export default MComponent({
   name: 'ZoomFiducials',
-  props: ['features', 'currentMouseover',  'currentMouseoverT', 'height'],
+  props: ['height'],
   inject: ['dataManager'],
   data: function () {
     return {
@@ -105,42 +105,6 @@ export default MComponent({
         result.push(currRec)
       }
       return result
-    },
-    // Returns highlighted feature DOM nodes, grouped by canonical id and sorted by y-position
-    getStacks_linear () {
-      if (!this.$parent.$el) return []
-      // all visible highlighted feature nodes
-      let hnodes = []
-      this.$parent.$el.querySelectorAll(`.feature.highlight`).forEach(n => {
-        if (n.style.display !== 'none') hnodes.push(n)
-      })
-      // index: canonical id -> list of nodes
-      let ix = {}
-      hnodes.forEach(fn => {
-        let cid = fn.getAttribute('canonical')
-        if (cid) {
-          if (cid in ix) {
-            ix[cid].push(fn)
-          } else {
-            ix[cid] = [fn]
-          }
-        }
-      })
-      // 
-      let stacks = []
-      for (let fid in ix) {
-        let rects = ix[fid].map(fn => {
-          return { fn, rect: fn.querySelector('.feature > rect').getBoundingClientRect() }
-        })
-        rects.sort((a, b) => a.rect.y - b.rect.y)
-        const pairs = rects.reduce((prs, r, i) => {
-          if (i === 0) return prs
-          prs.push([rects[i - 1].rect, r.rect])
-          return prs
-        }, [])
-        stacks.push({ cid: fid, pairs })
-      }
-      return stacks
     }
   },
   mounted: function () {

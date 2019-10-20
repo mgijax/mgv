@@ -12,7 +12,7 @@
     <input
       ref="searchTerm"
       size=30
-      :placeholder="currentSelection.placeholder"
+      :placeholder="selection.placeholder"
       @keypress="submitOnEnter"
       />
   </div>
@@ -27,12 +27,12 @@ export default MComponent({
   data: function () {
     return {
       searches: (new MouseMineQueries()).getQueries(),
-      currentSelection: { label: '' }
+      selection: { label: '' }
     }
   },
   methods: {
     selectSearch: function (val) {
-      this.currentSelection = this.searches.filter(s => s.label === val)[0]
+      this.selection = this.searches.filter(s => s.label === val)[0]
     },
     tellBusy (bool) {
       this.$parent.$parent.isBusy = bool
@@ -41,10 +41,10 @@ export default MComponent({
       let s = this.$refs.searchTerm.value
       s = s.trim()
       if (!s) return
-      let cs = this.currentSelection
+      let cs = this.selection
       this.tellBusy(true)
       cs.handler && cs.handler(s).then(data => {
-        this.$root.$emit('query-returned', { queryType: this.currentSelection, query: s, results: data })
+        this.$root.$emit('query-returned', { queryType: this.selection, query: s, results: data })
 	this.$refs.searchTerm.value = ''
         this.tellBusy(false)
       }).catch(err => {
@@ -56,7 +56,7 @@ export default MComponent({
     }
   },
   mounted: function () {
-    this.currentSelection = this.searches[0]
+    this.selection = this.searches[0]
   }
 
 })

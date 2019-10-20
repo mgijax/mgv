@@ -13,9 +13,6 @@
       fill="#e1e1e1"
       />
     <zoom-fiducials
-      :features="context.currentSelection"
-      :currentMouseover="context.currentMouseover"
-      :currentMouseoverT="context.currentMouseoverT"
       :height="height"
       ref="fiducials"
       />
