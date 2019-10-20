@@ -155,10 +155,10 @@
   </div>
   <!-- =================== -->
   <div
-    title="Draw inversions with a twist and using a different color."
+    title="Draw inversions with a twist."
     class="flexrow"
     >
-    <label>Show inversions</label>
+    <label>Twist inversions</label>
     <input
         type="checkbox"
         v-model="ZoomFiducials.showInversions"
@@ -291,7 +291,7 @@ export default MComponent({
 }
 .section {
   width: 100%;
-  background-color: #ccc;
+  background-color: #f1f1f1;
 }
 .flexrow {
   justify-content: space-between;

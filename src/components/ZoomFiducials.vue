@@ -44,7 +44,7 @@ export default MComponent({
       return `translate(${-pbb.x}, ${-pbb.y})`
     },
     color: function (r1, r2) {
-      return (!this.cfg.showInversions || r1.strand === r2.strand) ? 'black' : 'red'
+      return r1.strand === r2.strand ? 'black' : 'red'
     },
     points: function (r1, r2) {
       const p1 = `${r1.x},${r1.y + r1.height}`
@@ -59,16 +59,6 @@ export default MComponent({
     },
     getStacks () {
       if (!this.cfg.showConnectors) return []
-      if (this.cfg.connectorStyle === 'linear') {
-        return this.getStacks_linear()
-      } else if (this.cfg.connectorStyle === 'combinatorial') {
-        return this.getStacks_combinatorial()
-      } else {
-        return []
-      }
-    },
-    //
-    getStacks_combinatorial () {
       const dm = this.dataManager()
       const inclParas = this.app.cfg.includeParalogs
       const pel = this.$parent.$el
