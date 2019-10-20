@@ -114,10 +114,6 @@ class HistoryManager {
     length && (cfg.length = parseInt(length))
     delta && (cfg.delta = parseInt(delta))
     //
-    // ----- drawing mode -------------
-    let dmode = prms.get('dmode')
-    dmode && (cfg.dmode = dmode)
-    //
     return cfg
   }
 }

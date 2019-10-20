@@ -276,8 +276,6 @@ export default MComponent({
       genomeSets: [],
       // when true, all regions scroll (and zoom and select sequenc) in sync.
       scrollLock: false,
-      // drawing mode
-      dmode: 'direct', // one of: direct, landmark, mapped
       // Three ways to specify which regions to draw.
       // 1. Specify the regions explicitly. Each region is a genome+chr+start+end
       strips: [],
@@ -482,15 +480,12 @@ export default MComponent({
         this.rGenome = cxt.ref
         this.scrollLock = cxt.locked
         if (cxt.strips) {
-          this.dmode = 'direct'
           this.regionManager.initializeRegions(cxt.strips)
         } else if (cxt.lcoords && cxt.lcoords.landmark) {
-          this.dmode = 'landmark'
           this.lcoords = cxt.lcoords
           this.coords = cxt.coords
           this.regionManager.alignOnLandmark(cxt.lcoords, cxt.genomes)
         } else if (cxt.coords) {
-          this.dmode = 'mapped'
           this.coords = cxt.coords
           this.regionManager.computeMappedRegions(cxt.coords, cxt.genomes)
         }
@@ -498,7 +493,6 @@ export default MComponent({
       })
     },
     unAlign: function () {
-      this.dmode = 'direct'
       this.lcoords.landmark = null
       this.$root.$emit('context-changed')
     },
