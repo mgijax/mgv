@@ -130,18 +130,7 @@
         />
   </div>
   <!-- ============== FIDUCIALS section  ============== -->
-  <div class="section"><label>Connections</label></div>
-  <!-- =================== -->
-  <div
-    title="Include paralogs in position calcuations and drawing."
-    class="flexrow"
-    >
-    <label>Include paralogs</label>
-    <input
-        type="checkbox"
-        v-model="MGV.includeParalogs"
-        />
-  </div>
+  <div class="section"><label>Homology Connections</label></div>
   <!-- =================== -->
   <div
     title="For selected features, show connectors between homologs."
@@ -152,6 +141,19 @@
         type="checkbox"
         v-model="ZoomFiducials.showConnectors"
         />
+  </div>
+  <!-- =================== -->
+  <div
+    title=""
+    class="flexrow"
+    >
+    <label>Connect:</label>
+    <select
+      v-model="MGV.includeParalogs"
+      >
+      <option :value="true">Orthologs and paralogs</option>
+      <option :value="false">Orthologs</option>
+      </select>
   </div>
   <!-- =================== -->
   <div
