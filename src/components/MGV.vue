@@ -327,6 +327,11 @@ export default MComponent({
     }
   },
   computed: {
+    currentSelectionToList: function () {
+      const cHoms = this.currentSelection.map(f => this.dataManager.getHomologs(f, this.vGenomes))
+      const cHomIds = new Set(u.flatten(cHoms).map(f => f.cID || f.ID))
+      return Array.from(cHomIds)
+    },
     currentSelectionSet: function () {
       return new Set(this.currentSelection)
     },
@@ -474,22 +479,37 @@ export default MComponent({
       }
       return Promise.resolve(newc)
     },
+    // this routine is called at initialization time or when HistoryManager
     setContext: function (cxt0, quietly) {
       this.sanitizeContext(cxt0).then(cxt => {
-        this.currentSelection = cxt.currentSelection
+        //
         this.rGenome = cxt.ref
         this.scrollLock = cxt.locked
+        let p
         if (cxt.strips) {
-          this.regionManager.initializeRegions(cxt.strips)
+          p = this.regionManager.initializeRegions(cxt.strips)
         } else if (cxt.lcoords && cxt.lcoords.landmark) {
           this.lcoords = cxt.lcoords
           this.coords = cxt.coords
-          this.regionManager.alignOnLandmark(cxt.lcoords, cxt.genomes)
+          p = this.regionManager.alignOnLandmark(cxt.lcoords, cxt.genomes)
         } else if (cxt.coords) {
           this.coords = cxt.coords
-          this.regionManager.computeMappedRegions(cxt.coords, cxt.genomes)
+          p = this.regionManager.computeMappedRegions(cxt.coords, cxt.genomes)
         }
-        if (!quietly) this.$root.$emit('context-changed')
+        p.then(() => {
+          this.currentSelection = []
+          // resolve current selection IDs to features
+          this.vGenomes.forEach(g => {
+            this.dataManager.ensureFeatures(g).then(() => {
+              (cxt.currentSelection || []).forEach(ident => {
+                this.dataManager.getFeaturesBy(ident).filter(f => f.genome === g).forEach(f => {
+                  this.currentSelection.push(f)
+                })
+              })
+            })
+          })
+          if (!quietly) this.$root.$emit('context-changed')
+        })
       })
     },
     unAlign: function () {
@@ -499,7 +519,8 @@ export default MComponent({
     getContextString: function () {
       let cs = this.regionManager.getParameterString()
       if (this.currentSelection && this.currentSelection.length) {
-        cs = cs + '&' + `highlight=${this.currentSelection.join('+')}`
+        const ids = Array.from(new Set(this.currentSelection.map(f => f.cID || f.ID)))
+        cs = cs + '&' + `highlight=${ids}`
       }
       return cs
     },
@@ -525,19 +546,10 @@ export default MComponent({
     },
     featureClick: function (f, t, e) {
       this.detailFeatures = this.dataManager.getHomologs(f, this.vGenomes)
-      const fids = Array.from(new Set(this.detailFeatures.filter(x => x).map(f => f.cID || f.ID)))
-      const csel = this.currentSelection
-      if (e.shiftKey) {
-        fids.forEach(fid => {
-          let i = csel.indexOf(fid)
-          if (i >= 0) {
-            // delete csel.splice(i, 1)
-          } else {
-            csel.push(fid)
-          }
-        })
+      if (e.shiftKey && !this.currentSelectionSet.has(f)) {
+        this.currentSelection.push(f)
       } else {
-        this.currentSelection = fids
+        this.currentSelection = [f]
       }
       this.$root.$emit('selection-state-changed')
       this.$root.$emit('context-changed')
@@ -747,7 +759,7 @@ export default MComponent({
     })
     //
     this.$root.$on('list-edit-newfromselected', () => {
-      this.currentEditList = this.listManager.newList("selected", this.currentSelection, "#cccccc")
+      this.currentEditList = this.listManager.newList("selected", this.currentSelectionToList, "#cccccc")
     })
     //
     this.$root.$on('list-edit-open', data => {

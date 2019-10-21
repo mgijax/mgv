@@ -268,13 +268,13 @@ export default MComponent({
       this.items = Array.from(ss)
     },
     addSelected: function () {
-      this.union({items:this.app.currentSelection})
+      this.union({items:this.app.currentSelectionToList})
     },
     removeSelected: function () {
-      this.difference({items:this.app.currentSelection})
+      this.difference({items:this.app.currentSelectionToList})
     },
     intersectWithSelected: function () {
-      this.intersection({items:this.app.currentSelection})
+      this.intersection({items:this.app.currentSelectionToList})
     }
   }
 })

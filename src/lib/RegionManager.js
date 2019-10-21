@@ -198,6 +198,7 @@ class RegionManager {
     })
     this.mergeUpdate(strips)
     this.layout()
+    return Promise.resolve(true)
   }
   //--------------------------------------
   // Adds a new region. Adds a new strip if necessary, or adds r to the
@@ -530,6 +531,7 @@ class RegionManager {
     }
     const lcoords = {
       landmark: f.cID || f.ID,
+      lfeature: f,
       lgenome: f.genome,
       anchor: anchor,
       delta: 0,
@@ -549,7 +551,8 @@ class RegionManager {
       this.app.lcoords = lcoords
       const dm = this.app.dataManager
       const oids =dm.getHomologs(lcoords.landmark, genomes).filter(x => x).map(f => f.cID)
-      this.app.currentSelection = Array.from(new Set(oids))
+      // TODO: set current selection to landmark feature
+      this.app.currentSelection = [lcoords.lfeature] // Array.from(new Set(oids))
     })
   }
   //--------------------------------------
@@ -771,6 +774,8 @@ class RegionManager {
       } else {
         this.zoomScrollRegion(d.region, zAmt, sAmt, 'px')
       }
+    } else if (d.op === 'init-regions') {
+      this.initializeRegions(d.strips)
     } else if (d.op === 'set') {
       this.setRegion(r, d.coords)
     } else if (d.op === "split") {

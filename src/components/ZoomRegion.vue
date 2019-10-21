@@ -509,7 +509,7 @@ export default MComponent({
     },
     //
     selectedSet: function () {
-      return new Set(this.context.currentSelection)
+      return this.app.currentSelectionSet
     },
     //
     fIndex: function () {
@@ -658,7 +658,10 @@ export default MComponent({
       return t === this.context.currentMouseoverT
     },
     featureSelected: function (f) {
-      return this.selectedSet.has(f.cID) || this.selectedSet.has(f.ID)
+      for (let i = 0; i < this.app.currentSelection.length; i++) {
+        if (this.app.dataManager.equivalent(f, this.app.currentSelection[i])) return true
+      }
+      return false
     },
     featureInList: function (f) {
       if (!this.context.currentList) return false

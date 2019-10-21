@@ -104,9 +104,10 @@ export default MComponent({
         initiallyOpen: false,
         mapper: function (f) {
           if (this.selectedSet.has('dont care')) return 'dont care'
-	  const cs = this.app.currentSelectionSet
-	  if (!cs || cs.size === 0) return Array.from(this.selectedSet)[0]
-	  return cs.has(f.cID) || cs.has(f.ID)
+          for (let i = 0; i < this.app.currentSelection.length; i++) {
+            if (this.app.dataManager.equivalent(f, this.app.currentSelection[i])) return true
+          }
+          return false
         },
         message: ""
       }]
