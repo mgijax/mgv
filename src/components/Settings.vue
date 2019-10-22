@@ -142,7 +142,7 @@
         v-model="ZoomFiducials.showConnectors"
         />
   </div>
-  <!-- =================== -->
+  <!-- ===================
   <div
     title=""
     class="flexrow"
@@ -154,6 +154,18 @@
       <option :value="true">Orthologs and paralogs</option>
       <option :value="false">Orthologs</option>
       </select>
+  </div>
+-->
+  <!-- =================== -->
+  <div
+    title="Include paralogs in homology relations. Orthologs and genologs always included."
+    class="flexrow"
+    >
+    <label>Include paralogs</label>
+    <input
+        type="checkbox"
+        v-model="MGV.includeParalogs"
+        />
   </div>
   <!-- =================== -->
   <div
