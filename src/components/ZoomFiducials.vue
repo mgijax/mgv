@@ -63,8 +63,8 @@ export default MComponent({
       const inclParas = this.app.cfg.includeParalogs
       const pel = this.$parent.$el
       if (!pel) return []
-      // build index from canonical id -> lists (one per strip) of features with that cid
-      //   { cid -> { cid, strips: [ [ features in strip with that cid ] ] }
+      // build index from homologyID id -> lists (one per strip) of features with that cid
+      //   { cid -> { cid, strips: [[features in strip with that cid]] }
       const ix = {}
       pel.querySelectorAll('.zoom-strip').forEach((zel, zi) => {
        zel.querySelectorAll('.zoom-region').forEach(rel => {
@@ -72,7 +72,7 @@ export default MComponent({
         rel.querySelectorAll('.feature.highlight.visible').forEach(fel => {
           const fid = fel.getAttribute('name')
           const f = this.dataManager().getFeatureById(fid)
-          const cid = fel.getAttribute('canonical')
+          const cid = fel.getAttribute('homologyID')
           if (!cid) return
           const cdata = ix[cid] ? ix[cid] : { cid:cid, strips: [] }
           const rects = cdata.strips[zi] || []
@@ -96,11 +96,19 @@ export default MComponent({
         cdata.strips.forEach((rects, i) => {
           if (i === 0) return
           const prevRects = cdata.strips[i - 1]
-          prevRects.forEach(r1 => rects.forEach(r2 => {
-            const paras = dm.paralogs(r1.feature, r2.feature)
-            if (paras && !inclParas) return
-            currRec.pairs.push([r1, r2])
-          }))
+          const carryOver = [] // when rect doesn't connect to next row, keep trying further rows
+          prevRects.forEach(r1 => {
+            let r1matched = false
+            rects.forEach(r2 => {
+              const paras = dm.paralogs(r1.feature, r2.feature)
+              if (paras && !inclParas) return
+              currRec.pairs.push([r1, r2])
+              r1matched = true
+            })
+            if (!r1matched) carryOver.push(r1)
+          })
+          // carry over the unconnected rects to the next row
+          carryOver.forEach(r => rects.push(r))
         })
         result.push(currRec)
       }
