@@ -646,7 +646,7 @@ class RegionManager {
   // 
   mapLandmarkRegion (lcoords, genome) {
       const dm = this.app.dataManager
-      const lmf = dm.getHomolog(lcoords.landmark, lcoords.lgenome)
+      const lmf = dm.getHomolog(lcoords.lfeature, lcoords.lgenome)
       const mp = (lmf.start + lmf.end) / 2
       const s = Math.round(mp - lcoords.length / 2)
       const e = s + lcoords.length - 1

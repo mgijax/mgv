@@ -343,10 +343,10 @@ class DataManager {
         a.cID !== b.cID &&
         this.equivalentGenomes(a.genome, b.genome)
   }
-  // Returns the homologs of feature f from the specified genomes in the specified order.
+  // Returns a list of the homologs of feature f from the specified genomes in the specified order.
   // If a homolog does not exist in a given genome, that entry in the returned list === undefined.
   getHomologs (f, genomes) {
-    if (typeof f === 'string') {
+    if (typeof(f) === 'string') {
       f = (this.getFeaturesBy(f) || [])[0]
     }
     if (!f) {
@@ -355,7 +355,7 @@ class DataManager {
     const homs = genomes.map(g => {
       const eqgs = this.equivalentGenomes(f.genome, g)
       let gfeats
-      if (!eqgs || this.app.cfg.includeParalogs) {
+      if (!eqgs || (this.app.cfg.includeParalogs && f.hID)) {
         gfeats = this.hid2feats[f.hID]
       } else {
         gfeats = this.cid2feats[f.cID] 
