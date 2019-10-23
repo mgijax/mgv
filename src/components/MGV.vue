@@ -362,6 +362,26 @@ export default MComponent({
       this.visHeight = sz.height - 80
       this.$root.$emit('resize', sz)
     },
+    initialize: function () {
+      //
+      // Kick things off by getting all the genomes we know about and all their chomosomes 
+      // (names and lengths).
+      //
+      this.dataManager.getGenomes().then(genomes => {
+        const byName = (a,b) => a.name < b.name ? -1 : (a.name > b.name ? 1 : 0)
+        const part1 = genomes.filter(g => g.name.indexOf(".") === -1).sort(byName)
+        const part2 = genomes.filter(g => g.name.indexOf(".") !== -1).sort(byName)
+        genomes = part1.concat(part2)
+        // now set up the initial state
+        this.allGenomes = genomes // all the genomes (at least one)
+        this.$refs.genomeView.genome = this.allGenomes[0]
+        // initial hash from page URL
+        const ih = u.deepCopy(this.historyManager.initialHash)
+        ih.width = u.wWidth()
+        // console.log('MGV: setting initial context', ih)
+        this.setContext(ih, true)
+      })
+    },
     // Returns a promise for a sanitized version of a context configuration.
     // Missing fields are filled in (usually with current values)
     // so that the returned config is a complete specification.
@@ -495,6 +515,10 @@ export default MComponent({
         } else if (cxt.coords) {
           this.coords = cxt.coords
           p = this.regionManager.computeMappedRegions(cxt.coords, cxt.genomes)
+        }
+        if (!p) {
+          this.initialize()
+          return
         }
         p.then(() => {
           this.currentSelection = []
@@ -778,24 +802,8 @@ export default MComponent({
     this.$root.$on('facet-state', data => {
       this.activeFacets = data
     })
-    //
-    // Kick things off by getting all the genomes we know about and all their chomosomes 
-    // (names and lengths).
-    //
-    this.dataManager.getGenomes().then(genomes => {
-      const byName = (a,b) => a.name < b.name ? -1 : (a.name > b.name ? 1 : 0)
-      const part1 = genomes.filter(g => g.name.indexOf(".") === -1).sort(byName)
-      const part2 = genomes.filter(g => g.name.indexOf(".") !== -1).sort(byName)
-      genomes = part1.concat(part2)
-      // now set up the initial state
-      this.allGenomes = genomes // all the genomes (at least one)
-      this.$refs.genomeView.genome = this.allGenomes[0]
-      // initial hash from page URL
-      const ih = Object.assign({}, this.historyManager.initialHash)
-      ih.width = u.wWidth()
-      // console.log('MGV: setting initial context', ih)
-      this.setContext(ih, true)
-    })
+    // Here we go...
+    this.initialize()
   }
 })
 </script>

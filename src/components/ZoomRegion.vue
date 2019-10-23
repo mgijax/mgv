@@ -104,6 +104,7 @@
       <!-- ======= current range box ======= -->
       <g
         v-if="(dragging || trackMouse) && currRange"
+        style="pointer-events: none;"
         >
         <rect
           :x="currRangeTextX - (currRange[0] !== currRange[1] ? 55 : 30)"
@@ -647,6 +648,7 @@ export default MComponent({
       return this.featureHighlighted(f) ? 1 : 1 - this.cfg.contrast
     },
     featureHighlighted: function (f) {
+      // console.log('featureHighlighted', f.ID)
       return this.featureMouseover(f) || this.featureSelected(f) || this.featureInList(f)
     },
     featureMouseover: function (f) {
