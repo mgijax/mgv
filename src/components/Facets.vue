@@ -104,6 +104,7 @@ export default MComponent({
         initiallyOpen: false,
         mapper: function (f) {
           if (this.selectedSet.has('dont care')) return 'dont care'
+          if (this.app.currentSelection.length === 0) return true
           for (let i = 0; i < this.app.currentSelection.length; i++) {
             if (this.app.dataManager.equivalent(f, this.app.currentSelection[i])) return true
           }
