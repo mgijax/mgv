@@ -32,6 +32,9 @@
       @drag="zDrag"
       @dragend="zDragEnd"
       />
+    <range-boxes 
+      ref="rangeBoxes"
+      />  
   </svg>
 </template>
 
@@ -39,13 +42,14 @@
 import MComponent from '@/components/MComponent'
 import ZoomStrip from '@/components/ZoomStrip'
 import ZoomFiducials from '@/components/ZoomFiducials'
+import RangeBoxes from '@/components/RangeBoxes'
 import { svg2png, svg2file } from '@/lib/SvgDownload'
 import u from '@/lib/utils'
 export default MComponent({
   name: 'ZoomMain',
   inject: ['regionManager'],
   props: ['context'],
-  components: { ZoomStrip, ZoomFiducials },
+  components: { ZoomStrip, ZoomFiducials, RangeBoxes },
   data: function () {
     return {
       width: 500,

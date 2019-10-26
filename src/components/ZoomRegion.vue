@@ -826,18 +826,19 @@ export default MComponent({
     },
     mousemove: function (e) {
       if (this.dragging) return
-      let bb = this.$refs.underlay.getBoundingClientRect()
-      let px = e.clientX - bb.x
-      this.currRange = [px, px]
+      // let bb = this.$refs.underlay.getBoundingClientRect()
+      // let px = e.clientX - bb.x
+      // this.currRange = [px, px]
+      this.$root.$emit('region-mousemove', { region: this.region, vm: this, evt: e })
     },
     mouseenter: function (e) {
       document.body.focus()
-      // this.$root.$emit('region-current', { region: this.region })
+      this.$root.$emit('region-mouseenter', { region: this.region, vm: this, evt: e })
     },
     mouseleave: function (e) {
-      // this.$root.$emit('region-current', null)
       if (this.dragging) return
-      this.currRange = null
+      //this.currRange = null
+      this.$root.$emit('region-mouseleave', { region: this.region, vm: this, evt: e })
     },
     mouseover: function (e) {
       let f = this.getEventObjects(e)
@@ -907,8 +908,24 @@ export default MComponent({
         }
       }, document.body, this)
     },
-    // Initializes handler for dragging within a region (scroll, zoom, etc)
     initScrollDrag () {
+      this.dragging = false
+      u.dragify(this.$el, {
+        dragstart: function (e, d) {
+          this.dragging = true
+          this.$root.$emit("region-dragstart", { region: this.region, vm: this, evt: e, data: d })
+        },
+        drag: function (e, d) {
+          this.$root.$emit("region-drag", { region: this.region, vm: this, evt: e, data: d })
+        },
+        dragend: function (e, d) {
+          this.$root.$emit("region-dragend", { region: this.region, vm: this, evt: e, data: d })
+          this.dragging = false
+        }
+      }, this.$root.$el, this)
+    },
+    // Initializes handler for dragging within a region (scroll, zoom, etc)
+    xinitScrollDrag () {
       this.dragging = false
       u.dragify(this.$el, {
         dragstart: function (e, d) {
@@ -920,6 +937,7 @@ export default MComponent({
           d.altDrag = e.altKey
           d.metaDrag = e.metaKey
           this.currRange = [d.startX - d.bb.x, d.startX - d.bb.x]
+          this.$root.$emit("region-dragstart", { region: this.region, vm: this })
         },
         drag: function (e, d) {
           d.dragged = true
@@ -937,6 +955,7 @@ export default MComponent({
           } else {
             this.$root.$emit('region-drag', d.deltaX)
           }
+          this.$root.$emit('region-dragdrag', { region: this.region, vm: this })
         },
         dragend: function (e, d) {
           if (!d.dragged || Math.abs(d.deltaX) < 3) {
@@ -992,10 +1011,13 @@ export default MComponent({
           this.dragData = null
           this.dragging = false
           this.currRange = null
-          this.$root.$emit('region-dragend')
+          this.$root.$emit('region-dragend', { region: this.region, vm: this })
         }
       }, this.$root.$el, this)
     }
+  },
+  updated: function () {
+    // console.log('updated', this._uid)
   },
   created: function () {
     // create callbacks for the various events and save them so we can unregister them
@@ -1046,18 +1068,18 @@ export default MComponent({
       this.getFeatures()
     }
     //
-    this.$root.$on('region-drag', this.cbRegionDrag)
-    this.$root.$on('region-drag-modified', this.cbRegionDragModified)
-    this.$root.$on('region-dragend', this.cbRegionDragEnd)
-    this.$root.$on('region-selected', this.cbRegionSelected)
+    // this.$root.$on('region-drag', this.cbRegionDrag)
+    // this.$root.$on('region-drag-modified', this.cbRegionDragModified)
+    // this.$root.$on('region-dragend', this.cbRegionDragEnd)
+    // this.$root.$on('region-selected', this.cbRegionSelected)
     this.$root.$on('facet-state', this.cbFacetState)
     this.$root.$on('list-selection', this.cbListSelection)
   },
   destroyed: function () {
-    this.$root.$off('region-drag', this.cbRegionDrag)
-    this.$root.$off('region-drag-modified', this.cbRegionDragModified)
-    this.$root.$off('region-dragend', this.cbRegionDragEnd)
-    this.$root.$off('region-selected', this.cbRegionSelected)
+    // this.$root.$off('region-drag', this.cbRegionDrag)
+    // this.$root.$off('region-drag-modified', this.cbRegionDragModified)
+    // this.$root.$off('region-dragend', this.cbRegionDragEnd)
+    // this.$root.$off('region-selected', this.cbRegionSelected)
     this.$root.$off('facet-state', this.cbFacetState)
     this.$root.$off('list-selection', this.cbListSelection)
     this.$emit('region-delete')
