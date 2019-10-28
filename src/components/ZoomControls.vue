@@ -11,8 +11,25 @@
           @click="lockClicked"
           :title="context.scrollLock ? 'Scroll lock is ON. Click to turn OFF.' : 'Scroll lock is OFF. Click to turn ON'"
           :style="{ color: context.scrollLock ? 'rgb(255, 127, 14)' : 'black' }"
-
           />
+        <div class="flexrow"
+          style="cursor: pointer;"
+          >
+          <i class="material-icons"
+            :style="{ opacity: app.includeParalogs ? 0 : 1 }"
+            >not_interested</i>
+          <span
+            :title="app.includeParalogs ? 'Paralogs are being included. Click to exclude.' : 'Paralogs are being excluded. Click to include.'"
+            @click="app.includeParalogs = !app.includeParalogs"
+            :style="{
+              position:'relative',
+              left:'-21px',
+              top: '2px',
+              fontWeight: 'bold',
+              fontStyle: 'normal'
+              }"
+            >P</span>
+          </div>
         </div>
       <!-- Search box -->
       <div class="flexrow">

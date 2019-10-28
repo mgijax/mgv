@@ -351,6 +351,14 @@ export default MComponent({
     },
     rStrip: function () {
       return this.strips.filter(s => s.genome === this.rGenome)[0]
+    },
+    includeParalogs: {
+      get: function () {
+        return config.MGV.includeParalogs
+      },
+      set: function (v) {
+        config.MGV.includeParalogs = Boolean(v)
+      }
     }
   },
   methods: {
@@ -404,6 +412,12 @@ export default MComponent({
         // get specified ref genome name and look it up
         n = cxt.ref.name || cxt.ref
         newc.ref = this.agIndex[n] || null
+
+        if (!cxt.genomes) {
+          cxt.genomes = [cxt.ref]
+        } else if (cxt.genomes.indexOf(cxt.ref) === -1) {
+          cxt.genomes.push(cxt.ref)
+        }
       }
       //
       newc.locked = !cxt.ref && (cxt.locked === "on")
@@ -470,10 +484,12 @@ export default MComponent({
         // so we can resolve landmarks
         return this.dataManager.ensureFeatures(newc.ref).then(() => {
           // handle landmark spec
-          let lm = this.dataManager.getHomologs(cxt.landmark || this.lcoords.landmark, newc.ref)[0]
+          let lm = this.dataManager.getHomologs(cxt.landmark || this.lcoords.landmark, [newc.ref])[0]
           if (lm) {
             newc.lcoords = {
               landmark: lm.cID || lm.ID,
+              lfeature: lm,
+              lgenome: lm.genome,
               delta: typeof cxt.delta === 'number' ? cxt.delta : this.lcoords.delta,
               length: typeof cxt.length === 'number' ? cxt.length : this.lcoords.length
             }
@@ -515,10 +531,6 @@ export default MComponent({
         } else if (cxt.coords) {
           this.coords = cxt.coords
           p = this.regionManager.computeMappedRegions(cxt.coords, cxt.genomes)
-        }
-        if (!p) {
-          this.initialize()
-          return
         }
         p.then(() => {
           this.currentSelection = []
@@ -579,6 +591,13 @@ export default MComponent({
       this.$root.$emit('context-changed')
     },
     initKeyBindings () {
+      this.keyManager.register({
+       key: 'p',
+       handler: () => {
+         config.MGV.includeParalogs = !config.MGV.includeParalogs
+       },
+       thisObj: this
+      })
       this.keyManager.register({
        key: 'h',
        handler: () => this.$refs.helpBox.toggleOpen(),

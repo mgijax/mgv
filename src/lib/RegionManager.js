@@ -286,15 +286,6 @@ class RegionManager {
     this.app.strips.forEach(s => {
       s.regions.forEach(r => this.zoomScrollRegion(r, zAmt, sAmt, sType))
     })
-    /*
-    if (this.app.lcoords && this.app.lcoords.landmark) {
-      const lc = this.app.lcoords
-      const L2 = zAmt * lc.length
-      const d = sAmt * lc.length + lc.delta
-      lc.length = Math.round(L2)
-      lc.delta = Math.round(d)
-    }
-    */
   }
   //--------------------------------------
   jumpTo (coords, quietly) {
