@@ -335,6 +335,11 @@ export default MComponent({
     currentSelectionSet: function () {
       return new Set(this.currentSelection)
     },
+    currentSelectionLabel: function () {
+      const ids = Array.from(new Set(this.currentSelection.map(f => f.symbol||f.cID||f.ID)))
+      ids.sort()
+      return ids.join(", ")
+    },
     agIndex: function () {
       return this.allGenomes.reduce((ix, g) => { ix[g.name] = g; return ix }, {})
     },
@@ -362,6 +367,10 @@ export default MComponent({
     }
   },
   methods: {
+    toggleIncludeParalogs: function () {
+      this.includeParalogs = !this.includeParalogs
+      this.$root.$emit('context-changed')
+    },
     clearFacets: function () {
       this.$refs.facets.resetAll()
     },
@@ -421,6 +430,8 @@ export default MComponent({
       }
       //
       newc.locked = !cxt.ref && (cxt.locked === "on")
+      //
+      newc.includeParalogs = cxt.includeParalogs === "on"
       //
       if (cxt.strips) {
         newc.strips = cxt.strips.map(r => {
@@ -521,6 +532,7 @@ export default MComponent({
         //
         this.rGenome = cxt.ref
         this.scrollLock = cxt.locked
+        this.includeParalogs = cxt.includeParalogs
         let p
         if (cxt.strips) {
           p = this.regionManager.initializeRegions(cxt.strips)
@@ -594,7 +606,7 @@ export default MComponent({
       this.keyManager.register({
        key: 'p',
        handler: () => {
-         config.MGV.includeParalogs = !config.MGV.includeParalogs
+         this.toggleIncludeParalogs()
        },
        thisObj: this
       })

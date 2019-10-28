@@ -61,6 +61,10 @@ class HistoryManager {
     let locked = prms.get('lock')
     locked && (cfg.locked = locked)
 
+    // ----- locked mode ------------
+    let paralogs = prms.get('paralogs')
+    paralogs && (cfg.includeParalogs = paralogs)
+
     // ----- regions ------------
     // Regions parameter allows for multiple regions across multiple genomes
     // Example: "A/J::12:67900000..68800000/500,X:55622081..101002774/500|DBA/2J::1:1..1000000/1000"

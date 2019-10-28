@@ -1,8 +1,11 @@
 <template>
+  <div
+    class="zoom-controls flexcolumn"
+    :class="{ fixed: fixed }"
+    :style="{ top: offset + 'px' }"
+    >
     <div
-      class="zoom-controls flexrow"
-      :class="{ fixed: fixed }"
-      :style="{ top: offset + 'px' }"
+      class="flexrow"
       >
       <!-- scroll lock button -->
       <div class="flexrow">
@@ -20,13 +23,14 @@
             >not_interested</i>
           <span
             :title="app.includeParalogs ? 'Paralogs are being included. Click to exclude.' : 'Paralogs are being excluded. Click to include.'"
-            @click="app.includeParalogs = !app.includeParalogs"
+            @click="app.toggleIncludeParalogs()"
             :style="{
               position:'relative',
               left:'-21px',
               top: '2px',
               fontWeight: 'bold',
-              fontStyle: 'normal'
+              fontStyle: 'normal',
+              color: app.includeParalogs ? 'rgb(255, 127, 14)' : 'black'
               }"
             >P</span>
           </div>
@@ -81,6 +85,12 @@
           title="Click to download PNG image. Shift-click to download SVG."/>
       </div>
     </div>
+    <!-- Current selection -->
+    <div
+      class="flexrow current-selection-label"
+      v-if="app.currentSelection.length"
+      >Selected = {{app.currentSelectionLabel}} (with orthologs{{ app.includeParalogs ? ' and paralogs' : ''}})</div>
+  </div>  
 </template>
 
 <script>
@@ -158,8 +168,11 @@ export default MComponent({
     border-radius: 2px;
     padding-top: 8px;
 }
-.zoom-controls > .flexrow {
+.zoom-controls > * > .flexrow {
     justify-content: flex-start;
     flex-grow: 0;
+}
+.current-selection-label {
+  font-size: 12px;
 }
 </style>
