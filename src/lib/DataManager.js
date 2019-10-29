@@ -334,7 +334,7 @@ class DataManager {
     return a === b ||
       a.ID === b.ID ||
       a.cID && a.cID === b.cID ||
-      a.hID && a.hID === b.hID && (!eqgs || this.app.cfg.includeParalogs)
+      a.hID && a.hID === b.hID && (!eqgs || this.app.includeParalogs)
   }
   // Returns true iff features a and b are paralogs
   paralogs (a, b) {
@@ -355,10 +355,12 @@ class DataManager {
     const homs = genomes.map(g => {
       const eqgs = this.equivalentGenomes(f.genome, g)
       let gfeats
-      if (!eqgs || (this.app.cfg.includeParalogs && f.hID)) {
+      if (!eqgs || (this.app.includeParalogs && f.hID)) {
         gfeats = this.hid2feats[f.hID]
-      } else {
+      } else if (f.cID) {
         gfeats = this.cid2feats[f.cID] 
+      } else if (g === f.genome) {
+        gfeats = [f]
       }
       return (gfeats || []).filter(ff => ff.genome === g)
     })
