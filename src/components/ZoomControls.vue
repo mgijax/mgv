@@ -88,8 +88,10 @@
     <!-- Current selection -->
     <div
       class="flexrow current-selection-label"
-      v-if="app.currentSelection.length"
-      >Selected = {{app.currentSelectionLabel}} (with orthologs{{ app.includeParalogs ? ' and paralogs' : ''}})</div>
+      >
+      <span style="flex-grow: 1;"></span>
+      <span>{{app.currentSelectionLabel.length ? 'Selected: ' + app.currentSelectionLabel : 'Nothing selected.'}}</span>
+    </div>
   </div>  
 </template>
 

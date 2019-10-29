@@ -103,7 +103,7 @@
         />
       <!-- ======= current range box ======= -->
       <g
-        v-if="(dragging || trackMouse) && currRange"
+        v-if="currRange"
         style="pointer-events: none;"
         >
         <rect
@@ -825,7 +825,7 @@ export default MComponent({
       }
     },
     mousemove: function (e) {
-      if (this.dragging) return
+      if (this.dragging || !this.trackMouse) return
       let bb = this.$refs.underlay.getBoundingClientRect()
       let px = e.clientX - bb.x
       this.currRange = [px, px]
@@ -849,6 +849,11 @@ export default MComponent({
     },
     clicked: function (e) {
       this.$root.$emit('region-current', { region: this.region })
+      if (this.absorbNextClick) {
+        e.stopPropagation()
+        this.absorbNextClick = false
+        return
+      }
       if (e.altKey) {
         this.altClicked(e)
         return
@@ -857,10 +862,7 @@ export default MComponent({
       if (f) {
         this.$root.$emit('feature-click', { region: this.region, feature: f.feature, transcript: f.transcript, event: e })
         e.stopPropagation()
-      } else if (this.absorbNextClick) {
-        e.stopPropagation()
       }
-      this.absorbNextClick = false
     },
     altClicked: function (e) {
       let f = this.getEventObjects(e)
