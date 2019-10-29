@@ -949,6 +949,7 @@ export default MComponent({
             this.dragData = null
             this.dragging = false
             this.regionScrollDelta = 0
+            this.currRange = null
             return
           }
           //
