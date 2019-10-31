@@ -996,6 +996,13 @@ export default MComponent({
           this.dragging = false
           this.currRange = null
           this.$root.$emit('region-dragend')
+        },
+        dragcancel: function (d) {
+            this.dragData = null
+            this.dragging = false
+            this.regionScrollDelta = 0
+            this.currRange = null
+            return
         }
       }, this.$root.$el, this)
     }
@@ -1015,6 +1022,14 @@ export default MComponent({
     this.cbRegionDragEnd = d => {
       this.regionScrollDelta = 0
       this.currRange = null
+    }
+    this.cbEscapePressed = d => {
+      if (this.dragging) {
+        this.dragData.cancel()
+      } else {
+        this.regionScrollDelta = 0
+        this.currRange = null
+      }
     }
     this.cbRegionSelected = d => {
       if (this.context.scrollLock || this.region === d.region) {
@@ -1055,6 +1070,7 @@ export default MComponent({
     this.$root.$on('region-selected', this.cbRegionSelected)
     this.$root.$on('facet-state', this.cbFacetState)
     this.$root.$on('list-selection', this.cbListSelection)
+    this.$root.$on('escape-pressed', this.cbEscapePressed)
   },
   destroyed: function () {
     this.$root.$off('region-drag', this.cbRegionDrag)
@@ -1063,6 +1079,7 @@ export default MComponent({
     this.$root.$off('region-selected', this.cbRegionSelected)
     this.$root.$off('facet-state', this.cbFacetState)
     this.$root.$off('list-selection', this.cbListSelection)
+    this.$root.$off('escape-pressed', this.cbEscapePressed)
     this.$emit('region-delete')
   },
   mounted: function () {

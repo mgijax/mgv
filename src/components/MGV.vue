@@ -604,6 +604,13 @@ export default MComponent({
     },
     initKeyBindings () {
       this.keyManager.register({
+       key: 'Escape',
+       handler: () => {
+         this.$root.$emit('escape-pressed')
+       },
+       thisObj: this
+      })
+      this.keyManager.register({
        key: 'p',
        handler: () => {
          this.toggleIncludeParalogs()
