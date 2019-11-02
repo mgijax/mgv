@@ -318,7 +318,7 @@ function niceNumber(value, round_){
 function niceBounds(axis_start, axis_end, num_ticks){
     //default value is 10
     num_ticks = num_ticks || 10;
-    const axis_width = axis_end - axis_start;
+    let axis_width = axis_end - axis_start;
 
     if (axis_width == 0){
         axis_start -= .5
