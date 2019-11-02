@@ -1,8 +1,6 @@
 <template>
   <div
     class="zoom-controls flexcolumn"
-    :class="{ fixed: fixed }"
-    :style="{ top: offset + 'px' }"
     >
     <div
       class="flexrow"
@@ -14,6 +12,19 @@
           @click="lockClicked"
           :title="context.scrollLock ? 'Scroll lock is ON. Click to turn OFF.' : 'Scroll lock is OFF. Click to turn ON'"
           :style="{ color: context.scrollLock ? 'rgb(255, 127, 14)' : 'black' }"
+          />
+        </div>
+      <!-- Search box -->
+      <div class="flexrow">
+        <label
+          title="Focus the view around a gene or jump to specific coordinates."
+          >Find</label>
+        <input
+          ref="searchBox"
+          size="28"
+          placeholder="Enter symbol, ID, or coordinates."
+          @keypress="blurOnEnter"
+          @blur="findLandmark($event.target.value)"
           />
         <div class="flexrow"
           style="cursor: pointer;"
@@ -34,19 +45,6 @@
               }"
             >P</span>
           </div>
-        </div>
-      <!-- Search box -->
-      <div class="flexrow">
-        <label
-          title="Focus the view around a gene or jump to specific coordinates."
-          >Find</label>
-        <input
-          ref="searchBox"
-          size="28"
-          placeholder="Enter symbol, ID, or coordinates."
-          @keypress="blurOnEnter"
-          @blur="findLandmark($event.target.value)"
-          />
       </div>
       <!-- zoom/scroll controls -->
       <div class="flexrow">
@@ -109,19 +107,6 @@ export default MComponent({
     'context'
   ],
   inject: ['dataManager'],
-  data: function () {
-    return {
-      fixed: false,
-      offset: 0
-    }
-  },
-  mounted: function () {
-    this.$el.closest('.page-box-container').addEventListener('scroll', () => {
-      let bcr = this.$parent.$el.getBoundingClientRect()
-      this.fixed = bcr.top < 60
-      this.offset = this.fixed ? -bcr.top + 60 : 0
-    })
-  },
   methods: {
     blurOnEnter (e) {
       if (e.keyCode === 13) e.target.blur()
@@ -163,12 +148,10 @@ export default MComponent({
 <style scoped>
 .zoom-controls {
     flex-wrap: wrap;
-}
-.zoom-controls.fixed {
-    z-index: 100;
-    background-color: #ccc;
-    border-radius: 2px;
-    padding-top: 8px;
+    position: -webkit-sticky; /* Safari */
+    position: sticky;
+    top: 0;
+    background-color: #e1e1e1;
 }
 .zoom-controls > * > .flexrow {
     justify-content: flex-start;
