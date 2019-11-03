@@ -445,14 +445,22 @@ export default [{
       what: `Font size`,
       how: `Size of the font used to draw the sequence letters.`
     }, {
-      heading: `Selections. These options affect highlighting.`
+      heading: `Homology Connections`
+    }, {
+      what: `Show connectors`,
+      how: `When checked, connectors join highlighted genes across genomes.`
+    }, {
+      what: `Include paralogs`,
+      how: `Same as clicking the P icon in the view area. Controls whether paralogs are (on) or are not (off) included in region calculations, connector drawing, etc.
+      `
+    }, {
+      what: `Twist inversions`,
+      how: `Draws connectors between equivalent features on opposite strands with (on) or without (off) a twist.
+          `
     }, {
       what: `Contrast`,
       how: `Increasing the contrast makes selected genes stand out more by fading unselected genes.
           `
-    }, {
-      what: `Show connectors`,
-      how: `When checked, connectors join highlighted genes across genomes.`
     }, {
       what: `Fill opacity`,
       how: `Sets the opacity of the connector fill area.`
