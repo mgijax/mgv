@@ -594,8 +594,8 @@ export default MComponent({
     },
     featureClick: function (f, t, e) {
       this.detailFeatures = this.dataManager.getHomologs(f, this.vGenomes)
-      if (e.shiftKey && !this.currentSelectionSet.has(f)) {
-        this.currentSelection.push(f)
+      if (e.shiftKey) {
+        if (!this.currentSelectionSet.has(f)) this.currentSelection.push(f)
       } else {
         this.currentSelection = [f]
       }

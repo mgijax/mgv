@@ -58,7 +58,7 @@ export default [{
           `
     }]
   }, {
-    name: `Genomes and regions`,
+    name: `Genomes`,
     description: `MGV lets you explore multiple regions from multiple genomes at once.
         Each region is a mini-browser, and regions can be controlled individually or in sync.
         `,
@@ -187,6 +187,26 @@ export default [{
       how: `In unrestricted mode, each region acts independently, i.e., scrolling/zooming a region affects only that region.`
     }]
 
+  }, {
+    name: `Homologs`,
+    description: `MGV uses feature equivalence (aka homology) to draw connections, to calculate what regions to display, and other purposes. You can control whether paralogs are included or not in these operations by clicking the 'P' icon in the control area next to the Find box. This affects various operations as follows:
+       `,
+    items: [{
+      what: `Connections`,
+      how: `MGV draws connections between equivalent genes in neighboring strips when you mouse over or click on them. When the strips are from different species, connections are drawn from a gene to all orthologs in the view. When the strips are from the same species (eg different mouse strains), connections are drawn from a gene to the same gene only (P off), or to the same gene and all its paralogs (P on). Note that connections are only drawn between features that are already in view. To be certain you are seeing all paralogs, you should align on that gene (see below).
+      `
+    }, {
+      what: `Align on a gene`,
+      how: `Alt-click (or option-click) on a gene. Determines regions to draw based on equivalence to the clicked feature. In a different species, regions include all orthologs. In the same species, regions include the same gene only (P off) or that gene and its paralogs (P on).
+      `
+    }, {
+      what: `Searching`,
+      how: `Enter a gene's symbol or ID in the Find box. Essentially does a lookup followed by an alignment. See Align on a gene.`,
+    }, {
+      what: `Picking sequences`,
+      how: `When you open a feature's menu (right-click or control-click on the feature), there are options to add various sequences to your sequence cart. The options under 'This gene and all homologs' are sensitive to whether P is on or off.
+        `,
+    }]
   }, {  
     name: `Navigation`,
     description: `The following commands all apply to the ${ref('ZoomView')}.`,
@@ -468,11 +488,14 @@ export default [{
       what: `r`,
       how: `Turn reference genome on/off. The top genome in the view is made the reference. Same as clicking the R in the genome's left end cap.`
     },{
+      what: `p`,
+      how: `Include/exclude paralogs. Same as clicking the P icon in the .`
+    },{
       what: `t`,
       how: `Open/close the left-side tool panel.`
     },{
       what: `x`,
-      how: `Collapse/expand transcript display.`
+      how: `Collapse/expand transcript display. Same as clicking 'Spread trancripts' under  ${ref('Settings')}.`
     },{
       heading: `The following shortcuts use the arrow keys.`
     },{
