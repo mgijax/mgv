@@ -24,8 +24,8 @@
       <table>
         <tr v-for="(r,ri) in currSection.items" class="itemrow">
           <td v-if="r.heading" colspan="2" class="heading" v-html="r.heading"></td>
-          <td v-if="r.what" width="25%" class="what" v-html="r.what"></td>
-          <td v-if="r.what" class="how" v-html="r.how"></td>
+          <td v-if="r.label" width="25%" class="what" v-html="r.label"></td>
+          <td v-if="r.label" class="how" v-html="r.text"></td>
         </tr>
       </table>
     </div>
