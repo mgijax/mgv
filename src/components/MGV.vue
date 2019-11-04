@@ -367,6 +367,9 @@ export default MComponent({
     }
   },
   methods: {
+    toggleShowAllLabels: function () {
+      config.ZoomRegion.showFeatureLabels = !config.ZoomRegion.showFeatureLabels
+    },
     toggleIncludeParalogs: function () {
       this.includeParalogs = !this.includeParalogs
       this.$root.$emit('context-changed')
@@ -607,6 +610,13 @@ export default MComponent({
        key: 'Escape',
        handler: () => {
          this.$root.$emit('escape-pressed')
+       },
+       thisObj: this
+      })
+      this.keyManager.register({
+       key: 'n',
+       handler: () => {
+         this.toggleShowAllLabels()
        },
        thisObj: this
       })
