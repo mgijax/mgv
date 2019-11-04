@@ -11,6 +11,7 @@
        :title="fd.description"
        :draggable="false"
        :message="fd.message"
+       :messageClickHandler="() => facetOff(i)"
        >
        <facet
          :name="fd.name"
@@ -115,6 +116,9 @@ export default MComponent({
     }
   },
   methods: {
+    facetOff: function (i) {
+      this.$refs.facets[i].inactivate()
+    },
     test: function (f) {
       return this.$refs.facets.every(facet => facet.test(f))
     },
@@ -128,7 +132,7 @@ export default MComponent({
     facetStateChanged (facet) {
       // find the data item for this facet.
       const fd = this.facetData.filter(fd => fd.name === facet.name)[0]
-      fd.message = facet.active ? "Active." : ""
+      fd.message = facet.active ? "Active. Click to turn off." : ""
       let state = this.getFacetState()
       this.someoneActive = state.length > 0
       this.$root.$emit('facet-state', state)
