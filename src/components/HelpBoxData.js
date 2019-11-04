@@ -1,6 +1,7 @@
 
-function i(iname) {
-  return iname ? `<i class="material-icons">${iname}</i>` : ''
+function i(iname, color) {
+  color = color || 'black'
+  return iname ? `<i class="material-icons" style="color: ${color};">${iname}</i>` : ''
 }
 
 function ref(name) {
@@ -239,11 +240,16 @@ export default [{
     description: `Filters provide a way to limit the features that are drawn in the ${ref('ZoomView')}.
        Example: to see only protein coding genes, shift-click on the checkbox next to "protein_coding_gene"
        in the ${ref('FeatureType')} filter.
-       When a filter is "on" an alert icon is shown in the ZoomView header to remind you of that fact.
        `,
     items: [{
       heading: "General notes"
-    }, {  
+    }, {
+      what: `${i('warning', 'rgb(255, 127, 14)')}`,
+      how: `
+       When a filter is "on" an alert icon is shown in the ${ref('ZoomView')} header to remind you of that fact.
+       You can click on this icon to turn off all filters.
+	  `
+    }, {
       what: `True/False filters`,
       how: `A true/false filter includes/excludes a given feature based on whether it meets some 
           condition or not. These filters have a third option, "Don't care", which essentially
@@ -488,16 +494,19 @@ export default [{
       what: `h`,
       how: `Open/close this help window. Same as clicking ${i('info')}.`
     },{
-      what: `l (ell)`,
+      what: `l`,
       how: `Same as clicking the lock icon. Flips synchronization mode between synchronized
           (${i('lock')}) and not synchronized (${i('lock_open')}).
           `
     },{
-      what: `r`,
-      how: `Turn reference genome on/off. The top genome in the view is made the reference. Same as clicking the R in the genome's left end cap.`
+      what: `n`,
+      how: `Show/don't show all gene names (if view size is below threshold). Same as clicking "Show all labels" under Settings.`
     },{
       what: `p`,
-      how: `Include/exclude paralogs. Same as clicking the P icon in the .`
+      how: `Include/exclude paralogs. Same as clicking the P icon.`
+    },{
+      what: `r`,
+      how: `Turn reference genome on/off. The top genome in the view is made the reference. Same as clicking the R in the genome's left end cap.`
     },{
       what: `t`,
       how: `Open/close the left-side tool panel.`
