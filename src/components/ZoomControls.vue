@@ -25,6 +25,7 @@
           placeholder="Enter symbol, ID, or coordinates."
           @keypress="blurOnEnter"
           @blur="findLandmark($event.target.value)"
+          @focus="selectOnFocus"
           />
         <div class="flexrow"
           style="cursor: pointer;"
@@ -108,6 +109,9 @@ export default MComponent({
   ],
   inject: ['dataManager'],
   methods: {
+    selectOnFocus (e) {
+      e.target.select()
+    },
     blurOnEnter (e) {
       if (e.keyCode === 13) e.target.blur()
     },
@@ -139,7 +143,6 @@ export default MComponent({
           alert('Landmark not found: ' + n)
         }
       }
-      this.$refs.searchBox.value = ''
     }
   }
 })
