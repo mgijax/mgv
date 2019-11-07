@@ -876,6 +876,12 @@ export default MComponent({
           event: e,
           basePos: this.clientXtoBase(e.clientX)
         })
+        this.$root.$emit('feature-click', {
+          region: this.region,
+          feature: f.feature,
+          transcript: f.transcript,
+          event: e
+        })
         e.stopPropagation()
       } else {
         // alt clicked on region background

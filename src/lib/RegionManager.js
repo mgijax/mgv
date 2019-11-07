@@ -361,6 +361,23 @@ class RegionManager {
     return rs
   }
   //--------------------------------------
+  initMappedRegions (ref, coords, genomes) {
+    coords.genome = ref
+    const promises = genomes.map(g => {
+      return this.mapRegionToGenome(coords, g).then(regions => {
+        regions.forEach(r => { r.width = r.length })
+        return {
+          genome: g,
+          regions: regions
+        }
+      })
+    })
+    return Promise.all(promises).then(strips => {
+      this.mergeUpdate(strips)
+      this.layout()
+    })
+  }
+  //--------------------------------------
   // Map the region(s) being shown for the current reference genome to corresponding region(s)
   // in each of the specified genomes
   computeMappedRegions (genomes) {
@@ -539,11 +556,6 @@ class RegionManager {
     return this.computeLandmarkRegions(lcoords, genomes).then(strips => {
       this.mergeUpdate(strips)
       this.layout()
-      this.app.lcoords = lcoords
-      const dm = this.app.dataManager
-      const oids =dm.getHomologs(lcoords.landmark, genomes).filter(x => x).map(f => f.cID)
-      // TODO: set current selection to landmark feature
-      this.app.currentSelection = [lcoords.lfeature] // Array.from(new Set(oids))
     })
   }
   //--------------------------------------
@@ -596,6 +608,9 @@ class RegionManager {
       return null
     }
     const regions = lms.map(lm => {
+      const ll = lm.end - lm.start + 1
+      const hasFlank = typeof(lcoords.flank) === 'number'
+      const lw = hasFlank ? ll + 2*lcoords.flank : w
       let lmp
       if (typeof(lcoords.anchor) === 'number') {
         lmp = lm.start + lcoords.anchor * (lm.end - lm.start + 1)
@@ -619,12 +634,12 @@ class RegionManager {
           break
         }
       }
-      const s = Math.round(lmp - w / 2) + delta
+      const s = hasFlank ? lm.start - lcoords.flank : Math.round(lmp - lw / 2) + delta
       return this.makeRegion({
         genome: genome,
         chr: lm.chr,
         start: s,
-        end: s + w - 1,
+        end: s + lw - 1,
       })
     })
     return {
