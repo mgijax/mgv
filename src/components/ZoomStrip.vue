@@ -203,12 +203,17 @@ export default MComponent({
           const r = this.regions[i-1]
           d.region = r
           d.prevX = d.startX
+          d.dragged = false
         },
         drag: function (e, d) {
           this.regionManager().moveBorder(d.region, e.clientX - d.prevX, true)
           d.prevX = e.clientX
+          d.dragged = true
         },
         dragend: function (e, d) {
+          if (!d.dragged && e.altKey) {
+            this.regionManager().joinRegion(d.region)
+          }
           this.$root.$emit('context-changed')
         }
       }, this.$el, this)

@@ -339,6 +339,24 @@ class RegionManager {
     this.layout()
   }
   //--------------------------------------
+  joinRegion (r) {
+    const rr = this.findRegion(r)
+    const si = rr[0], ri = rr[1]
+    if (ri === -1) return
+    const s = this.app.strips[si]
+    const r2 = s.regions[ri + 1]
+    if (r.chr !== r2.chr) {
+      alert ("Cannot join regions because they have different chromosomes.")
+      return
+    }
+    r.start = Math.min(r.start, r2.start)
+    r.end = Math.max(r.end, r2.end)
+    r.length = r.end - r.start + 1
+    r.width += r2.width
+    s.regions.splice(ri+1, 1)
+    this.layout()
+  }
+  //--------------------------------------
   //
   mergeRegions (g, regions) {
     const rs = regions.reduce((newRs, r) => {
