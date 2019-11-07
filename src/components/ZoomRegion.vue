@@ -876,12 +876,6 @@ export default MComponent({
           event: e,
           basePos: this.clientXtoBase(e.clientX)
         })
-        this.$root.$emit('feature-click', {
-          region: this.region,
-          feature: f.feature,
-          transcript: f.transcript,
-          event: e
-        })
         e.stopPropagation()
       } else {
         // alt clicked on region background
@@ -949,7 +943,7 @@ export default MComponent({
         dragend: function (e, d) {
           if (!d.dragged || Math.abs(d.deltaX) < 3) {
             // this was actually just a click. If it was on the background, clear current selection
-            if (!e.target.closest('.feature')) {
+            if (!e.target.closest('.feature') && !e.altKey && !e.shiftKey) {
               this.$root.$emit('clear-selection')
             }
             this.dragData = null

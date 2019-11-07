@@ -548,6 +548,11 @@ class RegionManager {
   //--------------------------------------
   featureAlign (d) {
     const f = d.feature
+    if (d.event && d.event.shiftKey) {
+       this.app.currentSelection.push(f)
+    } else {
+       this.app.currentSelection = [f]
+    }
     const anchor = d.basePos ? ((d.basePos - f.start + 1) / (f.end - f.start + 1)) : null
     let l
     if (d.region) {
