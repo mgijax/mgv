@@ -1,8 +1,9 @@
 <template>
+  <div
+    class="zoom-controls flexcolumn"
+    >
     <div
-      class="zoom-controls flexrow"
-      :class="{ fixed: fixed }"
-      :style="{ top: offset + 'px' }"
+      class="flexrow"
       >
       <!-- scroll lock button -->
       <div class="flexrow">
@@ -11,7 +12,6 @@
           @click="lockClicked"
           :title="context.scrollLock ? 'Scroll lock is ON. Click to turn OFF.' : 'Scroll lock is OFF. Click to turn ON'"
           :style="{ color: context.scrollLock ? 'rgb(255, 127, 14)' : 'black' }"
-
           />
         </div>
       <!-- Search box -->
@@ -25,7 +25,27 @@
           placeholder="Enter symbol, ID, or coordinates."
           @keypress="blurOnEnter"
           @blur="findLandmark($event.target.value)"
+          @focus="selectOnFocus"
           />
+        <div class="flexrow"
+          style="cursor: pointer;"
+          >
+          <i class="material-icons"
+            :style="{ opacity: app.includeParalogs ? 0 : 1 }"
+            >not_interested</i>
+          <span
+            :title="app.includeParalogs ? 'Paralogs are being included. Click to exclude.' : 'Paralogs are being excluded. Click to include.'"
+            @click="app.toggleIncludeParalogs()"
+            :style="{
+              position:'relative',
+              left:'-21px',
+              top: '2px',
+              fontWeight: 'bold',
+              fontStyle: 'normal',
+              color: app.includeParalogs ? 'rgb(255, 127, 14)' : 'black'
+              }"
+            >P</span>
+          </div>
       </div>
       <!-- zoom/scroll controls -->
       <div class="flexrow">
@@ -64,6 +84,14 @@
           title="Click to download PNG image. Shift-click to download SVG."/>
       </div>
     </div>
+    <!-- Current selection -->
+    <div
+      class="flexrow current-selection-label"
+      >
+      <span style="flex-grow: 1;"></span>
+      <span>{{app.currentSelectionLabel.length ? 'Selected: ' + app.currentSelectionLabel : 'Nothing selected.'}}</span>
+    </div>
+  </div>  
 </template>
 
 <script>
@@ -80,20 +108,10 @@ export default MComponent({
     'context'
   ],
   inject: ['dataManager'],
-  data: function () {
-    return {
-      fixed: false,
-      offset: 0
-    }
-  },
-  mounted: function () {
-    this.$el.closest('.page-box-container').addEventListener('scroll', () => {
-      let bcr = this.$parent.$el.getBoundingClientRect()
-      this.fixed = bcr.top < 60
-      this.offset = this.fixed ? -bcr.top + 60 : 0
-    })
-  },
   methods: {
+    selectOnFocus (e) {
+      e.target.select()
+    },
     blurOnEnter (e) {
       if (e.keyCode === 13) e.target.blur()
     },
@@ -125,7 +143,6 @@ export default MComponent({
           alert('Landmark not found: ' + n)
         }
       }
-      this.$refs.searchBox.value = ''
     }
   }
 })
@@ -134,15 +151,16 @@ export default MComponent({
 <style scoped>
 .zoom-controls {
     flex-wrap: wrap;
+    position: -webkit-sticky; /* Safari */
+    position: sticky;
+    top: 0;
+    background-color: #e1e1e1;
 }
-.zoom-controls.fixed {
-    z-index: 100;
-    background-color: #ccc;
-    border-radius: 2px;
-    padding-top: 8px;
-}
-.zoom-controls > .flexrow {
+.zoom-controls > * > .flexrow {
     justify-content: flex-start;
     flex-grow: 0;
+}
+.current-selection-label {
+  font-size: 12px;
 }
 </style>

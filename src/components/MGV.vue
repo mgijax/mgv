@@ -335,6 +335,11 @@ export default MComponent({
     currentSelectionSet: function () {
       return new Set(this.currentSelection)
     },
+    currentSelectionLabel: function () {
+      const ids = Array.from(new Set(this.currentSelection.map(f => f.symbol||f.cID||f.ID)))
+      ids.sort()
+      return ids.join(", ")
+    },
     agIndex: function () {
       return this.allGenomes.reduce((ix, g) => { ix[g.name] = g; return ix }, {})
     },
@@ -351,9 +356,24 @@ export default MComponent({
     },
     rStrip: function () {
       return this.strips.filter(s => s.genome === this.rGenome)[0]
+    },
+    includeParalogs: {
+      get: function () {
+        return config.MGV.includeParalogs
+      },
+      set: function (v) {
+        config.MGV.includeParalogs = Boolean(v)
+      }
     }
   },
   methods: {
+    toggleShowAllLabels: function () {
+      config.ZoomRegion.showFeatureLabels = !config.ZoomRegion.showFeatureLabels
+    },
+    toggleIncludeParalogs: function () {
+      this.includeParalogs = !this.includeParalogs
+      this.$root.$emit('context-changed')
+    },
     clearFacets: function () {
       this.$refs.facets.resetAll()
     },
@@ -382,158 +402,93 @@ export default MComponent({
         this.setContext(ih, true)
       })
     },
-    // Returns a promise for a sanitized version of a context configuration.
-    // Missing fields are filled in (usually with current values)
-    // so that the returned config is a complete specification.
-    // Also performs sanity checks (eg making sure start <= end).
-    // Why a promise and not the thing directly? Because sanitizing may involve
-    // resolving a landmark feature to actual coordinates.
     //
-    sanitizeContext: function (cxt) {
+    // this routine is called at initialization time or when user hit Back or Forward button
+    setContext: function (cxt, quietly) {
       //
-      let newc = {} // the new, sanitized context
-      let r
-      let n
-      let nc
-
+      this.scrollLock =
+        cxt.locked === "on" ? true :
+        cxt.locked === "off" ? false : this.scrollLock
       //
-      newc.currentSelection = cxt.currentSelection
+      this.includeParalogs =   
+        cxt.includeParalogs === "on" ? true :
+        cxt.includeParalogs === "off" ? false : this.includeParalogs
       //
-      newc.ref = null
       if (cxt.ref) {
-        // get specified ref genome name and look it up
-        n = cxt.ref.name || cxt.ref
-        newc.ref = this.agIndex[n] || null
-      }
-      //
-      newc.locked = !cxt.ref && (cxt.locked === "on")
-      //
-      if (cxt.strips) {
-        newc.strips = cxt.strips.map(r => {
-          // validate region
-          r.genome = this.agIndex[r.genome]
-          if (!r.genome) return null
-          r.regions = r.regions.map(rr => {
-            try {
-              rr = gc.validate(rr, r.genome, true)
-            } catch (e) {
-              return null
-            }
-            if (rr) rr.genome = r.genome
-            return rr
-          }).filter(x => x)
-          return r
-        }).filter(x => x)
-        //
-        if (newc.strips.length === 0) newc.strips = this.strips
-        //
-        newc.genomes = newc.strips.map(r => r.genome)
-        if (newc.genomes.indexOf(newc.ref) === -1) newc.ref = null
-        newc.lcoords = {
-          landmark: null,
-          delta: 0,
-          length: 0
+        // make sure ref is included in genomes list
+        if (!cxt.genomes) {
+          cxt.genomes = [cxt.ref]
+        } else if (cxt.genomes.indexOf(cxt.ref) === -1) {
+          cxt.genomes.push(cxt.ref)
         }
-        return Promise.resolve(newc)
+        //
+        const rg = this.agIndex[cxt.ref]
+        if (rg) {
+          this.rGenome = rg
+          this.scrollLock = false
+        }
       }
-      //
-      // Resolve genomes. Assume genomes are given in the desired order.
+      // 
+      let genomes = [this.allGenomes[0]]
       if (cxt.genomes) {
-        if (!Array.isArray(cxt.genomes)) cxt.genomes = [cxt.genomes]
-        cxt.genomes = cxt.genomes.map(g => {
-          return this.allGenomes.filter(a => a.name === (g.name || g))[0]
-        }).filter(x => x)
-      } else {
-        cxt.genomes = u.removeDups(this.strips.map(s => s.genome))
+        genomes = cxt.genomes.map(n => this.agIndex[n]).filter(x => x)
       }
-      // if ref genome not included in genomes list, insert it at the front
-      if (cxt.genomes.indexOf(newc.ref) === -1) cxt.genomes.unshift(newc.ref)
-      newc.genomes = cxt.genomes
-
       //
-      if (cxt.chr || cxt.start || cxt.end) {
-        // handle normal coordinates spec
-        n = cxt.chr ? (cxt.chr.name || cxt.chr) : this.coords.chr.name
-        r = newc.ref.chromosomes.filter(c => c.name === n)[0]
-        newc.coords = nc = gc.validate({
-          chr: r,
-          start: cxt.start || this.coords.start,
-          end: cxt.end || this.coords.end
-        }, newc.ref, true)
-        newc.lcoords = {
-          landmark: null,
-          delta: 0,
-          length: nc.end - nc.start + 1
+      let p
+      if (this.rGenome && cxt.chr) {
+        const c = this.rGenome.chromosomes.filter(chr => chr.name === cxt.chr)[0]
+        const coords = {
+          chr: c,
+          start: cxt.start,
+          end: cxt.end
         }
-      } else if (cxt.landmark || typeof cxt.delta === 'number' || cxt.length) {
-        // make sure the ref genome's features have been loaded before continuing
-        // so we can resolve landmarks
-        return this.dataManager.ensureFeatures(newc.ref).then(() => {
-          // handle landmark spec
-          let lm = this.dataManager.getHomologs(cxt.landmark || this.lcoords.landmark, newc.ref)[0]
-          if (lm) {
-            newc.lcoords = {
-              landmark: lm.cID || lm.ID,
-              delta: typeof cxt.delta === 'number' ? cxt.delta : this.lcoords.delta,
-              length: typeof cxt.length === 'number' ? cxt.length : this.lcoords.length
-            }
-            let x = (lm.strand === '+' ? lm.start : lm.end) + newc.lcoords.delta
-            let ns = Math.floor(x - newc.lcoords.length / 2)
-            newc.coords = {
-              genome: newc.ref,
-              chr: lm.chr,
-              start: ns,
-              end: ns + newc.lcoords.length - 1
-            }
+        p = this.regionManager.initMappedRegions(this.rGenome, coords, genomes)
+      } else if (cxt.landmark) {
+        const lcoords = {
+           landmark: cxt.landmark,
+           lgenome: genomes[0],
+           delta: cxt.delta || 0
+        }
+        if (typeof(cxt.flank) === 'number') {
+          lcoords.flank = cxt.flank
+        } else {
+           lcoords.length = cxt.length || 1000000
+        }
+        p = this.regionManager.alignOnLandmark(lcoords, genomes)
+      } else if (cxt.strips) {
+        // Map regions specs to specs with genome and chromosome names resolved to objects.
+        const strips = cxt.strips.map(s => {
+          const g = this.agIndex[s.genome]
+          if (!g) return null
+          return {
+            genome: g,
+            regions: s.regions.map(r => {
+              return {
+                genome: g,
+                chr: g.chromosomes.filter(c => c.name === r.chr)[0],
+                start: r.start,
+                end: r.end,
+                length: r.end - r.start + 1,
+                width: r.width || r.end - r.start + 1
+              }
+            }).filter(r => r.chr)
           }
-          //
-          return newc
-        })
-      } else if (cxt.landmark === null) {
-        newc.coords = this.coords
-        newc.lcoords = {
-          landmark: null,
-          delta: 0,
-          length: this.lcoords.length
-        }
+        }).filter(x => x)
+        p = this.regionManager.initializeRegions(strips) 
       }
-      return Promise.resolve(newc)
-    },
-    // this routine is called at initialization time or when HistoryManager
-    setContext: function (cxt0, quietly) {
-      this.sanitizeContext(cxt0).then(cxt => {
-        //
-        this.rGenome = cxt.ref
-        this.scrollLock = cxt.locked
-        let p
-        if (cxt.strips) {
-          p = this.regionManager.initializeRegions(cxt.strips)
-        } else if (cxt.lcoords && cxt.lcoords.landmark) {
-          this.lcoords = cxt.lcoords
-          this.coords = cxt.coords
-          p = this.regionManager.alignOnLandmark(cxt.lcoords, cxt.genomes)
-        } else if (cxt.coords) {
-          this.coords = cxt.coords
-          p = this.regionManager.computeMappedRegions(cxt.coords, cxt.genomes)
-        }
-        if (!p) {
-          this.initialize()
-          return
-        }
-        p.then(() => {
-          this.currentSelection = []
-          // resolve current selection IDs to features
-          this.vGenomes.forEach(g => {
-            this.dataManager.ensureFeatures(g).then(() => {
-              (cxt.currentSelection || []).forEach(ident => {
-                this.dataManager.getFeaturesBy(ident).filter(f => f.genome === g).forEach(f => {
-                  this.currentSelection.push(f)
-                })
+      p.then(() => {
+        this.currentSelection = []
+        // resolve current selection IDs to features
+        this.vGenomes.forEach(g => {
+          this.dataManager.ensureFeatures(g).then(() => {
+            (cxt.currentSelection || []).forEach(ident => {
+              this.dataManager.getFeaturesBy(ident).filter(f => f.genome === g).forEach(f => {
+                this.currentSelection.push(f)
               })
             })
           })
-          if (!quietly) this.$root.$emit('context-changed')
         })
+        if (!quietly) this.$root.$emit('context-changed')
       })
     },
     unAlign: function () {
@@ -570,8 +525,15 @@ export default MComponent({
     },
     featureClick: function (f, t, e) {
       this.detailFeatures = this.dataManager.getHomologs(f, this.vGenomes)
-      if (e.shiftKey && !this.currentSelectionSet.has(f)) {
-        this.currentSelection.push(f)
+      if (e.shiftKey) {
+        if (this.currentSelectionSet.has(f)) {
+          this.currentSelection = this.currentSelection.filter(s => {
+            return ! this.dataManager.equivalent(s, f)
+          })
+          this.currentMouseover = null
+        } else {
+          this.currentSelection.push(f)
+        }
       } else {
         this.currentSelection = [f]
       }
@@ -579,6 +541,27 @@ export default MComponent({
       this.$root.$emit('context-changed')
     },
     initKeyBindings () {
+      this.keyManager.register({
+       key: 'Escape',
+       handler: () => {
+         this.$root.$emit('escape-pressed')
+       },
+       thisObj: this
+      })
+      this.keyManager.register({
+       key: 'n',
+       handler: () => {
+         this.toggleShowAllLabels()
+       },
+       thisObj: this
+      })
+      this.keyManager.register({
+       key: 'p',
+       handler: () => {
+         this.toggleIncludeParalogs()
+       },
+       thisObj: this
+      })
       this.keyManager.register({
        key: 'h',
        handler: () => this.$refs.helpBox.toggleOpen(),

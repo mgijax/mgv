@@ -103,7 +103,7 @@
         />
       <!-- ======= current range box ======= -->
       <g
-        v-if="(dragging || trackMouse) && currRange"
+        v-if="currRange"
         style="pointer-events: none;"
         >
         <rect
@@ -850,6 +850,11 @@ export default MComponent({
     },
     clicked: function (e) {
       this.$root.$emit('region-current', { region: this.region })
+      if (this.absorbNextClick) {
+        e.stopPropagation()
+        this.absorbNextClick = false
+        return
+      }
       if (e.altKey) {
         this.altClicked(e)
         return
@@ -858,10 +863,7 @@ export default MComponent({
       if (f) {
         this.$root.$emit('feature-click', { region: this.region, feature: f.feature, transcript: f.transcript, event: e })
         e.stopPropagation()
-      } else if (this.absorbNextClick) {
-        e.stopPropagation()
       }
-      this.absorbNextClick = false
     },
     altClicked: function (e) {
       let f = this.getEventObjects(e)
@@ -960,12 +962,13 @@ export default MComponent({
         dragend: function (e, d) {
           if (!d.dragged || Math.abs(d.deltaX) < 3) {
             // this was actually just a click. If it was on the background, clear current selection
-            if (!e.target.closest('.feature')) {
+            if (!e.target.closest('.feature') && !e.altKey && !e.shiftKey) {
               this.$root.$emit('clear-selection')
             }
             this.dragData = null
             this.dragging = false
             this.regionScrollDelta = 0
+            this.currRange = null
             return
           }
           //
@@ -1011,7 +1014,14 @@ export default MComponent({
           this.dragData = null
           this.dragging = false
           this.currRange = null
-          this.$root.$emit('region-dragend', { region: this.region, vm: this })
+          this.$root.$emit('region-dragend')
+        },
+        dragcancel: function (d) {
+            this.dragData = null
+            this.dragging = false
+            this.regionScrollDelta = 0
+            this.currRange = null
+            return
         }
       }, this.$root.$el, this)
     }
@@ -1034,6 +1044,14 @@ export default MComponent({
     this.cbRegionDragEnd = d => {
       this.regionScrollDelta = 0
       this.currRange = null
+    }
+    this.cbEscapePressed = d => {
+      if (this.dragging) {
+        this.dragData.cancel()
+      } else {
+        this.regionScrollDelta = 0
+        this.currRange = null
+      }
     }
     this.cbRegionSelected = d => {
       if (this.context.scrollLock || this.region === d.region) {
@@ -1074,6 +1092,7 @@ export default MComponent({
     // this.$root.$on('region-selected', this.cbRegionSelected)
     this.$root.$on('facet-state', this.cbFacetState)
     this.$root.$on('list-selection', this.cbListSelection)
+    this.$root.$on('escape-pressed', this.cbEscapePressed)
   },
   destroyed: function () {
     // this.$root.$off('region-drag', this.cbRegionDrag)
@@ -1082,6 +1101,7 @@ export default MComponent({
     // this.$root.$off('region-selected', this.cbRegionSelected)
     this.$root.$off('facet-state', this.cbFacetState)
     this.$root.$off('list-selection', this.cbListSelection)
+    this.$root.$off('escape-pressed', this.cbEscapePressed)
     this.$emit('region-delete')
   },
   mounted: function () {

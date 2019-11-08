@@ -286,15 +286,6 @@ class RegionManager {
     this.app.strips.forEach(s => {
       s.regions.forEach(r => this.zoomScrollRegion(r, zAmt, sAmt, sType))
     })
-    /*
-    if (this.app.lcoords && this.app.lcoords.landmark) {
-      const lc = this.app.lcoords
-      const L2 = zAmt * lc.length
-      const d = sAmt * lc.length + lc.delta
-      lc.length = Math.round(L2)
-      lc.delta = Math.round(d)
-    }
-    */
   }
   //--------------------------------------
   jumpTo (coords, quietly) {
@@ -348,6 +339,24 @@ class RegionManager {
     this.layout()
   }
   //--------------------------------------
+  joinRegion (r) {
+    const rr = this.findRegion(r)
+    const si = rr[0], ri = rr[1]
+    if (ri === -1) return
+    const s = this.app.strips[si]
+    const r2 = s.regions[ri + 1]
+    if (r.chr !== r2.chr) {
+      alert ("Cannot join regions because they have different chromosomes.")
+      return
+    }
+    r.start = Math.min(r.start, r2.start)
+    r.end = Math.max(r.end, r2.end)
+    r.length = r.end - r.start + 1
+    r.width += r2.width
+    s.regions.splice(ri+1, 1)
+    this.layout()
+  }
+  //--------------------------------------
   //
   mergeRegions (g, regions) {
     const rs = regions.reduce((newRs, r) => {
@@ -368,6 +377,23 @@ class RegionManager {
       return newRs
     }, [])
     return rs
+  }
+  //--------------------------------------
+  initMappedRegions (ref, coords, genomes) {
+    coords.genome = ref
+    const promises = genomes.map(g => {
+      return this.mapRegionToGenome(coords, g).then(regions => {
+        regions.forEach(r => { r.width = r.length })
+        return {
+          genome: g,
+          regions: regions
+        }
+      })
+    })
+    return Promise.all(promises).then(strips => {
+      this.mergeUpdate(strips)
+      this.layout()
+    })
   }
   //--------------------------------------
   // Map the region(s) being shown for the current reference genome to corresponding region(s)
@@ -522,6 +548,11 @@ class RegionManager {
   //--------------------------------------
   featureAlign (d) {
     const f = d.feature
+    if (d.event && d.event.shiftKey) {
+       this.app.currentSelection.push(f)
+    } else {
+       this.app.currentSelection = [f]
+    }
     const anchor = d.basePos ? ((d.basePos - f.start + 1) / (f.end - f.start + 1)) : null
     let l
     if (d.region) {
@@ -548,11 +579,6 @@ class RegionManager {
     return this.computeLandmarkRegions(lcoords, genomes).then(strips => {
       this.mergeUpdate(strips)
       this.layout()
-      this.app.lcoords = lcoords
-      const dm = this.app.dataManager
-      const oids =dm.getHomologs(lcoords.landmark, genomes).filter(x => x).map(f => f.cID)
-      // TODO: set current selection to landmark feature
-      this.app.currentSelection = [lcoords.lfeature] // Array.from(new Set(oids))
     })
   }
   //--------------------------------------
@@ -605,6 +631,9 @@ class RegionManager {
       return null
     }
     const regions = lms.map(lm => {
+      const ll = lm.end - lm.start + 1
+      const hasFlank = typeof(lcoords.flank) === 'number'
+      const lw = hasFlank ? ll + 2*lcoords.flank : w
       let lmp
       if (typeof(lcoords.anchor) === 'number') {
         lmp = lm.start + lcoords.anchor * (lm.end - lm.start + 1)
@@ -628,12 +657,12 @@ class RegionManager {
           break
         }
       }
-      const s = Math.round(lmp - w / 2) + delta
+      const s = hasFlank ? lm.start - lcoords.flank : Math.round(lmp - lw / 2) + delta
       return this.makeRegion({
         genome: genome,
         chr: lm.chr,
         start: s,
-        end: s + w - 1,
+        end: s + lw - 1,
       })
     })
     return {
@@ -839,8 +868,13 @@ class RegionManager {
     parms = [
       `regions=${rs}`
     ]
+    //
     if (app.rGenome) parms.push('ref=' + app.rGenome.name)
     else if (app.scrollLock) parms.push('lock=on')
+    //
+    if (app.includeParalogs) parms.push('paralogs=on')
+    else parms.push('paralogs=off')
+    //
     return parms.join('&')
   }
 }

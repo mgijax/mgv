@@ -40,6 +40,15 @@ class HistoryManager {
     // console.log("Set hash:", newHash)
   }
   // pqstring = Parse qstring. Parses the parameter portion of the URL.
+  // This routine parses out any/all parameters. It does not check whether those
+  // parameters make sense.
+  // Returns object containing any/all of the following fields:
+  //   genomes  - list of genome names (strings)
+  //   ref      - name of the ref genome (string)
+  //   regions  - list of strips, each a list of regions.
+  //   locked   - Lockstep mode: "on" or "off"
+  //   includeParalogs - Include ("on") or exclude ("off") paralogs
+  //  
   pqstring (qstring) {
     //
     let cfg = {}
@@ -61,9 +70,16 @@ class HistoryManager {
     let locked = prms.get('lock')
     locked && (cfg.locked = locked)
 
+    // ----- locked mode ------------
+    let paralogs = prms.get('paralogs')
+    paralogs && (cfg.includeParalogs = paralogs)
+
     // ----- regions ------------
     // Regions parameter allows for multiple regions across multiple genomes
-    // Example: "A/J::12:67900000..68800000/500,X:55622081..101002774/500|DBA/2J::1:1..1000000/1000"
+    // Example:
+    //   "A/J::12:67900000..68800000/500,X:55622081..101002774/500|DBA/2J::1:1..1000000/1000"
+    // NOTE: externally, the parameter is called "regions", but really it 
+    // specifies multiple strips and regions within them
     //
     let regions = prms.get('regions')
     if (regions) {

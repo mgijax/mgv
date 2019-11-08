@@ -148,7 +148,7 @@ export default MComponent({
     },
     backgroundClick: function (e) {
       if (e.target.closest('.zoom-region')) {
-        this.$root.$emit('clear-selection')
+        // this.$root.$emit('clear-selection')
       }
     },
     sortStrips (sortBy) {

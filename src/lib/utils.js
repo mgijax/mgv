@@ -72,6 +72,7 @@ function removeDups (lst) {
 //      target - same as evt.target
 //      startX, startY - the starting client coordinates of the drag
 //      deltaX, deltaY - the total distace traveled since dragstart
+//      cancel - a function to call if you want to cancel the drag
 //
 // Only onmousedown is listened for initially. When mousedown is detected
 // (ie on dragstart) the handlers for mousemove and mouseup are attached
@@ -89,7 +90,8 @@ function dragify (elt, behavior, root, dragThis) {
       startX: evt.clientX,
       startY: evt.clientY,
       deltaX: 0,
-      deltaY: 0
+      deltaY: 0,
+      cancel: () => cancelDrag()
     }
     if (behavior.dragstart && behavior.dragstart.call(dragThis, evt, dragging) === false) {
       dragging = null
@@ -121,6 +123,12 @@ function dragify (elt, behavior, root, dragThis) {
     evt.stopPropagation()
     evt.preventDefault()
     // console.log('END DRAG')
+  }
+  function cancelDrag () {
+    behavior.dragcancel && behavior.dragcancel.call(dragThis, dragging)
+    root.removeEventListener('mousemove', drag)
+    root.removeEventListener('mouseup', endDrag)
+    root.removeEventListener('mouseleave', endDrag)
   }
   elt.addEventListener('mousedown', startDrag)
 }
@@ -310,7 +318,7 @@ function niceNumber(value, round_){
 function niceBounds(axis_start, axis_end, num_ticks){
     //default value is 10
     num_ticks = num_ticks || 10;
-    const axis_width = axis_end - axis_start;
+    let axis_width = axis_end - axis_start;
 
     if (axis_width == 0){
         axis_start -= .5

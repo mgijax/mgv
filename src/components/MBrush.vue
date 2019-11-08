@@ -129,6 +129,8 @@ export default MComponent({
       return [s, e]
     },
     initDrag () {
+      //
+      if (!this.$refs.tab) return
       // Drag handlers for the tab
       u.dragify(this.$refs.tab, {
         dragstart: function (evt, data) {
