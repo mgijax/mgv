@@ -1,8 +1,8 @@
 <template>
   <div class="sequence-cart">
      <!-- Cart items -->
+     <span>{{ cart.length }} sequence{{ cart.length === 1 ? '' : 's' }}</span>
      <div class="sequence-cart-items">
-       <span>{{ cart.length }} sequence{{ cart.length === 1 ? '' : 's' }}</span>
        <sequence-cart-item
          v-for="item in cart"
          :key="item.name"
@@ -33,43 +33,12 @@
        <!-- spacer -->
        <div style="flex-grow: 1;"></div>
 
-       <!-- Download form -->
-       <form
-         ref="sequenceDownloadForm"
-         :action="fetchUrl"
-         target="_blank"
-         method="POST"
-         download>
-         <input type="hidden" name="descriptors" v-model="descriptors"></textarea>
-	 <div class="flexcolumn">
-	     <div v-show="fetched.length === 0" class="flexrow">
-	       <input name="filename" type="text" :disabled="cartEmpty" placeholder="Enter file name."></input>
-	       <!-- Download button -->
-	       <m-button
-		 icon="cloud_download"
-		 title="Download selected sequences in Fasta format."
-		 @click="downloadSelected"
-		 :disabled="cartEmpty"
-		 />
-	     </div>
-	     <div v-show="fetched.length > 0" class="flexrow">
-	       <!-- Fetched summary -->
-	       <span>Fetched {{fetched.length}} chars</span>
-	       <!-- View in browser -->
-	       <m-button
-		 icon="subject"
-		 title="View."
-		 @click="viewFetched"
-		 />
-	       <!-- Copy to clipboard -->
-	       <m-button
-		 icon="file_copy"
-		 title="Copy to clipboard."
-		 @click="copyFetched"
-		 />
-	     </div>
-	 </div>
-       </form>
+       <!-- Delete selected button -->
+       <i
+         class="material-icons"
+         :style="{ color: cartEmpty ? 'gray' : 'black'}"
+         title="Download selected sequences to a Fasta file, to the browser, or to the clipboard."
+         >cloud_download</i>
 
        <!-- spacer -->
        <div style="flex-grow: 1;"></div>
@@ -83,6 +52,71 @@
          :disabled="cartEmpty"
          />
 
+     </div>
+     <div v-show="nothingSelected && !cartEmpty" class="flexcolumn">
+     Nothing selected.
+     </div>
+     <div v-show="!nothingSelected" class="flexcolumn">
+       <!-- Download form -->
+       <form
+         ref="sequenceDownloadForm"
+         :action="fetchUrl"
+         target="_blank"
+         method="POST"
+         download>
+         <input type="hidden" name="descriptors" v-model="descriptors"></textarea>
+	 <div class="flexcolumn" style="padding-right: 12px;">
+	     <div class="flexrow download-option">
+               <label>File</label>
+	       <!-- Download button -->
+	       <m-button
+		 icon="folder"
+		 title="Download selected sequences to a file. Enter file name if desired."
+		 @click="downloadToFile"
+		 :disabled="nothingSelected"
+		 />
+	       <input name="filename" type="text" :disabled="cartEmpty" placeholder="Enter file name."></input>
+	     </div>
+	     <div class="flexrow download-option">
+               <label>Browser</label>
+	       <!-- View in browser -->
+	       <m-button
+		 icon="subject"
+		 title="Download selected sequences to a new browser tab."
+		 @click="downloadToBrowser"
+		 :disabled="nothingSelected"
+		 />
+             </div>
+             <div class="flexrow download-option">
+               <label>Clipboard</label>
+	       <!-- Copy to clipboard -->
+	       <m-button
+		 icon="file_copy"
+		 title="Copy selected sequences to the clipboard."
+		 @click="downloadToClipboard"
+		 :disabled="nothingSelected"
+                 v-show="!cbText"
+		 />
+               <m-button
+                 icon="check_circle"
+                 color="green"
+                 title="Confirm"
+                 @click="downloadToClipboardPt2"
+                 v-show="cbText"
+                 />
+               <m-button
+                 icon="cancel"
+                 color="red"
+                 title="Cancel"
+                 @click="cancelClipboard"
+                 v-show="cbText"
+                 />
+               <span
+                 v-show="cbText"
+                 >{{cbText.length}} chars</span>
+	     </div>
+	 </div>
+       </form>
      </div>
   </div>
 </template>
@@ -102,12 +136,19 @@ export default MComponent({
       cart: [],
       descriptors: '',
       bottomShowing: false,
-      fetched: ''
+      fetched: '',
+      cbText: ''
     }
   },
   computed: {
     cartEmpty () {
       return this.cart.length === 0
+    },
+    selected () {
+      return this.cart.filter(item => item.selected)
+    },
+    nothingSelected () {
+      return this.selected.length === 0
     },
     fetchUrl () {
       return this.app.runtimeConfig.dataUrl + "fetch.cgi"
@@ -143,22 +184,35 @@ export default MComponent({
     unselectAll: function () {
       this.cart.forEach(item => {item.selected = false})
     },
-    downloadSelected: function () {
-      const selected = this.cart.filter(item => item.selected)
-      if (selected.length === 0) return
-      if (this.$refs.sequenceDownloadForm.filename.value) {
-	  // if filename is specified, use form submission mentod
-	  this.descriptors = JSON.stringify(selected)
-	  this.$nextTick(() => {
-	      this.$refs.sequenceDownloadForm.submit()
-	      this.$refs.sequenceDownloadForm.reset()
-	  })
-      } else {
-          // no filename - use fetch
-	  this.dataManager().getSequences(selected).then(text => {
-	    this.fetched = text
-	  })
-      }
+    downloadToFile: function () {
+      if (this.nothingSelected) return
+      this.descriptors = JSON.stringify(this.selected)
+      this.$nextTick(() => {
+          this.$refs.sequenceDownloadForm.submit()
+      })
+    },
+    downloadToClipboard: function () {
+      if (this.nothingSelected) return
+      this.dataManager().getSequences(this.selected).then(text => { this.cbText = text })
+    },
+    downloadToClipboardPt2: function () {
+      const dummy = document.createElement("textarea")
+      document.body.appendChild(dummy);
+      dummy.value = this.cbText
+      dummy.select();
+      document.execCommand("copy");
+      document.body.removeChild(dummy);
+      this.cbText = ''
+    },
+    cancelClipboard: function () {
+      this.cbText = ''
+    },
+    downloadToBrowser: function () {
+      if (this.nothingSelected) return
+      this.dataManager().getSequences(this.selected).then(text => {
+	const w = window.open("","_blank")
+	w.document.write('<pre>', text, '</pre>')
+      })
     },
     viewFetched: function () {
 	const w = window.open("","_blank")
@@ -207,7 +261,7 @@ export default MComponent({
       this.$parent.open()
       this.$el.scrollIntoView()
       if (rs.sequences.length) {
-        this.$root.$emit('message', { message: `Added ${rs.sequences.length} sequences to cart` })
+        // this.$root.$emit('message', { message: `Added ${rs.sequences.length} sequences to cart` })
       }
     })
     this.kstore = new KeyStore(this.cfg.dbName)
@@ -223,7 +277,13 @@ export default MComponent({
   padding: 0px;
 }
 .sequence-cart-items {
-  max-height: 450px;
+  max-height: 250px;
   overflow: scroll;
+}
+.download-option {
+  justify-content: flex-start;
+}
+.download-option > * {
+  margin-left: 12px;
 }
 </style>
