@@ -377,7 +377,7 @@ class DataManager {
     const ca = new ContigAssigner()
     const slap = new SwimLaneAssigner()
     const slam = new SwimLaneAssigner()
-    const fp = new FeaturePacker(0, 5000)
+    const fp = new FeaturePacker(0, 1000)
     feats.forEach(f => {
       const lbl = f.symbol || f.ID
       const lblLenBp = ppb ? lbl.length * fsize / ppb : 0 
