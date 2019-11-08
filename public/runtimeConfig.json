@@ -1,6 +1,5 @@
 {
-    "xdataUrl" : "http://proto.informatics.jax.org/prototypes/mgv-data/",
-    "dataUrl" : "http://localhost:5000/",
+    "dataUrl" : "http://proto.informatics.jax.org/prototypes/mgv-data/",
     "linkUrls": [{
         "genomes" : [
             "129S1/SvImJ",

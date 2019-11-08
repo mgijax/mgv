@@ -142,6 +142,8 @@ export default MComponent({
     }
   },
   mounted: function () {
+    this.dragData = null
+    this.dragging = false
     // mouseenter
     this.$root.$on('region-mouseenter', d => {
     })
@@ -152,7 +154,8 @@ export default MComponent({
       // pix from left side of region
       const pxLeft = d.evt.clientX - bb.left
       // 
-      this.drawLines(this.getRegionVms(d.vm), pxLeft / bb.width)
+      //this.drawLines(this.getRegionVms(d.vm), pxLeft / bb.width)
+      this.drawLines([d.vm], pxLeft / bb.width)
     })
     // mouseleave
     this.$root.$on('region-mouseleave', d => {
@@ -161,11 +164,14 @@ export default MComponent({
     // dragstart
     this.$root.$on('region-dragstart', d => {
       // console.log('dragstart', d)
+      this.dragData = d.data
+      this.dragging = true
       d.data.dragged = false
       d.data.bb = d.vm.$refs.underlay.getBoundingClientRect()
       d.data.shiftDrag = d.evt.shiftKey
       d.data.altDrag = d.evt.altKey
       d.data.metaDrag = d.evt.metaKey
+      d.data.vm = d.vm
       d.data.vms = this.getRegionVms(d.vm)
     })
     // drag
@@ -177,9 +183,9 @@ export default MComponent({
         let x2 = d.evt.clientX - d.data.bb.x
         const start = Math.min(x1, x2)
         const end = Math.max(x1, x2)
-        const startp = start / d.data.bb.width
-        const widthp = (end - start) / d.data.bb.width
-        this.drawRects(d.data.vms, startp, widthp )
+        d.data.startp = start / d.data.bb.width
+        d.data.widthp = (end - start) / d.data.bb.width
+        this.drawRects(d.data.vms, d.data.startp, d.data.widthp )
       } else {
         d.data.vms.forEach(vm => vm.regionScrollDelta = d.data.deltaX)
         this.boxes.forEach(b => {
@@ -189,73 +195,82 @@ export default MComponent({
     })
     // dragend
     this.$root.$on('region-dragend', d => {
+      // dig out the event and re-point d at the data obj
+      const e = d.evt
+      d = d.data
       //console.log('dragend', d)
+      if (!d.dragged || Math.abs(d.deltaX) < 3) {
+        // this was actually just a click. If it was on the background, clear current selection
+        if (!e.target.closest('.feature')) {
+          this.$root.$emit('clear-selection')
+        }
+        this.dragData = null
+        this.dragging = false
+        d.vms.forEach(vm => vm.regionScrollDelta = 0)
+        return
+      }
+      //
+      if (d.altDrag) {
+        // selecting genomic sequence
+        const seqs = d.vms.map(vm => {
+          const r = vm.region
+          const L = r.end - r.start + 1
+          const start = Math.floor(r.start + d.startp * L)
+          const end = Math.floor(start + d.widthp * L - 1)
+          const gname = r.genome.name
+          const cname = r.chr.name
+          const reverseComplement =
+            d.deltaX > 0 && r.reversed || d.deltaX < 0 && !r.reversed
+          const rc = reverseComplement ? 'reverse complement ' : ''
+          return {
+            header: `>${gname}::${cname}:${start}..${end} (${rc}dna)`,
+            genome: r.genome.name,
+            genomeUrl: r.genome.url,
+            chromosome: r.chr.name,
+            start: [start],
+            length: [end - start + 1],
+            type: 'dna',
+            reverseComplement: reverseComplement,
+            selected: true,
+            totalLength: end - start + 1
+          }
+        })
+        this.$root.$emit('sequence-selected', { sequences : seqs, unselectAll: true })
+      } else if (d.shiftDrag || d.metaDrag) {
+        // zoom in/out of dragged region === composition of centered zoom plus a scroll
+        this.$root.$emit('region-change', {
+          region: d.vm.region,
+          op: 'zoomscroll',
+          pstart: d.startp,
+          plength: d.widthp,
+          out: d.metaDrag // whether this is a zoom out (true) or zoom in (false)
+        })
+      } else {
+        // scroll
+        this.$root.$emit('region-change', { region: this.region, op: 'scroll', amt: d.deltaX })
+      }
+
+      d.vms.forEach(vm => vm.regionScrollDelta = 0)
+      d.vm.absorbNextClick = true
+      this.dragData = null
+      this.dragging = false
+      this.boxes = []
+    })
+    //
+    this.$root.$on('escape-pressed', d => {
+      if (!this.dragging) return
+      this.dragData.vms.forEach(vm => vm.regionScrollDelta = 0)
+      this.dragData.cancel()
+      this.dragData = null
+      this.dragging = false
       this.boxes = []
     })
   }
 })
-/*
-        dragend: function (e, d) {
-          if (!d.dragged || Math.abs(d.deltaX) < 3) {
-            // this was actually just a click. If it was on the background, clear current selection
-            if (!e.target.closest('.feature')) {
-              this.$root.$emit('clear-selection')
-            }
-            this.dragData = null
-            this.dragging = false
-            this.regionScrollDelta = 0
-            return
-          }
-          //
-          const cr = this.currRange
-          const crs = Math.min(cr[0], cr[1])
-          const cre = Math.max(cr[0], cr[1])
-          // Express the dragged region start and length as fractions relative to the whole region.
-          // This allows easy conversion to the equiv part of other regions (for coordinated zooming).
-          const pstart = crs / this.region.width
-          const plength = (cre - crs + 1) / this.region.width
-          //
-          if (d.altDrag) {
-            // selecting genomic sequence
-            this.$root.$emit('sequence-selected', { sequences : [], unselectAll : true })
-            this.$root.$emit('region-selected', {
-              region: this.region,
-              pstart: pstart,
-              plength: plength,
-              dragDirection: e.clientX > d.startX ? 'l-to-r' : 'r-to-l'
-            })
-          } else if (d.shiftDrag || d.metaDrag) {
-            // zoom in/out of dragged region === composition of centered zoom plus a scroll
-            this.$root.$emit('region-change', {
-              region: this.region,
-              op: 'zoomscroll',
-              pstart: pstart,
-              plength: plength,
-              out: d.metaDrag // whether this is a zoom out (true) or zoom in (false)
-            })
-          } else {
-            // scroll
-            //const amt = this.deltaB / (this.region.end - this.region.start + 1)
-            this.$root.$emit('region-change', { region: this.region, op: 'scroll', amt: this.myDelta })
-          }
-          
-          //
-          // A click event is fired (unavoidably) at mouseup. Here we set a flag for ourselves to ignore
-          // the next click event (see method clicked() above).
-          //
-          this.absorbNextClick = true
-          //
-          this.regionScrollDelta = 0
-          this.dragData = null
-          this.dragging = false
-          this.currRange = null
-          this.$root.$emit('region-dragend', { region: this.region, vm: this })
-        }
-*/
 </script>
 
 <style scoped>
 .range-boxes {
-  pointer-events: none;
+pointer-events: none;
 }
 </style>

@@ -915,6 +915,7 @@ export default MComponent({
       u.dragify(this.$el, {
         dragstart: function (e, d) {
           this.dragging = true
+          this.dragData = d
           this.$root.$emit("region-dragstart", { region: this.region, vm: this, evt: e, data: d })
         },
         drag: function (e, d) {
@@ -922,163 +923,13 @@ export default MComponent({
         },
         dragend: function (e, d) {
           this.$root.$emit("region-dragend", { region: this.region, vm: this, evt: e, data: d })
+          this.dragData = null
           this.dragging = false
         }
       }, this.$root.$el, this)
     },
-    // Initializes handler for dragging within a region (scroll, zoom, etc)
-    xinitScrollDrag () {
-      this.dragging = false
-      u.dragify(this.$el, {
-        dragstart: function (e, d) {
-          this.dragging = true
-          this.dragData = d
-          d.dragged = false
-          d.bb = this.$refs.underlay.getBoundingClientRect()
-          d.shiftDrag = e.shiftKey
-          d.altDrag = e.altKey
-          d.metaDrag = e.metaKey
-          this.currRange = [d.startX - d.bb.x, d.startX - d.bb.x]
-          this.$root.$emit("region-dragstart", { region: this.region, vm: this })
-        },
-        drag: function (e, d) {
-          d.dragged = true
-          if (d.shiftDrag || d.altDrag || d.metaDrag) {
-            let x1 = d.startX - d.bb.x
-            let x2 = e.clientX - d.bb.x
-            this.currRange = [Math.min(x1, x2), Math.max(x1, x2)]
-            const crd = {
-              start: this.currRange[0] / d.bb.width,
-              length: (this.currRange[1] - this.currRange[0]) / d.bb.width,
-              shiftDrag: d.shiftDrag,
-              altDrag: d.altDrag
-            }
-            this.$root.$emit('region-drag-modified', crd)
-          } else {
-            this.$root.$emit('region-drag', d.deltaX)
-          }
-          this.$root.$emit('region-dragdrag', { region: this.region, vm: this })
-        },
-        dragend: function (e, d) {
-          if (!d.dragged || Math.abs(d.deltaX) < 3) {
-            // this was actually just a click. If it was on the background, clear current selection
-            if (!e.target.closest('.feature') && !e.altKey && !e.shiftKey) {
-              this.$root.$emit('clear-selection')
-            }
-            this.dragData = null
-            this.dragging = false
-            this.regionScrollDelta = 0
-            this.currRange = null
-            return
-          }
-          //
-          const cr = this.currRange
-          const crs = Math.min(cr[0], cr[1])
-          const cre = Math.max(cr[0], cr[1])
-          // Express the dragged region start and length as fractions relative to the whole region.
-          // This allows easy conversion to the equiv part of other regions (for coordinated zooming).
-          const pstart = crs / this.region.width
-          const plength = (cre - crs + 1) / this.region.width
-          //
-          if (d.altDrag) {
-            // selecting genomic sequence
-            this.$root.$emit('sequence-selected', { sequences : [], unselectAll : true })
-            this.$root.$emit('region-selected', {
-              region: this.region,
-              pstart: pstart,
-              plength: plength,
-              dragDirection: e.clientX > d.startX ? 'l-to-r' : 'r-to-l'
-            })
-          } else if (d.shiftDrag || d.metaDrag) {
-            // zoom in/out of dragged region === composition of centered zoom plus a scroll
-            this.$root.$emit('region-change', {
-              region: this.region,
-              op: 'zoomscroll',
-              pstart: pstart,
-              plength: plength,
-              out: d.metaDrag // whether this is a zoom out (true) or zoom in (false)
-            })
-          } else {
-            // scroll
-            //const amt = this.deltaB / (this.region.end - this.region.start + 1)
-            this.$root.$emit('region-change', { region: this.region, op: 'scroll', amt: this.myDelta })
-          }
-          
-          //
-          // A click event is fired (unavoidably) at mouseup. Here we set a flag for ourselves to ignore
-          // the next click event (see method clicked() above).
-          //
-          this.absorbNextClick = true
-          //
-          this.regionScrollDelta = 0
-          this.dragData = null
-          this.dragging = false
-          this.currRange = null
-          this.$root.$emit('region-dragend')
-        },
-        dragcancel: function (d) {
-            this.dragData = null
-            this.dragging = false
-            this.regionScrollDelta = 0
-            this.currRange = null
-            return
-        }
-      }, this.$root.$el, this)
-    }
-  },
-  updated: function () {
-    // console.log('updated', this._uid)
   },
   created: function () {
-    // create callbacks for the various events and save them so we can unregister them
-    // in the destroyed hook
-    this.cbRegionDrag = d => {
-      if (this.context.scrollLock || this.dragging) this.regionScrollDelta = d
-    }  
-    this.cbRegionDragModified = crd => {
-      if (!this.context.scrollLock || this.dragging) return
-      const s = this.region.width * crd.start
-      const e = s + this.region.width * crd.length
-      this.currRange = [s, e]
-    }
-    this.cbRegionDragEnd = d => {
-      this.regionScrollDelta = 0
-      this.currRange = null
-    }
-    this.cbEscapePressed = d => {
-      if (this.dragging) {
-        this.dragData.cancel()
-      } else {
-        this.regionScrollDelta = 0
-        this.currRange = null
-      }
-    }
-    this.cbRegionSelected = d => {
-      if (this.context.scrollLock || this.region === d.region) {
-        const r = this.region
-        const L = r.end - r.start + 1
-        const start = Math.floor(r.start + d.pstart * L)
-        const end = Math.floor(start + d.plength * L - 1)
-	const gname = this.region.genome.name
-	const cname = this.region.chr.name
-        const reverseComplement =
-          d.dragDirection === 'l-to-r' && r.reversed || d.dragDirection === 'r-to-l' && !r.reversed
-	const rc = reverseComplement ? 'reverse complement ' : ''
-        const seq = {
-	  header: `>${gname}::${cname}:${start}..${end} (${rc}dna)`,
-          genome: this.region.genome.name,
-          genomeUrl: this.region.genome.url,
-          chromosome: this.region.chr.name,
-          start: [start],
-          length: [end - start + 1],
-          type: 'dna',
-          reverseComplement: reverseComplement,
-          selected: true,
-          totalLength: end - start + 1
-        }
-        this.$root.$emit('sequence-selected', { sequences : [seq], unselectAll : false })
-      }
-    }
     this.cbFacetState = d => {
       this.getFeatures()
     }
@@ -1086,22 +937,12 @@ export default MComponent({
       this.getFeatures()
     }
     //
-    // this.$root.$on('region-drag', this.cbRegionDrag)
-    // this.$root.$on('region-drag-modified', this.cbRegionDragModified)
-    // this.$root.$on('region-dragend', this.cbRegionDragEnd)
-    // this.$root.$on('region-selected', this.cbRegionSelected)
     this.$root.$on('facet-state', this.cbFacetState)
     this.$root.$on('list-selection', this.cbListSelection)
-    this.$root.$on('escape-pressed', this.cbEscapePressed)
   },
   destroyed: function () {
-    // this.$root.$off('region-drag', this.cbRegionDrag)
-    // this.$root.$off('region-drag-modified', this.cbRegionDragModified)
-    // this.$root.$off('region-dragend', this.cbRegionDragEnd)
-    // this.$root.$off('region-selected', this.cbRegionSelected)
     this.$root.$off('facet-state', this.cbFacetState)
     this.$root.$off('list-selection', this.cbListSelection)
-    this.$root.$off('escape-pressed', this.cbEscapePressed)
     this.$emit('region-delete')
   },
   mounted: function () {
