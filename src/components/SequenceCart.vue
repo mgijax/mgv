@@ -34,16 +34,6 @@
        <div style="flex-grow: 1;"></div>
 
        <!-- Delete selected button -->
-       <i
-         class="material-icons"
-         :style="{ color: cartEmpty ? 'gray' : 'black'}"
-         title="Download selected sequences to a Fasta file, to the browser, or to the clipboard."
-         >cloud_download</i>
-
-       <!-- spacer -->
-       <div style="flex-grow: 1;"></div>
-
-       <!-- Delete selected button -->
        <m-button
          icon="delete"
          color="red"
@@ -53,8 +43,9 @@
          />
 
      </div>
-     <div v-show="nothingSelected && !cartEmpty" class="flexcolumn">
-     Nothing selected.
+     <div v-show="nothingSelected && !cartEmpty" class="flexrow" style="justify-content: center;">
+       <i class="material-icons" style="font-size: 18px;">cloud_download</i>
+       <span>Nothing selected.</span>
      </div>
      <div v-show="!nothingSelected" class="flexcolumn">
        <!-- Download form -->
@@ -67,36 +58,42 @@
          <input type="hidden" name="descriptors" v-model="descriptors"></textarea>
 	 <div class="flexcolumn" style="padding-right: 12px;">
 	     <div class="flexrow download-option">
-               <label>File</label>
 	       <!-- Download button -->
 	       <m-button
-		 icon="folder"
-		 title="Download selected sequences to a file. Enter file name if desired."
+		 icon="cloud_download"
+		 title="Download selected sequences to a file. Enter file name."
 		 @click="downloadToFile"
-		 :disabled="nothingSelected"
+		 :disabled="nothingSelected || noFileName"
 		 />
-	       <input name="filename" type="text" :disabled="cartEmpty" placeholder="Enter file name."></input>
+               <label>File</label>
+	       <input
+                 v-model="filename"
+                 name="filename"
+                 type="text"
+                 :disabled="cartEmpty"
+                 placeholder="Enter file name."></input>
 	     </div>
 	     <div class="flexrow download-option">
-               <label>Browser</label>
 	       <!-- View in browser -->
 	       <m-button
-		 icon="subject"
+		 icon="cloud_download"
 		 title="Download selected sequences to a new browser tab."
 		 @click="downloadToBrowser"
 		 :disabled="nothingSelected"
 		 />
+               <label>Browser</label>
              </div>
              <div class="flexrow download-option">
-               <label>Clipboard</label>
 	       <!-- Copy to clipboard -->
 	       <m-button
-		 icon="file_copy"
+		 icon="cloud_download"
 		 title="Copy selected sequences to the clipboard."
 		 @click="downloadToClipboard"
 		 :disabled="nothingSelected"
                  v-show="!cbText"
 		 />
+               <label v-show="!cbText">Clipboard</label>
+               <label v-show="cbText">Confirm:</label>
                <m-button
                  icon="check_circle"
                  color="green"
@@ -137,7 +134,8 @@ export default MComponent({
       descriptors: '',
       bottomShowing: false,
       fetched: '',
-      cbText: ''
+      cbText: '',
+      filename: ''
     }
   },
   computed: {
@@ -149,6 +147,9 @@ export default MComponent({
     },
     nothingSelected () {
       return this.selected.length === 0
+    },
+    noFileName () {
+      return ! this.filename
     },
     fetchUrl () {
       return this.app.runtimeConfig.dataUrl + "fetch.cgi"
