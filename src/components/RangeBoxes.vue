@@ -247,7 +247,7 @@ export default MComponent({
         })
       } else {
         // scroll
-        this.$root.$emit('region-change', { region: this.region, op: 'scroll', amt: d.deltaX })
+        this.$root.$emit('region-change', { region: d.vm.region, op: 'scroll', amt: d.deltaX })
       }
 
       d.vms.forEach(vm => vm.regionScrollDelta = 0)
