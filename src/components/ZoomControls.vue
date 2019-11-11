@@ -84,11 +84,28 @@
           title="Click to download PNG image. Shift-click to download SVG."/>
       </div>
     </div>
-    <!-- Current selection -->
     <div
       class="flexrow current-selection-label"
       >
+      <!-- Current list -->
+      <div class="flexrow" v-if="context.currentList">
+        Current list:
+        <span
+          v-if="context.currentList"
+          class="listGlyph"
+          :style="{ backgroundColor: context.currentList.color }"
+          />{{context.currentList.name}}
+          <m-button
+            icon="highlight_off"
+            title="Click to clear current list."
+            color="red"
+            @click="clearList"
+            style="font-size: 12px;"
+            />
+      </div>
+      <div v-else>No current list</div>
       <span style="flex-grow: 1;"></span>
+      <!-- Current selection -->
       <span>{{app.currentSelectionLabel.length ? 'Selected: ' + app.currentSelectionLabel : 'Nothing selected.'}}</span>
     </div>
   </div>  
@@ -108,7 +125,22 @@ export default MComponent({
     'context'
   ],
   inject: ['dataManager'],
+  computed: {
+    currListTitle: function () {
+      const clist = this.context.currentList
+      if (!clist) return 'No current list.'
+      const clen = clist.items.length 
+      const cglen = this.currentListHomologs.length
+      const s = clen === 1 ? '' : 's'
+      const sz = cglen === clen ? `${clen} item${s}` : `${cglen} of ${clen} item${s} found in this genome`
+      const lim = cglen > this.maxListLength ? ` ${this.maxListLength} shown` : ''
+      return `${clist.name} (${sz}${lim})`
+    }
+  },
   methods: {
+    clearList: function () {
+      this.$root.$emit('list-click', { list: this.context.currentList })
+    },
     selectOnFocus (e) {
       e.target.select()
     },
@@ -155,6 +187,8 @@ export default MComponent({
     position: sticky;
     top: 0;
     background-color: #e1e1e1;
+    border: thin solid #c8c8c8;
+    margin-bottom: 8px;
 }
 .zoom-controls > * > .flexrow {
     justify-content: flex-start;
@@ -162,5 +196,13 @@ export default MComponent({
 }
 .current-selection-label {
   font-size: 12px;
+}
+.listGlyph {
+  width: 6px;
+  height: 6px;
+  border-radius: 6px;
+  border: thin solid black;
+  display: inline-block;
+  margin-left: 6px;
 }
 </style>

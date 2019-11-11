@@ -55,6 +55,7 @@
           @click="clickedGlyph(g.f)"
           >
           <line
+            class="noevents"
             :x1="g.gPoint[0]"
             :y1="g.gPoint[1]"
             :x2="g.aPoint[0]"
@@ -72,6 +73,7 @@
           <title>{{ g.f.symbol || g.f.ID }}</title>
           </circle>
           <text
+            class="noevents"
             v-if="showLabels"
             :x="g.gPoint[0]"
             :y="g.gPoint[1] - glyphRadius"
@@ -84,7 +86,7 @@
           v-for="g in myGlyphs"
           :key="g.f.ID"
           :name="g.f.ID"
-          class="list-item"
+          class="list-item noevents"
           :x1="g.aPoint[0] + (g.f.strand === '-' ? -1 : 1) *  width / 2"
           :y1="g.aPoint[1]"
           :x2="g.aPoint[0]"
@@ -319,5 +321,8 @@ export default MComponent({
 }
 .list-item {
   cursor: pointer;
+}
+.noevents {
+  pointer-events: none;
 }
 </style>
