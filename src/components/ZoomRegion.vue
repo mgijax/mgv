@@ -32,7 +32,7 @@
       -->
       <!-- ======= axis line ======= -->
       <line
-        class="axis"
+        class="axis noevents"
         :x1="b2p(region.start)"
         :y1="0"
         :x2="b2p(region.end)"
@@ -101,37 +101,6 @@
         ref="underlay"
         :transform="`translate(${-myDelta},0)`"
         />
-      <!-- ======= current range box ======= -->
-      <g
-        v-if="currRange"
-        style="pointer-events: none;"
-        >
-        <rect
-          :x="currRangeTextX - (currRange[0] !== currRange[1] ? 55 : 30)"
-          :y="-zeroOffset + Math.max(height, 10) + 2"
-          :width="currRange[0] !== currRange[1] ? 110 : 60"
-          height="10"
-          fill="white"
-          />
-        <text
-          :x="currRangeTextX"
-          :y="-zeroOffset + Math.max(height, 10) + 10"
-          font-size="10"
-          font-family="sans-serif"
-          :text-anchor="currRangeAnchor"
-          >
-          {{region.chr.name}}:{{p2b(currRange[0])}}{{currRange[0] !== currRange[1] ? '..' + p2b(currRange[1]) : ''}}
-          </text>
-        <rect
-          :x="b2p(0.5 + p2b(Math.min(currRange[0], currRange[1])))"
-          :y="-zeroOffset"
-          :width="ppb * Math.floor(bpp * Math.abs(currRange[1] - currRange[0])) + 1"
-          :height="Math.max(height, 10)"
-          fill-opacity="0.3"
-          stroke="black"
-          stroke-opacity="0.5"
-          />
-      </g>
       <!-- ======= coordinates label ======= -->
       <text
         x="50%"
@@ -220,6 +189,7 @@
             />
           <!-- ======= Transcript axis line, arrow ======= -->
           <polyline
+            class="noevents"
             :points="transcriptAxisPoints(f, t, ti)"
             :stroke="featureColor(f)"
             fill="none"
@@ -227,7 +197,7 @@
           <!-- ======= Exons ======= -->
           <rect v-for="e in t.exons"
             :key="e.ID"
-            class="exon"
+            class="exon noevents"
             :x="featureX(e)"
             :y="0"
             :width="featureW(e)"
@@ -237,6 +207,7 @@
             />
           <!-- ======= Start codon ======= -->
           <path v-if="t.cds && showStartStopCodons"
+            class="noevents"
             :d="codonGlyph(f, t, 'start')"
             :fill="'cyan'"
             stroke="cyan"
@@ -245,6 +216,7 @@
             />
           <!-- ======= Stop codon ======= -->
           <path v-if="t.cds && showStartStopCodons"
+            class="noevents"
             :d="codonGlyph(f, t, 'stop')"
             :fill="'red'"
             stroke="red"
@@ -841,10 +813,12 @@ export default MComponent({
       this.$root.$emit('region-mouseleave', { region: this.region, vm: this, evt: e })
     },
     mouseover: function (e) {
+      //console.log('over', e)
       let f = this.getEventObjects(e)
       if (f) this.$root.$emit('feature-over', { region: this.region, feature: f.feature, transcript: f.transcript, event: e })
     },
     mouseout: function (e) {
+      //console.log('out', e)
       let f = this.getEventObjects(e)
       if (f) this.$root.$emit('feature-out', { region: this.region, feature: f.feature, transcript: f.transcript, event: e })
     },
@@ -988,5 +962,8 @@ export default MComponent({
 }
 @keyframes blinker {
   50% { outline-width: 0px; }
+}
+.zoom-region .noevents {
+  pointer-events: none;
 }
 </style>

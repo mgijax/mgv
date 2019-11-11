@@ -515,6 +515,7 @@ export default MComponent({
     },
     // FIXME All these handlers for features really belong somewhere else
     featureOver: function (f, t, e) {
+      //console.log(f, t, e)
       this.currentMouseover = f
       this.currentMouseoverT = t
       if (e.ctrlKey || e.altKey) this.detailFeatures = this.dataManager.getHomologs(f, this.vGenomes)
