@@ -23,8 +23,7 @@
           ref="searchBox"
           size="28"
           placeholder="Enter symbol, ID, or coordinates."
-          @keypress="blurOnEnter"
-          @blur="findLandmark($event.target.value)"
+          @keypress="submitOnEnter"
           @focus="selectOnFocus"
           />
         <div class="flexrow"
@@ -144,8 +143,8 @@ export default MComponent({
     selectOnFocus (e) {
       e.target.select()
     },
-    blurOnEnter (e) {
-      if (e.keyCode === 13) e.target.blur()
+    submitOnEnter (e) {
+      if (e.keyCode === 13) this.findLandmark(e.target.value)
     },
     scroll (amt) {
       this.app.scrollLock = true
