@@ -367,6 +367,23 @@ export default MComponent({
     }
   },
   methods: {
+    /*
+    // A higher level operation that focusses the user's view on the currently selected gene(s) by:
+    // 1. Creating a list from the current selection
+    // 2. Making it the current list
+    // 3. Turning on the filter "Is in current list"
+    // This has the effect of disappearing everything else
+    focusOnSelected () {
+      if (this.currentSelection.length === 0) {
+        alert("Cannot focus on current selection: nothing selected.")
+        return
+      }
+      const lst = this.listManager.newList("__focus__", this.currentSelectionToList, "#cccccc")
+      this.setCurrentList(lst)
+      this.$refs.facets.$refs.facets[3].selected = true
+    },
+    */
+    // Toggle whether we are showing all gene labels or not.
     toggleShowAllLabels: function () {
       config.ZoomRegion.showFeatureLabels = !config.ZoomRegion.showFeatureLabels
     },
@@ -540,6 +557,19 @@ export default MComponent({
       }
       this.$root.$emit('selection-state-changed')
       this.$root.$emit('context-changed')
+    },
+    setCurrentList: function (lst) {
+      this.currentList = lst
+      this.currentListSet = new Set(lst.items)
+      this.currentListItem = 0
+    },
+    stepCurrentList: function () {
+      this.currentListItem = (this.currentListItem + 1) % this.currentList.items.length
+    },
+    clearCurrentList: function () {
+      this.currentList = null
+      this.currentListSet = null
+      this.currentListItem = 0
     },
     initKeyBindings () {
       this.keyManager.register({
@@ -723,26 +753,20 @@ export default MComponent({
       let lst = data.list || data
       let shift = data.event ? data.event.shiftKey : false
       if (lst.items.length === 0) {
-          this.currentList = null
-          this.currentListSet = null
-          this.currentListItem = 0
+          this.clearCurrentList()
           return
       }
       if (lst === this.currentList) {
         if (shift) {
           // shift-click repeatedly on a list to step through its members
-          this.currentListItem = (this.currentListItem + 1) % lst.items.length
+          this.stepCurrentList()
         } else {
-          this.currentList = null
-          this.currentListSet = null
-          this.currentListItem = 0
+          this.clearCurrentList()
 	  this.$root.$emit('list-selection', null)
           return
         }
       } else {
-        this.currentList = lst
-        this.currentListSet = new Set(lst.items)
-        this.currentListItem = 0
+        this.setCurrentList(lst)
 	this.$root.$emit('list-selection', this.currentList)
         if (!shift) return
       }
@@ -753,7 +777,7 @@ export default MComponent({
     //
     this.$root.$on('list-delete', data => {
       if (this.currentList === data) {
-        this.currentList = null
+        this.clearCurrentList()
       }
     })
     //
