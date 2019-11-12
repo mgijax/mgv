@@ -12,7 +12,7 @@ export default [{
     name: `About`,
     description: `The Multiple Genome Viewer (MGV) allows you to browse and compare multiple 
         related genomes, download corresponding sequence regions, display lists of genes, and 
-        several other functions.
+        other functions.
         <p/>
         To open/close this Help at any time, click the ${i('info')} button in the page header, or type 'h'.
         This popup provides basic help.
@@ -40,17 +40,18 @@ export default [{
           `
     }, {
       label: `Views`,
-      text: `The two main sections of the page are ${ref('GenomeView')}, 
-          which shows all the chromosomes of a single genome, and ${ref('ZoomView')},
-          which shows specified chromosomal regions from one or more genomes. 
+      text: `
+      The two main sections of the page are the ${ref('ZoomView')},
+          which shows specified chromosomal regions from one or more genomes, and the
+          ${ref('GenomeView')}, which shows all the chromosomes of a single genome.
           The two views are synchronized. E.g., clicking on a strip in ${ref('ZoomView')}
           refocuses ${ref('GenomeView')} to display that genome.
           `
     }, {
       label: `Genomes and Regions`,
       text: `In the ${ref('ZoomView')}, each genomic region is displayed in its own "mini browser" 
-          that can be independently scrolled and zoomed. The size of a region
-          ranges from one chromosome to a few bases.
+          that can be scrolled and zoomed. The size of a region
+          ranges from a full chromosome to a few bases.
           <p/>
           Regions shown in the ${ref('GenomeView')} and ${ref('ZoomView')} for a given
           genome correspond, and changes in one are reflected in the other.
@@ -68,6 +69,7 @@ export default [{
       text: `The ${ref('Genomes')} box lists all the genomes.
           Check the box next to a genome to add it to the ${ref('ZoomView')};
           uncheck the box to remove it.
+          To see metadata for a genome, hover the mouse over thyour mouse over the genome's name.
           To select one genome and remove all others, shift-click the box.
           Buttons at the bottom of the list provide ways to
           select predefine sets of genomes.
@@ -79,6 +81,8 @@ export default [{
           Strips (i.e. genomes) can be reordered by dragging;
           grab the center handle (<span style="font-weight: bold;">::</span>) in the left endcap 
           and drag up or down.
+          You can also sort the genomes alphabetically by clicking the ${i('sort')} icon in the control area.
+          (NOTE that if there is a reference genome, it is always positioned
           `
       }, {
       label: `Reference genome`,
@@ -88,7 +92,7 @@ export default [{
           <li>The reference genome always stays at the top of the view; other genomes may still be rearranged.
           <li>The reference genome is always displayed; you cannot turn off its checkox (in ${ref('Genomes')}) while it is the reference.
           <li>To "turn off" the reference genome, click its "R" again.
-          <li>Hitting is "R" key is a quick way to turn on/off the reference genome.
+          <li>Hitting the "R" key is a quick way to turn on/off the reference genome.
           </ul>
           `
       }, {
@@ -104,34 +108,15 @@ export default [{
           Alternatively, split an existing region, then navigate one side to the desired location.
           `
       }, {
-      label: `Synchronized browsing`,
-      text: `
-          <table>
-          <tr>
-            <td>${i('lock_open')}</td>
-            <td>Unsynchronized. Each displayed region scrolls and zooms independently.</td>
-          </tr>
-          <tr>
-            <td>${i('lock')}</td>
-            <td>Synchronized. All displayed regions scroll and zoom in sync. E.g., if you drag 
-            in one region, all regions scroll.</td>
-          </tr>
-          </table>
-      Click the lock icon to switch modes. Other actions also set/clear this mode:
-        <ol>
-        <li> Navigating via controls at the top of the ${ref('ZoomView')} sets mode to synchronized (${i('lock')}).
-        <li> Navigating via individual (pop-up) region controls sets mode to unsynchronized (${i('lock_open')}).
-        <li> Navigating via dragging in a region maintains the current mode.
-        </ol>
-        `
-      }, {
       label: `Aligning regions around a gene`,
       text: `To center all the views around a gene (and turn on ${i('lock')}), alt-click 
           on the gene, or select "Align on this gene" from the gene's popup menu, or search for the gene 
-          via the Find box.`
+          via the Find box. If the gene has paralogs, they are/are not included in this operation depending whether 
+          the paralogs toggle ("P") is on or off, respectively.
+          `
       }, {
       label: `Region controls`,
-      text: `To access individual controls for a region within a genome,
+      text: `To access controls for an individual region within a genome,
           right-click on its background (not on a feature).
           Changes made here affect only that region (and switch to ${i('lock_open')} mode).
           `
@@ -141,12 +126,18 @@ export default [{
           its background (not on a feature). Alternatively, click the ${i('compare')} button in the region's popup controls.
           `
       }, {
+      label: `Joining regions`,
+      text: `You can join two neighboring regions by alt-clicking on the divider bar between them.
+          Both regions must be from the same chromosome.
+          `
+      }, {
       label: `Reverse orientation`,
       text: `By default, the forward strand direction is drawn left-to-right.
           When comparing regions with inversions, it can be convenient to draw some 
           left-to-right and some right-to-left, so that homologs line up vertically.
           To reverse the orientation of a region, open it controls and click on the "F-R" toggle.
-          To reverse the orientation of all the regions in a strip, click the "R" in the left endcap.
+          To reverse the orientation of all the regions in a strip, click the &gt; in the left endcap.
+          The icon turns into <span style="color: red;">&lt;</span>.
           Click again to revert to normal.
           Regions in reverse orientation are outlined in red.
           `
@@ -155,18 +146,6 @@ export default [{
       text: `
           Multiple regions for a genome are displayed side-by-side in a strip.
           Regions can be reordered by dragging; grab the handle (::)
-          at the top left corner of a region to move it left or right.
-          Genome regions can be resized by dragging the gray divider bar between
-          neighboring regions.
-          `
-      }, {
-      label: `Moving and re-sizing`,
-      text: `
-          In the ${ref('ZoomView')}, genomes are displayed as horizontal "strips".
-          Strips (i.e. genomes) can be reordered by dragging;
-          grab the center handle at the far left end of the strip to move it up or down.
-          Multiple regions for a genome can be displayed side-by-side in a strip.
-          These regions can be reordered by dragging; grab the handle
           at the top left corner of a region to move it left or right.
           Genome regions can be resized by dragging the gray divider bar between
           neighboring regions.
@@ -217,37 +196,41 @@ export default [{
       the ${ref('ZoomView')}. Then hit enter or tab.`
     }, {
       label: `Specify coordinates`,
-      text: `Type or paste coordinates in the Find box. Then hit enter or tab.`
+      text: `Type or paste coordinates in the Find box. Then hit enter or tab.
+            `
     }, {
       label: `Scroll left`,
       text: `Click the ${i('chevron_left')} button, or 
-            hit the ${i('arrow_back')} key, or drag left on a region.`
+            hit the ${i('arrow_back')} key, or drag left on a region.
+            `
     }, {
       label: `Scroll right`,
       text: `Click the ${i('chevron_right')} button, or hit the 
-          ${i('arrow_forward')} key, or drag right on a region.`
+          ${i('arrow_forward')} key, or drag right on a region.
+          `
     }, {
       label: `Zoom in`,
       text: `Click the ${i('zoom_in')} button, or hit the ${i('arrow_upward')} 
-          key, or shift-drag on a region.`
+          key, or shift-drag on a region.
+          `
     }, {
       label: `Zoom out`,
       text: `Click the ${i('zoom_out')} button, or hit the ${i('arrow_downward')}
-          key, or command-drag on a region.`
+          key, or command-drag on a region.
+          `
     }]
   }, {
     name: `Filters`,
     description: `Filters provide a way to limit the features that are drawn in the ${ref('ZoomView')}.
-       Example: to see only protein coding genes, shift-click on the checkbox next to "protein_coding_gene"
-       in the ${ref('FeatureType')} filter.
        `,
     items: [{
       heading: "General notes"
     }, {
-      label: `${i('warning', 'rgb(255, 127, 14)')}`,
+      label: `Alert icons`,
       text: `
-       When a filter is "on" an alert icon is shown in the ${ref('ZoomView')} header to remind you of that fact.
-       You can click on this icon to turn off all filters.
+       When a filter is "on", ${i('warning', 'rgb(255, 127, 14)')} is shown in the ${ref('ZoomView')} header to remind
+       you of that fact.  You can click on this icon to turn off all filters.
+       The same icon is diaplayed on each filter that is currently active; click these icons to turn off individual filters.
 	  `
     }, {
       label: `True/False filters`,
@@ -266,65 +249,63 @@ export default [{
       heading: "Specific filters"
     }, {  
       label: `Feature type`,
-      text: `Tests that a feature's type is among those selected.
+      text: `Only displays features of the selected type(s).
 	  `
     }, {  
       label: `Feature length`,
-      text: `Tests that a feature's genomic length is in one of the selected ranges.
+      text: `Only displays features whose lengths fall in the selected range(s).
           `
     }, {  
-      label: `Has canonical ID`,
-      text: `Tests that a feature does/does not have a canonical ID.
+      label: `Missing from some* genome`,
+      text: `If true, only displays features that are missing in at least one of the currently displayed genomes.
+            If false, only displays features that are present in all currently displayed genomes.
           `
     }, {  
       label: `Is in current list`,
-      text: `Tests that a feature is/is not a member of the currently displayed list.
-          If no list is currently being displayed, the filter has no effect.
-          If the current list changes while this filter is active, the view updates accordingly.
+      text: `If there is no current list, this filter has no effect.
+          Otherwise: if true, only displays features that are members of the current list;
+          if false, only displays features that are not members of the current list.
           `
     }, {  
       label: `Is currently selected`,
-      text: `Tests that a feature is/is not currently selected.
-         If there is no current selection, this filter has no effect (everything is shown).
-         If the current selection changes while this filter is active, the view updates accordingly.
-         (Reminder: click on a feature to select it. Shift-click to select multiple features.
-         Click on the background to unselect everything.)
+      text: `If no features are currently selected, this filter has no effect.
+          Otherwise: if true, only displays currently selected features.
+          if false, only displays features that are not currently selected.
          `
     }]
   }, {
     name: `Sequences`,
     description: `You can select sequences and download them in FASTA format or copy them to the clipboard.
         The ${ref('SequenceCart')} contains (descriptors of) sequences that you select plus
-        controls for downloading/copying. Actual sequences are not materialized until download
+        controls for downloading. Actual sequences are not materialized until download
         time, so large(-ish) sequences are ok. If you want whole chromosomes, though,
         you should go to <a href="ftp://ftp.ensembl.org/pub/" target="_blank">Ensembl</a>.
         `,
     items: [{
       label: `Select genomic sequences`,
       text: `Alt-drag the desired region; it is added to the ${ref('SequenceCart')}.
-          If ${i('lock')} is set, the selection happens in all displayed regions.
+          If ${i('lock','rgb(255, 127, 14)')} is set, the selection happens in all displayed regions.
           If the drag action is right-to-left, the sequence(s) will be reverse-complemented. 
           `
       }, {
       label: `Select gene sequences`,
       text: `Right click on a gene to open its context menu. Choose one of the 
           options under "Add sequences to cart." You can select genomic, transcript,
-          composite transcript, or CDS sequences, for the current gene or for that
+          composite transcript, or CDS sequences; you may select these sequences the current gene only or for that
           gene and its homologs. A composite transcript consists of the union of all the
-          exons in the gene.
+          exons of all the transcripts of a gene; the are what you see when "Spread transcripts" is off,
+          and all trasncripts for a gene are piled up on top of one another..
           `
       }, {
       label: `Download sequences`,
-      text: `In the ${ref('SequenceCart')}, select the sequences you want to download,
-	  and click the ${i('cloud_download')} button. If you fill in a file name, the sequences
-	  will be downloaded to that file. If not, the sequences will be displayed in a new
-	  browser window.
-          `
-      }, {
-      label: `Copy sequences to the clipboard`,
-      text: `In the ${ref('SequenceCart')}, select the sequences you want to copy.
-          Then click the ${i('file_copy')} button. For very large sequences, downloading to
-	  a file is preferred.
+      text: `In the ${ref('SequenceCart')}, select the sequences you want to download by clicking
+          their checkboxes in the SequenceCart.
+          When sequences are selected, download buttons are enabled.
+          To download to a file, enter a file names and click the ${i('cloud_download')} next to "File".
+          To view the sequences in a browser tab, click the ${i('cloud_download')} next to "Browser".
+          And to load the sequences into the clipboard (so you can paste them somewhere), click the
+          ${i('cloud_download')} next to "Clipboard", then click the ${i('check_circle','green')} to confirm (this
+          extra step is required by web security restrictions).
           `
       }, {
       label: `Reverse complement`,
@@ -339,15 +320,17 @@ export default [{
           (translated). Click this toggle to switch.`
       }, {
       label: `Clear the ${ref('SequenceCart')}`,
-      text: `Click the checkmark at the bottom of the ${ref('SequenceCart')} to select all sequences, then
-          click the ${i('delete')} button.`
+      text: `Click the ${i('check_box')} at the bottom of the ${ref('SequenceCart')} to select all sequences, then
+          click the ${i('delete','red')} button.`
     }]
   }, {
     name: `Lists and searches`,
     description: `You can create and display lists of genes. Your current lists plus controls for creating new lists are
         available under ${ref('Lists and searches')}. You can create lists by selecting specific
-        genes, by entering a list of symbols or IDs, by searching by a disease, phenotype or other category,
-        or by combining other lists.`, 
+        genes, by entering a list of symbols or IDs, by searching a disease, phenotype or other category,
+        or by combining other lists.
+        <span style="color: red;">Note that lists created by searching are currently limited to mouse only.</span>
+        `,
     items: [{
       label: `Create by search`,
       text: `Under Create, choose a category (e.g. "...by phenotype or disease"), enter a term
@@ -359,27 +342,31 @@ export default [{
       label: `Create from selection`,
       text: `In the ${ref('ZoomView')}, you select genes by clicking on them. Hold the shift key to select more
           than one. Then, under Create, select "New list from ZoomView selection" and click the "GO" button.
+          The new list is given a default name and color, which you can change.
 	  `
       }, {
       label: `Create by combining`,
       text: `Example: you have lists A and B and you want to create C containing the genes common to
           both. (1) Under Create, select "New list from combining lists", and click "GO". The ${ref('ListEditor')} appears.
 	  (2) Drag list A from MyLists onto the ${ref('ListEditor')} items area.
-          (3) Drag list B onto the set intersection area. Neighboring areas implement set union and set
-          difference. You can also combine the current selection with a list by simply clicking on one
-          of the set operators.
-          (Example: to add the current selection to a list, click the union area.)
+          (3) Drag list B onto the set intersection area. (Neighboring areas support intersection and difference.)
           (4) Click the Create button at the bottom of the ${ref('ListEditor')} to generate
           the set of intersection genes, which are also displayed in the ${ref('GenomeView')}.
+          <p/>
+          You can also combine a list with the current selection by clicking on one of the operator areas.
+          Example: to add the current selection to a list, click the union area.
           `
       }, {
       label: `Display a list`,
-      text: `Click on the list under MyLists. The positions of all list items are shown in the ${ref('GenomeView')}.
-      In the ${ref('ZoomView')}, any list items currently in view are highlighted. To stop displaying a list,
-      click on it again.
+      text: `Click on the list under MyLists. The positions of all list items (up to a max size) are shown
+      in the ${ref('GenomeView')}.
+      In the ${ref('ZoomView')}, any list items currently in view are highlighted.
+      As well, the list name appears in the ZoomView control area.
+      To stop displaying a list, click on it again under MyLists, or click the ${i('highlight_off','red')}
+      in the control area.
           `
       }, {
-      label: `To step through a list`,
+      label: `Step through a list`,
       text: `Shift-click on a list to make it the current list and jump to the first gene.
           Continue to shift-click to jump to successive list items.
           `
@@ -395,13 +382,8 @@ export default [{
   }, {
     name: `Settings`,
     description: `Under ${ref('Settings')} are numerous parameters you can change to customize the display. At any point,
-        you can also download the current display as a png or svg.`,
+        you can also download the current display as a png or svg (click the ${i('camera_alt')} icon).`,
     items: [{
-      label: `Download image`,
-      text: `Click the ${i('camera_alt')} button in either the ${ref('ZoomView')} or the ${ref('GenomeView')} to download a
-          png image of that area. Shift-click to download svg. Unlike a screen grab, this captures the
-          entire display area even if it is scrolled out of view.`
-    }, {
       heading: `Features`
     }, {
       label: `Details threshold`,
@@ -412,7 +394,7 @@ export default [{
       label: `Show all labels`,
       text: `When checked and view region is below the details threshold, displays labels for all 
           visible genes. When unchecked or when view region is above the threshold, labels are
-          displayed only for highlighted genes.
+          displayed only for highlighted genes. Keyboard shortcut: n.
           `
     }, {
       label: `Font size`,
@@ -441,7 +423,7 @@ export default [{
     }, {
       label: `Show start/stop codons`,
       text: `When checked, marks the positions of start and stop codons. Start codons are blue triangles 
-          pointing in the direction of transcription. Stop codons are red triangled pointing down.
+          pointing in the direction of transcription. Stop codons are red triangles pointing down.
           `
     }, {
       heading: `Sequences. When zoomed in far enough (less than a few hundred bases), the genomic 
@@ -454,7 +436,7 @@ export default [{
       heading: `Homology Connections`
     }, {
       label: `Show connectors`,
-      text: `When checked, connectors join highlighted genes across genomes.`
+      text: `When checked, connectors are drawn joining highlighted genes across genomes.`
     }, {
       label: `Include paralogs`,
       text: `Same as clicking the P icon in the view area. Controls whether paralogs are (on) or are not (off) included in region calculations, connector drawing, etc.
@@ -462,10 +444,10 @@ export default [{
     }, {
       label: `Twist inversions`,
       text: `Draws connectors between equivalent features on opposite strands with (on) or without (off) a twist.
-          `
+      `
     }, {
       label: `Contrast`,
-      text: `Increasing the contrast makes selected genes stand out more by fading unselected genes.
+      text: `Fades non-selected features to make the selected feature stand out.
           `
     }, {
       label: `Fill opacity`,
@@ -495,21 +477,22 @@ export default [{
       text: `Open/close this help window. Same as clicking ${i('info')}.`
     },{
       label: `l`,
-      text: `Same as clicking the lock icon. Flips synchronization mode between synchronized
-          (${i('lock','rgb(255, 127, 14)')}) and not synchronized (${i('lock_open')}).
+      text: `Same as clicking the lock icon. Turns lock on
+          (${i('lock','rgb(255, 127, 14)')}) and off (${i('lock_open')}).
+          NOTE: when lock is turned on, the reference genome (if any) is de-selected.
           `
     },{
       label: `n`,
-      text: `Show/don't show all gene names (if view size is below threshold). Same as clicking "Show all labels" under Settings.`
+      text: `Show/don't show all gene names (when view size is below threshold). Same as clicking "Show all labels" under Settings.`
     },{
       label: `p`,
       text: `Include/exclude paralogs. Same as clicking the P icon.`
     },{
       label: `r`,
-      text: `Turn reference genome on/off. The top genome in the view is made the reference. Same as clicking the R in the genome's left end cap.`
+      text: `Turn reference genome on/off. The top genome in the view is made the reference. Same as clicking the R in the genome's left end cap. NOTE: when ref genome is selected, the lock is turned off.`
     },{
       label: `t`,
-      text: `Open/close the left-side tool panel.`
+      text: `Open/close the left-side tool panel. Same as clicking the ${i('settings')} in the page header.`
     },{
       label: `x`,
       text: `Collapse/expand transcript display. Same as clicking 'Spread trancripts' under  ${ref('Settings')}.`

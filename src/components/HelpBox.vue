@@ -135,4 +135,10 @@ export default MComponent({
 .help-box .footer {
   margin-top: 10px;
 }
+.help-box td.heading {
+  background-color: #f1f1f1;
+  font-size: 18px;
+  padding-bottom: 0px;
+  text-align: center;
+}
 </style>
