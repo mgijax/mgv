@@ -149,6 +149,7 @@ export default MComponent({
     })
     // mousemove
     this.$root.$on('region-mousemove', d => {
+      if (!this.cfg.trackMouse) return
       // bounding box of the region that sent the event
       const bb = d.vm.$refs.underlay.getBoundingClientRect()
       // pix from left side of region

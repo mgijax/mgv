@@ -216,7 +216,7 @@
     <label>Track mouse</label>
     <input
         type="checkbox"
-        v-model="ZoomRegion.trackMouse"
+        v-model="RangeBoxes.trackMouse"
         />
   </div>
   <!-- =================== -->
