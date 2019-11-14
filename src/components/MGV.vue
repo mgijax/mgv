@@ -191,6 +191,8 @@
 
 <script>
 //
+import ga from '@/lib/mgi_ga'
+//
 import Facets from '@/components/Facets'
 import FeatureColorMap from '@/lib/FeatureColorMap'
 import FeatureDetails from '@/components/FeatureDetails'
@@ -367,6 +369,9 @@ export default MComponent({
     }
   },
   methods: {
+    logEvent: function (action, label, value) {
+      ga.ga_logEvent("MGV", action, label, value)
+    },
     /*
     // A higher level operation that focusses the user's view on the currently selected gene(s) by:
     // 1. Creating a list from the current selection
@@ -766,6 +771,7 @@ export default MComponent({
           return
         }
       } else {
+        this.logEvent('ListOp', 'display')
         this.setCurrentList(lst)
 	this.$root.$emit('list-selection', this.currentList)
         if (!shift) return

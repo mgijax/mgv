@@ -145,6 +145,9 @@ export default MComponent({
     selected () {
       return this.cart.filter(item => item.selected)
     },
+    selectedLength () {
+      return this.selected.reduce((a,v) => a + v.totalLength, 0)
+    },
     nothingSelected () {
       return this.selected.length === 0
     },
@@ -191,6 +194,7 @@ export default MComponent({
       this.$nextTick(() => {
           this.$refs.sequenceDownloadForm.submit()
       })
+      this.app.logEvent('DownloadSequence', 'file', this.selectedLength)
     },
     downloadToClipboard: function () {
       if (this.nothingSelected) return
@@ -204,6 +208,7 @@ export default MComponent({
       document.execCommand("copy");
       document.body.removeChild(dummy);
       this.cbText = ''
+      this.app.logEvent('DownloadSequence', 'clipboard', this.selectedLength)
     },
     cancelClipboard: function () {
       this.cbText = ''
@@ -213,6 +218,7 @@ export default MComponent({
       this.dataManager().getSequences(this.selected).then(text => {
 	const w = window.open("","_blank")
 	w.document.write('<pre>', text, '</pre>')
+        this.app.logEvent('DownloadSequence', 'browser', this.selectedLength)
       })
     },
     viewFetched: function () {

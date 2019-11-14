@@ -82,6 +82,7 @@ export default MComponent({
   methods: {
     clickedGo () {
       this[this.createMethod]()
+      this.app.logEvent('ListOp', 'new')
     },
     newEmpty () {
       this.$root.$emit('list-edit-new')

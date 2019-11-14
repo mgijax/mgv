@@ -542,6 +542,15 @@ class RegionManager {
         start: 1,
         end: Math.min(10000000, gb.chromosomes[0].length)
       }))
+    } else {
+      // One the assumption that region boundaries coincide with feature boundaries,
+      // add a little space to each end.
+      rbs.forEach(r => {
+        const len = r.end - r.start + 1
+        const margin = Math.round(len * 0.05)
+        r.start -= margin
+        r.end += margin
+      })
     }
     return rbs
   }
@@ -777,7 +786,7 @@ class RegionManager {
   //
   regionChange (d) {
     //
-    //this.app.logEvent("MGV", "Navigate", d.op)
+    this.app.logEvent("Navigate", d.op)
     //
     const r = d.region ||
       this.currRegion ||

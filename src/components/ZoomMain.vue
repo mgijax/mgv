@@ -84,6 +84,7 @@ export default MComponent({
       } else {
         svg2png(this.$el, this.width, this.height, 'mgv.zoomview.png')
       }
+      this.app.logEvent("DownloadImage", "zoomView")
     },
     resize: function () {
       this.width = this.$el.parentNode.getBoundingClientRect().width - 5
