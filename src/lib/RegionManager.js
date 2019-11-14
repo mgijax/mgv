@@ -726,7 +726,7 @@ class RegionManager {
     // x-offset in pixels from left side of strip. Init to 12 to skip over endcap.
     let dx = 12
     // Number of pixels between regions 
-    const gap = 2
+    const gap = 5
     // total gap space for the strip
     const totalGap = dx + gap * (strip.regions.length - 1)
     // width available for the regions 
@@ -776,6 +776,8 @@ class RegionManager {
   //    pos (when op = split) Position of the split. (0..1)
   //
   regionChange (d) {
+    //
+    //this.app.logEvent("MGV", "Navigate", d.op)
     //
     const r = d.region ||
       this.currRegion ||

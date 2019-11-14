@@ -27,7 +27,7 @@
       :key="zri+'-2'"
       class="border-handle"
       v-show="zri > 0 && !rDragging"
-      :transform="`translate(${zr.deltaX - 2.5}, 0)`"
+      :transform="`translate(${zr.deltaX - 5}, 0)`"
       :i="zri"
       x="0"
       y="0"
