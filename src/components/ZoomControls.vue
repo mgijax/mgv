@@ -159,7 +159,10 @@ export default MComponent({
     },
     findLandmark (n) {
       if (!n) return
-      const f = this.dataManager().getFeaturesBy(n).filter(f => this.app.vGenomes.indexOf(f.genome) !== -1)[0]
+      const fs = this.dataManager().getFeaturesBy(n)
+      const fsf = fs.filter(f => this.app.vGenomes.indexOf(f.genome) !== -1)
+      const f = fsf[0]
+      //const f = this.dataManager().getFeaturesBy(n).filter(f => this.app.vGenomes.indexOf(f.genome) !== -1)[0]
       if (f) {
         // user entered a valid symbol
         this.app.scrollLock = true
@@ -168,7 +171,7 @@ export default MComponent({
         // not a valid symbol. try parsing as coords.
         const c = gc.parse(n)
         if (c) {
-          this.$root.$emit('set-scroll-lock')
+          this.app.scrollLock = true
           this.$root.$emit('region-change', { op: 'jump-to', coords: c })
         } else {
           alert('Landmark not found: ' + n)

@@ -10,20 +10,36 @@
       hoverBackgroundColor="white"
       />
     <img
+      name="allianceLogo"
+      title="Alliance of Genome Resources"
+      class="logo"
+      src="../assets/Alliance_logo.png"
+      />
+    <!--
+    <img
       name="mgiLogo"
       title="Mouse Genome Informatics"
       class="logo"
       src="../assets/MGI_logo.png"
       />
+    -->
     <span
       name="title"
       >Multiple Genome Viewer (MGV)</span>
+    <img
+      name="allianceLogo"
+      title="Alliance of Genome Resources"
+      class="logo"
+      src="../assets/Alliance_logo.png"
+      />
+    <!--
     <img
       name="mousemineLogo"
       title="MouseMine"
       class="logo"
       src="../assets/MouseMine_logo.png"
       />
+    -->
     <m-button
       name="infoBtn"
       title="Click for help."

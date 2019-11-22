@@ -14,6 +14,7 @@ import u from '@/lib/utils'
 import { SwimLaneAssigner, FeaturePacker, ContigAssigner } from '@/lib/Layout'
 import config from '@/config'
 import { GenomeRegistrar } from '@/lib/GenomeRegistrar'
+import HomologyManager from '@/lib/HomologyManager'
 import gff3 from '@/lib/gff3lite'
 import { translate, reverseComplement } from '@/lib/genetic_code'
 
@@ -30,23 +31,31 @@ class DataManager {
     this.symbol2feats = {} // symbol -> [ features ]
     this.greg = new GenomeRegistrar()
     this.genomes = this.greg.register(this.url)
+    this.homologyManager = new HomologyManager(this, this.url)
+  }
+  ready () {
+    return this.homologyManager.ready()
   }
   getFeatureById (id) {
     return this.id2feat[id]
   }
   getFeaturesByCid (cid) {
-    return this.cid2feats[cid]
+    return this.cid2feats[cid] || []
   }
   getFeaturesByHid (hid) {
-    return this.hid2feats[hid]
+    return this.hid2feats[hid] || []
   }
   getFeaturesBySymbol (symbol) {
-    return this.symbol2feats[symbol.toLowerCase()]
+    return this.symbol2feats[symbol.toLowerCase()] || []
   }
   getFeaturesBy (val) {
     let f = this.getFeatureById(val)
     if (f) return [f]
-    return this.getFeaturesByCid(val) || this.getFeaturesBySymbol(val) || []
+    let fs = this.getFeaturesByCid(val)
+    if (fs.length > 0) return fs
+    fs = this.getFeaturesBySymbol(val)
+    if (fs.length > 0) return fs
+    return []
   }
   //
   lookupGenome (n) {
@@ -320,57 +329,24 @@ class DataManager {
     }
     return d
   }
-  // Returns true iff genomes ga and gb are equivalent
-  equivalentGenomes (ga, gb) {
-    const txa = ga.metadata.taxonid
-    const txb = gb.metadata.taxonid
-    return txa === txb || 
-      // FIXME: hardcoded special case for mouse subspecies.
-      (txa.startsWith('100') && txa.length === 5 && txb.startsWith('100') && txb.length === 5)
-  }
   // Returns true iff feature a and b are equivalent
   equivalent (a, b) {
-    const eqgs = this.equivalentGenomes(a.genome, b.genome)
-    return a === b ||
-      a.ID === b.ID ||
-      a.cID && a.cID === b.cID ||
-      a.hID && a.hID === b.hID && (!eqgs || this.app.includeParalogs)
+    return this.homologyManager.isHomolog(a, b)
   }
   // Returns true iff features a and b are paralogs
   paralogs (a, b) {
-    return a.hID &&
-        a.hID === b.hID && 
-        a.cID !== b.cID &&
-        this.equivalentGenomes(a.genome, b.genome)
+    return this.homologyManager.isInferredParalog(a, b)
   }
   // Returns a list of the homologs of feature f from the specified genomes in the specified order.
-  // If a homolog does not exist in a given genome, that entry in the returned list === undefined.
   getHomologs (f, genomes) {
     if (typeof(f) === 'string') {
+      // FIXME picking an arbitrary one. Should use them all.
       f = (this.getFeaturesBy(f) || [])[0]
     }
     if (!f) {
       return []
     }
-    const homs = genomes.map(g => {
-      const eqgs = this.equivalentGenomes(f.genome, g)
-      let gfeats
-      if (!eqgs || (this.app.includeParalogs && f.hID)) {
-        gfeats = this.hid2feats[f.hID]
-      } else if (f.cID) {
-        gfeats = this.cid2feats[f.cID] 
-      } else if (g === f.genome) {
-        gfeats = [f]
-      }
-      return (gfeats || []).filter(ff => ff.genome === g)
-    })
-
-    return homs.reduce((a,v) => a.concat(v), [])
-  }
-  // Returns the homologs of feature f from genome g, or undefined if none exists
-  // If there is more than one homologs, an arbitrary one is returned.
-  getHomolog (f, g) {
-    return this.getHomologs(f, [g])[0]
+    return this.homologyManager.getHomologs(f, genomes)
   }
   //
   assignLanes (feats, ppb, fsize) {

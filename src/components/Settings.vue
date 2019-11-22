@@ -169,10 +169,10 @@
   </div>
   <!-- =================== -->
   <div
-    title="Draw inversions with a twist."
+    title="Draw inversions with a twist and a different color."
     class="flexrow"
     >
-    <label>Twist inversions</label>
+    <label>Highlight inversions</label>
     <input
         type="checkbox"
         v-model="ZoomFiducials.showInversions"

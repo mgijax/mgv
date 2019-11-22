@@ -442,8 +442,8 @@ export default [{
       text: `Same as clicking the P icon in the view area. Controls whether paralogs are (on) or are not (off) included in region calculations, connector drawing, etc.
       `
     }, {
-      label: `Twist inversions`,
-      text: `Draws connectors between equivalent features on opposite strands with (on) or without (off) a twist.
+      label: `Highlight inversions`,
+      text: `If on, connectors between features on opposite strands ('inversions') in red and with a twist.
       `
     }, {
       label: `Contrast`,

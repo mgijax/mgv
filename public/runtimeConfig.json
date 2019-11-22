@@ -1,5 +1,6 @@
 {
-    "dataUrl" : "http://proto.informatics.jax.org/prototypes/mgv-data/",
+    "xataUrl" : "http://proto.informatics.jax.org/prototypes/mgv-data/",
+    "dataUrl" : "http://proto.informatics.jax.org/prototypes/mgv-data-alliance/",
     "linkUrls": [{
         "genomes" : [
             "129S1/SvImJ",

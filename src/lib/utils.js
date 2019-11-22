@@ -15,22 +15,24 @@ function assert (cond, message) {
 // If unique is unspecified or is true, builds a unique index - each key maps to one element.
 // If unique is false, builds a non-unique index - each kep maps to a list of elements.
 //
-function index (list, key, unique) {
+function index (list, key, unique, ofunc) {
   let fkey
   if (typeof key === 'string') fkey = (x) => x[key]
   else if (typeof key === 'function') fkey = key
   else fkey = (x) => x
   //
+  ofunc = ofunc || (x => x)
+  //
   if (unique === false) {
     return list.reduce((ix, item) => {
       let k = fkey(item)
       if (!(k in ix)) ix[k] = []
-      ix[k].push(item)
+      ix[k].push(ofunc(item))
       return ix
     }, {})
   } else {
     return list.reduce((ix, item) => {
-      ix[fkey(item)] = item
+      ix[fkey(item)] = ofunc(item)
       return ix
     }, {})
   }
@@ -203,7 +205,7 @@ function deepCopy (obj) {
 //  type: expected type of the response (text, json, or gff3)
 //  postData: if provided, a URL-encoded string, eg, "name=Joel&age=60"
 function fetch (url, type, postData) {
-  const types = ['text', 'json', 'gff3']
+  const types = ['text', 'json', 'gff3','tsv']
   if (!type) type = 'text'
   if (types.indexOf(type) === -1) return Promise.reject('Unknown type: ' + type)
   //
@@ -213,6 +215,10 @@ function fetch (url, type, postData) {
     } else {
         return Promise.reject(new Error(response.statusText))
     }
+  }
+  //
+  function parseTsv (s) {
+    return s.split(/\n/).map(l => l.trim().split())
   }
   //
   let opts = undefined
@@ -233,6 +239,8 @@ function fetch (url, type, postData) {
       return r.json()
     case 'gff3':
       return r.text().then(t => gff.parseFile(t))
+    case 'tsv':
+      return r.text().then(t => parseTsv(t))
     default:
       fail('Unknown type: ' + type)
     }

@@ -351,6 +351,9 @@ export default MComponent({
     vGenomes: function () {
       return this.strips.map(s => s.genome)
     },
+    vTaxons: function () {
+      return Array.from(new Set(this.vGenomes.map(g => g.metadata.taxonid)))
+    },
     activeFacetsText: function () {
       return this.activeFacets.map(f => {
         return `${f.facet} [${f.values.join(", ")}]`
@@ -817,7 +820,7 @@ export default MComponent({
       this.activeFacets = data
     })
     // Here we go...
-    this.initialize()
+    this.dataManager.ready().then(() => this.initialize())
   }
 })
 </script>
