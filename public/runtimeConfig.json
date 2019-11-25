@@ -35,43 +35,28 @@
             "text": "Alliance",
             "url" : "https://www.alliancegenome.org/gene/",
             "attr": "cID"
-        }]
-    }, {
-        "genomes" : ["H.sapiens"],
-        "links" : [{
+        }, {
             "text" : "Ensembl",
             "url" : "http://www.ensembl.org/id/",
             "attr": "ID"
-        }, {
-            "text" : "HumanMine",
-            "url" : "http://www.humanmine.org/humanmine/portal.do?class=Gene&externalids=",
-            "attr": "ID"
-        }, {
+        }]
+    }, {
+        "genomes" : [
+            "H.sapiens",
+            "R.norvegicus",
+            "D.rerio",
+            "D.melanogaster",
+            "C.elegans",
+            "S.cerevisiae"
+        ],
+        "links" : [{
             "text": "Alliance",
             "url" : "https://www.alliancegenome.org/gene/",
             "attr": "cID"
-        }]
-    }, {
-        "genomes" : ["R.norvegicus"],
-        "links" : [{
+        }, {
             "text" : "Ensembl",
             "url" : "http://www.ensembl.org/id/",
             "attr": "ID"
-        }, {
-            "text": "Alliance",
-            "url" : "https://www.alliancegenome.org/gene/",
-            "attr": "cID"
-        }]
-    }, {
-        "genomes" : ["D.rerio"],
-        "links" : [{
-            "text" : "Ensembl",
-            "url" : "http://www.ensembl.org/id/",
-            "attr": "ID"
-        }, {
-            "text": "Alliance",
-            "url" : "https://www.alliancegenome.org/gene/",
-            "attr": "cID"
         }]
     }],
     "exitUrl": "http://www.informatics.jax.org"

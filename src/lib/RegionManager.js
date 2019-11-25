@@ -634,7 +634,7 @@ class RegionManager {
     const delta = lcoords.delta
     const w = lcoords.length
     const alignOn = config.ZoomRegion.featureAlignment
-    const lms = this.app.dataManager.getHomologs(lcoords.landmark, [genome]).filter(x => x)
+    const lms = this.app.dataManager.getHomologs(lcoords.landmark, [genome])
     //
     if (lms.length === 0) {
       return null
@@ -647,24 +647,7 @@ class RegionManager {
       if (typeof(lcoords.anchor) === 'number') {
         lmp = lm.start + lcoords.anchor * (lm.end - lm.start + 1)
       } else {
-        switch (alignOn) {
-        case '3-prime':
-          lmp = lm.strand === '+' ? lm.end : lm.start
-          break
-        case 'proximal':
-          lmp = lm.start
-          break
-        case 'distal':
-          lmp = lm.end
-          break
-        case 'midpoint':
-          lmp = Math.floor((lm.start + lm.end) / 2)
-          break
-        case '5-prime':
-        default:
-          lmp = lm.strand === '+' ? lm.start : lm.end
-          break
-        }
+        lmp = Math.floor((lm.start + lm.end) / 2)
       }
       const s = hasFlank ? lm.start - lcoords.flank : Math.round(lmp - lw / 2) + delta
       return this.makeRegion({

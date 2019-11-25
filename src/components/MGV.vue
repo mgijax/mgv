@@ -1,6 +1,6 @@
 <template>
   <div class="mgv-app">
-    <m-header @gear-clicked="toggleDrawer"></m-header>
+    <m-header @gear-clicked="toggleDrawer" ref="header"></m-header>
     <div name="content" class="flexrow">
       <!--
       ============ Left column ==============================================
@@ -335,12 +335,22 @@ export default MComponent({
       return Array.from(cHomIds)
     },
     currentSelectionSet: function () {
-      return new Set(this.currentSelection)
+      const sids = u.flatten(this.currentSelection.map(f => this.dataManager.getHomologCids(f)))
+      return new Set(sids)
     },
     currentSelectionLabel: function () {
       const ids = Array.from(new Set(this.currentSelection.map(f => f.symbol||f.cID||f.ID)))
       ids.sort()
       return ids.join(", ")
+    },
+    currentMouseoverSet: function () {
+      const dm = this.dataManager
+      if (this.currentMouseover) {
+        const f = this.currentMouseover
+        return new Set(this.dataManager.getHomologCids(f))
+      } else {
+        return new Set()
+      }
     },
     agIndex: function () {
       return this.allGenomes.reduce((ix, g) => { ix[g.name] = g; return ix }, {})
@@ -369,6 +379,11 @@ export default MComponent({
       set: function (v) {
         config.MGV.includeParalogs = Boolean(v)
       }
+    }
+  },
+  watch: {
+    vTaxons: function () {
+      this.$root.$emit('taxons-changed')
     }
   },
   methods: {
@@ -543,7 +558,6 @@ export default MComponent({
       //console.log(f, t, e)
       this.currentMouseover = f
       this.currentMouseoverT = t
-      if (e.ctrlKey || e.altKey) this.detailFeatures = this.dataManager.getHomologs(f, this.vGenomes)
     },
     featureOff: function (f, t, e) {
       this.currentMouseover = null
@@ -552,7 +566,7 @@ export default MComponent({
     featureClick: function (f, t, e) {
       this.detailFeatures = this.dataManager.getHomologs(f, this.vGenomes)
       if (e.shiftKey) {
-        if (this.currentSelectionSet.has(f)) {
+        if (this.currentSelectionSet.has(f.cID)) {
           this.currentSelection = this.currentSelection.filter(s => {
             return ! this.dataManager.equivalent(s, f)
           })

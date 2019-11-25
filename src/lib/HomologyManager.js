@@ -31,142 +31,75 @@ class HomologyManager {
         // add idB
         ar.push(idB)
       })
+      //
+      this.app.$root.$on('taxons-changed', d => {
+        this.computeAllInferredParalogs()
+      })
+      //
       return true
     })
   }
-  //
+  // Returns a promise that resolves (to true) when I'm ready to go
   ready () {
     return this.readyP
   }
+  // For each specified taxon, computes inferred paralogs, relative to all the rest
+  computeAllInferredParalogs (txAs) {
+    console.log('Computing inferred paralogs...')
+    txAs = txAs || this.app.vTaxons
+    txAs.map(txA => this.computeInferredParalogs(txA, txAs))
+    console.log('Done.')
+  }
+  // Computes inferred paralogs for all txA ids, relative to the specified list of taxons.
+  // Records results in the main index (at this.index[txA][txA])
+  computeInferredParalogs (txA, txBs) {
+     const Aix = this.index[txA] = (this.index[txA] || {})
+     const paraIx = this.index[txA][txA] = {}
+     txBs.forEach(txB => {
+       if (txA === txB) return []
+       const Bix = this.index[txB] || {}
+       const ABix = Aix[txB] || {}
+       const BAix = Bix[txA] || {}
+       // at this point, ABix is the A->B orthology index and BAix is the B->A index.
+       // for every id in ABix find its B ortholog ids, then map each B id back to its
+       // A orthologs.
+       for (let idA in ABix) {
+         const idBs = ABix[idA] || []
+         const idAs = u.flatten(idBs.map(idB => BAix[idB] || []))
+         if (paraIx[idA]) {
+           paraIx[idA] = paraIx[idA].concat(idAs)
+         } else {
+           paraIx[idA] = idAs
+         }
+       }
+       // Eliminate duplicates from the lists of paralogs
+       for (let idA in paraIx) {
+         paraIx[idA] = Array.from(new Set(paraIx[idA]))
+       }
+     })
+  }
   //
-  fixGenomesArg (genomes) {
-    if (!genomes) {
-      return this.app.vGenomes
-    } else if (!Array.isArray(genomes)) {
-      return [genomes]
-    } else {
-      return genomes
-    }
-  }
-  // Hacky function so that all mouse species are considered the same
-  fixTaxonId (taxonid) {
-    if (taxonid.startsWith("100")) taxonid = "10090"
-    return taxonid
-  }
-  //
-  getTaxonId (f) {
-    const t = f.genome.metadata.taxonid
-    return this.fixTaxonId(t)
-  }
-
-  //
-  getOrthologIds (idA, txA, txB) {
-    const abIndex = (this.index[txA] || {})[txB] || {}
-    return abIndex[idA] || []
-  }
-  //
-  isOrthologId (idA, txA, idB, txB) {
-    const orths = this.getOrthologIds(idA, txA, txB)
-    return orths.indexOf(idB) >= 0
-  }
   // For a given (canonical) id in a given taxon, returns
   // list of all homologous (canonical) ids from specified taxons.
-  // For different taxonids, uses orthology assertions. 
-  // For same taxon id, uses inferred paralogy (if includeParalogs is on)
-  // or just idA (otherwise)..
   getHomologIds (idA, txA, txBs) {
-    txA = this.fixTaxonId(txA)
-    const txAi = this.index[txA] || {}
-    const homIds =  u.flatten(txBs.map(txB => {
-      txB = this.fixTaxonId(txB)
-      if (txB === txA) {
-        // same taxon.
-        if (this.app.includeParalogs) {
-          // inlude all inferred paralogs
-          return this.getInferredParalogIds(idA, txA, txBs)
-        } else {
-          // inlude just idA
-          return [idA]
-        }
-      } else {
-        // different taxon. Use orthology mappings.
-        const txABi = txAi[txB] || {}
-        return txABi[idA] || []
-      }
-    }))
-    // eliminate dups
-    return Array.from(new Set(homIds))
+    const Aix = this.index[txA] || {}
+    const homIds = txBs.map(txB => (Aix[txB] || {})[idA] || [])
+    return u.flatten(homIds)
   }
-  // Define inferred paralogs as orthologs of my orthologs that are in my taxon.
-  //
-  getInferredParalogIds (idA, txA, txBs) {
-    txA = this.fixTaxonId(txA)
-    txBs = txBs.map(tx => this.fixTaxonId(tx))
-    const paraIds = u.flatten(txBs.map(txB => {
-      const bHomIds = txA === txB ? [] : this.getHomologIds(idA, txA, [txB])
-      const bHomParas = u.flatten(bHomIds.map(idB => this.getHomologIds(idB, txB, [txA])))
-      return bHomParas
-    }))
-    // make sure paras includes itself
-    paraIds.push(idA)
-    // eliminate dupes
-    return Array.from(new Set(paraIds))
-  }
-  // Returns homologs of a feature from the given genome(s).
-  // Args:
-  //    f : a Feature
-  //    genomes : genomes to get homologs for. If not specified,
-  //            gets homologs for all currently selected genomes.
-  // Returns:
-  //    List of features from the specified genome(s) that are homologous to f
-  //
-  getHomologs (f, genomes) {
-    genomes = this.fixGenomesArg(genomes)
-    const txA = this.fixTaxonId(f.genome.metadata.taxonid)
-    const txBs = Array.from(new Set(genomes.map(g => this.fixTaxonId(g.metadata.taxonid))))
-    const homIds = this.getHomologIds(f.cID, txA, txBs)
-    const homs = homIds.map(hid =>
-       this.dataManager.getFeaturesByCid(hid).filter(hom =>
-           genomes.indexOf(hom.genome) >= 0))
-    return u.flatten(homs)
+  // Extended version of getHomologIds. Also includes orthologs of idA's paralogs.
+  getHomologIdsExt (idA, txA, txBs) {
+    const idAs = this.getInferredParalogIds(idA, txA)
+    const idBs = idAs.map(a => this.getOrthologIds(a, txA, txBs))
+    idBs.push(idAs)
+    return Array.from(new Set(u.flatten(idBs)))
   }
   //
-  isOrtholog (fA, fB) {
-    return this.isOrthologId(fA.cID, this.getTaxonId(fA), fB.cID, this.getTaxonId(fB))
+  getOrthologIds (idA, txA, txBs) {
+    return this.getHomologIds(idA, txA, txBs.filter(txB => txB !== txA))
   }
   //
-  isHomolog (fA, fB) {
-    // same feature?
-    if (fA === fB || fA.ID === fB.ID) return true
-    // else if no cID, can't be homologs
-    if (!fA.cID) return false
-    // cIDs match?
-    if (fA.cID === fB.cID) return true
-    // fB is a homolog?
-    const txA = this.getTaxonId(fA)
-    const txB = this.getTaxonId(fB)
-    const aHomIds =  this.getHomologIds(fA.cID, txA, this.app.vTaxons)
-    if (aHomIds.indexOf(fB.cID) >= 0) return true
-    return false
-  }
-  // Returns paralogs of f inferred through common orthology in a specified genome(s)
-  // Args:
-  //    f : a Feature
-  //    genomes : genome(s) to compare with. If not specified, uses all current selected genomes.
-  // Returns:
-  //    List of features in f's genome that share a common orthology to
-  //    something(s) in the specified genome(s). 
-  getInferredParalogs (f, genomes) {
-    genomes = this.fixGenomesArg(genomes)
-    const homs = this.getHomologs(f, genomes)
-    const paras = u.flatten(homs.map(hom => this.getHomologs(hom, f.genome)))
-    return paras
-  }
-  // Returns True iff f1 and f2 are inferred paralogs with respect to the given genome.
-  // f1 and f2 are inferred paralogs iff the have at least one ortholog in common in the 
-  // specified genome. 
-  isInferredParalog (f1, f2, genomes) {
-    return this.getInferredParalogs(f1, genomes).indexOf(f2) >= 0
+  getInferredParalogIds (idA, txA) {
+    return this.getHomologIds(idA, txA, [txA])
   }
 }
 export default HomologyManager

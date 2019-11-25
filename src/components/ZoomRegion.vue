@@ -624,18 +624,13 @@ export default MComponent({
       return this.featureMouseover(f) || this.featureSelected(f) || this.featureInList(f)
     },
     featureMouseover: function (f) {
-      let c = this.context.currentMouseover
-      if (!c) return false
-      return this.dataManager().equivalent(f, c)
+      return this.app.currentMouseover === f || this.app.currentMouseoverSet.has(f.cID)
     },
     transcriptHighlighted: function (t) {
       return t === this.context.currentMouseoverT
     },
     featureSelected: function (f) {
-      for (let i = 0; i < this.app.currentSelection.length; i++) {
-        if (this.app.dataManager.equivalent(f, this.app.currentSelection[i])) return true
-      }
-      return false
+      return this.selectedSet.has(f.cID)
     },
     featureInList: function (f) {
       if (!this.context.currentList) return false

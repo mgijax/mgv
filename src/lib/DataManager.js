@@ -329,24 +329,78 @@ class DataManager {
     }
     return d
   }
-  // Returns true iff feature a and b are equivalent
-  equivalent (a, b) {
-    return this.homologyManager.isHomolog(a, b)
+  // Returns canonical ids of all homologs of f
+  getHomologCids (f) {
+    const hm = this.homologyManager
+    const txA = this.getTaxonId(f)
+    if (this.app.includeParalogs) {
+      return hm.getHomologIdsExt(f.cID, txA, this.app.vTaxons)
+    } else {
+      const homs = hm.getOrthologIds(f.cID, txA, this.app.vTaxons)
+      homs.push(f.cID)
+      return homs
+    }
   }
-  // Returns true iff features a and b are paralogs
-  paralogs (a, b) {
-    return this.homologyManager.isInferredParalog(a, b)
-  }
-  // Returns a list of the homologs of feature f from the specified genomes in the specified order.
+  // Returns homologs of a feature from the given genome(s).
+  // Args:
+  //    f : a Feature
+  //    genomes : genomes to get homologs for. If not specified,
+  //            gets homologs for all currently selected genomes.
+  // Returns:
+  //    List of features from the specified genome(s) that are homologous to f
+  //
   getHomologs (f, genomes) {
+    genomes = this.fixGenomesArg(genomes)
     if (typeof(f) === 'string') {
       // FIXME picking an arbitrary one. Should use them all.
       f = (this.getFeaturesBy(f) || [])[0]
+      if (!f) return []
     }
-    if (!f) {
-      return []
+    const hm = this.homologyManager
+    const txA = this.getTaxonId(f)
+    const txBs = Array.from(new Set(genomes.map(g => this.fixTaxonId(g.metadata.taxonid))))
+    const hFunc = this.app.includeParalogs ? 'getHomologIdsExt' : 'getHomologIds'
+    const homIds = hm[hFunc](f.cID, txA, txBs)
+    const homs = homIds.map(hid =>
+       this.getFeaturesByCid(hid).filter(hom =>
+           genomes.indexOf(hom.genome) >= 0))
+    return u.flatten(homs)
+  }
+  //
+  equivalent (fA, fB) {
+    // same feature?
+    if (fA === fB || fA.ID === fB.ID) return true
+    // else if no cID, can't be homologs
+    if (!fA.cID) return false
+    // same cID?
+    if (fA.cID === fB.cID) return true
+    // fB is a homolog?
+    const txA = this.getTaxonId(fA)
+    const txB = this.getTaxonId(fB)
+    const idBs = this.homologyManager.getHomologIds(fA.cID, txA, [txB])
+    if (idBs.indexOf(fB.cID) >= 0) return true
+    //
+    return false
+  }
+  //
+  fixGenomesArg (genomes) {
+    if (!genomes) {
+      return this.app.vGenomes
+    } else if (!Array.isArray(genomes)) {
+      return [genomes]
+    } else {
+      return genomes
     }
-    return this.homologyManager.getHomologs(f, genomes)
+  }
+  // Hacky function so that all mouse species are considered the same
+  fixTaxonId (taxonid) {
+    if (taxonid.startsWith("100")) taxonid = "10090"
+    return taxonid
+  }
+  //
+  getTaxonId (f) {
+    const t = f.genome.metadata.taxonid
+    return this.fixTaxonId(t)
   }
   //
   assignLanes (feats, ppb, fsize) {
