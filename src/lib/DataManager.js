@@ -376,6 +376,7 @@ class DataManager {
     // fB is a homolog?
     const txA = this.getTaxonId(fA)
     const txB = this.getTaxonId(fB)
+    if (txA === txB && !this.app.includeParalogs) return false
     const idBs = this.homologyManager.getHomologIds(fA.cID, txA, [txB])
     if (idBs.indexOf(fB.cID) >= 0) return true
     //
