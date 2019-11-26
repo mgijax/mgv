@@ -9,7 +9,7 @@
     >
     <polygon
       class="fiducial"
-      v-for="(p, i) in stacks"
+      v-for="(p, i) in edges"
       :key="i"
       :points="points(p[0], p[1])"
       :fill="color(p[0], p[1])"
@@ -31,7 +31,7 @@ export default MComponent({
   data: function () {
     return {
       deltaX: 0,
-      stacks: []
+      edges: []
     }
   },
   methods: {
@@ -66,14 +66,12 @@ export default MComponent({
       })
       return Array.from(feats)
     },
-    getStacks () {
-      if (!this.cfg.showConnectors) return []
+    //
+    getGraphNodes () {
       const dm = this.dataManager()
       const inclParas = this.app.cfg.includeParalogs
       const pel = this.$parent.$el
       if (!pel) return []
-      //
-      // Build list of lists of rectangles for all the visible highlighted features
       const boxesByStrip = []
       pel.querySelectorAll('.zoom-strip').forEach((zel, zi) => {
        const boxes = []
@@ -86,43 +84,52 @@ export default MComponent({
           const f = this.dataManager().getFeatureById(fid)
           //
 	  const rect = fel.querySelector('.feature > rect').getBoundingClientRect()
-          rect.feature = f
 	  rect.strand = fel.getAttribute('strand')
           if (rev) rect.strand = rect.strand === '+' ? '-' : '+'
           //
-          boxes.push(rect)
+          // Each node has a feature, a rectangle, and a reachable set.
+          boxes.push({rect:rect, feature:f, reachable: (new Set())})
         })
        })
       })
       // Remove empty lists then sort by strip y-position.
       const boxesByStrip2 = boxesByStrip.filter(x => x.length > 0)
-      boxesByStrip2.sort((a,b) => a[0].y - b[0].y)
+      boxesByStrip2.sort((a,b) => a[0].rect.y - b[0].rect.y)
+      return boxesByStrip2
+    },
+    //
+    buildGraph () {
       //
-      const pairs = []
-      let carryOver = [] // when rect doesn't connect to next row, keep trying further rows
-      boxesByStrip2.forEach((rects, i) => {
+      if (!this.cfg.showConnectors) return []
+      //
+      const dm = this.app.dataManager
+      const nstrips = this.getGraphNodes()
+      const edges = []
+      const addEdges = (n,i) => {
         if (i === 0) return
-        const prevRects = boxesByStrip2[i - 1]
-        carryOver = [] // when rect doesn't connect to next row, keep trying further rows
-        prevRects.forEach(r1 => {
-          let r1matched = false
-          rects.forEach(r2 => {
-            if (dm.equivalent(r1.feature, r2.feature)) {
-              pairs.push([r1, r2])
-              r1matched = true
+        const rest = nstrips.slice(0, i).reverse()
+        rest.forEach(row => {
+          row.forEach(m => {
+            if (n.reachable.has(m)) return
+            if (dm.equivalent(n.feature, m.feature)) {
+              edges.push([m.rect,n.rect])
+              n.reachable.add(m)
+              m.reachable.forEach(r => n.reachable.add(r))
             }
           })
-          if (!r1matched) carryOver.push(r1)
         })
-        // carry over the unconnected rects to the next row
-        carryOver.forEach(r => rects.push(r))
-      })
+      }
       //
-      return pairs
+      nstrips.forEach((nstrip, i) => {
+        nstrip.forEach(node => {
+          addEdges(node, i)
+        })
+      })
+      return edges
     }
   },
   mounted: function () {
-    window.setInterval(() => { this.stacks = this.getStacks(), 500})
+    window.setInterval(() => { this.edges = this.buildGraph(), 500})
   }
 })
 </script>
