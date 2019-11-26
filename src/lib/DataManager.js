@@ -331,6 +331,7 @@ class DataManager {
   }
   // Returns canonical ids of all homologs of f
   getHomologCids (f) {
+    if (!f.cID) return [f.ID]
     const hm = this.homologyManager
     const txA = this.getTaxonId(f)
     if (this.app.includeParalogs) {
