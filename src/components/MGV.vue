@@ -566,10 +566,9 @@ export default MComponent({
     featureClick: function (f, t, e) {
       this.detailFeatures = this.dataManager.getHomologs(f, this.vGenomes)
       if (e.shiftKey) {
-        if (this.currentSelectionSet.has(f.cID)) {
-          this.currentSelection = this.currentSelection.filter(s => {
-            return ! this.dataManager.equivalent(s, f)
-          })
+        const i = this.currentSelection.indexOf(f)
+        if (i >= 0) {
+          this.currentSelection.splice(i,1)
           this.currentMouseover = null
         } else {
           this.currentSelection.push(f)
