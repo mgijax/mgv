@@ -3,20 +3,35 @@
     class="zoom-fiducials"
     :transform="translate()"
     >
-  <g
-    class="zoom-fstack"
-    :transform="`translate(${deltaX}, 0)`"
-    >
-    <polygon
-      class="fiducial"
-      v-for="(p, i) in edges"
-      :key="i"
-      :points="points(p[0], p[1])"
-      :fill="color(p[0], p[1])"
-      :fill-opacity="cfg.fillOpacity"
-      :stroke="color(p[0], p[1])"
-      :stroke-opacity="cfg.fillOpacity"
-      />
+    <g
+      class="zoom-fstack"
+      :transform="`translate(${deltaX}, 0)`"
+      >
+      <polygon
+        class="fiducial"
+        v-for="(p, i) in edges"
+        :key="i"
+        :points="points(p[0], p[1])"
+        :fill="color(p[0], p[1])"
+        :fill-opacity="cfg.fillOpacity"
+        :stroke="color(p[0], p[1])"
+        :stroke-opacity="cfg.fillOpacity"
+        />
+    </g>
+    <g
+      class="featureRects"
+      :transform="`translate(${deltaX}, 0)`"
+      >
+      <rect
+        v-for="(r,j) in clickedFeatures"
+        :key="'rect_'+j"
+        :x="r.x-2"
+        :y="r.y-2"
+        :width="r.width+4"
+        :height="r.height+4"
+        stroke="black"
+        fill="none"
+        />
     </g>
   </g>
 </template>
@@ -31,6 +46,7 @@ export default MComponent({
   data: function () {
     return {
       deltaX: 0,
+      clickedFeatures: [],
       edges: []
     }
   },
@@ -72,6 +88,7 @@ export default MComponent({
       const inclParas = this.app.cfg.includeParalogs
       const pel = this.$parent.$el
       if (!pel) return []
+      const clickedFeatures = []
       const boxesByStrip = []
       pel.querySelectorAll('.zoom-strip').forEach((zel, zi) => {
        const boxes = []
@@ -79,6 +96,8 @@ export default MComponent({
        zel.querySelectorAll('.zoom-region').forEach(rel => {
         const rev = rel.classList.contains('reversed')
         rel.querySelectorAll('.feature.highlight.visible').forEach(fel => {
+          //
+          if (fel.classList.contains('selected')) clickedFeatures.push(fel.getBoundingClientRect())
           //
           const fid = fel.getAttribute('name')
           const f = this.dataManager().getFeatureById(fid)
@@ -88,13 +107,14 @@ export default MComponent({
           if (rev) rect.strand = rect.strand === '+' ? '-' : '+'
           //
           // Each node has a feature, a rectangle, and a reachable set.
-          boxes.push({rect:rect, feature:f, reachable: (new Set())})
+          boxes.push({fel: fel, rect:rect, feature:f, reachable: (new Set())})
         })
        })
       })
       // Remove empty lists then sort by strip y-position.
       const boxesByStrip2 = boxesByStrip.filter(x => x.length > 0)
       boxesByStrip2.sort((a,b) => a[0].rect.y - b[0].rect.y)
+      this.clickedFeatures = clickedFeatures
       return boxesByStrip2
     },
     //
@@ -125,11 +145,12 @@ export default MComponent({
           addEdges(node, i)
         })
       })
-      return edges
+      this.nodes = nstrips
+      this.edges = edges
     }
   },
   mounted: function () {
-    window.setInterval(() => { this.edges = this.buildGraph(), 500})
+    window.setInterval(() => { this.buildGraph(), 500})
   }
 })
 </script>

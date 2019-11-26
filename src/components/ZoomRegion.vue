@@ -151,7 +151,11 @@
         :homologyID="f.hID || f.cID || f.ID"
 	:strand="f.strand"
         class="feature"
-        :class="{ highlight: featureHighlighted(f), visible: featureVisible(f)}"
+        :class="{
+          highlight: featureHighlighted(f),
+          visible: featureVisible(f),
+          selected: featureDirectlySelected(f)
+        }"
         :transform="featureTransform(f)"
         :style="{ opacity: featureOpacity(f) }"
         v-show="featureVisible(f)"
@@ -629,8 +633,13 @@ export default MComponent({
     transcriptHighlighted: function (t) {
       return t === this.context.currentMouseoverT
     },
+    // Returns true iff feature f is in the current selection list (ie it was actually clicked on)
+    featureDirectlySelected: function (f) {
+      return this.context.currentSelection.indexOf(f) >= 0
+    },
+    // Returns true if feature is selected or is a homolog 
     featureSelected: function (f) {
-      return this.selectedSet.has(f.cID)
+      return this.selectedSet.has(f.cID ? f.cID : f.ID)
     },
     featureInList: function (f) {
       if (!this.context.currentList) return false
