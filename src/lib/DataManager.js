@@ -359,8 +359,7 @@ class DataManager {
     const hm = this.homologyManager
     const txA = this.getTaxonId(f)
     const txBs = Array.from(new Set(genomes.map(g => this.fixTaxonId(g.metadata.taxonid))))
-    const hFunc = this.app.includeParalogs ? 'getHomologIdsExt' : 'getHomologIds'
-    const homIds = hm[hFunc](f.cID, txA, txBs)
+    const homIds = this.getHomologCids(f)
     const homs = homIds.map(hid =>
        this.getFeaturesByCid(hid).filter(hom =>
            genomes.indexOf(hom.genome) >= 0))
