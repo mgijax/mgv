@@ -83,7 +83,14 @@ class HomologyManager {
   // list of all homologous (canonical) ids from specified taxons.
   getHomologIds (idA, txA, txBs) {
     const Aix = this.index[txA] || {}
-    const homIds = txBs.map(txB => (Aix[txB] || {})[idA] || [])
+    const homIds = txBs.map(txB => {
+      const ABix = Aix[txB] || {}
+      const homs = ABix[idA] || []
+      if (txA === txB && homs.indexOf(idA) === -1) {
+         homs.push(idA)
+      }
+      return homs
+    })
     return u.flatten(homIds)
   }
   // Extended version of getHomologIds. Also includes orthologs of idA's paralogs.
