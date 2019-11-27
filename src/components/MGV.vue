@@ -516,6 +516,7 @@ export default MComponent({
         }).filter(x => x)
         p = this.regionManager.initializeRegions(strips) 
       }
+      // Set current selection from highlight ids
       p.then(() => {
         this.currentSelection = []
         // resolve current selection IDs to features
@@ -523,7 +524,9 @@ export default MComponent({
           this.dataManager.ensureFeatures(g).then(() => {
             (cxt.currentSelection || []).forEach(ident => {
               this.dataManager.getFeaturesBy(ident).filter(f => f.genome === g).forEach(f => {
-                this.currentSelection.push(f)
+                if (!f.cID || !this.currentSelectionSet.has(f.cID)) {
+                  this.currentSelection.push(f)
+                }
               })
             })
           })
