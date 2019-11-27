@@ -93,6 +93,10 @@ class DataManager {
         })
         if (feats.length) allFeats.push(this._registerChr(g, prevChr, feats))
         delete this.pending[g.name]
+        // calculate feature density (features per Mb) for each genome
+        const totalFeats = allFeats.reduce((v,a) => v + a.length, 0)
+        const totalGenomeLength = g.chromosomes.reduce((v,c) => v + c.length, 0)
+        g.featureDensity = totalFeats / totalGenomeLength * 1000000
         return allFeats
       })
     })

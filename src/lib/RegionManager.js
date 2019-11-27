@@ -365,7 +365,11 @@ class RegionManager {
         const r0 = newRs[i]
         const db = gc.distanceBetween(r0, r)
         const tlen = r0.length + r.length
-        if (db < 1000000) {
+        // compute an estimated merge widow, which is the size
+        // region estimated to contain a max number of features
+        const maxIncrease = 25
+        const mergeWindow = 1000000 * (maxIncrease / g.featureDensity)
+        if (db <= mergeWindow) {
           r0.start = Math.min(r0.start, r.start)
           r0.end = Math.max(r0.end, r.end)
           r0.length = r0.end - r0.start + 1
@@ -567,7 +571,7 @@ class RegionManager {
     if (d.region) {
       l = d.region.end - d.region.start + 1
     } else {
-      l = 3 * (f.end - f.start + 1)
+      l = 3 * f.length
     }
     const lcoords = {
       landmark: f.cID || f.ID,
@@ -575,7 +579,11 @@ class RegionManager {
       lgenome: f.genome,
       anchor: anchor,
       delta: 0,
-      length: l
+    }
+    if (d.region) {
+      lcoords.mlength = (d.region.end - d.region.start + 1) / f.length
+    } else {
+      lcoords.length = l
     }
     return this.alignOnLandmark(lcoords)
   }
@@ -623,38 +631,62 @@ class RegionManager {
   // Args:
   //    lcoords (object) the landmark specification. Contains:
   //        landmark (string) name of the landmark
-  //        length (number) size in bp around the landmark
-  //        delta (number) amount to shift the view from the landmark
   //        lgenome (object) the genome where the landmark was selected
-  //        anchor (number from 0 to 1) Defines reference point on the landmark
+  //        delta (number, default=0) amount to shift the view from the landmark
+  //        anchor (number from 0 to 1, default=0.5) Defines reference point on the landmark
   //            to align to. Number specifies relative position, from 
   //            start coordinate (0) to end coordinate (1).
+  //    Exactly one of the following must be specified:
+  //        length (number, default=undefined) length of the region, in bp
+  //            Total width = length
+  //        mlength (number, default = 3) 
+  //            Total width is mlength * feature length
+  //        flank (number, default=undefined) specifies a flanking amount in bp.
+  //            Total width is 2*flank + feature length
+  //        
+  //
   //    genome (object) the genome for which to compute the coordinates
   computeLandmarkRegion (lcoords, genome) {
-    const delta = lcoords.delta
-    const w = lcoords.length
-    const alignOn = config.ZoomRegion.featureAlignment
     const lms = this.app.dataManager.getHomologs(lcoords.landmark, [genome])
     //
     if (lms.length === 0) {
       return null
     }
+    const delta = lcoords.delta || 0
     const regions = lms.map(lm => {
-      const ll = lm.end - lm.start + 1
-      const hasFlank = typeof(lcoords.flank) === 'number'
-      const lw = hasFlank ? ll + 2*lcoords.flank : w
+      // compute the region around landmark feature lm
+      //
+      // compute anchor point
       let lmp
       if (typeof(lcoords.anchor) === 'number') {
-        lmp = lm.start + lcoords.anchor * (lm.end - lm.start + 1)
+        lmp = lm.start + lcoords.anchor * lm.length
       } else {
         lmp = Math.floor((lm.start + lm.end) / 2)
       }
-      const s = hasFlank ? lm.start - lcoords.flank : Math.round(lmp - lw / 2) + delta
+      // 
+      let w
+      let s
+      if (typeof(lcoords.length) === 'number') {
+        w = lcoords.length
+        s = lmp - w / 2
+      } else if (typeof(lcoords.flank) === 'number') {
+        w = lm.length + 2*lcoords.flank
+        s = lm.start - lcoords.flank
+      } else if (typeof(lcoords.mlength) === 'number') {
+        w = lcoords.mlength * lm.length
+        s = lmp - w / 2
+      } else {
+        throw "Must specify one of: length, mlength, or flank"
+      }
+      //
+      s = Math.round(s)
+      w = Math.round(w)
+      //
       return this.makeRegion({
         genome: genome,
         chr: lm.chr,
         start: s,
-        end: s + lw - 1,
+        end: s + w - 1,
       })
     })
     return {
