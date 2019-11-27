@@ -1,7 +1,7 @@
 <template>
   <div class="sequence-cart">
      <!-- Cart items -->
-     <span>{{ cart.length }} sequence{{ cart.length === 1 ? '' : 's' }}</span>
+     <span v-show="cart.length > 0">{{ cart.length }} sequence{{ cart.length === 1 ? '' : 's' }}</span>
      <div class="sequence-cart-items">
        <sequence-cart-item
          v-for="item in cart"
@@ -32,7 +32,7 @@
 
        <!-- spacer -->
        <div style="flex-grow: 1;"></div>
-       <span>{{selectedLengthLabel}}</span>
+       <span style="font-size: 12px;">{{selectedLengthLabel}}</span>
        <div style="flex-grow: 1;"></div>
 
        <!-- Delete selected button -->
@@ -148,10 +148,11 @@ export default MComponent({
       return this.selected.reduce((a,v) => a + v.totalLength, 0)
     },
     selectedLengthLabel () {
+      if (this.cartEmpty) return "Cart is empty."
       const n = this.selected.length
       if (n === 0) return "Nothing selected."
       const len = u.prettyPrintBases(this.selectedLength)
-      return `${this.selected.length} sequence${n > 1 ? 's' : ''}, ${len}`
+      return `${this.selected.length} selected, ${len}`
     },
     nothingSelected () {
       return this.selected.length === 0
