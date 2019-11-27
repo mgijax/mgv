@@ -2,13 +2,13 @@
   <div class="feature-details">
     <table>
       <tr>
-        <th style="width: 8%;">Canonical ID</th>
-        <th style="width: 8%;">Symbol</th>
-        <th style="width:  7%;">Genome</th>
-        <th style="width: 15%;">ID</th>
-        <th style="width: 12%;">Type</th>
-        <th style="width: 15%;">Coordinates</th>
-        <th style="width: 7%;">Length</th>
+        <th>Canonical ID</th>
+        <th>Symbol</th>
+        <th>Genome</th>
+        <th>ID</th>
+        <th>Type</th>
+        <th>Coordinates</th>
+        <th>Length</th>
       </tr>
       <tr
         v-for="(f,i) in features"
@@ -57,7 +57,6 @@ export default MComponent({
 table {
   width: 100%;
   font-size: 12px;
-  table-layout: fixed;
   white-space: nowrap;
 }
 table * {
