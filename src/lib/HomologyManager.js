@@ -45,10 +45,8 @@ class HomologyManager {
   }
   // For each specified taxon, computes inferred paralogs, relative to all the rest
   computeAllInferredParalogs (txAs) {
-    console.log('Computing inferred paralogs...')
     txAs = txAs || this.app.vTaxons
     txAs.map(txA => this.computeInferredParalogs(txA, txAs))
-    console.log('Done.')
   }
   // Computes inferred paralogs for all txA ids, relative to the specified list of taxons.
   // Records results in the main index (at this.index[txA][txA])

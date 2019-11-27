@@ -334,14 +334,16 @@ class DataManager {
     return d
   }
   // Returns canonical ids of all homologs of f
-  getHomologCids (f) {
+  getHomologCids (f, genomes) {
     if (!f.cID) return [f.ID]
+    genomes = genomes || this.app.vGenomes
+    const taxons = Array.from(new Set(genomes.map(g => this.fixTaxonId(g.metadata.taxonid))))
     const hm = this.homologyManager
     const txA = this.getTaxonId(f)
     if (this.app.includeParalogs) {
-      return hm.getHomologIdsExt(f.cID, txA, this.app.vTaxons)
+      return hm.getHomologIdsExt(f.cID, txA, taxons)
     } else {
-      const homs = hm.getOrthologIds(f.cID, txA, this.app.vTaxons)
+      const homs = hm.getOrthologIds(f.cID, txA, taxons)
       homs.push(f.cID)
       return homs
     }
@@ -363,8 +365,7 @@ class DataManager {
     }
     const hm = this.homologyManager
     const txA = this.getTaxonId(f)
-    const txBs = Array.from(new Set(genomes.map(g => this.fixTaxonId(g.metadata.taxonid))))
-    const homIds = this.getHomologCids(f)
+    const homIds = this.getHomologCids(f, genomes)
     const homs = homIds.map(hid =>
        this.getFeaturesByCid(hid).filter(hom =>
            genomes.indexOf(hom.genome) >= 0))
