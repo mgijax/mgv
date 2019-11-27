@@ -2,6 +2,22 @@
   <div class="settings flexcolumn">
   <form>
   <!-- ============== FEATURES section  ============== -->
+  <div class="section"><label>Genomes</label></div>
+  <!-- =================== -->
+  <div
+    title="Set the amount of space between genomes/strips"
+    class="flexrow"
+    >
+    <label>Gap</label>
+    <input
+        type="range"
+        v-model="ZoomMain.stripGap"
+        min="25"
+        max="125"
+        />
+  </div>
+
+  <!-- ============== FEATURES section  ============== -->
   <div class="section"><label>Features</label></div>
   <!-- =================== -->
   <div

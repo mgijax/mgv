@@ -53,7 +53,7 @@ export default MComponent({
   data: function () {
     return {
       width: 500,
-      height: 200,
+      height: 200
     }
   },
   computed: {
@@ -62,6 +62,9 @@ export default MComponent({
     },
     rg: function () {
       return this.context.rGenome
+    },
+    stripGap: function () {
+      return parseInt(this.cfg.stripGap)
     }
   },
   watch: {
@@ -69,6 +72,9 @@ export default MComponent({
       this.$nextTick(() => { if (this.$refs.strips) this.setYs() })
     },
     rg: function () {
+      if (this.$refs.strips) this.setYs()
+    },
+    stripGap: function () {
       if (this.$refs.strips) this.setYs()
     }
   },
@@ -129,9 +135,9 @@ export default MComponent({
       strips.forEach((s,i) => {
         if(!s.dragging) s.zoomY = dy
         s.strip.order = i
-        dy += s.height + 34
+        dy += s.height + this.stripGap
       })
-      this.height = dy
+      this.height = dy - this.stripGap + 40
     },
     // Handlers for dragging ZoomStrips to change their Y-order.
     zDragStart (d) {

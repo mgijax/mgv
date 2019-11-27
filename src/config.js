@@ -13,7 +13,7 @@ export default {
   // Timestamp used at page load to determine whether to flush user's setting cache.
   //
   // IMPORTANT!!! You MUST update this value whenever this config file changes!!!
-  TIMESTAMP: 'Tue May 7 06:59:39 EST 2019',
+  TIMESTAMP: 'Tue May 8 06:59:39 EST 2019',
   ///////////////////////////////////////////
 
   //
@@ -76,6 +76,9 @@ export default {
   ZoomControls: {
     defaultZoom: 2, // multipler for zooming out, divisor for zooming in
     defaultPan: 0.15 // multiplier for panning right, -multiplier for left
+  },
+  ZoomMain: {
+    stripGap: 40
   },
   ZoomStrip: {
     endCapColor: '#ccc',
