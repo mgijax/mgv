@@ -32,6 +32,8 @@
 
        <!-- spacer -->
        <div style="flex-grow: 1;"></div>
+       <span>{{selectedLengthLabel}}</span>
+       <div style="flex-grow: 1;"></div>
 
        <!-- Delete selected button -->
        <m-button
@@ -43,11 +45,7 @@
          />
 
      </div>
-     <div v-show="nothingSelected && !cartEmpty" class="flexrow" style="justify-content: center;">
-       <i class="material-icons" style="font-size: 18px;">cloud_download</i>
-       <span>Nothing selected.</span>
-     </div>
-     <div v-show="!nothingSelected" class="flexcolumn">
+     <div class="flexcolumn">
        <!-- Download form -->
        <form
          ref="sequenceDownloadForm"
@@ -120,6 +118,7 @@
 
 <script>
 import config from '@/config'
+import u from '@/lib/utils'
 import MComponent from '@/components/MComponent'
 import MButton from '@/components/MButton'
 import SequenceCartItem from '@/components/SequenceCartItem'
@@ -147,6 +146,12 @@ export default MComponent({
     },
     selectedLength () {
       return this.selected.reduce((a,v) => a + v.totalLength, 0)
+    },
+    selectedLengthLabel () {
+      const n = this.selected.length
+      if (n === 0) return "Nothing selected."
+      const len = u.prettyPrintBases(this.selectedLength)
+      return `${this.selected.length} sequence${n > 1 ? 's' : ''}, ${len}`
     },
     nothingSelected () {
       return this.selected.length === 0
