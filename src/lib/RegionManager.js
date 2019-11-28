@@ -98,23 +98,41 @@ class RegionManager {
 
   //--------------------------------------
   // Add a strip to the display for genome g. 
-  addStrip (g, r) {
+  addStrip (g) {
     let p
-    if (this.app.lcoords && this.app.lcoords.landmark) {
-      p = this.computeLandmarkRegions(this.app.lcoords, [g]).then(strips => strips[0])
+    if (this.app.currentSelection.length) {
+      const ps = this.app.currentSelection.map(f => {
+        const lcoords = {
+          lfeature: f,
+          lgenome: f.genome,
+          delta: 0,
+          mlength: 3
+        }
+        return this.computeLandmarkRegions(lcoords, [g])
+      })
+      p = Promise.all(ps).then(results => {
+        const results2 =  u.flatten(results).reduce((a,v) => {
+          a.regions = a.regions.concat(v.regions)
+          return a
+        }, { genome:g, regions: [] })
+        results2.regions = this.mergeRegions(g, results2.regions)
+        return results2
+      })
     } else if (this.app.rGenome && this.app.rStrip) {
       p = this.mapRegionsToGenome(this.app.rStrip.regions, g)
     } else if (this.app.strips.length) {
       p = this.mapRegionsToGenome(this.app.strips[0].regions, g)
     } else {
       const chr = g.chromosomes[0]
+      const approxNgenes = 150
+      const len = Math.round(1000000 * approxNgenes / g.featureDensity)
       p = Promise.resolve({
         genome: g,
         regions: [{
           genome: g,
           chr: chr,
           start: 1,
-          end: Math.min(10000000, chr.length),
+          end: Math.min(len, chr.length),
           width: 1 // value doesn't matter here
           }]
       })
@@ -207,7 +225,7 @@ class RegionManager {
     r = this.makeRegion(r)
     const si = this.findStrip(r.genome)
     if (si === -1) {
-      this.addStrip(r.genome, r).then(this.layout())
+      this.addStrip(r.genome).then(this.layout())
     } else {
       const s = this.app.strips[si]
       r.width = s.regions.length ? s.regions[0].width : 1
@@ -540,11 +558,13 @@ class RegionManager {
     if (rbs.length === 0) {
       // Could not map the region - no homologs found.
       // Have a flower instead...
+      const approxNgenes = 150
+      const len = 1000000 * approxNgenes / gb.featureDensity
       rbs.push(this.makeRegion({
         genome: gb,
         chr: gb.chromosomes[0],
         start: 1,
-        end: Math.min(10000000, gb.chromosomes[0].length)
+        end: Math.min(len, gb.chromosomes[0].length)
       }))
     } else {
       // One the assumption that region boundaries coincide with feature boundaries,
@@ -647,7 +667,7 @@ class RegionManager {
   //
   //    genome (object) the genome for which to compute the coordinates
   computeLandmarkRegion (lcoords, genome) {
-    const lms = this.app.dataManager.getHomologs(lcoords.landmark, [genome])
+    const lms = this.app.dataManager.getHomologs(lcoords.lfeature, [genome])
     //
     if (lms.length === 0) {
       return null
