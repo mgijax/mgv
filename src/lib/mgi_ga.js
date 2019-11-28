@@ -1,6 +1,12 @@
 /* Name: mgi_ga.js
  *
- * Adapted from MGI modele of the same name.
+ * Adapted from MGI modele of the same name. 
+ * Exports a function ga_logEvent which logs an event at Google Analytics
+ * under the MGI account. The function takes these arguments:
+ *      category     required string; names the object that was interacted with
+ *      action       required string; what type of interaction?
+ *      label        optional string; subcategory or other label for the event
+ *      value        optional integer; numeric value associated with the event
  */
 
 

@@ -33,7 +33,7 @@
             :style="{ opacity: app.includeParalogs ? 0 : 1 }"
             >not_interested</i>
           <span
-            :title="app.includeParalogs ? 'Paralogs are being included. Click to exclude.' : 'Paralogs are being excluded. Click to include.'"
+            :title="app.includeParalogs ? 'Inferred paralogs are being included. Click to exclude.' : 'Inferred paralogs are being excluded. Click to include.'"
             @click="app.toggleIncludeParalogs()"
             :style="{
               position:'relative',
