@@ -72,7 +72,7 @@
         ============ Sequence Cart ==============
         -->
         <page-box
-          label="SequenceCart"
+          label="Sequence Cart"
           icon="shopping_cart"
           >
           <sequence-cart
@@ -94,7 +94,7 @@
         <page-box
           :message="activeFacets.length ? `Active filters (click to remove):\n${activeFacetsText}` : ''"
           :messageClickHandler="clearFacets"
-          label="ZoomView"
+          label="Zoom View"
           icon="view_agenda"
           >
           <zoom-view
@@ -106,7 +106,7 @@
         <!--
         ============== Gene View ==============
         <page-box
-          label="GeneView"
+          label="Gene View"
           icon="view_agenda"
           >
           <gene-view
@@ -121,7 +121,7 @@
         ============ Genome View ==============
         -->
         <page-box
-          label="GenomeView"
+          label="Genome View"
           icon="language"
           >
           <genome-view
@@ -134,7 +134,7 @@
         ============ Feature Details ==========
         -->
         <page-box
-          label="FeatureDetails"
+          label="Feature Details"
           icon="description"
           >
           <feature-details
@@ -152,7 +152,7 @@
       ============ List Editor ==============
       -->
       <page-box
-        label="ListEditor"
+        label="List Editor"
         :floating="true"
         :initialX="250"
         :initialY="100"
@@ -387,6 +387,25 @@ export default MComponent({
     }
   },
   methods: {
+    /*
+    DownloadImage    genomeView
+    DownloadImage    zoomView
+    ListOp           display
+    ListOp           delete
+    ListOp           edit
+    ListOp           new
+    DownloadSequence file      <totallength>
+    DownloadSequence clipboard <totallength>
+    DownloadSequence browser   <totallength>
+
+    Navigate         zoom
+    Navigate         scroll
+    Navigate         find
+    Navigate         align
+    Navigate         setRef
+
+
+    */
     logEvent: function (action, label, value) {
       ga.ga_logEvent("MGV", action, label, value)
     },
