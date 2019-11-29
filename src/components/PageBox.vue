@@ -113,10 +113,16 @@ export default MComponent({
     // console.log("PageBox.created:", this.label)
   },
   methods: {
-    toggleOpen: function () {
-      this.isOpen = !this.isOpen
-      this.$emit('pagebox-' + (this.isOpen ? 'open' : 'close'), this)
-      u.unselectAllText()
+    toggleOpen: function (e) {
+      if (e && e.shiftKey) {
+        this.isOpen = true
+        this.$emit('pagebox-open', this)
+        this.$root.$emit('pagebox-open-exclusive', this)
+        u.unselectAllText()
+      } else {
+        this.isOpen = !this.isOpen
+        this.$emit('pagebox-' + (this.isOpen ? 'open' : 'close'), this)
+      }
     },
     open: function () {
       if (!this.isOpen) this.toggleOpen()
@@ -125,6 +131,11 @@ export default MComponent({
     },
     close: function () {
       if (this.isOpen) this.toggleOpen()
+    },
+    onExclusiveOpen (pb) {
+      if (pb.$parent === this.$parent && pb !== this) {
+        this.close()
+      }
     },
     // -------------------------------
     // Drag and drop handlers. 
@@ -216,6 +227,7 @@ export default MComponent({
     }
   },
   mounted: function () {
+    this.$root.$on('pagebox-open-exclusive', pb => this.onExclusiveOpen(pb))
     Vue.nextTick(() => {
       // At mount time, contained components have already been rendered.
       // Find the content component, which is the last.

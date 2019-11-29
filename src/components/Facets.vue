@@ -67,7 +67,7 @@ export default MComponent({
         },
         message: ""
       }, {
-        name: 'Missing from some* genome',
+        name: 'Missing in some* genome',
         description: `
         If false, only shows features that are missing in some *displayed* genome.
         If true, only shows features that occur in all displayed genomes.

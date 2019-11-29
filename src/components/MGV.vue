@@ -400,9 +400,7 @@ export default MComponent({
 
     Navigate         zoom
     Navigate         scroll
-    Navigate         find
-    Navigate         align
-    Navigate         setRef
+    Navigate         etc...
 
 
     */
