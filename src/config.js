@@ -25,8 +25,8 @@ export default {
   },
   MHeader: {
     title: "Multiple Genome Viewer (MGV)",
-    logoLeft: '../assets/Alliance_logo.png',
-    logoRight: '../assets/Alliance_logo.png',
+    logoLeft: 'assets/Alliance_logo.png',
+    logoRight: 'assets/Alliance_logo.png',
     style: {
       backgroundColor: '#557f9e',
       color: '#ffffff'
