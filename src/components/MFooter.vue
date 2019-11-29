@@ -1,5 +1,7 @@
 <template>
-  <div name="footer" class="flexrow">
+  <div name="footer" class="flexrow"
+    :style="style"
+    >
     <span id="version">version {{cfg.VERSION}}</span>
     <span>MGV is powered by:
     <a href="http://www.informatics.jax.org" target="_blank">MGI</a>,
@@ -14,9 +16,15 @@
 
 <script>
 import MComponent from '@/components/MComponent'
+import config from '@/config'
 export default MComponent({
   name: 'MFooter',
-  props: ['version']
+  props: ['version'],
+  data: function () {
+    return {
+      style: config.MHeader.style
+    }
+  }
 })
 </script>
 
@@ -24,13 +32,11 @@ export default MComponent({
 [name="footer"] {
   height: 20px;
   width: 100%;
-  color: white;
-  background-color: #557f9e;
   font-size: 12px;
   font-weight: bold;
 }
 a:link, a:visited {
-  color: white;
+  color: inherit;
   text-decoration: none;
 }
 a:hover {

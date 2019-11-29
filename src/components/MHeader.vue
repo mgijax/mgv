@@ -1,11 +1,13 @@
 <template>
-  <div name="header" class="flexrow">
+  <div name="header" class="flexrow"
+    :style="cfg.style"
+    >
     <m-button
       name="settingBtn"
       @click="$emit('gear-clicked')"
       icon="settings"
       title="Show/hide tool drawer."
-      color="white"
+      :color="cfg.style.color"
       hoverColor="rgb(31, 119, 180)"
       hoverBackgroundColor="white"
       />
@@ -13,39 +15,23 @@
       name="allianceLogo"
       title="Alliance of Genome Resources"
       class="logo"
-      src="../assets/Alliance_logo.png"
+      :src="cfg.logoLeft"
       />
-    <!--
-    <img
-      name="mgiLogo"
-      title="Mouse Genome Informatics"
-      class="logo"
-      src="../assets/MGI_logo.png"
-      />
-    -->
     <span
       name="title"
-      >Multiple Genome Viewer (MGV)</span>
+      >{{cfg.title}}</span>
     <img
       name="allianceLogo"
       title="Alliance of Genome Resources"
       class="logo"
-      src="../assets/Alliance_logo.png"
+      :src="cfg.logoRight"
       />
-    <!--
-    <img
-      name="mousemineLogo"
-      title="MouseMine"
-      class="logo"
-      src="../assets/MouseMine_logo.png"
-      />
-    -->
     <m-button
       name="infoBtn"
       title="Click for help."
       icon="info"
       @click="openHelp"
-      color="white"
+      :color="cfg.style.color"
       hoverColor="rgb(31, 119, 180)"
       hoverBackgroundColor="white"
       />
@@ -68,8 +54,6 @@ export default MComponent({
 
 <style scoped>
 [name="header"] {
-  color: white;
-  background-color: #557f9e;
   width: 100%;
   height: 60px;
 }

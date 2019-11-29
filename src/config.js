@@ -13,7 +13,7 @@ export default {
   // Timestamp used at page load to determine whether to flush user's setting cache.
   //
   // IMPORTANT!!! You MUST update this value whenever this config file changes!!!
-  TIMESTAMP: 'Tue May 8 06:59:39 EST 2019',
+  TIMESTAMP: 'Tue May 9 06:59:39 EST 2019',
   ///////////////////////////////////////////
 
   //
@@ -23,7 +23,14 @@ export default {
     VERSION: '2.0.0-beta', // code version.
     animDur: 0.5 // default animation duration in sec
   },
-  PageBox: {
+  MHeader: {
+    title: "Multiple Genome Viewer (MGV)",
+    logoLeft: '../assets/Alliance_logo.png',
+    logoRight: '../assets/Alliance_logo.png',
+    style: {
+      backgroundColor: '#557f9e',
+      color: '#ffffff'
+    }
   },
   MGV: {
     defaultHash: 'regions=C57BL/6J::14:44798909..46294274/1019|CAROLI/EiJ::14:36689781..38185146/1019|A/J::14:37282962..38778327/1019&lock=on&highlight=MGI:2385001',
