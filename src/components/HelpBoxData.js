@@ -35,6 +35,7 @@ export default [{
           in the header.
           The right column, containing various views, is always visible.
           Each box can be opened/closed by clicking the "X" in its top right corner.
+          (Shift-click the "X" to open that box and close others in its column.)
           Boxes can be repositioned vertically in their columns by dragging the grab
           handle (${i('drag_indicator')}) in the box's top right corner.
           `
