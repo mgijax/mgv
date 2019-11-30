@@ -223,7 +223,7 @@ export default MComponent({
       return this.isOpen ? this.iconClose : this.iconOpen
     },
     openHelpText: function () {
-      return `Click to ${this.isOpen ? 'close' : 'open'}.`
+      return `Click to ${this.isOpen ? 'close' : 'open'}. Shift-click to open and close all others.`
     }
   },
   mounted: function () {
