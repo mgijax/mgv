@@ -120,7 +120,11 @@ export default MComponent({
     //
     buildGraph () {
       //
-      if (!this.cfg.showConnectors) return []
+      if (!this.cfg.showConnectors) {
+        this.nodes = []
+        this.edges = []
+        return
+      }
       //
       const dm = this.app.dataManager
       const nstrips = this.getGraphNodes()

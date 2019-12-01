@@ -295,7 +295,7 @@ export default [{
           composite transcript, or CDS sequences; you may select these sequences the current gene only or for that
           gene and its homologs. A composite transcript consists of the union of all the
           exons of all the transcripts of a gene; the are what you see when "Spread transcripts" is off,
-          and all trasncripts for a gene are piled up on top of one another..
+          and all trasncripts for a gene are piled up on top of one another.
           `
       }, {
       label: `Download sequences`,
