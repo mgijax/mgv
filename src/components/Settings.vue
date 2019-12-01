@@ -160,10 +160,11 @@
   </div>
   <!-- =================== -->
   <div
-    title="Include inferred paralogs in searches, drawing, selecting, etc."
+    :title="paralogsButtonTitle"
     class="flexrow"
+    :style="{ opacity: paralogsEnabled ? 1 : 0.3 }"
     >
-    <label>Inferred paralogs</label>
+    <label>Infer paralogs</label>
     <input
         type="checkbox"
         v-model="MGV.includeParalogs"
@@ -296,7 +297,20 @@ export default MComponent({
       set: function (v) {
         this.ZoomRegion.detailThreshold = parseInt(v) * 1000000
       }
+    },
+    paralogsEnabled: function () {
+      return this.app.vTaxons.length > 1
+    },
+    paralogsButtonTitle: function () {
+      return this.paralogsEnabled ?
+        (this.app.includeParalogs ?
+            'Inferred paralogs are being included in searches, drawing, selecting, etc. Click to exclude.'
+            :
+            'Inferred paralogs are not being included in searches, drawing, selecting, etc. Click to include.')
+        :
+        'Cannot infer paralogs because only one species is being displayed.'
     }
+
   }
 })
 </script>

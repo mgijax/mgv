@@ -27,21 +27,21 @@
           @focus="selectOnFocus"
           />
         <div class="flexrow"
-          style="cursor: pointer;"
+          :style="{cursor: 'pointer', opacity: paralogsEnabled ? 1 : 0.3}"
           >
           <i class="material-icons"
-            :style="{ opacity: app.includeParalogs ? 0 : 1 }"
+            :style="{ opacity: app.includeParalogs && paralogsEnabled ? 0 : 1 }"
             >not_interested</i>
           <span
-            :title="app.includeParalogs ? 'Inferred paralogs are being included in searches, drawing, selecting, etc. Click to exclude.' : 'Inferred paralogs are not being included in searches, drawing, selecting, etc. Click to include.'"
-            @click="app.toggleIncludeParalogs()"
+            :title="paralogsButtonTitle"
+            @click="paralogsEnabled && app.toggleIncludeParalogs()"
             :style="{
               position:'relative',
               left:'-21px',
               top: '2px',
               fontWeight: 'bold',
               fontStyle: 'normal',
-              color: app.includeParalogs ? 'rgb(255, 127, 14)' : 'black'
+              color: app.includeParalogs && paralogsEnabled ? 'rgb(255, 127, 14)' : 'black'
               }"
             >P</span>
           </div>
@@ -134,6 +134,19 @@ export default MComponent({
       const sz = cglen === clen ? `${clen} item${s}` : `${cglen} of ${clen} item${s} found in this genome`
       const lim = cglen > this.maxListLength ? ` ${this.maxListLength} shown` : ''
       return `${clist.name} (${sz}${lim})`
+    },
+    paralogsEnabled: function () {
+      return this.app.vTaxons.length > 1
+    },
+    paralogsButtonTitle: function () {
+      
+      return this.paralogsEnabled ?
+        (this.app.includeParalogs ?
+            'Inferred paralogs are being included in searches, drawing, selecting, etc. Click to exclude.'
+            :
+            'Inferred paralogs are not being included in searches, drawing, selecting, etc. Click to include.')
+        :
+        'Cannot infer paralogs because only one species is being displayed.'
     }
   },
   methods: {
