@@ -23,19 +23,6 @@
               title="Check box to view this genome. Uncheck to hide. Shift-click to view this genome and hide all others."
               />
           </td>
-            <!--
-          <td>
-            <input
-              name="refGenome"
-              type="radio"
-              :value="genome.name"
-              v-model="rG"
-              @click="rgClicked"
-              @change="rgChanged"
-              title="Click to make this the reference genome. Shift-click to turn off reference genome."
-              />
-          </td>
-            -->
         </tr>  
       </table>
       </div>

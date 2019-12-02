@@ -179,13 +179,7 @@
           />
       </page-box>
     </div>
-    <m-footer version="1.0.0"></m-footer>
-    <!--
-    ============ Messages  ==============
-    -->
-    <messages
-      ref="messages"
-      />
+    <m-footer ref="footer"></m-footer>
   </div>
 </template>
 
@@ -203,7 +197,6 @@ import GenomeView from '@/components/GenomeView'
 import HelpBox from '@/components/HelpBox'
 import ListEditor from '@/components/ListEditor'
 import MComponent from '@/components/MComponent'
-import Messages from '@/components/Messages'
 import MFooter from '@/components/MFooter'
 import MHeader from '@/components/MHeader'
 import MyLists from '@/components/MyLists'
@@ -236,7 +229,6 @@ export default MComponent({
     GenomeSelector,
     HelpBox,
     ListEditor,
-    Messages,
     MHeader,
     MFooter,
     MyLists,

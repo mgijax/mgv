@@ -14,6 +14,7 @@ class HomologyManager {
       //    [idA, taxonA, idB, taxonB, YNcode]
       // Example:
       //    ["FB:FBgn0000028","7227","ZFIN:ZDB-GENE-000523-2","7955","NY"]
+      this.app.$root.$emit('message', { message: 'Fetching orthology data...' })
       data.forEach(r => {
         // extract the row into vars
         const idA = r[0]
@@ -33,6 +34,7 @@ class HomologyManager {
       })
       //
       this.app.$root.$on('taxons-changed', d => {
+        this.app.$root.$emit('message', { message: 'Computing inferred paralogs...' })
         this.computeAllInferredParalogs()
       })
       //

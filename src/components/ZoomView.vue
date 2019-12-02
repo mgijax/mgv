@@ -77,6 +77,8 @@ export default MComponent({
       const y = evt.clientY // - cbb.y
       const x = evt.clientX // - cbb.x
       if (fnode) {
+        // Before showing f's context menu, be sure it's model has been read into the cache.
+        // FIXME: In fact, be sure this is done for f and all its visible homologs
         const f = this.dataManager().getFeatureById(fnode.getAttribute('name'))
         this.dataManager().getGenes(f.genome, f.chr, f.start, f.end, true).then(() => {
           const tnode = evt.target.closest('.transcript')

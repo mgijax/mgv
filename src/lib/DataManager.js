@@ -74,6 +74,7 @@ class DataManager {
     //
     this.cache[g.name] = {}
     this.pending[g.name] = this.greg.getReader(g, 'genes').then(reader => {
+      this.app.$root.$emit('message', { message: 'Loading ' + g.name + '...' })
       return reader.readAll().then(recs => {
         let prevChr = null
         let feats = []
