@@ -79,15 +79,18 @@ export default MComponent({
       if (fnode) {
         // Before showing f's context menu, be sure it's model has been read into the cache.
         // FIXME: In fact, be sure this is done for f and all its visible homologs
-        const f = this.dataManager().getFeatureById(fnode.getAttribute('name'))
-        this.dataManager().getGenes(f.genome, f.chr, f.start, f.end, true).then(() => {
+        const dm = this.dataManager()
+        const f = dm.getFeatureById(fnode.getAttribute('name'))
+        const fhoms = dm.getHomologs(f)
+        const fhomPs = fhoms.map(h => dm.getGenes(h.genome, h.chr, h.start, h.end, true))
+        Promise.all(fhomPs).then(() => {
           const tnode = evt.target.closest('.transcript')
           const tid = tnode ? tnode.getAttribute('name') : ''
           const t = tnode ? f.transcripts.filter(t => t.ID === tid)[0] : null
           this.contextObject = { event: evt, vm: vm, feature: f, transcript: t }
           this.contextMenu = (this.featureMenu[f.genome.taxonid] || this.featureMenu['default'])
           const cm = this.$refs.contextMenu
-        cm.open(y, x)
+          cm.open(y, x)
         })
       } else {
         this.$refs.regionControls.open(vm.region, y-2, x-2)
