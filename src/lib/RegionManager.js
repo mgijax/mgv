@@ -601,7 +601,11 @@ class RegionManager {
       delta: 0,
     }
     if (d.region) {
-      lcoords.mlength = (d.region.end - d.region.start + 1) / f.length
+      if (d.event.metaKey) {
+        lcoords.mlength = (d.region.end - d.region.start + 1) / f.length
+      } else {
+        lcoords.length = d.region.end - d.region.start + 1
+      }
     } else {
       lcoords.length = l
     }
