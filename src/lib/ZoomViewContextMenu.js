@@ -110,29 +110,25 @@ function getMenus(thisObj) {
       }).bind(thisObj)
     }
   }
-  function sequenceCartOptions () {
+  function sequenceCartOptions (which, label, helpText) {
       return {
-        label: 'Add sequences to cart',
-        helpText: 'Add sequences to cart',
+        label: label || '',
+        helpText: helpText || '',
         menuItems: [
-          { label: 'This gene only' },
-          sequenceSelectionOption('dna','this'),
-          sequenceSelectionOption('composite transcript','this'),
-          sequenceSelectionOption('transcript','this'),
-          sequenceSelectionOption('cds','this'),
-          { label: 'This gene and all homologs' },
-          sequenceSelectionOption('dna','all'),
-          sequenceSelectionOption('composite transcript','all'),
-          sequenceSelectionOption('transcript','all'),
-          sequenceSelectionOption('cds','all'),
-       ]
-     }
+          sequenceSelectionOption('dna',which),
+          sequenceSelectionOption('composite transcript',which),
+          sequenceSelectionOption('transcript',which),
+          sequenceSelectionOption('cds',which)
+        ]
+      }
   }
   //
   const mouseMenu = [
     alignOption(),
     externalLinkOptions(),
-    sequenceCartOptions()
+    { label: 'Add sequences to cart' },
+    sequenceCartOptions('this', 'This gene only'),
+    sequenceCartOptions('all', 'This gene and all homologs')
   ]
 
   return {
