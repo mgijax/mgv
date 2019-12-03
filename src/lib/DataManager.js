@@ -330,7 +330,7 @@ class DataManager {
       totalLength: len,
       selected: true,
       reverseComplement: f.strand === '-',
-      translate: false
+      translate: stype === 'cds'
     }
     return d
   }
