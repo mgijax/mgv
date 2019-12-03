@@ -39,8 +39,9 @@ function getMenus(thisObj) {
      }
   }
   // type = one of: dna, transcript, cds
-  // which = one of: this, all
-  function sequenceSelectionOption (type, which) {
+  // whichGene = one of: target, all
+  // whichTxp = optional, one of: target, all
+  function sequenceSelectionOption (type, whichGene, whichTxp) {
     return {
       icon: 'shopping_cart',
       label: cxt => {
@@ -49,8 +50,9 @@ function getMenus(thisObj) {
 	const c = t ? t.cds : null
 	const target = type === 'dna' ? f : type === 'transcript' ? t : type === 'cds' ? c : f
 	const ident = target ? target.ID : ''
-        const all = which === 'all'
-	if (all) {
+        const all = whichGene === 'all'
+        const allT = whichTxp === 'all'
+	if (all || allT) {
 	  return `All ${type}${type === 'dna' || type === 'cds' ? ' sequences' : 's'}`
 	} else {
 	  return `${type} <span style="font-size: smaller;">(${ident})</span>`
@@ -62,9 +64,11 @@ function getMenus(thisObj) {
 	const c = t ? t.cds : null
 	const target = type === 'dna' ? f : type === 'transcript' ? t : type === 'cds' ? c : f
 	const ident = target ? target.ID : ''
-        const all = which === 'all'
-	if (all) {
-          return `Adds all ${type} sequences to your cart for ${f.ID} and homologs from all currently displayed genomes.`
+        const all = whichGene === 'all'
+        const allT = whichTxp === 'all'
+	if (all || allT) {
+          const homPart = all ? ' and homologs from all currently displayed genomes' : ''
+          return `Adds all ${type} sequences to your cart for ${f.ID}${homPart}.`
 	} else {
           return `Adds ${type} sequence ${ident} to your cart.`
 	}
@@ -73,10 +77,11 @@ function getMenus(thisObj) {
         const f = cxt.feature
 	const t = cxt.transcript
 	const c = t ? t.cds : null
-        const all = which === 'all'
+        const all = whichGene === 'all'
+        const allT = whichTxp === 'all'
         return (
-	  (which === 'this' && type === 'transcript' && !t) ||
-	  (which === 'this' && type === 'cds' && !c) ||
+	  (whichGene === 'target' && type === 'transcript' && !t && !allT) ||
+	  (whichGene === 'target' && type === 'cds' && !c && !allT) ||
 	  (f.sotype !== 'protein_coding_gene' && type === 'cds'))
       },
       extraArgs: [type],
@@ -84,7 +89,8 @@ function getMenus(thisObj) {
         const f = cxt.feature
 	const t = cxt.transcript
 	const c = t ? t.cds : null
-        const all = which === 'all'
+        const all = whichGene === 'all'
+        const allT = whichTxp === 'all'
 	const homologs = all ?
 	  this.dataManager().getHomologs(f, this.context.strips.map(
 	      s => s.genome)).filter(x => x)
@@ -92,14 +98,16 @@ function getMenus(thisObj) {
         const seqs = u.flatten(homologs.map(ff => {
           if (seqtype === 'dna') {
             return this.dataManager().makeSequenceDescriptor(seqtype, ff)
-          } else if (seqtype === 'transcript') {
-            return (all ? ff.transcripts : (t ? [t] : [])).map(tt => {
-              return this.dataManager().makeSequenceDescriptor(seqtype, ff, tt)
-            })
           } else if (seqtype === 'composite transcript') {
             return this.dataManager().makeSequenceDescriptor('transcript', ff, ff.composite)
+          } else if (seqtype === 'transcript') {
+            const txps = allT ? ff.transcripts : [t]
+            return txps.map(tt => {
+              return this.dataManager().makeSequenceDescriptor(seqtype, ff, tt)
+            })
           } else if (seqtype === 'cds') {
-            return (all ? ff.transcripts.filter(t => t.cds) : (t.cds ? [t] : [])).map(tt => {
+            const cdss = allT ? ff.transcripts.filter(t => t.cds) : (t.cds ? [t] : [])
+            return cdss.map(tt => {
               return this.dataManager().makeSequenceDescriptor(seqtype, ff, tt)
             })
           } else {
@@ -110,29 +118,41 @@ function getMenus(thisObj) {
       }).bind(thisObj)
     }
   }
-  function sequenceCartOptions (which, label, helpText) {
+  function sequenceCartOptions (whichGene, label, helpText) {
+      const menuItems = []
+      if (whichGene === 'target') {
+        menuItems.push(sequenceSelectionOption('dna', 'target'))
+        menuItems.push(sequenceSelectionOption('composite transcript', 'target', 'target'))
+        menuItems.push(sequenceSelectionOption('transcript', 'target', 'target'))
+        menuItems.push(sequenceSelectionOption('transcript','target','all'))
+        menuItems.push(sequenceSelectionOption('cds', 'target', 'target'))
+        menuItems.push(sequenceSelectionOption('cds','target','all'))
+      } else {
+        menuItems.push(sequenceSelectionOption('dna', 'all'))
+        menuItems.push(sequenceSelectionOption('composite transcript', 'all', 'all'))
+        menuItems.push(sequenceSelectionOption('transcript', 'all', 'all'))
+        menuItems.push(sequenceSelectionOption('cds', 'all', 'all'))
+      }
       return {
         label: label || '',
         helpText: helpText || '',
-        menuItems: [
-          sequenceSelectionOption('dna',which),
-          sequenceSelectionOption('composite transcript',which),
-          sequenceSelectionOption('transcript',which),
-          sequenceSelectionOption('cds',which)
-        ]
+        menuItems: menuItems
       }
   }
   //
-  const mouseMenu = [
+  const menu = [
     alignOption(),
     externalLinkOptions(),
-    { label: 'Add sequences to cart' },
-    sequenceCartOptions('this', 'This gene only'),
+    {
+      label: 'Add sequences to cart',
+      icon: 'shopping_cart'
+    },
+    sequenceCartOptions('target', 'This gene only'),
     sequenceCartOptions('all', 'This gene and all homologs')
   ]
 
   return {
-    'default': mouseMenu
+    'default': menu
   }
 }
 
