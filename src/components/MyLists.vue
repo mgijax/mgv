@@ -63,7 +63,7 @@ export default MComponent({
         label: 'New list from combining lists',
         value: 'newFromCombo'
       }, {
-        label: 'New list from search...',
+        label: 'New mouse ID list from search...',
         value: 'newFromQuery'
       }],
       createMethod: 'newFromQuery',
