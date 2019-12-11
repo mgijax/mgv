@@ -275,6 +275,14 @@ class DataManager {
     const params = `descriptors=${JSON.stringify(descrs)}${fparam}`
     return u.fetch(this.fetchUrl, 'text', params)
   }
+  getAlignments (descrs) {
+    const params = `descriptors=${JSON.stringify(descrs)}&return=alignments`
+    return u.fetch(this.fetchUrl, 'json', params)
+  }
+  getExonAlignmentScores (descrs) {
+    const params = `descriptors=${JSON.stringify(descrs)}&return=exonscores`
+    return u.fetch(this.fetchUrl, 'json', params)
+  }
   // 
   // Returns a promise for the genomic sequence of the specified range for the specified genome
   getSequence (g, c, s, e, doRC) {

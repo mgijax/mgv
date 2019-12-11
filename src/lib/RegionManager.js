@@ -139,8 +139,9 @@ class RegionManager {
     }
     return p.then(strip => {
       strip.regions.forEach(r => r.width = r.end - r.start + 1)
-      this.app.strips.push(this.layoutStrip(strip))
-      return strip
+      if (this.app.strips.filter(s => s.genome === strip.genome).length === 0) {
+          this.app.strips.push(this.layoutStrip(strip))
+      }
     })
   }
   //--------------------------------------
