@@ -11,7 +11,7 @@ class ChunkedGff3FileReader {
   }
   readAll () {
     if (this.chunkSize === 0) {
-      return this.fetcher.fetch(`${this.url}/${this.name}/0`, 'gff3')
+      return this.fetcher.fetch(`${this.url}/${this.name}/0.gff3`, 'gff3')
     } else {
       const ps = this.genome.chromosomes.map(c => this.readChromosome(c))
       return Promise.all(ps).then(u.concatAll)
@@ -24,17 +24,17 @@ class ChunkedGff3FileReader {
     let url
     let p
     if (this.chunkSize === 0) {
-      url = `${this.url}/${this.name}/0`
+      url = `${this.url}/${this.name}/0.gff3`
       p = this.fetcher.fetch(url, 'gff3').then(data => data.filter(f => f[0] === c.name))
     } else if (this.chunkSize === 1) {
-      url = `${this.url}/${this.name}/${c.name}/0`
+      url = `${this.url}/${this.name}/${c.name}/0.gff3`
       p = this.fetcher.fetch(url, 'gff3')
     } else {
       const minBlk = Math.max(0, Math.floor(s / this.chunkSize))
       const maxBlk = Math.max(minBlk, Math.floor(Math.min(e, c.length) / this.chunkSize))
       const ps = []
       for (let i = minBlk; i <= maxBlk; i++) {
-        url = `${this.url}/${this.name}/${c.name}/${i}`
+        url = `${this.url}/${this.name}/${c.name}/${i}.gff3`
         ps.push(this.fetcher.fetch(url, 'gff3'))
       }
       p = Promise.all(ps).then(u.concatAll).then(recs => {
