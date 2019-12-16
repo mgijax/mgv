@@ -103,7 +103,8 @@
         />
       <!-- ======= coordinates label ======= -->
       <text
-        x="50%"
+        ref="coordinatesLabel"
+        :x="coordinatesLabelX"
         :y="height - zeroOffset + 10"
         dominant-baseline="hanging"
         fill="black"
@@ -228,13 +229,13 @@
             :transform="`translate(0,${spreadTranscripts ? featureHeight/2 : 0})`"
             />
         </g>
+        <!-- transcript labels -->
         <g
           class="transcript"
           v-for="(t, ti) in spreadTranscripts ? f.transcripts : f.composite.exons ? [f.composite] : []"
           :key="t.ID+'.lbl'"
           :transform="transcriptTransform(f, t, ti)"
           >
-          <!-- transcript label -->
           <text
             v-if="spreadTranscripts && showDetails && (showTranscriptLabels || transcriptHighlighted(t))"
             :x="transcriptTextX(t)"
@@ -394,6 +395,11 @@ export default MComponent({
       const pp = u.prettyPrintBases(r.end - r.start + 1)
       return `${c}:${s}..${e} (${pp})`
     },
+    coordinatesLabelX: function () {
+      const e = this.$refs.coordinatesLabel
+      const w = e ? e.textLength.baseVal.value : 0
+      return Math.max(0, (this.region.width - w) / 2)
+    },
     tickPositions: function () {
       const r = this.region
       const nticks = Math.floor(r.width / 20)
@@ -425,15 +431,6 @@ export default MComponent({
     },
     trackMouse: function () {
       return this.cfg.trackMouse
-    },
-    currRangeAnchor: function () {
-      if (this.currRangeTextX < 25) return 'start'
-      else if (this.region.width - this.currRangeTextX < 25) return 'end'
-      else return 'middle'
-    },
-    currRangeTextX: function () {
-      if (!this.currRange) return 0
-      return (this.currRange[0] + this.currRange[1]) / 2
     },
     spreadTranscripts: function () {
       return this.cfg.spreadTranscripts
