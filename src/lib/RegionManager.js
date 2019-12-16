@@ -890,7 +890,6 @@ class RegionManager {
     } else if (d.op === 'clear-lock-mode') {
       this.clearLockMode()
     } else if (d.op === 'set-genomes') {
-      this.app.$root.$emit('message', { 'message': 'Setting genomes...' })
       this.setStrips(d.vGenomes.map(n => this.app.dataManager.lookupGenome(n))).then(() => {
         this.announce()
       })

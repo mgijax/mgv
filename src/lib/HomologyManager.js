@@ -8,13 +8,29 @@ class HomologyManager {
     this.app = this.dataManager.app
     //  Organize pairwise assertions into multilevel mapping:
     //          taxonA -> taxonB -> idA -> [idB]
+    this.url = url
     this.index = {}
-    this.readyP = u.fetch(url+ '/homologies.json', 'json').then(data => {
+    this.taxonid2promise = {}
+    this.promises = []
+    //
+    this.app.$root.$on('taxons-changed', d => {
+      if (this.app.vTaxons.length > 1) {
+        this.app.$root.$emit('message', { message: 'Computing inferred paralogs...' })
+      }
+      this.computeAllInferredParalogs()
+    })
+  }
+  //
+  loadHomologiesForTaxon (taxonid) {
+    if (this.taxonid2promise[taxonid]) {
+      return this.taxonid2promise[taxonid]
+    }
+    this.app.$root.$emit('message', { message: `Fetching orthology data for taxon ${taxonid}...` })
+    const p = u.fetch(`${this.url}/homologies/${taxonid}.json`, 'json').then(data => {
       // Each row of data is a list of five values:
       //    [idA, taxonA, idB, taxonB, YNcode]
       // Example:
       //    ["FB:FBgn0000028","7227","ZFIN:ZDB-GENE-000523-2","7955","NY"]
-      this.app.$root.$emit('message', { message: 'Fetching orthology data...' })
       data.forEach(r => {
         // extract the row into vars
         const idA = r[0]
@@ -33,17 +49,37 @@ class HomologyManager {
         ar.push(idB)
       })
       //
-      this.app.$root.$on('taxons-changed', d => {
-        this.app.$root.$emit('message', { message: 'Computing inferred paralogs...' })
-        this.computeAllInferredParalogs()
-      })
-      //
       return true
     })
+    //
+    this.taxonid2promise[taxonid] = p
+    this.promises.push(p)
+    //
+    return p
   }
-  // Returns a promise that resolves (to true) when I'm ready to go
-  ready () {
-    return this.readyP
+  //
+  registerData (data) {
+    // Each row of data is a list of five values:
+    //    [idA, taxonA, idB, taxonB, YNcode]
+    // Example:
+    //    ["FB:FBgn0000028","7227","ZFIN:ZDB-GENE-000523-2","7955","NY"]
+    data.forEach(r => {
+      // extract the row into vars
+      const idA = r[0]
+      const txA = r[1]
+      const idB = r[2]
+      const txB = r[3]
+      const yn  = r[4]
+      // add to index
+      // get (and init, if necessary) top level index, by taxon A
+      const i0 = this.index[txA] = (this.index[txA] || {})
+      // get (and init, if necessary) second level index, by taxon B
+      const i1 = i0[txB] = (i0[txB] || {})
+      // get (and init, if necessary) list of homologs for idA in taxon B
+      const ar = i1[idA] = (i1[idA] || [])
+      // add idB
+      ar.push(idB)
+    })
   }
   // For each specified taxon, computes inferred paralogs, relative to all the rest
   computeAllInferredParalogs (txAs) {

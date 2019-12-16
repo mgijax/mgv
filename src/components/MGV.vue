@@ -845,7 +845,7 @@ export default MComponent({
       this.activeFacets = data
     })
     // Here we go...
-    this.dataManager.ready().then(() => this.initialize())
+    this.initialize()
   }
 })
 </script>

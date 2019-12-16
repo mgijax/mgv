@@ -33,9 +33,6 @@ class DataManager {
     this.genomes = this.greg.register(this.url)
     this.homologyManager = new HomologyManager(this, this.url)
   }
-  ready () {
-    return this.homologyManager.ready()
-  }
   getFeatureById (id) {
     return this.id2feat[id]
   }
@@ -72,6 +69,8 @@ class DataManager {
     if (this.pending[g.name]) return this.pending[g.name]
     if (this.cache[g.name]) return Promise.resolve(true)
     //
+    const hp = this.homologyManager.loadHomologiesForTaxon(this.fixTaxonId(g.metadata.taxonid))
+    //
     this.cache[g.name] = {}
     this.pending[g.name] = this.greg.getReader(g, 'genes').then(reader => {
       this.app.$root.$emit('message', { message: 'Loading ' + g.name + '...' })
@@ -101,8 +100,10 @@ class DataManager {
         return allFeats
       })
     })
-    return this.pending[g.name]
+    return hp.then(() => this.pending[g.name])
   }
+  //
+
   //
   _registerChr (g, c, feats) {
     let freg = new FeatureRegistrar(g, c, this.id2feat, this.cid2feats, this.hid2feats, this.symbol2feats)
