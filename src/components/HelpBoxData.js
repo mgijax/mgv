@@ -158,19 +158,36 @@ export default [{
       `,
     items: [{
       label: `Reference`,
-      text: `<span style="color: white; background-color: rgb(255, 127, 14); width: 16px;">&nbsp;R&nbsp;</span> One genome is chosen as the reference. Coordinates are specified for the reference; coordinates for all other genomes are calculated. Navigating in the reference genome causes all other genomes to update. Navigating in a non-reference genome causes MGV to go to unrestricted mode.`
+      text: `
+       <span style="color: white; background-color: rgb(255, 127, 14); width: 16px;">&nbsp;R&nbsp;</span> One genome is chosen as the reference. Coordinates are specified for the reference; coordinates for all other genomes are calculated. Navigating in the reference genome causes all other genomes to update.
+      `
     }, {
       label: `Lockstep`,
-      text: `<i class="material-icons" style="color: rgb(255, 127, 14); font-size: 20px;">lock</i> In lockstep mode, all displayed regions act as one. Zooming, scrolling, and selecting genomic sequence happen in all regions simultaneously. This mode is most useful when the regions are aligned around a landmark, such as when the user alt-clicks on a gene. To exit lockstep, click the lock icon.
-      `,
+      text: `
+      <i class="material-icons" style="color: rgb(255, 127, 14); font-size: 20px;">lock</i> In lockstep mode, all displayed regions act as one. Zooming, scrolling, and selecting genomic sequence happen in all regions simultaneously. This mode is most useful when the regions are aligned around a landmark, such as when the user alt-clicks on a gene. To exit lockstep, click the lock icon.
+      `
     }, {
       label: `Unrestricted`,
-      text: `<span style="color: rgb(68,68,68); background-color: rgb(204,204,204); width: 16px;">&nbsp;R&nbsp;</span> <i class="material-icons" style="color: black; font-size: 20px;">lock_open</i> When both Reference and Lockstep are off, each region acts independently, i.e., scrolling/zooming a region affects only that region.`
+      text: `
+      <span style="color: rgb(68,68,68); background-color: rgb(204,204,204); width: 16px;">&nbsp;R&nbsp;</span> <i class="material-icons" style="color: black; font-size: 20px;">lock_open</i> When both Reference and Lockstep are off, each region acts independently, i.e., scrolling/zooming a region affects only that region.
+      `
     }]
 
   }, {
     name: `Homologs`,
-    description: `MGV uses feature equivalence (aka homology) to draw connections, to calculate what regions to display, and other purposes. You can control whether paralogs are included or not in these operations by clicking the 'P' icon in the control area next to the Find box. This affects various operations as follows:
+    description: `
+      MGV uses homology relationships to draw connections, to calculate what regions to display, 
+      and other stuff. There are three kinds of homology relationships:
+      <ol>
+      <li>Orthologs. Homology assertions between genes of different species come from the 
+      Alliance of Genome Resources (stringent set).
+      <li>(Inferred) paralogs. Homology assertions between different genes in the same species are inferred
+      from common orthology. Inference of paralogs depends on the set of species you are viewing and is 
+      calculated on the fly. You can control whether or not inferred paralogs are used by
+      clicking the <span style="color: rgb(255, 127, 14); font-weight: bold;">P</span> icon in the control area next to the Find box.
+      <li>Genologs. Assertions of gene equivalence across genomes within a species (eg, 
+      the annotated mouse strains) is accomplished by shared canonical identifier (MGI id).
+      </ol>
        `,
     items: [{
       label: `Connections`,
@@ -195,6 +212,13 @@ export default [{
       label: `Find a gene`,
       text: `Enter the gene symbol or ID in the Find input box at the top of
       the ${ref('ZoomView')}. Then hit enter or tab.`
+    }, {
+      label: `Line up on a gene`,
+      text: `
+        Alt-click (option-click) on a gene to align all genome views around that gene and its homologs.
+        Hold down the command/meta key (or not) to scale the region sizes.
+        Scaling can help when the homologs are of very different sizes.
+            `
     }, {
       label: `Specify coordinates`,
       text: `Type or paste coordinates in the Find box. Then hit enter or tab.
