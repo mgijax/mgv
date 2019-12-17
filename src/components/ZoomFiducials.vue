@@ -154,7 +154,12 @@ export default MComponent({
     }
   },
   mounted: function () {
-    this.$root.$on('region-update', () => this.buildGraph())
+    const build2 = () => {
+      this.buildGraph()
+      window.setTimeout(() => this.buildGraph(), 300)
+    }
+    this.$root.$on('region-update', build2)
+    this.$root.$on('strip-move', build2)
   }
 })
 </script>

@@ -916,7 +916,7 @@ export default MComponent({
     this.$root.$on('list-selection', this.cbListSelection)
   },
   updated: function () {
-    this.$root.$emit('region-update')
+    this.$root.$emit('region-update', this)
   },
   destroyed: function () {
     this.$root.$off('facet-state', this.cbFacetState)

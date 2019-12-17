@@ -146,12 +146,14 @@ export default MComponent({
     zDrag (d) {
       d.data.vm.dragY = d.data.deltaY
       this.setYs()
+      this.$root.$emit('strip-move', d.vm)
     },
     zDragEnd (d) {
       d.data.vm.dragY = 0
       this.dragging = null
       this.setYs()
       this.$root.$emit('context-changed')
+      this.$root.$emit('strip-move', d.vm)
     },
     backgroundClick: function (e) {
       if (e.target.closest('.zoom-region')) {
@@ -181,6 +183,4 @@ export default MComponent({
 </script>
 
 <style scoped>
-.zoom-main * {
-}
 </style>
