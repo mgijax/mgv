@@ -154,7 +154,7 @@ export default MComponent({
     }
   },
   mounted: function () {
-    window.setInterval(() => { this.buildGraph(), 500})
+    this.$root.$on('region-update', () => this.buildGraph())
   }
 })
 </script>
