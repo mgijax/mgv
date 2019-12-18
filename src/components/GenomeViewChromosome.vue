@@ -231,6 +231,11 @@ export default MComponent({
         c = data.vm.capturedBy
         data.vm.capturedBy = null
       }
+      // if not in unrestricted mode, make this the ref genome
+      if (this.app.rGenome || this.app.scrollLock) {
+        this.app.rGenome = this.genome
+        this.app.scrollLock = false
+      }
       this.$root.$emit('region-change', {
         op: 'set',
         region: rr,
@@ -307,6 +312,11 @@ export default MComponent({
           // user just clicked. Set the region size to a minimum of 10 MB.
           r.start -= 5000000
           r.end += 5000000
+        }
+        // if not in unrestricted mode, make this the ref genome
+        if (this.app.rGenome || this.app.scrollLock) {
+          this.app.rGenome = this.genome
+          this.app.scrollLock = false
         }
         this.$root.$emit('region-change', { vm: this, op: 'new', region: r, only: !d.shiftDrag })
       }
