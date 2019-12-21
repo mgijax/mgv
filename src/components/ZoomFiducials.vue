@@ -6,6 +6,7 @@
     <g
       class="zoom-fstack"
       :transform="`translate(${deltaX}, 0)`"
+      v-show="cfg.showConnectors"
       >
       <polygon
         class="fiducial"
@@ -119,12 +120,6 @@ export default MComponent({
     },
     //
     buildGraph () {
-      //
-      if (!this.cfg.showConnectors) {
-        this.nodes = []
-        this.edges = []
-        return
-      }
       //
       const dm = this.app.dataManager
       const nstrips = this.getGraphNodes()
