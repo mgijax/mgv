@@ -419,6 +419,11 @@ class DataManager {
     return this.fixTaxonId(t)
   }
   //
+  getVariants () {
+    const url = this.url + '/VCF_GRCm38_31.vcf'
+    u.fetch(url, 'vcf').then(d => console.log(d))
+  }
+  //
   assignLanes (feats, ppb, fsize) {
     const ca = new ContigAssigner()
     const slap = new SwimLaneAssigner()

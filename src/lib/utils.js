@@ -1,5 +1,6 @@
 import Vue from 'vue'
 import gff from '@/lib/gff3lite'
+import vcf from '@/lib/vcflite'
 
 //
 function fail (e) {
@@ -205,7 +206,7 @@ function deepCopy (obj) {
 //  type: expected type of the response (text, json, or gff3)
 //  postData: if provided, a URL-encoded string, eg, "name=Joel&age=60"
 function fetch (url, type, postData) {
-  const types = ['text', 'json', 'gff3','tsv']
+  const types = ['text', 'json', 'gff3','vcf','tsv']
   if (!type) type = 'text'
   if (types.indexOf(type) === -1) return Promise.reject('Unknown type: ' + type)
   //
@@ -239,6 +240,8 @@ function fetch (url, type, postData) {
       return r.json()
     case 'gff3':
       return r.text().then(t => gff.parseFile(t))
+    case 'vcf':
+      return r.text().then(t => vcf.parseFile(t))
     case 'tsv':
       return r.text().then(t => parseTsv(t))
     default:
