@@ -25,7 +25,6 @@
       :rGenome="context.rGenome"
       :context="context"
       :regions="zs.regions"
-      :synGenome="synGenome(i)"
       :width="width"
       @height-changed="setYs()"
       @dragstart="zDragStart"
@@ -79,11 +78,6 @@ export default MComponent({
     }
   },
   methods: {
-    synGenome: function (i) {
-      return null
-      //if (this.context.strips.length !== 2) return null
-      //return this.context.strips[1-i].genome
-    },
     downloadImage: function (e) {
       if (e.shiftKey) {
         svg2file(this.$el, 'mgv.zoomview.svg')

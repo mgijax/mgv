@@ -12,7 +12,6 @@
       :allMaxLaneP="allMaxLaneP"
       :allMaxLaneM="allMaxLaneM"
       :pad="cfg.pad"
-      :synGenome="synGenome"
       @region-draw="setHeight"
       @region-delete="setHeight"
       @busy-start="busyStart"
@@ -132,7 +131,6 @@ export default MComponent({
     'width',
     'strip',
     'regions',
-    'synGenome',
     'rGenome'
   ],
   inject: ['regionManager'],

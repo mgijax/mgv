@@ -362,11 +362,6 @@ export default MComponent({
     pad: {
       type: Number,
       default: 0.5
-    },
-    // if specified, show synteny blocks vs this genome
-    synGenome: {
-      type: Object,
-      default: null
     }
   },
   data: function () {
