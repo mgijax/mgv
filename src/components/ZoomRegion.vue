@@ -161,6 +161,7 @@
         :style="{ opacity: featureOpacity(f) }"
         v-show="featureVisible(f)"
         >
+        <!-- ======= Underlay  ======= -->
         <rect
           class="outline"
           :x="featureX(f)"
@@ -182,7 +183,7 @@
           :name="t.ID"
           :transform="transcriptTransform(f, t, ti)"
           >
-          <!-- ======= Underlay  ======= -->
+          <!-- ======= Transcript Underlay  ======= -->
           <rect
             class="underlay"
             :x="featureX(t)"
@@ -191,13 +192,6 @@
             :height="featureH(t)"
             fill="white"
             :fill-opacity="spreadTranscripts ? (transcriptHighlighted(t) ? 0.6 : 0.2) : 0"
-            />
-          <!-- ======= Transcript axis line, arrow ======= -->
-          <polyline
-            class="noevents"
-            :points="transcriptAxisPoints(f, t, ti)"
-            :stroke="featureColor(f)"
-            fill="none"
             />
           <!-- ======= Exons ======= -->
           <rect v-for="e in t.exons"
@@ -208,7 +202,15 @@
             :width="featureW(e)"
             :height="featureHeight"
             :fill="featureColor(f)"
+            fill-opacity="0.5"
             stroke="none"
+            />
+          <!-- ======= Transcript axis line, arrow ======= -->
+          <polyline
+            class="noevents"
+            :points="transcriptAxisPoints(f, t, ti)"
+            :stroke="featureColor(f)"
+            fill="none"
             />
           <!-- ======= Start codon ======= -->
           <path v-if="t.cds && showStartStopCodons"
@@ -229,7 +231,7 @@
             :transform="`translate(0,${spreadTranscripts ? featureHeight/2 : 0})`"
             />
         </g>
-        <!-- transcript labels -->
+        <!-- Transcript labels -->
         <g
           class="transcript"
           v-for="(t, ti) in spreadTranscripts ? f.transcripts : f.composite.exons ? [f.composite] : []"
@@ -247,10 +249,10 @@
             >{{t.cds ? t.cds.ID : t.ID}}</text>
         </g>
         </g> <!-- if showDetails -->
-        <!-- feature label -->
+        <!-- Feature label -->
         <text
           class="symbol"
-          v-if="(showDetails && showFeatureLabels) || featureSelected(f) || featureMouseover(f) || featureInList(f)"
+          v-if="featureShowLabel(f)"
           :x="featureTextX(f)"
           :x0="featureTextX(f)"
           :y="-3"
@@ -385,9 +387,9 @@ export default MComponent({
     coordinatesLabel: function () {
       const r = this.region
       const c = r.chr.name
-      const s = u.prettyPrintBases(r.start + this.deltaB, true)
-      const e = u.prettyPrintBases(r.end + this.deltaB, true)
-      const pp = u.prettyPrintBases(r.end - r.start + 1)
+      const s = u.prettyPrintBases(this.minBase, true)
+      const e = u.prettyPrintBases(this.maxBase, true)
+      const pp = u.prettyPrintBases(r.length)
       return `${c}:${s}..${e} (${pp})`
     },
     coordinatesLabelX: function () {
@@ -496,6 +498,14 @@ export default MComponent({
     //
     deltaB: function () {
       return -Math.round(this.myDelta / this.ppb)
+    },
+    //
+    minBase: function () {
+      return this.region.start + this.direction * this.deltaB
+    },
+    //
+    maxBase: function () {
+      return this.region.end + this.direction * this.deltaB
     },
     //
     maxLaneP: function () {
@@ -633,13 +643,23 @@ export default MComponent({
     featureSelected: function (f) {
       return this.selectedSet.has(f.cID ? f.cID : f.ID)
     },
+    // Returns true if feature label should be shown
+    featureShowLabel: function (f) {
+      return (this.showDetails && this.showFeatureLabels) || 
+        this.featureSelected(f) ||
+        this.featureMouseover(f) ||
+        this.featureInList(f)
+    },
+    // Returns true iff f's ID or cID is a member of the currently displayed list.
     featureInList: function (f) {
       if (!this.context.currentList) return false
       const s = this.context.currentListSet
       return s && (s.has(f.cID) || s.has(f.ID))
     },
+    // Returns true iff the feature is currently visible, ie, it overlaps the coordinate range of this region
+    // (takes scrolling into account)
     featureVisible: function (f) {
-      let overlaps = f.start <= (this.region.end + this.direction*this.deltaB) && f.end >= (this.region.start + this.direction*this.deltaB)
+      let overlaps = f.start <= this.maxBase && f.end >= this.minBase
       return overlaps
     },
     featureTextX: function (f) {
@@ -705,10 +725,10 @@ export default MComponent({
       const h = 8
       if (which === 'start') {
         // triangle pointing in transcription direction
-        return `m${x},0 l0,${-h} l${dir * h},${h / 2} Z`
+        return `m${x},${-h} l0,${-h} l${dir * h},${h / 2} Z`
       } else {
         // triangle pointing down
-        return `m${x},0 l${-h / 2},${-h} l${h},0 Z`
+        return `m${x},${-h / 2} l${-h / 2},${-h} l${h},0 Z`
       }
     },
     transcriptAxisPoints (f, t, ti) {
@@ -719,7 +739,7 @@ export default MComponent({
       let x1 = Math.min(tx1, tx2)
       let x2 = Math.max(tx1, tx2)
       let ext = 10
-      let h = 3
+      let h = 5
       if (!this.spreadTranscripts) {
         return `${x1} ${y} ${x2} ${y}`
       }
@@ -728,10 +748,12 @@ export default MComponent({
       if (dir === 'right') {
         // arrow pointing right
         x2 += ext
+        x2 = Math.min(x2, this.region.width + this.deltaB * this.ppb)
         return `${x1} ${y} ${x2} ${y} ${x2 - ext / 2} ${y - h} ${x2} ${y} ${x2 - ext / 2} ${y + h}`
       } else {
         // arrow pointing left
         x1 -= ext
+        x1 = Math.max(x1, this.deltaB * this.ppb)
         return `${x2} ${y} ${x1} ${y} ${x1 + ext / 2} ${y - h} ${x1} ${y} ${x1 + ext / 2} ${y + h}`
       }
     },
