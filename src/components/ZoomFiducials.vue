@@ -155,6 +155,7 @@ export default MComponent({
     }
     this.$root.$on('region-update', build2)
     this.$root.$on('strip-move', build2)
+    this.$root.$on('zoom-main-updated', build2)
   }
 })
 </script>

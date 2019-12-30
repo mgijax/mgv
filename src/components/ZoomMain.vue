@@ -159,6 +159,9 @@ export default MComponent({
       this.$root.$emit('context-changed')
     }
   },
+  updated: function () {
+    this.$root.$emit('zoom-main-updated')
+  },
   created: function () {
     //
     this.$root.$on('resize', () => this.resize())
