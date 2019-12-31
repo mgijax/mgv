@@ -389,7 +389,7 @@ export default MComponent({
       const c = r.chr.name
       const s = u.prettyPrintBases(this.minBase, true)
       const e = u.prettyPrintBases(this.maxBase, true)
-      const pp = u.prettyPrintBases(r.length)
+      const pp = u.prettyPrintBases(r.end - r.start + 1)
       return `${c}:${s}..${e} (${pp})`
     },
     coordinatesLabelX: function () {
