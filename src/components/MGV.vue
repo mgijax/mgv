@@ -476,6 +476,8 @@ export default MComponent({
           this.rGenome = rg
           this.scrollLock = false
         }
+      } else {
+        this.rGenome = null
       }
       // 
       let genomes = [this.allGenomes[0]]
