@@ -60,7 +60,7 @@
         :x="cfg.endCapWidth / 2"
         :y="2"
         text-anchor="middle"
-        style="font-size: 12px; font-weight: bold;"
+        style="font-size: 12px; font-weight: bold; font-family: sans-serif;"
         :fill="endCapFontColor"
         @click="rGenomeClicked"
         >R<title>Make this the reference genome.</title></text>
