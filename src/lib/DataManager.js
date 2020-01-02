@@ -194,7 +194,7 @@ class DataManager {
           }
           return tt
         }).sort((a,b) => {
-          if (a.strand === '+') {
+          if (!a.strand || a.strand === '+') {
             return a.start !== b.start ? a.start - b.start : b.length - a.length
           } else {
             return a.end !== b.end ? b.end - a.end : b.length - a.length
@@ -428,7 +428,7 @@ class DataManager {
       const lblLenBp = ppb ? lbl.length * fsize / ppb : 0 
       const start = f.start
       const end = Math.max(f.end, start + lblLenBp - 1)
-      const sla = f.strand === '+' ? slap : slam
+      const sla = f.strand === '-' ? slam : slap
       f.layout.contig = ca.assignNext(start, end)
       f.layout.l1 = sla.assignNext(start, end)
       f.layout.l2 = fp.assignNext(start, end, 1 + f.transcripts.length, f.ID)

@@ -185,7 +185,7 @@ export default MComponent({
         }
       })
       const gsByStrand = gs.reduce((a,g) => {
-        a[g.f.strand].push(g)
+        a[g.f.strand || '+'].push(g)
         return a
       }, {'+':[], '-': [] })
       const th = this.showLabels ? 12 : 0
@@ -257,7 +257,7 @@ export default MComponent({
       return this.ppb * f.start
     },
     glyphTextX: function (f) {
-      const dx = this.orientation === 'v' ? 0 : (f.strand === '+' ? this.glyphRadius + 2 : -this.glyphRadius-10)
+      const dx = this.orientation === 'v' ? 0 : (f.strand === '-' ? -this.glyphRadius-10 : this.glyphRadius + 2)
       return this.glyphX(f) + dx
     },
     glyphTextY: function (f) {

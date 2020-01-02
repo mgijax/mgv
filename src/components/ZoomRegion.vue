@@ -511,7 +511,7 @@ export default MComponent({
       if (this.showDetails && this.spreadTranscripts) {
         return 1
       } else {
-        let x = this.features.filter(f => f.strand === '+' && this.featureVisible(f)).reduce((v, f) => Math.max(v, f.layout.l1), 0)
+        let x = this.features.filter(f => (f.strand === null || f.strand === '+') && this.featureVisible(f)).reduce((v, f) => Math.max(v, f.layout.l1), 0)
         return Math.max(x, 1)
       }
     },
@@ -598,7 +598,7 @@ export default MComponent({
     featureY (f) {
       if (this.showDetails && this.spreadTranscripts) {
         return f.layout.l2 * (this.featureHeight + this.laneGap) + this.featureFontSize
-      } else if (f.strand === '+') {
+      } else if (!f.strand || f.strand === '+') {
         return -f.layout.l1 * (this.featureHeight + this.featureFontSize)
       } else {
         return (f.layout.l1 - 1) * (this.featureHeight + this.featureFontSize) + this.featureFontSize
@@ -712,6 +712,7 @@ export default MComponent({
       }
     },
     codonGlyph (f, t, which) {
+      // this function's results are not defined if f.strand is null
       const dir = (f.strand === '+' ? 1 : -1) * (this.region.reversed ? -1 : 1)
       let pos
       if ((f.strand === '+' && which === 'start')
@@ -739,7 +740,7 @@ export default MComponent({
       let x2 = Math.max(tx1, tx2)
       let ext = 10
       let h = 5
-      if (!this.spreadTranscripts) {
+      if (!this.spreadTranscripts || !f.strand) {
         return `${x1} ${y} ${x2} ${y}`
       }
       const rev = this.region.reversed

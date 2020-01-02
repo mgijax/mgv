@@ -489,7 +489,7 @@ class RegionManager {
     const bfeatsClipped = bfeats.map(abf => {
       const af = abf[0]
       const bf = abf[1]
-      const inverted = af.strand !== bf.strand
+      const inverted = af.strand && af.strand !== bf.strand
       // If the A feature is only partly contained by the A region, then need to adjust
       // the mapped B feature coordinates accordingly.
       let bfs = bf.start

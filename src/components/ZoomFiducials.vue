@@ -57,18 +57,21 @@ export default MComponent({
       let pbb = this.$parent.$el.getBoundingClientRect()
       return `translate(${-pbb.x}, ${-pbb.y})`
     },
+    inverted: function (r1, r2) {
+      return this.cfg.showInversions && r1.strand !== r2.strand && r1.strand && r2.strand
+    },
     color: function (r1, r2) {
-      return (!this.cfg.showInversions || r1.strand === r2.strand) ? 'black' : 'red'
+      return this.inverted(r1, r2) ? 'red' : 'black'
     },
     points: function (r1, r2) {
       const p1 = `${r1.x},${r1.y + r1.height}`
       const p2 = `${r2.x},${r2.y}`
       const p3 = `${r2.x + r2.width},${r2.y}`
       const p4 = `${r1.x + r1.width},${r1.y + r1.height}`
-      if (r1.strand === r2.strand || !this.cfg.showInversions) {
-	  return `${p1} ${p2} ${p3} ${p4}`
-      } else {
+      if (this.inverted(r1,r2)) {
 	  return `${p1} ${p3} ${p2} ${p4}`
+      } else {
+	  return `${p1} ${p2} ${p3} ${p4}`
       }
     },
     getVisibleHighlighted () {
