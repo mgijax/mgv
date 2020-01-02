@@ -149,7 +149,6 @@
          v-for="f in features"
         :key="f.ID"
         :name="f.ID"
-        :homologyID="f.hID || f.cID || f.ID"
 	:strand="f.strand"
         class="feature"
         :class="{
