@@ -10,7 +10,7 @@
         ref="toolDrawer"
         class="flexcolumn"
         :class="{ open: drawerOpen, closed: !drawerOpen}"
-        :style="{ height: visHeight + 'px', overflow: 'scroll' }"
+        :style="{ height: visHeight + 'px' }"
         >
         <!--
         ============ Genomes ==============
@@ -86,7 +86,7 @@
       -->
       <page-box-container
         name="rightColumn"
-        :style="{ height: visHeight + 'px', overflow: 'scroll' }"
+        :style="{ height: visHeight + 'px' }"
         class="flexcolumn">
         <!--
         ============== Zoom View ==============
@@ -927,6 +927,10 @@ button:hover {
 }
 [name="leftColumn"] {
   transition: min-width 0.5s, max-width 0.5s, opacity 0.5s;
+  overflow-y: scroll; 
+}
+[name="rightColumn"] {
+  overflow: scroll; 
 }
 [name="leftColumn"].open {
   min-width: 260px;

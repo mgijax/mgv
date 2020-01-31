@@ -140,7 +140,7 @@ export default MComponent({
 }
 .genome-selector .table-container {
   max-height: 300px;
-  overflow: scroll;
+  overflow-y: scroll;
 }
 .genome-selector .table-container table {
   width: 100%

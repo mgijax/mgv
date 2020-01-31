@@ -291,7 +291,7 @@ export default MComponent({
 }
 .sequence-cart-items {
   max-height: 250px;
-  overflow: scroll;
+  overflow-y: scroll;
 }
 .download-option {
   justify-content: flex-start;

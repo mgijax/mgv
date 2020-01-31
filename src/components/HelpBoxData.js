@@ -70,7 +70,7 @@ export default [{
       text: `The ${ref('Genomes')} box lists all the genomes.
           Check the box next to a genome to add it to the ${ref('ZoomView')};
           uncheck the box to remove it.
-          To see metadata for a genome, hover the mouse over thyour mouse over the genome's name.
+          To see metadata for a genome, hover the mouse over the genome's name.
           To select one genome and remove all others, shift-click the box.
           Buttons at the bottom of the list provide ways to
           select predefine sets of genomes.
@@ -83,13 +83,13 @@ export default [{
           grab the center handle (<span style="font-weight: bold;">::</span>) in the left endcap 
           and drag up or down.
           You can also sort the genomes alphabetically by clicking the ${i('sort')} icon in the control area.
-          (NOTE that if there is a reference genome, it is always positioned
+          (NOTE that if there is a reference genome, it is always positioned at the top.)
           `
       }, {
       label: `Reference genome`,
       text: `You can optionally pick a genome to be the "reference" by clicking the "R" in that genome's end cap.
           <ul><li>The corresponding strip rises to the top, and its left end cap has a different color.
-          <li>All other genome regions are calculated based on the reference and are updated with every change in the refernce region.
+          <li>All other genome regions are calculated based on the reference and are updated with every change in the reference region.
           <li>The reference genome always stays at the top of the view; other genomes may still be rearranged.
           <li>The reference genome is always displayed; you cannot turn off its checkox (in ${ref('Genomes')}) while it is the reference.
           <li>To "turn off" the reference genome, click its "R" again.
@@ -318,8 +318,8 @@ export default [{
           options under "Add sequences to cart." You can select genomic, transcript,
           composite transcript, or CDS sequences; you may select these sequences the current gene only or for that
           gene and its homologs. A composite transcript consists of the union of all the
-          exons of all the transcripts of a gene; the are what you see when "Spread transcripts" is off,
-          and all trasncripts for a gene are piled up on top of one another.
+          exons of all the transcripts of a gene; these are what you see when "Spread transcripts" is off,
+          and all transcripts for a gene are piled on top of one another.
           `
       }, {
       label: `Download sequences`,

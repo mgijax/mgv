@@ -116,7 +116,7 @@ export default MComponent({
 <style scoped>
 .my-lists > div {
   max-height: 250px;
-  overflow: scroll;
+  overflow-y: scroll;
 }
 .gobutton {
   background-color: green;
