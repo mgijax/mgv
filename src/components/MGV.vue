@@ -856,6 +856,17 @@ export default MComponent({
 html, body {
   height: 100%;
   margin: 0px;
+  overflow: hidden;
+}
+
+/* scrollbar style not supported in FF  */
+*::-webkit-scrollbar {
+  width: 6px;
+}
+ 
+*::-webkit-scrollbar-thumb {
+  background-color: darkgrey;
+  border-radius: 3px;
 }
 /* -----------------------------------------
  * Global styles for the app
@@ -933,8 +944,8 @@ button:hover {
   overflow: scroll; 
 }
 [name="leftColumn"].open {
-  min-width: 260px;
-  max-width: 260px;
+  min-width: 300px;
+  max-width: 300px;
   opacity: 1;
 }
 [name="leftColumn"].closed {

@@ -1,29 +1,33 @@
 <template>
   <div class="my-lists">
+     <!-- List of user's lists -->
      <div class="flexcolumn">
-     <span>My lists <span style="font-size: smaller;">({{ lists.length }} list{{ lists.length === 1 ? '' : 's' }})</span></span>
-     <div class="flexrow"
-       v-if="lists.length > 0"
-       style="justify-content: space-around;cursor:pointer;max-height:12px;">
-       <i class="material-icons"
-         :style="{opacity:currentSort.attr==='name'?1:0, flexGrow:1}"
-         title="Click to sort"
-         @click="setSort('name')"
-         >arrow_drop_{{currentSort.dir === -1 ? 'down' : 'up'}}</i>
-       <i class="material-icons"
-         :style="{opacity:currentSort.attr==='created'?1:0, flexGrow:1}"
-         title="Click to sort"
-         @click="setSort('created')"
-         >arrow_drop_{{currentSort.dir === -1 ? 'down' : 'up'}}</i>
-     </div>
-     <my-list-item
-         v-for="item in sortedLists"
-         :key="item.name"
-         :item="item"
-         :class="{ current: item === currentList }"
-         />
+       <span>My lists <span style="font-size: smaller;">({{ lists.length }} list{{ lists.length === 1 ? '' : 's' }})</span></span>
+       <div class="flexrow"
+         v-if="lists.length > 0"
+         style="justify-content: space-around;cursor:pointer;max-height:12px;">
+         <i class="material-icons"
+           :style="{opacity:currentSort.attr==='name'?1:0, flexGrow:1}"
+           title="Click to sort"
+           @click="setSort('name')"
+           >arrow_drop_{{currentSort.dir === -1 ? 'down' : 'up'}}</i>
+         <i class="material-icons"
+           :style="{opacity:currentSort.attr==='created'?1:0, flexGrow:1}"
+           title="Click to sort"
+           @click="setSort('created')"
+           >arrow_drop_{{currentSort.dir === -1 ? 'down' : 'up'}}</i>
+       </div>
+       <div class="flexcolumn listolists">
+         <my-list-item
+           v-for="item in sortedLists"
+           :key="item.name"
+           :item="item"
+           :class="{ current: item === currentList }"
+           />
+       </div>
      </div>
      <p/>
+     <!-- Create list controls -->
      <span>Create</span>
      <div class="flexrow">
        <select v-model="createMethod">
@@ -114,7 +118,7 @@ export default MComponent({
 </script>
 
 <style scoped>
-.my-lists > div {
+.my-lists .listolists {
   max-height: 250px;
   overflow-y: scroll;
 }
@@ -122,5 +126,6 @@ export default MComponent({
   background-color: green;
   color: white;
   margin: 4px;
+  border-width: 1px;
 }
 </style>

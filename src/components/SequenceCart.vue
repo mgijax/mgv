@@ -2,7 +2,7 @@
   <div class="sequence-cart">
      <!-- Cart items -->
      <span v-show="cart.length > 0">{{ cart.length }} sequence{{ cart.length === 1 ? '' : 's' }}</span>
-     <div class="sequence-cart-items">
+     <div class="sequence-cart-items" v-if="cart.length">
        <sequence-cart-item
          v-for="item in cart"
          :key="item.name"
