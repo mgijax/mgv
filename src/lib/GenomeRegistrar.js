@@ -115,6 +115,7 @@ class GenomeRegistrar {
     })
     info.name2chr = info.chromosomes.reduce((a,c) => { a[c.name] = c; return a }, {})
     this.name2genome[info.name] = info
+    this.name2reader[info.name] = new GenomeReader(this, info)
     return info
   }
 }
