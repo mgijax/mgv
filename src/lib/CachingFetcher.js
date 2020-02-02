@@ -14,7 +14,7 @@ class CachingFetcher {
   // Args:
   //   url (string) the URL to fetch
   //   type (string) one of: text, json, gff3
-  fetch (url, type, namespace) {
+  fetch (url, type) {
     const key = `${this.namespace}::${type}::${url}`
     return this.kstore.get(key).then(cachedval => {
       if (cachedval === undefined) {

@@ -16,7 +16,6 @@ import config from '@/config'
 import { GenomeRegistrar } from '@/lib/GenomeRegistrar'
 import HomologyManager from '@/lib/HomologyManager'
 import gff3 from '@/lib/gff3lite'
-import { translate, reverseComplement } from '@/lib/genetic_code'
 
 class DataManager {
   constructor (app) {
@@ -132,7 +131,6 @@ class DataManager {
           // Here we attach them to their genes.
           // Index the transcripts by gene ID.
           const gid2tps = u.index(tps, t => t.gID, false)
-          let needLayout = false
           feats.forEach(f => {
             // if we've already got the transcripts for this gene, skip
             if (f.transcripts.length) return
@@ -163,7 +161,6 @@ class DataManager {
             }
             Object.assign(f.composite, cT)
             //f.transcripts.push(cT)
-            needLayout = true
           })
           return feats
         })
@@ -246,8 +243,6 @@ class DataManager {
     const dExons = new Set() // distinct exons
     const allExons = tps.reduce((a,t) => a.concat(t.exons), [])
     allExons.sort((e1, e2) => e1.start - e2.start)
-    let ccontig = null
-    let hwm = 0
     allExons.forEach(e => {
       // composite
       const lastE = cExons[cExons.length - 1]
@@ -372,8 +367,6 @@ class DataManager {
       f = (this.getFeaturesBy(f) || [])[0]
       if (!f) return []
     }
-    const hm = this.homologyManager
-    const txA = this.getTaxonId(f)
     const homIds = this.getHomologCids(f, genomes)
     const homs = homIds.map(hid =>
        this.getFeaturesByCid(hid).filter(hom =>
@@ -495,7 +488,7 @@ class FeatureRegistrar {
     //
     f.length = f.end - f.start + 1
     if (f.length > config.DataManager.featureSizeLimit) {
-      console.log('Feature too big. Skipping: ', f)
+      // console.log('Feature too big. Skipping: ', f)
       return null
     }
     // A place to store layout attributes (such as swim lanes). Unlike

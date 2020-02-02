@@ -82,7 +82,7 @@ export default MComponent({
     }
   },
   watch: {
-    selected: function (e) {
+    selected: function () {
       this.$emit('facet-change', this)
     }
   },

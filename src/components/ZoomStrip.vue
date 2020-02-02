@@ -5,7 +5,7 @@
   >
     <!-- list of ZoomRegions -->
     <zoom-region
-      v-for="(zr,zri) in regions"
+      v-for="zr in regions"
       :key="zr.id"
       :context="context"
       :region="zr"
@@ -120,7 +120,6 @@
 import MComponent from '@/components/MComponent'
 import ZoomRegion from '@/components/ZoomRegion'
 import u from '@/lib/utils'
-import config from '@/config'
 //
 export default MComponent({
   name: 'ZoomStrip',
@@ -164,12 +163,11 @@ export default MComponent({
     }
   },
   methods: {
-    regionRdragstart: function (d) {
+    regionRdragstart: function () {
       this.rDragging = true
     },
     regionRdrag: function (d) {
       const drs = d.region.deltaX + d.deltaX
-      const dre = drs + d.region.width - 1
       let dir = 1
       this.$children.forEach(zr => {
         const r = zr.region
@@ -182,7 +180,7 @@ export default MComponent({
         }
       })
     },
-    regionRdragend: function (d) {
+    regionRdragend: function () {
       this.rDragging = false
       this.$children.forEach(zr => {
         zr.regionDragDelta = 0
@@ -240,7 +238,7 @@ export default MComponent({
         value: e.shiftKey ? undefined : !sir 
       }))
     },
-    rGenomeClicked (e) {
+    rGenomeClicked () {
       if (this.genome === this.app.rGenome) {
         this.$root.$emit('region-change', { op : 'clear-ref-genome' })
       } else {

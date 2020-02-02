@@ -119,7 +119,6 @@
 
 <script>
 import MComponent from '@/components/MComponent'
-import gc from '@/lib/GenomeCoordinates'
 import u from '@/lib/utils'
 import { SegmentLayout } from '@/lib/Layout'
 import MBrush from '@/components/MBrush'
@@ -221,7 +220,7 @@ export default MComponent({
     brushenter: function (r) {
       this.$root.$emit('region-current', { region : r })
     },
-    brushleave: function (r) {
+    brushleave: function () {
       this.$root.$emit('region-current', null)
     },
     brushed: function (data, rr) {
@@ -247,7 +246,6 @@ export default MComponent({
       })
     },
     clickedGlyph: function (f) {
-      let id = f.cID || f.ID
       this.$root.$emit('region-change', { op : 'feature-align', feature: f })
     },
     glyphX: function (f) {

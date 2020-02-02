@@ -5,6 +5,7 @@
       <!-- a button per section -->
       <span
         v-for="(s,i) in sections"
+        :key="s.name"
         class="sectionButton"
         :class="{ current: selectedSection === i }"
         @click="select(i)"
@@ -22,7 +23,7 @@
         v-html="currSection.description"
         />
       <table>
-        <tr v-for="(r,ri) in currSection.items" class="itemrow">
+        <tr v-for="(r,ri) in currSection.items" :key="ri" class="itemrow">
           <td v-if="r.heading" colspan="2" class="heading" v-html="r.heading"></td>
           <td v-if="r.label" width="25%" class="what" v-html="r.label"></td>
           <td v-if="r.label" class="how" v-html="r.text"></td>
@@ -37,7 +38,6 @@
 </template>
 
 <script>
-import config from '@/config'
 import MComponent from '@/components/MComponent'
 import MButton from '@/components/MButton'
 import helpData from '@/components/HelpBoxData'

@@ -53,43 +53,43 @@
          target="_blank"
          method="POST"
          download>
-         <input type="hidden" name="descriptors" v-model="descriptors"></textarea>
-	 <div class="flexcolumn" style="padding-right: 12px;">
-	     <div class="flexrow download-option">
-	       <!-- Download button -->
-	       <m-button
-		 icon="cloud_download"
-		 title="Download selected sequences to a file. Enter file name."
-		 @click="downloadToFile"
-		 :disabled="nothingSelected || noFileName"
-		 />
+         <input type="hidden" name="descriptors" v-model="descriptors" />
+         <div class="flexcolumn" style="padding-right: 12px;">
+             <div class="flexrow download-option">
+               <!-- Download button -->
+               <m-button
+                 icon="cloud_download"
+                 title="Download selected sequences to a file. Enter file name."
+                 @click="downloadToFile"
+                 :disabled="nothingSelected || noFileName"
+                 />
                <label>File</label>
-	       <input
+               <input
                  v-model="filename"
                  name="filename"
                  type="text"
                  :disabled="cartEmpty"
-                 placeholder="Enter file name."></input>
-	     </div>
-	     <div class="flexrow download-option">
-	       <!-- View in browser -->
-	       <m-button
-		 icon="cloud_download"
-		 title="Download selected sequences to a new browser tab."
-		 @click="downloadToBrowser"
-		 :disabled="nothingSelected"
-		 />
+                 placeholder="Enter file name." />
+             </div>
+             <div class="flexrow download-option">
+               <!-- View in browser -->
+               <m-button
+                 icon="cloud_download"
+                 title="Download selected sequences to a new browser tab."
+                 @click="downloadToBrowser"
+                 :disabled="nothingSelected"
+                 />
                <label>Browser</label>
              </div>
              <div class="flexrow download-option">
-	       <!-- Copy to clipboard -->
-	       <m-button
-		 icon="cloud_download"
-		 title="Copy selected sequences to the clipboard."
-		 @click="downloadToClipboard"
-		 :disabled="nothingSelected"
+               <!-- Copy to clipboard -->
+               <m-button
+                 icon="cloud_download"
+                 title="Copy selected sequences to the clipboard."
+                 @click="downloadToClipboard"
+                 :disabled="nothingSelected"
                  v-show="!cbText"
-		 />
+                 />
                <label v-show="!cbText">Clipboard</label>
                <label v-show="cbText">Confirm:</label>
                <m-button
@@ -109,15 +109,14 @@
                <span
                  v-show="cbText"
                  >{{cbText.length}} chars</span>
-	     </div>
-	 </div>
+             </div>
+         </div>
        </form>
      </div>
   </div>
 </template>
 
 <script>
-import config from '@/config'
 import u from '@/lib/utils'
 import MComponent from '@/components/MComponent'
 import MButton from '@/components/MButton'
@@ -222,15 +221,15 @@ export default MComponent({
     downloadToBrowser: function () {
       if (this.nothingSelected) return
       this.dataManager().getSequences(this.selected).then(text => {
-	const w = window.open("","_blank")
-	w.document.write('<pre>', text, '</pre>')
+        const w = window.open("","_blank")
+        w.document.write('<pre>', text, '</pre>')
         this.app.logEvent('DownloadSequence', 'browser', this.selectedLength)
       })
     },
     viewFetched: function () {
-	const w = window.open("","_blank")
-	w.document.write('<pre>', this.fetched, '</pre>')
-	this.fetched = ''
+        const w = window.open("","_blank")
+        w.document.write('<pre>', this.fetched, '</pre>')
+        this.fetched = ''
     },
     copyFetched: function () {
         const dummy = document.createElement("textarea")
@@ -239,7 +238,7 @@ export default MComponent({
         dummy.select();
         document.execCommand("copy");
         document.body.removeChild(dummy);
-	this.fetched = ''
+        this.fetched = ''
     },
     save () {
       return this.kstore.set('all', this.cart.map(seq => {

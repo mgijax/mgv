@@ -27,7 +27,7 @@ function svg2png (svg, width, height, fname) {
   let data = (new XMLSerializer()).serializeToString(svg)
   // Problem if the svg element has no explicit width
   const svgBB = svg.getBoundingClientRect()
-  data = data.replace('height', `width=\"${svgBB.width}\" height`)
+  data = data.replace('height', `width="${svgBB.width}" height`)
   //
   const DOMURL = window.URL || window.webkitURL || window
   const img = new Image()
@@ -40,7 +40,7 @@ function svg2png (svg, width, height, fname) {
     triggerDownload(imgURI, fname)
     document.body.removeChild(canvas)
   }
-  img.onerror = function (e) {
+  img.onerror = function () {
     document.body.removeChild(canvas)
   }
   img.src = url

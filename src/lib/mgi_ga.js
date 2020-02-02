@@ -21,8 +21,8 @@ m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
 })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
 
 // These are queued until the analytics library loads, at which point they execute.
-ga('create', 'UA-11017903-1', 'auto');
-ga('send', 'pageview');
+window.ga('create', 'UA-11017903-1', 'auto');
+window.ga('send', 'pageview');
 
 // helper function
 function ga_logEvent(
@@ -32,7 +32,7 @@ function ga_logEvent(
         value           // optional integer; numeric value associated with the event
         ) {
         
-        ga('send', 'event', category, action, label, value);
+        window.ga('send', 'event', category, action, label, value);
 }
 
 //

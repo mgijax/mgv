@@ -1,5 +1,4 @@
 import u from '@/lib/utils'
-import config from '@/config'
 //
 class HomologyManager {
   //
@@ -13,7 +12,7 @@ class HomologyManager {
     this.taxonid2promise = {}
     this.promises = []
     //
-    this.app.$root.$on('taxons-changed', d => {
+    this.app.$root.$on('taxons-changed', () => {
       if (this.app.vTaxons.length > 1) {
         this.app.$root.$emit('message', { message: 'Computing inferred paralogs...' })
       }
@@ -37,7 +36,6 @@ class HomologyManager {
         const txA = r[1]
         const idB = r[2]
         const txB = r[3]
-        const yn  = r[4]
         // add to index
         // get (and init, if necessary) top level index, by taxon A
         const i0 = this.index[txA] = (this.index[txA] || {})
@@ -69,7 +67,6 @@ class HomologyManager {
       const txA = r[1]
       const idB = r[2]
       const txB = r[3]
-      const yn  = r[4]
       // add to index
       // get (and init, if necessary) top level index, by taxon A
       const i0 = this.index[txA] = (this.index[txA] || {})

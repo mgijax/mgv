@@ -143,7 +143,7 @@ export default MComponent({
       get: function () {
         return this.items.join('\n')
       },
-      set: function (val) {
+      set: function () {
         // let v = this.$refs.textarea.value
         // let titems = v.split(/\s+/).filter(x => x)
       }

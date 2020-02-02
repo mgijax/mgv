@@ -3,7 +3,6 @@
  *
  * Utilities for working with GFF3.
  */
-const HEADER = '##gff-version 3'
 
 const TAB = '\t'
 const NL = '\n'
@@ -11,7 +10,6 @@ const HASH = '#'
 const SEMI = ';'
 const EQ = '='
 
-const SEPARATOR = '###'
 
 // define constants for the column indices
 const seqid = 0

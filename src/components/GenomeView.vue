@@ -11,6 +11,7 @@
           >
           <option
             v-for="g in vGenomes"
+            :key="g.name"
             :value="g"
             >{{g === context.rGenome ? '*' : ''}}{{g.name}}</option>
         </select>
@@ -131,7 +132,6 @@
 </template>
 
 <script>
-import Vue from 'vue'
 import MComponent from '@/components/MComponent'
 import GenomeViewChromosome from '@/components/GenomeViewChromosome'
 import MButton from '@/components/MButton'
@@ -217,7 +217,7 @@ export default MComponent({
     dragstart: function (d) {
       this.currMBrush = d.vm
     },
-    dragend: function (d) {
+    dragend: function () {
       this.currMBrush = null
     },
     downloadImage: function (e) {
@@ -284,7 +284,7 @@ export default MComponent({
     }
   },
   watch: {
-    genomeName: function (oldc, newc) {
+    genomeName: function () {
       this.resize()
     },
     isOpen: function () {

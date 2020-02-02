@@ -278,8 +278,6 @@ export default MComponent({
         this.y += e.clientY - d.prevY
         d.prevX = e.clientX
         d.prevY = e.clientY
-      },
-      dragend: function (e, d) {
       }
     }, this.$parent.$el, this)
   },

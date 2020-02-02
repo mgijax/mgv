@@ -10,7 +10,7 @@ class KeyStore {
       this.store = null
       this.disabled = true
       this.nullP = Promise.resolve(null)
-      console.log(`KeyStore: error in constructor: ${err} \n Disabled.`)
+      throw `KeyStore: error in constructor: ${err}.`
     }
   }
   get (key) {

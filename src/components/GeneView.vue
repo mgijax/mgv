@@ -41,12 +41,10 @@
 
 <script>
 import MComponent from '@/components/MComponent'
-import config from '@/config'
 export default MComponent({
   name: 'GeneView',
   props: ['genes','spreadTranscripts'],
   data: function () {
-    const c = config
     return {
       //   intronFringe (int) amount (in bp) to extend into the intron
       intronFringe: 20,
@@ -74,9 +72,9 @@ export default MComponent({
       this.ppb = this.width / maxTlen
       this.genes.forEach((g,i) => this.layoutGene(g,i))
     },
-    layoutGene (gene, i) {
+    layoutGene (gene) {
       this.layoutTranscript(gene.composite)
-      gene.transcripts.forEach((t,j) => this.layoutTranscript2(t, gene.composite))
+      gene.transcripts.forEach(t => this.layoutTranscript2(t, gene.composite))
     },
     layoutTranscript (trans, i, j) {
       this.layoutExons(trans.exons, i, j)
@@ -102,7 +100,7 @@ export default MComponent({
     //   exons (list) Exons, each with start and end coordinates (in bp).
     // Returns:
     //   The exons, tagged with the computed coordinates (x and width, in pixels)
-    layoutExons (exons, i, j) {
+    layoutExons (exons) {
       // current x (in px) coord
       let x = 0
       // the amount (in px) for each intron fringe
@@ -113,7 +111,7 @@ export default MComponent({
          x += e.width + 2 * intronWidth
       })
     },
-    exonStyle (e, i, j) {
+    exonStyle (e) {
       return {
         left: e.x + 'px',
         top: '0px',

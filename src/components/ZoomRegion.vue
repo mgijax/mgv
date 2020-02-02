@@ -556,7 +556,7 @@ export default MComponent({
         this.$nextTick(() => this.$emit('region-draw', this))
       }
     },
-    featureFontSize: function (old, newval) {
+    featureFontSize: function () {
       this.assignLanes()
     },
     showFeatureLabels: function () {
@@ -787,15 +787,14 @@ export default MComponent({
               this.sequence = ''
             }
             this.$emit('busy-end')
-          }).catch(err => {
-            console.log('Error while fetching sequence: ', err)
+          }).catch(() => {
             this.sequence = ''
             this.$emit('busy-end')
           })
         } else {
           this.sequence = ''
         }
-      }).catch((e) => {
+      }).catch(() => {
         this.$emit('busy-end')
       })
     },
@@ -887,7 +886,7 @@ export default MComponent({
     initRegionDrag () {
       this.rDragging = false
       u.dragify(this.$refs.draghandle, {
-        dragstart: function (e, d) {
+        dragstart: function () {
           this.rDragging = true
           this.$emit('region-rdragstart', { region: this.region, vm: this })
         },
@@ -895,7 +894,7 @@ export default MComponent({
           this.regionDragDelta = d.deltaX
           this.$emit('region-rdrag', { region: this.region, vm: this, deltaX: d.deltaX })
         },
-        dragend: function (e, d) {
+        dragend: function () {
           this.rDragging = false
           this.$emit('region-rdragend', { region: this.region, vm: this })
           this.regionDragDelta = 0
@@ -922,10 +921,10 @@ export default MComponent({
     },
   },
   created: function () {
-    this.cbFacetState = d => {
+    this.cbFacetState = () => {
       this.getFeatures()
     }
-    this.cbListSelection = d => {
+    this.cbListSelection = () => {
       this.getFeatures()
     }
     //

@@ -39,7 +39,6 @@
 
 <script>
 import MComponent from '@/components/MComponent'
-import u from '@/lib/utils'
 export default MComponent({
   name: 'ZoomFiducials',
   props: ['height'],
@@ -69,9 +68,9 @@ export default MComponent({
       const p3 = `${r2.x + r2.width},${r2.y}`
       const p4 = `${r1.x + r1.width},${r1.y + r1.height}`
       if (this.inverted(r1,r2)) {
-	  return `${p1} ${p3} ${p2} ${p4}`
+          return `${p1} ${p3} ${p2} ${p4}`
       } else {
-	  return `${p1} ${p2} ${p3} ${p4}`
+          return `${p1} ${p2} ${p3} ${p4}`
       }
     },
     getVisibleHighlighted () {
@@ -79,7 +78,7 @@ export default MComponent({
       const pel = this.$parent.$el
       if (!pel) return []
       const feats = new Set()
-      pel.querySelectorAll('.feature.highlight.visible').forEach((fel, fi) => {
+      pel.querySelectorAll('.feature.highlight.visible').forEach(fel => {
         const fid = fel.getAttribute('name')
         const f = dm.getFeatureById(fid)
         feats.add(f)
@@ -88,13 +87,11 @@ export default MComponent({
     },
     //
     getGraphNodes () {
-      const dm = this.dataManager()
-      const inclParas = this.app.cfg.includeParalogs
       const pel = this.$parent.$el
       if (!pel) return []
       const clickedFeatures = []
       const boxesByStrip = []
-      pel.querySelectorAll('.zoom-strip').forEach((zel, zi) => {
+      pel.querySelectorAll('.zoom-strip').forEach(zel => {
        const boxes = []
        boxesByStrip.push(boxes)
        zel.querySelectorAll('.zoom-region').forEach(rel => {
@@ -106,8 +103,8 @@ export default MComponent({
           const fid = fel.getAttribute('name')
           const f = this.dataManager().getFeatureById(fid)
           //
-	  const rect = fel.querySelector('.feature > rect').getBoundingClientRect()
-	  rect.strand = fel.getAttribute('strand')
+          const rect = fel.querySelector('.feature > rect').getBoundingClientRect()
+          rect.strand = fel.getAttribute('strand')
           if (rev) rect.strand = rect.strand === '+' ? '-' : '+'
           //
           // Each node has a feature, a rectangle, and a reachable set.

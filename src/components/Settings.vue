@@ -255,7 +255,6 @@ import MComponent from '@/components/MComponent'
 import MButton from '@/components/MButton'
 import KeyStore from '@/lib/KeyStore'
 import config from '@/config'
-import u from '@/lib/utils'
 export default MComponent({
   name: 'Settings',
   components: { MButton },

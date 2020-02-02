@@ -47,7 +47,7 @@ export default MComponent({
         this.$root.$emit('query-returned', { queryType: this.selection, query: s, results: data })
 	this.$refs.searchTerm.value = ''
         this.tellBusy(false)
-      }).catch(err => {
+      }).catch(() => {
         this.tellBusy(false)
       })
     },

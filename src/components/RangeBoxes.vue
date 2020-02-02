@@ -60,7 +60,7 @@ export default MComponent({
     textY: function (b) {
       return (b.y !== undefined ? b.y + b.height : b.y2) + this.fontSize
     },
-    textAnchor: function (b) {
+    textAnchor: function () {
       return "middle"
     },
     textRectX: function (b) { 
@@ -144,9 +144,6 @@ export default MComponent({
   mounted: function () {
     this.dragData = null
     this.dragging = false
-    // mouseenter
-    this.$root.$on('region-mouseenter', d => {
-    })
     // mousemove
     this.$root.$on('region-mousemove', d => {
       if (!this.cfg.trackMouse) return
@@ -159,7 +156,7 @@ export default MComponent({
       this.drawLines([d.vm], pxLeft / bb.width)
     })
     // mouseleave
-    this.$root.$on('region-mouseleave', d => {
+    this.$root.$on('region-mouseleave', () => {
       this.boxes = []
     })
     // dragstart
@@ -258,7 +255,7 @@ export default MComponent({
       this.boxes = []
     })
     //
-    this.$root.$on('escape-pressed', d => {
+    this.$root.$on('escape-pressed', () => {
       if (!this.dragging) return
       this.dragData.vms.forEach(vm => vm.regionScrollDelta = 0)
       this.dragData.cancel()

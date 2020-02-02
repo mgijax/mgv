@@ -203,7 +203,7 @@ export default MComponent({
         }
       })
     },
-    dragEnd: function (ev) {
+    dragEnd: function () {
       // console.log('PageBox.dragEnd', ev)
       document.removeEventListener('dragover', this.ddData.listener)
       this.isDragging = false
@@ -232,7 +232,7 @@ export default MComponent({
       // At mount time, contained components have already been rendered.
       // Find the content component, which is the last.
       let lc = this.$refs.content = this.$children[3]
-      if (!lc) console.log ('Cannot find last child.', this)
+      if (!lc) throw 'Cannot find last child.'
       let htext = lc ? lc.$el.title : ''
       // move help text from component to this box's info button
       this.helpText = htext

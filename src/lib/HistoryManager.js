@@ -87,7 +87,7 @@ class HistoryManager {
         const bits = gr.split('::')
         const genome = bits[0]
         const gregs = bits[1].split(/,/g).map(gr => {
-          const coords = gr.split(/:|[.][.]|[\/]/g)
+          const coords = gr.split(/:|[.][.]|[/]/g)
           const w = parseInt(coords[3]) || 0
           return {
             genome: genome,

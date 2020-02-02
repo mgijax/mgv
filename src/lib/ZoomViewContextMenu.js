@@ -29,7 +29,7 @@ function getMenus(thisObj) {
               label: `${lnk.text}`,
               helpText: `See details for this feature at ${lnk.text}.`,
               disabled: false,
-              handler: (function (cxt) {
+              handler: (function () {
                 const u = lnk.url + f[lnk.attr || "ID"]
                 window.open(u, '_blank')
               }).bind(thisObj)
@@ -46,55 +46,53 @@ function getMenus(thisObj) {
       icon: 'shopping_cart',
       label: cxt => {
         const f = cxt.feature
-	const t = cxt.transcript
-	const c = t ? t.cds : null
-	const target = type === 'dna' ? f : type === 'transcript' ? t : type === 'cds' ? c : f
-	const ident = target ? target.ID : ''
+        const t = cxt.transcript
+        const c = t ? t.cds : null
+        const target = type === 'dna' ? f : type === 'transcript' ? t : type === 'cds' ? c : f
+        const ident = target ? target.ID : ''
         const all = whichGene === 'all'
         const allT = whichTxp === 'all'
-	if (all || allT) {
-	  return `All ${type}${type === 'dna' || type === 'cds' ? ' sequences' : 's'}`
-	} else {
-	  return `${type} <span style="font-size: smaller;">(${ident})</span>`
-	}
+        if (all || allT) {
+          return `All ${type}${type === 'dna' || type === 'cds' ? ' sequences' : 's'}`
+        } else {
+          return `${type} <span style="font-size: smaller;">(${ident})</span>`
+        }
       },
       helpText: cxt => {
         const f = cxt.feature
-	const t = cxt.transcript
-	const c = t ? t.cds : null
-	const target = type === 'dna' ? f : type === 'transcript' ? t : type === 'cds' ? c : f
-	const ident = target ? target.ID : ''
+        const t = cxt.transcript
+        const c = t ? t.cds : null
+        const target = type === 'dna' ? f : type === 'transcript' ? t : type === 'cds' ? c : f
+        const ident = target ? target.ID : ''
         const all = whichGene === 'all'
         const allT = whichTxp === 'all'
-	if (all || allT) {
+        if (all || allT) {
           const homPart = all ? ' and homologs from all currently displayed genomes' : ''
           return `Adds all ${type} sequences to your cart for ${f.ID}${homPart}.`
-	} else {
+        } else {
           return `Adds ${type} sequence ${ident} to your cart.`
-	}
+        }
       },
       disabled: cxt => {
         const f = cxt.feature
-	const t = cxt.transcript
-	const c = t ? t.cds : null
-        const all = whichGene === 'all'
+        const t = cxt.transcript
+        const c = t ? t.cds : null
         const allT = whichTxp === 'all'
         return (
-	  (whichGene === 'target' && type === 'transcript' && !t && !allT) ||
-	  (whichGene === 'target' && type === 'cds' && !c && !allT) ||
-	  (f.sotype !== 'protein_coding_gene' && type === 'cds'))
+          (whichGene === 'target' && type === 'transcript' && !t && !allT) ||
+          (whichGene === 'target' && type === 'cds' && !c && !allT) ||
+          (f.sotype !== 'protein_coding_gene' && type === 'cds'))
       },
       extraArgs: [type],
       handler: (function (cxt, seqtype) {
         const f = cxt.feature
-	const t = cxt.transcript
-	const c = t ? t.cds : null
+        const t = cxt.transcript
         const all = whichGene === 'all'
         const allT = whichTxp === 'all'
-	const homologs = all ?
-	  this.dataManager().getHomologs(f, this.context.strips.map(
-	      s => s.genome)).filter(x => x)
-	  : [f]
+        const homologs = all ?
+          this.dataManager().getHomologs(f, this.context.strips.map(
+              s => s.genome)).filter(x => x)
+          : [f]
         const seqs = u.flatten(homologs.map(ff => {
           if (seqtype === 'dna') {
             return this.dataManager().makeSequenceDescriptor(seqtype, ff)

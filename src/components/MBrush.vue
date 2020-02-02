@@ -133,7 +133,7 @@ export default MComponent({
       if (!this.$refs.tab) return
       // Drag handlers for the tab
       u.dragify(this.$refs.tab, {
-        dragstart: function (evt, data) {
+        dragstart: function () {
           this.$emit('dragstart', { vm: this })
         },
         drag: function (evt, data) {
@@ -143,7 +143,7 @@ export default MComponent({
           this.brushing = true
           // this.dragX = data.deltaX
         },
-        dragend: function (evt, data) {
+        dragend: function () {
           this.notify()
           this.brushing = false
           this.dragX = 0
@@ -151,7 +151,7 @@ export default MComponent({
       }, this.app.$el, this)
       // Drag handlers for the up tabhandle
       u.dragify(this.$refs.tabhandleup, {
-        dragstart: function (evt, data) {
+        dragstart: function () {
           this.$emit('dragstart', { vm: this })
         },
         drag: function (evt, data) {
@@ -160,14 +160,14 @@ export default MComponent({
           this.currentRange = this.chop(nc)
           this.brushing = true
         },
-        dragend: function (evt, data) {
+        dragend: function () {
           this.notify()
           this.brushing = false
         }
       }, this.app.$el, this)
       // Drag handlers for the down tabhandle
       u.dragify(this.$refs.tabhandledn, {
-        dragstart: function (evt, data) {
+        dragstart: function () {
           this.$emit('dragstart', { vm: this })
         },
         drag: function (evt, data) {
@@ -176,7 +176,7 @@ export default MComponent({
           this.currentRange = this.chop(nc)
           this.brushing = true
         },
-        dragend: function (evt, data) {
+        dragend: function () {
           this.notify()
           this.brushing = false
         }

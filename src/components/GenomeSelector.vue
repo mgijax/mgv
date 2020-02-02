@@ -37,7 +37,6 @@
 
 <script>
 import MComponent from '@/components/MComponent'
-import u from '@/lib/utils'
 export default MComponent({
   name: 'GenomeSelector',
   props: ['allGenomes', 'strips', 'genomeSets', 'rGenome'],

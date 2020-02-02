@@ -51,7 +51,7 @@ export default MComponent({
       if (cxt && cxt.feature) {
         return [
           cxt.feature.label,
-	  cxt.feature.biotype || cxt.feature.sotype || '',
+          cxt.feature.biotype || cxt.feature.sotype || '',
           cxt.feature.ID, 
           cxt.transcript ? cxt.transcript.ID : '',
           cxt.transcript && cxt.transcript.cds ? cxt.transcript.cds.ID : ''
@@ -73,7 +73,6 @@ export default MComponent({
       const fnode = evt.target.closest('.feature')
       const vm = rnode ? rnode.__vue__ : null
       if (!vm) return
-      const cbb = this.$el.getBoundingClientRect()
       const y = evt.clientY // - cbb.y
       const x = evt.clientX // - cbb.x
       if (fnode) {

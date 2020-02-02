@@ -2,7 +2,6 @@
 // RegionManager - central point of control for creating/updating the model data that
 // drives the main display.
 //`
-import config from '@/config'
 import u from '@/lib/utils'
 import gc from '@/lib/GenomeCoordinates'
 
@@ -307,7 +306,7 @@ class RegionManager {
     })
   }
   //--------------------------------------
-  jumpTo (coords, quietly) {
+  jumpTo (coords) {
     let strips = this.app.strips
     if (!this.app.scrollLock) {
       const s = this.app.strips.filter(s => s.order === 0)[0] || this.app.strips[0]
@@ -383,7 +382,6 @@ class RegionManager {
       for (let i = 0; i < newRs.length; i++) {
         const r0 = newRs[i]
         const db = gc.distanceBetween(r0, r)
-        const tlen = r0.length + r.length
         // compute an estimated merge widow, which is the size
         // region estimated to contain a max number of features
         const maxIncrease = 25
@@ -677,7 +675,6 @@ class RegionManager {
     if (lms.length === 0) {
       return null
     }
-    const delta = lcoords.delta || 0
     const regions = lms.map(lm => {
       // compute the region around landmark feature lm
       //

@@ -207,7 +207,6 @@ import SequenceCart from '@/components/SequenceCart'
 import ZoomView from '@/components/ZoomView'
 //
 import config from '@/config'
-import gc from '@/lib/GenomeCoordinates'
 import u from '@/lib/utils'
 //
 import DataManager from '@/lib/DataManager'
@@ -336,7 +335,6 @@ export default MComponent({
       return ids.join(", ")
     },
     currentMouseoverSet: function () {
-      const dm = this.dataManager
       if (this.currentMouseover) {
         const f = this.currentMouseover
         return new Set(this.dataManager.getHomologCids(f))
@@ -568,12 +566,11 @@ export default MComponent({
       window.setTimeout(this.resize.bind(this), this.cfg.animDur * 1000)
     },
     // FIXME All these handlers for features really belong somewhere else
-    featureOver: function (f, t, e) {
-      //console.log(f, t, e)
+    featureOver: function (f, t) {
       this.currentMouseover = f
       this.currentMouseoverT = t
     },
-    featureOff: function (f, t, e) {
+    featureOff: function () {
       this.currentMouseover = null
       this.currentMouseoverT = null
     },
@@ -797,13 +794,13 @@ export default MComponent({
           this.stepCurrentList()
         } else {
           this.clearCurrentList()
-	  this.$root.$emit('list-selection', null)
+          this.$root.$emit('list-selection', null)
           return
         }
       } else {
         this.logEvent('ListOp', 'display')
         this.setCurrentList(lst)
-	this.$root.$emit('list-selection', this.currentList)
+        this.$root.$emit('list-selection', this.currentList)
         if (!shift) return
       }
       let lm = lst.items[this.currentListItem]
@@ -835,7 +832,7 @@ export default MComponent({
       this.$refs.listEditor.open()
     })
     //
-    this.$root.$on('list-edit-cancel', data => {
+    this.$root.$on('list-edit-cancel', () => {
       this.currentEditList = null
     })
     //

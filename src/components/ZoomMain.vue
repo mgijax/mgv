@@ -17,7 +17,7 @@
       ref="fiducials"
       />
     <zoom-strip
-       v-for="(zs,i) in context.strips"
+       v-for="zs in context.strips"
        ref="strips"
       :key="zs.genome.name"
       :strip="zs"

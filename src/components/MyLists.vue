@@ -33,6 +33,7 @@
        <select v-model="createMethod">
          <option
            v-for="opt in createOptions"
+           :key="opt.label"
            :value="opt.value"
            >{{opt.label}}</option>
        </select>

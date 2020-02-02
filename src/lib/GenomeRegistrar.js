@@ -71,7 +71,6 @@ class GenomeRegistrar {
     if (p) return p
     this.url2promise[url] = p = u.fetch(this._adjust(url), 'json')
       .then(data => this._register(url, data))
-      .catch(err => console.log(err))
     return p
   }
   _adjust (url) {
@@ -116,10 +115,9 @@ class GenomeRegistrar {
     })
     info.name2chr = info.chromosomes.reduce((a,c) => { a[c.name] = c; return a }, {})
     this.name2genome[info.name] = info
-    const gr = this.name2reader[info.name] = new GenomeReader(this, info)
     return info
   }
 }
 
 // -------------------------------------------------------------------------------
-export { GenomeRegistrar }
+export { GenomeRegistrar, GenomeReader }
