@@ -2,7 +2,7 @@
 
 The Multiple Genome Viewer (MGV) supports comparative, simultaneous browsing of multiple genomes.
 
-A companion repo, [mgv-data](git@github.com:mgijax/mgv-data.git), provides scripts for building the back-end data structures accessed by MGV.
+A companion repo, [mgv-data](https://github.com/mgijax/mgv-data), provides scripts for building the back-end data structures accessed by MGV.
 
 ## Project setup
 ```
