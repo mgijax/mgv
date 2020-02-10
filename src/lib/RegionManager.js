@@ -670,7 +670,7 @@ class RegionManager {
   //
   //    genome (object) the genome for which to compute the coordinates
   computeLandmarkRegion (lcoords, genome) {
-    const lms = this.app.dataManager.getHomologs(lcoords.lfeature, [genome])
+    const lms = this.app.dataManager.getHomologs(lcoords.landmark, [genome])
     //
     if (lms.length === 0) {
       return null
