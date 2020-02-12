@@ -653,7 +653,9 @@ class RegionManager {
   // Assumes the genome has been loaded!
   // Args:
   //    lcoords (object) the landmark specification. Contains:
-  //        landmark (string) name of the landmark
+  //        One of:
+  //            landmark (string) name of the landmark
+  //            lfeature (object) the landmark feature itself
   //        lgenome (object) the genome where the landmark was selected
   //        delta (number, default=0) amount to shift the view from the landmark
   //        anchor (number from 0 to 1, default=0.5) Defines reference point on the landmark
@@ -670,7 +672,7 @@ class RegionManager {
   //
   //    genome (object) the genome for which to compute the coordinates
   computeLandmarkRegion (lcoords, genome) {
-    const lms = this.app.dataManager.getHomologs(lcoords.landmark, [genome])
+    const lms = this.app.dataManager.getHomologs(lcoords.landmark || lcoords.lfeature, [genome])
     //
     if (lms.length === 0) {
       return null
