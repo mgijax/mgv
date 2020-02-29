@@ -1,5 +1,5 @@
 {
-    "dataUrl" : "./mgv_web_data",
+    "dataUrl" : "./mgv_web_data/",
     "linkUrls": [{
         "genomes" : [
             "129S1/SvImJ",
