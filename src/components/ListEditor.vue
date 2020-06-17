@@ -343,4 +343,8 @@ textarea {
 [name="difference"] .circle.c2 {
   background-color: #cccccceb;
 }
+button[value="create"], button[value="save"] {
+  background-color: green;
+  color: white;
+}
 </style>
