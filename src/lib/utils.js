@@ -2,6 +2,12 @@ import Vue from 'vue'
 import gff from '@/lib/gff3lite'
 
 //
+function debug () {
+    /* eslint-disable no-console */
+    console.log.apply(console, arguments)
+}
+
+//
 function fail (e) {
   throw e
 }
@@ -416,6 +422,7 @@ export default {
   afterTicks,
   assert,
   concatAll,
+  debug,
   deepCopy,
   dragify,
   eachTick,
