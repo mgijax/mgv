@@ -11,6 +11,7 @@
     @mouseenter.stop="mouseenter"
     @mouseleave.stop="mouseleave"
     @click="clicked"
+    @wheel="wheeled"
     :width="region.width"
     >
     <g
@@ -877,6 +878,36 @@ export default MComponent({
         this.$root.$emit('region-change', { region: this.region, op: 'split', pos: px / regionRect.width })
       }
     },
+    //
+    wheeled: function (e) {
+      if (Math.abs(e.deltaY) >= Math.abs(e.deltaX)) {
+          return
+      }
+      e.stopPropagation()
+      e.preventDefault()
+      if (! this.wheelTimer) {
+          // START
+          this.wheelData = {
+            startX: e.clientX,
+            startY: e.clientY,
+            deltaX: 0,
+            deltaY: 0
+          }
+          this.$root.$emit("region-dragstart", { region: this.region, vm: this, evt: e, data: this.wheelData })
+      } else {
+        window.clearTimeout(this.wheelTimer)
+      }
+      // DRAG
+      this.wheelData.deltaX -= e.deltaX
+      this.$root.$emit("region-drag", { region: this.region, vm: this, evt: e, data: this.wheelData })
+      // this.regionScrollDelta -= e.deltaX
+      this.wheelTimer = window.setTimeout(() => {
+        // END
+        this.wheelTimer = null
+        this.$root.$emit("region-dragend", { region: this.region, vm: this, evt: e, data: this.wheelData })
+        // this.regionScrollDelta = 0
+      }, this.cfg.wheelTimeout)
+    },
     // Initialize all drag behaviors for this region
     initDrag () {
       this.initScrollDrag()
@@ -901,6 +932,7 @@ export default MComponent({
         }
       }, document.body, this)
     },
+    // Initializes handler for scrolling L/R by dragging.
     initScrollDrag () {
       this.dragging = false
       u.dragify(this.$el, {
