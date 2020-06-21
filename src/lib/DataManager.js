@@ -178,7 +178,7 @@ class DataManager {
         const val = ts.map(t => {
           const exons = this._unpackExons(t)
           const tlen = exons.reduce((l,x) => l + x.end - x.start + 1, 0)
-          const cds = this._unpackCds(t[8]['cds'], tlen, exons)
+          const cds = this._unpackCds(t[8]['cds'], tlen, exons, t.strand)
           const tt= {
             gID: t[8]['Parent'],
             ID: t[8]['ID'],
@@ -216,7 +216,7 @@ class DataManager {
   // CDSs of a transcript are encoded as "ID|start|end", where ID is the CDSs ID and start and end are
   // the positions of the start and stop codons. (Reminder: Coordinates are always forward strand. To know
   // which is the start codon and which is the stop codon, you have to look at the strand of the gene.)
-  _unpackCds (cdsAttr, tlen, exons) {
+  _unpackCds (cdsAttr, tlen, exons, strand) {
     if (!cdsAttr) return null
     const parts = cdsAttr.split('|')
     const c = {
@@ -226,14 +226,28 @@ class DataManager {
     }
     // compute the length of the CDS by adding up the included exons (taking care not to
     // include UTRs)
-    c.pieces = exons.reduce((a,x) => {
-      if (c.start <= x.end && c.end >= x.start) {
-        const piece = { start: Math.max(c.start, x.start), end: Math.min(c.end, x.end) }
-        a.push(piece)
+    const PUTR = strand === "+" ? '5_prime_utr' : '3_prime_utr'
+    const DUTR = strand === "+" ? '3_prime_utr' : '5_prime_utr'
+    const CDS = 'CDS'
+    c.pieces = exons.reduce((a,r) => {
+      // make a copy so we don't munge the exon object
+      const x = { start: r.start, end: r.end }
+      if (x.end < c.start) {
+          a.push({ start: x.start, end: x.end, type: PUTR })
+      }
+      else if (x.start > c.end) {
+          a.push({ start: x.start, end: x.end, type: DUTR })
+      } else {
+          const pUTR = { start: x.start, end: Math.min(c.start - 1, x.end), type: PUTR }
+          if (pUTR.start <= pUTR.end) a.push(pUTR)
+          const cds = { start: Math.max(c.start, x.start), end: Math.min(c.end, x.end), type: CDS }
+          a.push(cds)
+          const dUTR = { start: Math.max(c.end + 1, x.start), end: x.end, type: DUTR }
+          if (dUTR.start <= dUTR.end) a.push(dUTR)
       }
       return a
     }, [])
-    c.length = c.pieces.reduce((a,x) => a + x.end - x.start + 1, 0)
+    c.length = c.pieces.reduce((a,x) => a + (x.type==='cds' ? x.end - x.start + 1 : 0), 0)
     return c
   }
   // Given transcripts for a gene, returns an object containing (1) the "distinct" exons, and 
@@ -265,6 +279,7 @@ class DataManager {
       composite: cExons
     }
   }
+  // 
   getSequences (descrs, filename) {
     const fparam = filename ? `&filename=${filename}` : ''
     const params = `descriptors=${JSON.stringify(descrs)}${fparam}`
@@ -318,7 +333,7 @@ class DataManager {
     const len = target.length
     const sym = f.symbol || ''
     const gn = f.genome.name
-    const parts = target.pieces || target.exons || [f]
+    const parts = target.pieces ? (target.pieces.filter(p => p.type==='CDS')) : (target.exons || [f])
     const starts = parts.map(p => p.start)
     const lengths = parts.map(p => p.end - p.start + 1)
     const d = {

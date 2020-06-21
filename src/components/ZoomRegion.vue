@@ -193,13 +193,13 @@
             :fill-opacity="spreadTranscripts ? (transcriptHighlighted(t) ? 0.6 : 0.2) : 0"
             />
           <!-- ======= Exons ======= -->
-          <rect v-for="e in t.exons"
+          <rect v-for="e in t.cds ? t.cds.pieces : t.exons"
             :key="e.ID"
             class="exon noevents"
             :x="featureX(e)"
-            :y="0"
+            :y="e.type && e.type.endsWith('utr') ? featureHeight / 4 : 0"
             :width="featureW(e)"
-            :height="featureHeight"
+            :height="featureHeight * (e.type && e.type.endsWith('utr') ? 0.5 : 1)"
             :fill="featureColor(f)"
             fill-opacity="0.5"
             stroke="none"
@@ -211,23 +211,23 @@
             :stroke="featureColor(f)"
             fill="none"
             />
-          <!-- ======= Start codon ======= -->
-          <path v-if="t.cds && showStartStopCodons"
-            class="noevents"
-            :d="codonGlyph(f, t, 'start')"
-            :fill="'cyan'"
-            stroke="cyan"
-            stroke-width="0.5"
-            :transform="`translate(0,${spreadTranscripts ? 4 + featureHeight/2 : 0})`"
-            />
           <!-- ======= Stop codon ======= -->
           <path v-if="t.cds && showStartStopCodons"
             class="noevents"
             :d="codonGlyph(f, t, 'stop')"
-            :fill="'red'"
+            fill="red"
             stroke="red"
-            stroke-width="0.5"
-            :transform="`translate(0,${spreadTranscripts ? featureHeight/2 : 0})`"
+            stroke-width="1"
+            :transform="`translate(0,${spreadTranscripts ? 4 + featureHeight/2 : 0})`"
+            />
+          <!-- ======= Start codon ======= -->
+          <path v-if="t.cds && showStartStopCodons"
+            class="noevents"
+            :d="codonGlyph(f, t, 'start')"
+            fill="cyan"
+            stroke="cyan"
+            stroke-width="1"
+            :transform="`translate(0,${spreadTranscripts ? 4 + featureHeight/2 : 0})`"
             />
         </g>
         <!-- Transcript labels -->
@@ -724,11 +724,12 @@ export default MComponent({
       const x = this.b2p(pos + 0.5)
       const h = 8
       if (which === 'start') {
-        // triangle pointing in transcription direction
-        return `m${x},${-h} l0,${-h} l${dir * h},${h / 2} Z`
+        // start codon glyph
+        return `m${x},${-h / 2} l${dir*h},0 l${-dir*h},${-h/2} l0,${h} l${dir*h},${-h/2}`
       } else {
-        // triangle pointing down
-        return `m${x},${-h / 2} l${-h / 2},${-h} l${h},0 Z`
+        // stop codon glyph
+        return `m${x},${-h / 2} l${dir*h},0 l${-dir*h},${-h/2} l0,${h} l${dir*h},${-h/2}`
+        //return `m${x},${-h/2} l${-h/2},${-h} l${h},0 Z`
       }
     },
     transcriptAxisPoints (f, t, ti) {
