@@ -219,7 +219,7 @@
             fill="red"
             stroke="red"
             stroke-width="1"
-            :transform="`translate(0,${spreadTranscripts ? 4 + featureHeight/2 : 0})`"
+            :transform="`translate(0,${4 + featureHeight/2})`"
             />
           <!-- ======= Start codon ======= -->
           <path v-if="t.cds && showStartStopCodons"
@@ -228,7 +228,7 @@
             fill="cyan"
             stroke="cyan"
             stroke-width="1"
-            :transform="`translate(0,${spreadTranscripts ? 4 + featureHeight/2 : 0})`"
+            :transform="`translate(0,${4 + featureHeight/2})`"
             />
         </g>
         <!-- Transcript labels -->

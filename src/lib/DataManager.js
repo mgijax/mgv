@@ -140,6 +140,17 @@ class DataManager {
             // Build the composite transcript for the gene from the real transcripts.
             // If none, build a "fake" composite of a single exon covering the gene.
             const c = this._computedExons(f.transcripts)
+            // composite CDS, currently chosen as the longest real CDS.
+            const ccds = f.transcripts.reduce((a,t) => {
+                if (!a && !t.cds)
+                    return null
+                if (a && !t.cds)
+                    return a
+                else if (t.cds && !a)
+                    return t.cds
+                else
+                    return a.length > t.cds.length ? a : t.cds
+            }, null)
             const cT = c.composite.length ? {
               gID: f.ID,
               ID: f.ID + "_composite",
@@ -148,7 +159,7 @@ class DataManager {
               start: c.composite[0].start,
               end: c.composite[c.composite.length - 1].end,
               length: c.composite.reduce((l,x) => l + x.end - x.start + 1, 0),
-              cds: null
+              cds: ccds
             } : {
               gID: f.ID,
               ID: f.ID + "_composite",
@@ -228,7 +239,7 @@ class DataManager {
     // include UTRs)
     const PUTR = strand === "+" ? '5_prime_utr' : '3_prime_utr'
     const DUTR = strand === "+" ? '3_prime_utr' : '5_prime_utr'
-    const CDS = 'CDS'
+    const CDS = 'cds'
     c.pieces = exons.reduce((a,r) => {
       // make a copy so we don't munge the exon object
       const x = { start: r.start, end: r.end }
@@ -333,7 +344,7 @@ class DataManager {
     const len = target.length
     const sym = f.symbol || ''
     const gn = f.genome.name
-    const parts = target.pieces ? (target.pieces.filter(p => p.type==='CDS')) : (target.exons || [f])
+    const parts = target.pieces ? (target.pieces.filter(p => p.type==='cds')) : (target.exons || [f])
     const starts = parts.map(p => p.start)
     const lengths = parts.map(p => p.end - p.start + 1)
     const d = {
