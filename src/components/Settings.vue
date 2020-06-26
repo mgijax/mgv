@@ -326,6 +326,6 @@ export default MComponent({
   justify-content: space-between;
 }
 input {
-  max-width: 65px;
+  max-width: 165px;
 }
 </style>
