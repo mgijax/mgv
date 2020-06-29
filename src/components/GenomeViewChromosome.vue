@@ -307,9 +307,10 @@ export default MComponent({
           end: Math.floor(Math.max(d.p1, d.p2) / this.ppb)
         }
         if (d.p1 === d.p2) {
-          // user just clicked. Set the region size to a minimum of 10 MB.
-          r.start -= 5000000
-          r.end += 5000000
+          // user just clicked. Set the region size to a fraction of the chromosome's length
+          const delta = Math.round((this.chromosome.length * .01) / 2)
+          r.start -= delta
+          r.end += delta
         }
         // if not in unrestricted mode, make this the ref genome
         if (this.app.rGenome || this.app.scrollLock) {
