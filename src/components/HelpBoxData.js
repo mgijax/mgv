@@ -159,12 +159,12 @@ export default [{
     items: [{
       label: `Reference`,
       text: `
-       <span style="color: white; background-color: rgb(255, 127, 14); width: 16px;">&nbsp;R&nbsp;</span> One genome is chosen as the reference. Coordinates are specified for the reference; coordinates for all other genomes are calculated. Navigating in the reference genome causes all other genomes to update.
+       <span style="color: white; background-color: rgb(255, 127, 14); width: 16px;">&nbsp;R&nbsp;</span> One genome is chosen as the reference. Coordinates are specified for the reference; coordinates for all other genomes are calculated. Navigating in the reference genome causes all other genomes to update. To make a genome the reference, click on the R in its left end cap. Alternativelty, typing 'R' makes the genome at the top of the display the reference. Clicking or typing R again turns off reference mode.
       `
     }, {
       label: `Lockstep`,
       text: `
-      <i class="material-icons" style="color: rgb(255, 127, 14); font-size: 20px;">lock</i> In lockstep mode, all displayed regions act as one. Zooming, scrolling, and selecting genomic sequence happen in all regions simultaneously. This mode is most useful when the regions are aligned around a landmark, such as when the user alt-clicks on a gene. To exit lockstep, click the lock icon.
+      <i class="material-icons" style="color: rgb(255, 127, 14); font-size: 20px;">lock</i> In lockstep mode, all displayed regions act as one. Zooming, scrolling, and selecting genomic sequence happen in all regions simultaneously. This mode is most useful when the regions are aligned around a landmark, such as when the user alt-clicks (aka option-click) on a gene. Clicking the lock icon or typing 'L' toggles lockstep mode on/off.
       `
     }, {
       label: `Unrestricted`,
@@ -209,9 +209,10 @@ export default [{
     name: `Navigation`,
     description: `The following commands all apply to the ${ref('ZoomView')}.`,
     items: [{
-      label: `Find a gene`,
+      label: `Jump to a gene`,
       text: `Enter the gene symbol or ID in the Find input box at the top of
-      the ${ref('ZoomView')}. Then hit enter or tab.`
+      the ${ref('ZoomView')}. Then hit enter or tab. Also lines up view on that gene.
+      `
     }, {
       label: `Line up on a gene`,
       text: `
@@ -221,27 +222,26 @@ export default [{
             `
     }, {
       label: `Specify coordinates`,
-      text: `Type or paste coordinates in the Find box. Then hit enter or tab.
+      text: `Type or paste coordinates in the Find box. Use the format chr:start..end, e.g., "2:105641053..105726252". Then hit enter or tab.
             `
     }, {
-      label: `Scroll left`,
-      text: `Click the ${i('chevron_left')} button, or 
-            hit the ${i('arrow_back')} key, or drag left on a region.
-            `
-    }, {
-      label: `Scroll right`,
-      text: `Click the ${i('chevron_right')} button, or hit the 
-          ${i('arrow_forward')} key, or drag right on a region.
+      label: `Scroll`,
+      text: `
+          Scroll by dragging on a region or by using a mouse wheel or trackpad.
+          There are also scroll buttons (${i('chevron_left')} and  ${i('chevron_right')},
+          or you may use the arrow keys (${i('arrow_back')} and ${i('arrow_forward')}).
+          Holding the shift key down while clicking or typing increases the scroll amount.
           `
     }, {
-      label: `Zoom in`,
-      text: `Click the ${i('zoom_in')} button, or hit the ${i('arrow_upward')} 
-          key, or shift-drag on a region.
-          `
-    }, {
-      label: `Zoom out`,
-      text: `Click the ${i('zoom_out')} button, or hit the ${i('arrow_downward')}
-          key, or command-drag on a region.
+      label: `Zoom`,
+      text: `
+          Zoom by shift-dragging (for zoom in) or command-dragging (for zoom out) over the region you're interested in. 
+          For zooming in, the dragged region expands to fill view, and for zooming out, the current view shrinks into the dragged region.
+          Both actions actually involve scrolling as well as zooming.
+          <br/>
+          You can do centered zooming by clicking the ${i('zoom_in')} and ${i('zoom_out')} buttons, or by
+          hitting the ${i('arrow_upward')} and ${i('arrow_downward')} keys.
+          Holding the shift key down while clicking or typing increases the zoom amount.
           `
     }]
   }, {
@@ -296,6 +296,8 @@ export default [{
       text: `If no features are currently selected, this filter has no effect.
           Otherwise: if true, only displays currently selected features.
           if false, only displays features that are not currently selected.
+          Setting the filter to true provides a way to focus on one gene at a time: click on a gene, and it 
+          becomes the only displayed gene, then click the background to see everything again.
          `
     }]
   }, {
@@ -434,8 +436,10 @@ export default [{
     }, {
       label: `Spread transcripts`,
       text: `When checked, transcripts for a gene are spread out so they are all visible. 
-          When unchecked, transcripts are drawn on top of one another for a compact view.
+          When unchecked, only shows a single "composite" transcript for each gene, for a more compact view.
           Same as using the 'x' keyboard shortcut.
+          If "Show start/stop codons" is checked, blue and red triangles (respectively) are displayed for each CDS.
+          The compact view shows only the longest CDS.
           `
     }, {
       label: `Show all labels`,
@@ -449,6 +453,7 @@ export default [{
       label: `Show start/stop codons`,
       text: `When checked, marks the positions of start and stop codons. Start codons are blue triangles 
           pointing in the direction of transcription. Stop codons are red triangles pointing down.
+          When "Spread transcripts" is unchecked, only shows codong for the longest CDS. 
           `
     }, {
       heading: `Sequences. When zoomed in far enough (less than a few hundred bases), the genomic 
