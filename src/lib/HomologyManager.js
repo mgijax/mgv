@@ -25,7 +25,7 @@ class HomologyManager {
       return this.taxonid2promise[taxonid]
     }
     this.app.$root.$emit('message', { message: `Fetching orthology data for taxon ${taxonid}...` })
-    const p = u.fetch(`${this.url}/homologies/${taxonid}.json`, 'json').then(data => {
+    const p = u.fetch(`${this.url}/homologies/orthology/${taxonid}.json`, 'json').then(data => {
       // Each row of data is a list of five values:
       //    [idA, taxonA, idB, taxonB, YNcode]
       // Example:

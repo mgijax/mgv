@@ -16,7 +16,7 @@ class GenomeReader {
     this.kstore = new KeyStore(n)
     this.readers = this.info.tracks.reduce((a,t) => {
       if (t.type === 'ChunkedGff3') {
-        a[t.name] = new ChunkedGff3FileReader(this.fetcher, t.name, t.chunkSize, info)
+        a[t.name] = new ChunkedGff3FileReader(this.fetcher, t.name, t.chunkSize, info, info.url + "models/")
       }
       return a
     }, {})
