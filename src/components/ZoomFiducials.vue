@@ -26,11 +26,12 @@
       <rect
         v-for="(r,j) in clickedFeatures"
         :key="'rect_'+j"
-        :x="r.x-2"
-        :y="r.y-2"
-        :width="r.width+4"
-        :height="r.height+4"
+        :x="r.x-1"
+        :y="r.y+3"
+        :width="r.width+2"
+        :height="r.height-2"
         stroke="black"
+        opacity=0.4
         fill="none"
         />
     </g>
