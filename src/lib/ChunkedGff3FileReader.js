@@ -2,12 +2,12 @@ import u from '@/lib/utils'
 
 // ---------------------------------------------------------------------
 class ChunkedGff3FileReader {
-  constructor (fetcher, name, chunkSize, genome) {
+  constructor (fetcher, name, chunkSize, genome, url) {
     this.fetcher = fetcher
     this.name = name
     this.chunkSize = chunkSize
     this.genome = genome
-    this.url = genome.url
+    this.url = url
   }
   readAll () {
     if (this.chunkSize === 0) {
@@ -24,12 +24,15 @@ class ChunkedGff3FileReader {
     let url
     let p
     if (this.chunkSize === 0) {
+      // One file for the genome.
       url = `${this.url}/${this.name}/0.gff3`
       p = this.fetcher.fetch(url, 'gff3').then(data => data.filter(f => f[0] === c.name))
     } else if (this.chunkSize === 1) {
+      // One file per chromosome.
       url = `${this.url}/${this.name}/${c.name}/0.gff3`
       p = this.fetcher.fetch(url, 'gff3')
     } else {
+      // Chunked files (size = chunkSize) organized by chromosome.
       const minBlk = Math.max(0, Math.floor(s / this.chunkSize))
       const maxBlk = Math.max(minBlk, Math.floor(Math.min(e, c.length) / this.chunkSize))
       const ps = []

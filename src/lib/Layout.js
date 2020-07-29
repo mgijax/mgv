@@ -47,7 +47,7 @@ class FeaturePacker {
   }
   assignNext (fstart, fend, fheight, fsymbol) {
     // buffer should contain only things that overlap
-    // or are no more that minXgap away
+    // or are no more than minXgap away
     this.buffer = this.buffer.filter(ff => {
       // return fstart <= ff.fend && fend >= ff.fstart
       return fstart - ff.fend <= this.minXgap

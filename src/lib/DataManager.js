@@ -436,14 +436,25 @@ class DataManager {
     const t = f.genome.metadata.taxonid
     return this.fixTaxonId(t)
   }
-  //
-  assignLanes (feats, ppb, fsize) {
+  // Assigns lanes to features based on their coordinates AND their labels
+  // Args:
+  //    feats - list of Features, from same chromosome, sorted by start
+  //    ppb - pixels per base. Scaling factor.
+  //    fsize - font size
+  //    useLabelFcn - function to return the proper label to use for sizing 
+  // Returns:
+  //   Nothing. Sets lane values in the layout object of each feature
+  assignLanes (feats, ppb, fsize, useLabelFcn) {
     const ca = new ContigAssigner()
-    const slap = new SwimLaneAssigner()
-    const slam = new SwimLaneAssigner()
+    const slap = new SwimLaneAssigner() // plus strand
+    const slam = new SwimLaneAssigner() // minus strand
     const fp = new FeaturePacker(0, 1000)
+    useLabelFcn =  useLabelFcn || (() => true)
     feats.forEach(f => {
-      const lbl = f.symbol || f.ID
+      const lbl = useLabelFcn(f) ? f.transcripts.reduce((a,t) => {
+          const ts = t.symbol || t.ID
+          return ts.length > a.length ? ts : a
+      }, f.symbol || f.ID) : ""
       const lblLenBp = ppb ? lbl.length * fsize / ppb : 0 
       const start = f.start
       const end = Math.max(f.end, start + lblLenBp - 1)
