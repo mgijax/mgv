@@ -105,6 +105,7 @@
     <input
         type="checkbox"
         v-model="ZoomRegion.showTranscriptLabels"
+        :disabled="!ZoomRegion.showFeatureLabels"
         />
   </div>
   <!-- =================== -->

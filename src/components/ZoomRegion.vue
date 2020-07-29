@@ -239,7 +239,7 @@
           :transform="transcriptTransform(f, t, ti)"
           >
           <text
-            v-if="spreadTranscripts && showDetails && (showTranscriptLabels || transcriptHighlighted(t))"
+            v-if="spreadTranscripts && showDetails && (showFeatureLabels && showTranscriptLabels || transcriptHighlighted(t))"
             :x="transcriptTextX(t)"
             :y="featureHeight + 2"
             :font-weight="t.cds ? 'bold' : 'normal'"
@@ -350,12 +350,12 @@ export default MComponent({
       type: Object,
       default: null
     },
-    //
+    // maximum maxLaneP value for all regions in my strip
     allMaxLaneP: {
       type: Number,
       default: 0
     },
-    //
+    // maximum maxLaneM value for all regions in my strip
     allMaxLaneM: {
       type: Number,
       default: 0
@@ -507,7 +507,7 @@ export default MComponent({
     maxBase: function () {
       return this.region.end + this.direction * this.deltaB
     },
-    //
+    // Max number of lanes above axis (plus strand)
     maxLaneP: function () {
       if (this.showDetails && this.spreadTranscripts) {
         return 1
@@ -516,6 +516,7 @@ export default MComponent({
         return Math.max(x, 1)
       }
     },
+    // Max number of lanes below axis (minus strand)
     maxLaneM: function () {
       let m
       if (this.showDetails && this.spreadTranscripts) {
@@ -525,6 +526,7 @@ export default MComponent({
       }
       return Math.max(m, 1)
     },
+    // Total height
     height: function () {
       let h
       if (this.showDetails && this.spreadTranscripts) {
@@ -534,6 +536,7 @@ export default MComponent({
       }
       return Math.max(h, this.cfg.minHeight)
     },
+    // Y-distance from axis to top of box
     zeroOffset: function () {
       if (this.showDetails && this.spreadTranscripts) {
         return this.sequenceFontSize * 2 + 10
@@ -547,6 +550,7 @@ export default MComponent({
       if (newval !== oldval) this.getFeatures()
     },
     spreadTranscripts: function () {
+      this.assignLanes()
       this.$nextTick(() => this.$emit('region-draw', this))
     },
     height: function () {
@@ -566,7 +570,14 @@ export default MComponent({
   },
   methods: {
     assignLanes () {
-      this.dataManager().assignLanes(this.features, this.showFeatureLabels && this.showDetails ? this.ppb : null, this.featureFontSize)
+      const ppb = this.ppb
+      const fcn0 = () => true
+      const fcn1 = (f) => this.featureHighlighted(f)
+      const fcn = this.showDetails ? 
+           (this.spreadTranscripts ? fcn0 : (this.showFeatureLabels ? fcn0 : fcn1))
+           :
+           (this.showFeatureLabels ? fcn0 : fcn1)
+      this.dataManager().assignLanes(this.features, ppb, this.featureFontSize, fcn)
       this.$nextTick(() => this.$emit('region-draw', this))
     },
     clientXtoBase: function (x) {  
@@ -645,7 +656,8 @@ export default MComponent({
     },
     // Returns true if feature label should be shown
     featureShowLabel: function (f) {
-      return (this.showDetails && this.showFeatureLabels) || 
+      //return (this.showDetails && this.showFeatureLabels) || 
+      return (this.showFeatureLabels) || 
         this.featureSelected(f) ||
         this.featureMouseover(f) ||
         this.featureInList(f)
@@ -879,7 +891,15 @@ export default MComponent({
         this.$root.$emit('region-change', { region: this.region, op: 'split', pos: px / regionRect.width })
       }
     },
-    //
+    // Turns wheel (left/right) events into drags.
+    // Initial wheel event:
+    //    -> dragstart
+    //    init timeout
+    // Subsequent wheel events
+    //    -> drag
+    //    reset timeout
+    // On timout:
+    //    -> dragend
     wheeled: function (e) {
       if (Math.abs(e.deltaY) >= Math.abs(e.deltaX)) {
           return
@@ -906,7 +926,6 @@ export default MComponent({
         // END
         this.wheelTimer = null
         this.$root.$emit("region-dragend", { region: this.region, vm: this, evt: e, data: this.wheelData })
-        // this.regionScrollDelta = 0
       }, this.cfg.wheelTimeout)
     },
     // Initialize all drag behaviors for this region
@@ -960,9 +979,13 @@ export default MComponent({
     this.cbListSelection = () => {
       this.getFeatures()
     }
+    this.cbSelectionState = () => {
+      this.getFeatures()
+    }
     //
     this.$root.$on('facet-state', this.cbFacetState)
     this.$root.$on('list-selection', this.cbListSelection)
+    this.$root.$on('selection-state-changed', this.cbSelectionState)
   },
   updated: function () {
     this.$root.$emit('region-update', this)
@@ -970,6 +993,7 @@ export default MComponent({
   destroyed: function () {
     this.$root.$off('facet-state', this.cbFacetState)
     this.$root.$off('list-selection', this.cbListSelection)
+    this.$root.$off('selection-state-changed', this.cbSelectionState)
     this.$emit('region-delete')
   },
   mounted: function () {
@@ -1004,6 +1028,9 @@ export default MComponent({
 }
 .zoom-region .zrBtn:hover * {
   fill-opacity: 1;
+}
+.feature.visible {
+  transition: transform 0.5s;
 }
 .feature .transcript {
   transition: transform 0.5s;
