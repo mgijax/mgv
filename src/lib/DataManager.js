@@ -67,7 +67,8 @@ class DataManager {
     if (this.pending[g.name]) return this.pending[g.name]
     if (this.cache[g.name]) return Promise.resolve(true)
     //
-    const hp = this.homologyManager.loadHomologiesForTaxon(this.fixTaxonId(g.metadata.taxonid))
+    const txid = this.fixTaxonId(g.metadata.taxonid)
+    const hp = this.homologyManager.loadHomologiesForTaxon(txid)
     //
     this.cache[g.name] = {}
     this.pending[g.name] = this.greg.getReader(g, 'genes').then(reader => {
@@ -98,7 +99,10 @@ class DataManager {
         return allFeats
       })
     })
-    return hp.then(() => this.pending[g.name])
+    return hp.then(() => {
+        this.homologyManager.computeAllInferredParalogs()
+        return this.pending[g.name]
+    })
   }
   //
 
