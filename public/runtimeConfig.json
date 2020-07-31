@@ -41,12 +41,12 @@
         }]
     }, {
         "genomes" : [
-            "H.sapiens",
-            "R.norvegicus",
-            "D.rerio",
-            "D.melanogaster",
-            "C.elegans",
-            "S.cerevisiae"
+            "H. sapiens",
+            "R. norvegicus",
+            "D. rerio",
+            "D. melanogaster",
+            "C. elegans",
+            "S. cerevisiae"
         ],
         "links" : [{
             "text": "Alliance",
