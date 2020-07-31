@@ -200,7 +200,7 @@ export default MComponent({
       if (!d.dragged || Math.abs(d.deltaX) < 3) {
         // this was actually just a click. If it was on the background, clear current selection
         if (!e.target.closest('.feature')) {
-          this.$root.$emit('clear-selection')
+          // this.$root.$emit('clear-selection')
         }
         this.dragData = null
         this.dragging = false

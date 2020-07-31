@@ -2,7 +2,6 @@
   <svg
     class="zoom-main"
     :height="height"
-    @click="backgroundClick"
     >
     <!-- underlay -->
     <rect
@@ -148,11 +147,6 @@ export default MComponent({
       this.setYs()
       this.$root.$emit('context-changed')
       this.$root.$emit('strip-move', d.vm)
-    },
-    backgroundClick: function (e) {
-      if (e.target.closest('.zoom-region')) {
-        // this.$root.$emit('clear-selection')
-      }
     },
     sortStrips (sortBy) {
       this.setYs(sortBy)

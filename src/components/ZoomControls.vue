@@ -105,7 +105,18 @@
       <div v-else>No current list</div>
       <span style="flex-grow: 1;"></span>
       <!-- Current selection -->
-      <span>{{app.currentSelectionLabel.length ? 'Selected: ' + app.currentSelectionLabel : 'Nothing selected.'}}</span>
+      <div>
+        <span v-if="app.currentSelectionLabel.length > 0">
+          <m-button
+            icon="highlight_off"
+            title="Click to clear current list."
+            color="red"
+            @click="clearSelection"
+            style="font-size: 12px;"
+            />
+          Selected {{ app.currentSelectionLabel }}</span>
+        <span v-else>Nothin selected.</span>
+      </div>
     </div>
   </div>  
 </template>
@@ -151,6 +162,9 @@ export default MComponent({
   methods: {
     clearList: function () {
       this.$root.$emit('list-click', { list: this.context.currentList })
+    },
+    clearSelection: function () {
+      this.$root.$emit('clear-selection')
     },
     selectOnFocus (e) {
       e.target.select()
