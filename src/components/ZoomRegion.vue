@@ -1029,12 +1029,6 @@ export default MComponent({
 .zoom-region .zrBtn:hover * {
   fill-opacity: 1;
 }
-.feature.visible {
-  transition: transform 0.5s;
-}
-.feature .transcript {
-  transition: transform 0.5s;
-}
 .feature.pulse {
   outline-color: yellow;
   outline-width: 6px;
