@@ -106,13 +106,6 @@ class GenomeRegistrar {
   }
   registerGenome (url, info) {
     info.url = info.url || url
-    info.chromosomes.sort((a, b) => {
-       let an = a.name || a
-       let bn = b.name || b
-       if (an.match(/^\d$/)) an = "0" + an
-       if (bn.match(/^\d$/)) bn = "0" + bn
-       return an < bn ? -1 : an > bn ? 1 : 0
-    })
     info.name2chr = info.chromosomes.reduce((a,c) => { a[c.name] = c; return a }, {})
     this.name2genome[info.name] = info
     this.name2reader[info.name] = new GenomeReader(this, info)
