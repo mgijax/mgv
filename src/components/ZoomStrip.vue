@@ -222,9 +222,9 @@ export default MComponent({
       this.busyCount -= 1
     },
     setHeight () {
+      this.allMaxLaneP = Math.max(this.allMaxLaneP, 1, Math.max.apply(null, this.$children.map(r => r.maxLaneP)))
+      this.allMaxLaneM = Math.max(this.allMaxLaneM, 1, Math.max.apply(null, this.$children.map(r => r.maxLaneM)))
       this.height = Math.max.apply(null, this.$children.map(r => r.height))
-      this.allMaxLaneP = Math.max.apply(null, this.$children.map(r => r.maxLaneP))
-      this.allMaxLaneM = Math.max.apply(null, this.$children.map(r => r.maxLaneM))
       this.$emit('height-changed', this)
     },
     deleteClicked () {
@@ -244,7 +244,20 @@ export default MComponent({
       } else {
         this.$root.$emit('region-change', { op : 'set-ref-genome', genome : this.genome })
       }
+    },
+    compactify () {
+      this.allMaxLaneP = 0
+      this.allMaxLaneM = 0
     }
+  },
+  created: function () {
+      this.cbCompactify = () => {
+        this.compactify()
+      }
+      this.$root.$on('compactify', this.cbCompactify)
+  },
+  destroyed: function () {
+      this.$root.$off('compactify', this.cbCompactify)
   },
   mounted: function () {
     //
@@ -267,9 +280,6 @@ export default MComponent({
         self.$emit('dragend', { evt, data })
       }
     }, this.$root.$el)
-  },
-  destroyed: function () {
-    // this.$nextTick(() => this.$root.$emit('sort-strips'))
   }
 })
 </script>
