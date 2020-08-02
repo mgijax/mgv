@@ -415,7 +415,25 @@ export default MComponent({
     */
     // Toggle whether we are showing all gene labels or not.
     toggleShowAllLabels: function () {
-      config.ZoomRegion.showFeatureLabels = !config.ZoomRegion.showFeatureLabels
+      const cfg = config.ZoomRegion
+      if (cfg.spreadTranscripts) {
+          if (cfg.showFeatureLabels) {
+            if (cfg.showTranscriptLabels) {
+              cfg.showFeatureLabels = cfg.showTranscriptLabels = false
+            } else {
+              cfg.showTranscriptLabels = true
+            }
+          } else {
+            cfg.showFeatureLabels = true
+          }
+      } else {
+          cfg.showFeatureLabels = !cfg.showFeatureLabels
+      }
+      this.$root.$emit('compactify')
+    },
+    toggleSpreadTranscripts: function () {
+        config.ZoomRegion.spreadTranscripts = !config.ZoomRegion.spreadTranscripts
+        this.$root.$emit('compactify')
     },
     toggleIncludeParalogs: function () {
       this.includeParalogs = !this.includeParalogs
@@ -656,7 +674,7 @@ export default MComponent({
       })
       this.keyManager.register({
        key: 'x',
-       handler: () => { config.ZoomRegion.spreadTranscripts = !config.ZoomRegion.spreadTranscripts },
+       handler: () => this.toggleSpreadTranscripts(),
        thisObj: this
       })
       this.keyManager.register({
