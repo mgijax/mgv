@@ -90,7 +90,7 @@
     title="When checked, spreads transcripts so you can see them all. When unchecked, piles them on top of one another for a compact view. In spread view, strand is indicated by arrows. In the collapsed view, strand is indicated by position above (+) or below (-) the axis line."
     class="flexrow"
     >
-    <label>Spread transcripts</label>
+    <label>Show transcripts</label>
     <input
         type="checkbox"
         v-model="ZoomRegion.spreadTranscripts"
@@ -106,6 +106,19 @@
         type="checkbox"
         v-model="ZoomRegion.showTranscriptLabels"
         :disabled="!ZoomRegion.showFeatureLabels"
+        />
+  </div>
+  <!-- =================== -->
+  <div
+    class="flexrow"
+    title="For coding transcripts, show the protein ID intead of transcript id."
+    >
+    <div></div>
+    <label>Show protein labels</label>
+    <input
+        type="checkbox"
+        v-model="ZoomRegion.showProteinLabels"
+        :disabled="!ZoomRegion.showFeatureLabels || !ZoomRegion.showTranscriptLabels"
         />
   </div>
   <!-- =================== -->

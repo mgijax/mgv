@@ -242,11 +242,11 @@
             v-if="spreadTranscripts && showDetails && (showFeatureLabels && showTranscriptLabels || transcriptHighlighted(t))"
             :x="transcriptTextX(t)"
             :y="featureHeight + 2"
-            :font-weight="t.cds ? 'bold' : 'normal'"
             font-family="sans-serif"
             :font-size="transcriptFontSize"
+            :font-weight="transcriptHighlighted(t) ? 'bold' : 'normal'"
             dominant-baseline="hanging"
-            >{{t.cds ? t.cds.ID : t.ID}}</text>
+            >{{t.cds && showProteinLabels ? t.cds.ID : t.ID}}</text>
         </g>
         </g> <!-- if showDetails -->
         <!-- Feature label -->
@@ -437,6 +437,9 @@ export default MComponent({
     },
     showTranscriptLabels: function () {
       return this.cfg.showTranscriptLabels
+    },
+    showProteinLabels: function () {
+      return this.cfg.showProteinLabels
     },
     showDetails: function () {
       return (this.region.end - this.region.start + 1) < this.detailThreshold
