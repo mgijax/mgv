@@ -288,6 +288,14 @@ export default MComponent({
   },
   mounted: function () {
     this.$watch('$data', () => this.save(), {deep: true})
+    this.$watch('ZoomRegion.featureFontSize', () => {
+      const zr = this.ZoomRegion
+      zr.transcriptFontSize = Math.min(zr.transcriptFontSize, zr.featureFontSize)
+    })
+    this.$watch('ZoomRegion.transcriptFontSize', () => {
+      const zr = this.ZoomRegion
+      zr.transcriptFontSize = Math.min(zr.transcriptFontSize, zr.featureFontSize)
+    })
   },
   computed: {
     thresholdMb: {
