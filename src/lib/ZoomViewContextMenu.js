@@ -19,10 +19,13 @@ function getMenus(thisObj) {
      return {
        icon: '',
        label: `Link outs`,
+       disabled: cxt => {
+           const los = cxt.feature.genome.linkouts || []
+           return los.length == 0
+       },
        menuItems: function(cxt) {
          const f = cxt.feature
-         const lurls = this.app.runtimeConfig.linkUrls
-         const lnks = u.flatten(lurls.filter(l => l.genomes.indexOf(f.genome.name) !== -1).map(l => l.links))
+         const lnks = f.genome.linkouts || []
          return lnks.map(lnk => {
            return {
               icon: 'open_in_new',
@@ -30,7 +33,9 @@ function getMenus(thisObj) {
               helpText: `See details for this feature at ${lnk.text}.`,
               disabled: false,
               handler: (function () {
-                const u = lnk.url + f[lnk.attr || "ID"]
+                let ident = f[lnk.attr]
+                if (lnk.stripPrefix) ident = ident.replace(/^[^:]+:/, "")
+                const u = lnk.url + ident
                 window.open(u, '_blank')
               }).bind(thisObj)
            }
@@ -142,11 +147,11 @@ function getMenus(thisObj) {
     alignOption(),
     externalLinkOptions(),
     {
-      label: 'Add sequences to cart',
+      label: 'Add sequences to cart...',
       icon: 'shopping_cart'
     },
-    sequenceCartOptions('target', 'This gene only'),
-    sequenceCartOptions('all', 'This gene and all homologs')
+    sequenceCartOptions('target', '...for this  gene only'),
+    sequenceCartOptions('all', '...for this gene and all homologs')
   ]
 
   return {
