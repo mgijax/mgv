@@ -111,8 +111,7 @@ export default MComponent({
   white-space: nowrap;
 }
 .menu-item.separator {
-  background-color: #bbb;
-  color: white;
+    border-top: thin solid white;
 }
 .menu-item.disabled {
   color: lightgray;
