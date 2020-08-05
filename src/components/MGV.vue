@@ -414,6 +414,8 @@ export default MComponent({
     },
     */
     // Toggle whether we are showing all gene labels or not.
+    // When showing transcripts, toggles between 3 states: show gene labels,
+    // show gene and transcript labels, and show no labels.
     toggleShowAllLabels: function () {
       const cfg = config.ZoomRegion
       if (cfg.spreadTranscripts) {
@@ -429,7 +431,6 @@ export default MComponent({
       } else {
           cfg.showFeatureLabels = !cfg.showFeatureLabels
       }
-      this.$root.$emit('compactify')
     },
     toggleSpreadTranscripts: function () {
         config.ZoomRegion.spreadTranscripts = !config.ZoomRegion.spreadTranscripts
