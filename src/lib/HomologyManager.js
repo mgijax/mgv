@@ -26,27 +26,7 @@ class HomologyManager {
     }
     this.app.$root.$emit('message', { message: `Fetching orthology data for taxon ${taxonid}...` })
     const p = u.fetch(`${this.url}/homologies/orthology/${taxonid}.json`, 'json').then(data => {
-      // Each row of data is a list of five values:
-      //    [idA, taxonA, idB, taxonB, YNcode]
-      // Example:
-      //    ["FB:FBgn0000028","7227","ZFIN:ZDB-GENE-000523-2","7955","NY"]
-      data.forEach(r => {
-        // extract the row into vars
-        const idA = r[0]
-        const txA = r[1]
-        const idB = r[2]
-        const txB = r[3]
-        // add to index
-        // get (and init, if necessary) top level index, by taxon A
-        const i0 = this.index[txA] = (this.index[txA] || {})
-        // get (and init, if necessary) second level index, by taxon B
-        const i1 = i0[txB] = (i0[txB] || {})
-        // get (and init, if necessary) list of homologs for idA in taxon B
-        const ar = i1[idA] = (i1[idA] || [])
-        // add idB
-        ar.push(idB)
-      })
-      //
+      this.registerData(data)
       return true
     })
     //
