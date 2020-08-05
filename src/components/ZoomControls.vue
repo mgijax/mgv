@@ -115,7 +115,7 @@
             style="font-size: 12px;"
             />
           Selected {{ app.currentSelectionLabel }}</span>
-        <span v-else>Nothin selected.</span>
+        <span v-else>Nothing selected.</span>
       </div>
     </div>
   </div>  
