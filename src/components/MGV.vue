@@ -431,6 +431,7 @@ export default MComponent({
       } else {
           cfg.showFeatureLabels = !cfg.showFeatureLabels
       }
+      this.$root.$emit('compactify')
     },
     toggleSpreadTranscripts: function () {
         config.ZoomRegion.spreadTranscripts = !config.ZoomRegion.spreadTranscripts
@@ -624,17 +625,15 @@ export default MComponent({
     },
     initKeyBindings () {
       this.keyManager.register({
-       key: 'Escape',
-       handler: () => {
-         this.$root.$emit('escape-pressed')
-       },
-       thisObj: this
-      })
-      this.keyManager.register({
        key: 'n',
        handler: () => {
          this.toggleShowAllLabels()
        },
+       thisObj: this
+      })
+      this.keyManager.register({
+       key: 'x',
+       handler: () => this.toggleSpreadTranscripts(),
        thisObj: this
       })
       this.keyManager.register({
@@ -662,6 +661,13 @@ export default MComponent({
        thisObj: this
       })
       this.keyManager.register({
+       key: 'Escape',
+       handler: () => {
+         this.$root.$emit('escape-pressed')
+       },
+       thisObj: this
+      })
+      this.keyManager.register({
        key: 'r',
        handler: () => {
          if (this.rGenome) {
@@ -671,11 +677,6 @@ export default MComponent({
            s && this.$root.$emit('region-change', { op: 'set-ref-genome', genome: s.genome })
          }
        },
-       thisObj: this
-      })
-      this.keyManager.register({
-       key: 'x',
-       handler: () => this.toggleSpreadTranscripts(),
        thisObj: this
       })
       this.keyManager.register({
