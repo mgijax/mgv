@@ -110,7 +110,7 @@ export default {
     showFeatureLabels: true,
     showTranscriptLabels: false,
     showProteinLabels: true,
-    showStartStopCodons: true,
+    showStartStopCodons: false,
     contrast: 0,
     currentFeature: {
       stroke: '#ffff00',

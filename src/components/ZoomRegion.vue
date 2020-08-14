@@ -246,7 +246,7 @@
             :font-size="transcriptFontSize"
             :font-weight="transcriptHighlighted(t) ? 'bold' : 'normal'"
             dominant-baseline="hanging"
-            >{{t.cds && showProteinLabels ? t.cds.ID : t.ID}}</text>
+            >{{t.cds && showProteinLabels ? t.cds.label : t.label}}</text>
         </g>
         </g> <!-- if showDetails -->
         <!-- Feature label -->

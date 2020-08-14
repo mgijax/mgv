@@ -54,7 +54,7 @@ function getMenus(thisObj) {
         const t = cxt.transcript
         const c = t ? t.cds : null
         const target = type === 'dna' ? f : type === 'transcript' ? t : type === 'cds' ? c : f
-        const ident = target ? target.ID : ''
+        const ident = target ? target.label : ''
         const all = whichGene === 'all'
         const allT = whichTxp === 'all'
         if (all || allT) {

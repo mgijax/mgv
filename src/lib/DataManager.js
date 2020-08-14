@@ -183,6 +183,10 @@ class DataManager {
       return feats
     })
   }
+  // Utility function for stripping the prefix from a curie style identifier
+  stripPrefix (s) {
+        return s.substr(s.indexOf(':')+1)
+  }
   // Returns a promise for the transcripts of features that overlap the 
   // specified range of the specified genome. Each transcript includes
   // its exons. Coding transcripts also contain the coordinates of the
@@ -194,9 +198,12 @@ class DataManager {
           const exons = this._unpackExons(t)
           const tlen = exons.reduce((l,x) => l + x.end - x.start + 1, 0)
           const cds = this._unpackCds(t[8]['cds'], tlen, exons, t.strand)
+          const attrs = t[8]
           const tt= {
-            gID: t[8]['Parent'],
-            ID: t[8]['ID'],
+            gID: attrs['Parent'],
+            ID: attrs['ID'],
+            label: this.stripPrefix(attrs['Name'] || attrs['transcript_id'] || attrs['ID']),
+            transcript_id: attrs['transcript_id'],
             exons: exons,
             start: Math.min.apply(null,exons.map(e => e.start)),
             end: Math.max.apply(null,exons.map(e => e.end)),
@@ -236,8 +243,10 @@ class DataManager {
     const parts = cdsAttr.split('|')
     const c = {
       ID: parts[0],
-      start: parseInt(parts[1]),
-      end: parseInt(parts[2])
+      protein_id: parts[1],
+      label: this.stripPrefix(parts[1] || parts[0]),
+      start: parseInt(parts[2]),
+      end: parseInt(parts[3])
     }
     // compute the length of the CDS by adding up the included exons (taking care not to
     // include UTRs)
@@ -354,6 +363,7 @@ class DataManager {
     const d = {
       header: `${gn}::${id} ${sym} (${stype})`,
       ID: id,
+      // seqId: stype === 'transcript' ? t.transcript_id : stype === 'cds' ? t.cds.protein_id : null,
       genome: f.genome.name,
       genomeUrl: f.genome.url,
       type: stype,

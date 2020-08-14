@@ -52,9 +52,9 @@ export default MComponent({
         return [
           cxt.feature.label,
           cxt.feature.biotype || cxt.feature.sotype || '',
-          cxt.feature.ID, 
-          cxt.transcript ? cxt.transcript.ID : '',
-          cxt.transcript && cxt.transcript.cds ? cxt.transcript.cds.ID : ''
+          cxt.feature.curie || cxt.feature.ID, 
+          cxt.transcript ? cxt.transcript.label : '',
+          cxt.transcript && cxt.transcript.cds ? cxt.transcript.cds.label : ''
         ]
       } else {
         return ['']
