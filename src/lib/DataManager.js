@@ -466,10 +466,11 @@ class DataManager {
     useLabelFcn =  useLabelFcn || (() => true)
     feats.forEach(f => {
       const lbl = useLabelFcn(f) ? f.transcripts.reduce((a,t) => {
-          const ts = t.symbol || t.ID
+          const ts = t.label || t.ID
           return ts.length > a.length ? ts : a
       }, f.symbol || f.ID) : ""
-      const lblLenBp = ppb ? lbl.length * fsize / ppb : 0 
+      // estimate length of label.
+      const lblLenBp = ppb ? 0.6 * (lbl.length * fsize) / ppb : 0 
       const start = f.start
       const end = Math.max(f.end, start + lblLenBp - 1)
       const sla = f.strand === '-' ? slam : slap
