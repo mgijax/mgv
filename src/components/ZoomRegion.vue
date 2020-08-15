@@ -324,7 +324,6 @@
 <script>
 import MComponent from '@/components/MComponent'
 import u from '@/lib/utils'
-import { SegmentLayout } from '@/lib/Layout'
 import { complement } from '@/lib/genetic_code'
 //
 export default MComponent({
@@ -904,7 +903,7 @@ export default MComponent({
     // On timout:
     //    -> dragend
     wheeled: function (e) {
-      if (Math.abs(e.deltaY) >= Math.abs(e.deltaX)) {
+      if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
           return
       }
       e.stopPropagation()
@@ -1000,7 +999,6 @@ export default MComponent({
     this.$emit('region-delete')
   },
   mounted: function () {
-    this.segLayout = new SegmentLayout()
     this.initDrag()
     this.getFeatures()
   }
