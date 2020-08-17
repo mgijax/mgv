@@ -19,23 +19,6 @@ class ContigAssigner {
   }
 }
 
-class SwimLaneAssigner {
-  constructor () {
-    this.lanes = []
-  }
-  assignNext (fstart, fend) {
-    for (let i = 0; i < this.lanes.length; i++) {
-      let hwm = this.lanes[i]
-      if (fstart > hwm) {
-        this.lanes[i] = fend
-        return i + 1
-      }
-    }
-    this.lanes.push(fend)
-    return this.lanes.length
-  }
-}
-
 class FeaturePacker {
   constructor (ygap, minXgap) {
     // y distance between blocks.
@@ -146,4 +129,4 @@ class SegmentLayout {
   }
 }
 
-export { ContigAssigner, SwimLaneAssigner, FeaturePacker, SegmentLayout }
+export { ContigAssigner, FeaturePacker, SegmentLayout }

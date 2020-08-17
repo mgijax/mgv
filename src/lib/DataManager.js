@@ -11,7 +11,7 @@
  */
 import gc from '@/lib/GenomeCoordinates'
 import u from '@/lib/utils'
-import { SwimLaneAssigner, FeaturePacker, ContigAssigner } from '@/lib/Layout'
+import { FeaturePacker, ContigAssigner } from '@/lib/Layout'
 import config from '@/config'
 import { GenomeRegistrar } from '@/lib/GenomeRegistrar'
 import HomologyManager from '@/lib/HomologyManager'
@@ -353,7 +353,7 @@ class DataManager {
   //
   makeSequenceDescriptor (stype, f, t) {
     const target = stype === 'dna' ? f : stype === 'composite transcript' ? f : stype === 'transcript' ? t : t.cds
-    const id = target.ID
+    const id = target.label || target.ID
     const len = target.length
     const sym = f.symbol || ''
     const gn = f.genome.name
@@ -460,9 +460,10 @@ class DataManager {
   //   Nothing. Sets lane values in the layout object of each feature
   assignLanes (feats, ppb, fsize, useLabelFcn) {
     const ca = new ContigAssigner()
-    const slap = new SwimLaneAssigner() // plus strand
-    const slam = new SwimLaneAssigner() // minus strand
     const fp = new FeaturePacker(0, 1000)
+    const fpp = new FeaturePacker(0, 1000)
+    const fpm = new FeaturePacker(0, 1000)
+    //
     useLabelFcn =  useLabelFcn || (() => true)
     feats.forEach(f => {
       const lbl = useLabelFcn(f) ? f.transcripts.reduce((a,t) => {
@@ -473,9 +474,9 @@ class DataManager {
       const lblLenBp = ppb ? 0.6 * (lbl.length * fsize) / ppb : 0 
       const start = f.start
       const end = Math.max(f.end, start + lblLenBp - 1)
-      const sla = f.strand === '-' ? slam : slap
+      const fpa = f.strand === '-' ? fpm : fpp
       f.layout.contig = ca.assignNext(start, end)
-      f.layout.l1 = sla.assignNext(start, end)
+      f.layout.l1 = 1 + fpa.assignNext(start, end, 2, f.ID)
       f.layout.l2 = fp.assignNext(start, end, 1 + f.transcripts.length, f.ID)
     })  
   }
