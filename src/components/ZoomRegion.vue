@@ -198,9 +198,9 @@
             :key="e.ID"
             class="exon noevents"
             :x="featureX(e)"
-            :y="e.type && e.type.endsWith('utr') ? featureHeight / 4 : 0"
+            :y="isUTR(e) ? featureHeight / 4 : 0"
             :width="featureW(e)"
-            :height="featureHeight * (e.type && e.type.endsWith('utr') ? 0.5 : 1)"
+            :height="featureHeight * (isUTR(e) ? 0.5 : 1)"
             :fill="featureColor(f)"
             fill-opacity="0.5"
             stroke="none"
@@ -632,6 +632,9 @@ export default MComponent({
     },
     featureColor (f) {
       return this.featureColorMap.getColor(f)
+    },
+    isUTR (e) {
+      return e.type && e.type.endsWith('utr')
     },
     featureOpacity (f) {
       const nobodyHighlighted = !(this.context.currentMouseover || this.selectedSet.size || this.context.currentListSet)
