@@ -420,7 +420,7 @@ export default MComponent({
       return this.regionScrollDelta
     },
     detailThreshold: function () {
-      return Math.min(this.cfg.detailThreshold, this.cfg.detailThresholdLimit)
+      return 1000000 * Math.min(this.cfg.detailThreshold, this.cfg.detailThresholdLimit)
     },
     sequenceThreshold: function () {
       return Math.min(this.cfg.sequenceThreshold, this.cfg.sequenceThresholdLimit)
@@ -442,7 +442,6 @@ export default MComponent({
     },
     showDetails: function () {
       return (this.region.end - this.region.start + 1) < this.detailThreshold
-      // return (this.context.coords.end - this.context.coords.start + 1) < this.detailThreshold
     },
     showSequence: function () {
       return this.ppb >= 1

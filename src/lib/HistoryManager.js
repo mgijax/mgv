@@ -58,6 +58,9 @@ class HistoryManager {
     let prms = new URLSearchParams(qstring)
 
     // ----- genomes ------------
+    cfg.style = prms.get('style') || ''
+
+    // ----- genomes ------------
     let pgenomes = prms.get('genomes') || ''
     pgenomes = pgenomes ? u.removeDups(pgenomes.trim().split(/[ ,]+/)) : []
     pgenomes.length > 0 && (cfg.genomes = pgenomes)

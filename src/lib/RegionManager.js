@@ -920,12 +920,6 @@ class RegionManager {
       `regions=${rs}`
     ]
     //
-    if (app.rGenome) parms.push('ref=' + app.rGenome.name)
-    else if (app.scrollLock) parms.push('lock=on')
-    //
-    if (app.includeParalogs) parms.push('paralogs=on')
-    else parms.push('paralogs=off')
-    //
     return parms.join('&')
   }
 }

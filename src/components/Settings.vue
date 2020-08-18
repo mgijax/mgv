@@ -29,7 +29,7 @@
         max=10
         step=1
         type="number"
-        v-model="thresholdMb"
+        v-model="ZoomRegion.detailThreshold"
         />Mbp
   </div>
   <!-- =================== -->
@@ -293,6 +293,57 @@ export default MComponent({
           Object.assign(this.$data, settings)
         }
       })
+    },
+    valToParam: function(val, type) {
+        switch (type) {
+        case 'b':
+            return val ? "1" : "0"
+        case 'n':
+            return ""+val
+        case 's':
+        default:
+            return val
+        }
+    },
+    paramToVal: function (param, type) {
+        switch (type) {
+        case 'b':
+            return param === "1"
+        case 'n':
+            return parseFloat(param)
+        case 's':
+        default:
+            return param
+        }
+    },
+    getSettingVal: function (obj, path) {
+        return path.split(".").reduce((a,v) => a[v], obj)
+    },
+    setSettingVal: function(obj, path, val) {
+        const parts = path.split(".")
+        for(let i = 0 ; i < parts.length - 1 ; i++){
+            obj = obj[parts[i]]
+        }
+        obj[parts[parts.length - 1]] = val
+    },
+    getContextString: function () {
+        const parms = this.settingsInfo.map(si => {
+            const pname = si[1]
+            const v = this.getSettingVal(this, si[0])
+            const pval = this.valToParam(v, si[2])
+            return `${pname}:${pval}`
+        })
+        return parms.join(',')
+    },
+    setContextFromString: function (cxt) {
+        cxt.split(",").forEach(s => {
+            const nv = s.split(":")
+            if (nv.length != 2) return
+            const n = nv[0]
+            const v = nv[1]
+            const si = this.settingsIndex[n]
+            if (si) this.setSettingVal(this, si[0], this.paramToVal(v, si[2]))
+        })
     }
   },
   created: function() {
@@ -311,14 +362,6 @@ export default MComponent({
     })
   },
   computed: {
-    thresholdMb: {
-      get: function () {
-        return this.ZoomRegion.detailThreshold / 1000000
-      },
-      set: function (v) {
-        this.ZoomRegion.detailThreshold = parseInt(v) * 1000000
-      }
-    },
     paralogsEnabled: function () {
       return this.app.vTaxons.length > 1
     },
@@ -330,8 +373,33 @@ export default MComponent({
             'Inferred paralogs are not being included in searches, drawing, selecting, etc. Click to include.')
         :
         'Cannot infer paralogs because only one species is being displayed.'
+    },
+    settingsIndex: function () {
+        return this.settingsInfo.reduce((a,v) => {
+            a[v[1]] = v
+            return a
+        }, {})
+    },
+    settingsInfo: function () {
+      return [
+        ["ZoomMain.stripGap",               "gg", "n"],
+        ["ZoomRegion.detailThreshold",      "fd", "n"],
+        ["ZoomRegion.showFeatureLabels",    "fl", "b"],
+        ["ZoomRegion.featureFontSize",      "ff", "n"],
+        ["ZoomRegion.featureHeight",        "fh", "n"],
+        ["ZoomRegion.laneGap",              "tg", "n"],
+        ["ZoomRegion.spreadTranscripts",    "tx", "b"],
+        ["ZoomRegion.showTranscriptLabels", "tl", "b"],
+        ["ZoomRegion.showProteinLabels",    "pl", "b"],
+        ["ZoomRegion.transcriptFontSize",   "tf", "n"],
+        ["ZoomRegion.showStartStopCodons",  "tc", "b"],
+        ["ZoomRegion.sequenceFontSize",     "sf", "n"],
+        ["ZoomFiducials.showConnectors",    "h",  "b"],
+        ["ZoomFiducials.showInversions",    "hi", "b"],
+        ["ZoomRegion.contrast",             "hc", "n"],
+        ["ZoomFiducials.fillOpacity",       "ho", "n"]
+      ]
     }
-
   }
 })
 </script>

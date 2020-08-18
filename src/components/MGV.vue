@@ -431,11 +431,9 @@ export default MComponent({
       } else {
           cfg.showFeatureLabels = !cfg.showFeatureLabels
       }
-      this.$root.$emit('compactify')
     },
     toggleSpreadTranscripts: function () {
         config.ZoomRegion.spreadTranscripts = !config.ZoomRegion.spreadTranscripts
-        this.$root.$emit('compactify')
     },
     toggleIncludeParalogs: function () {
       this.includeParalogs = !this.includeParalogs
@@ -480,6 +478,10 @@ export default MComponent({
       this.includeParalogs =   
         cxt.includeParalogs === "on" ? true :
         cxt.includeParalogs === "off" ? false : this.includeParalogs
+      //
+      if (cxt.style) {
+          this.$refs.settings.setContextFromString(cxt.style)
+      }
       //
       if (cxt.ref) {
         // make sure ref is included in genomes list
@@ -571,8 +573,16 @@ export default MComponent({
       let cs = this.regionManager.getParameterString()
       if (this.currentSelection && this.currentSelection.length) {
         const ids = Array.from(new Set(this.currentSelection.map(f => f.cID || f.ID)))
-        cs = cs + '&' + `highlight=${ids}`
+        cs += `&highlight=${ids}`
       }
+
+      //
+      if (this.rGenome) cs += '&ref=' + this.rGenome.name
+      else if (this.scrollLock) cs += '&lock=on'
+      //
+      cs += '&paralogs=' + (this.includeParalogs ? 'on' : 'off')
+      //
+      cs += '&style=' + this.$refs.settings.getContextString()
       return cs
     },
     openDrawer: function () {
