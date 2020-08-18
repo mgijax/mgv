@@ -213,11 +213,7 @@ class DataManager {
           }
           return tt
         }).sort((a,b) => {
-          if (!a.strand || a.strand === '+') {
-            return a.start !== b.start ? a.start - b.start : b.length - a.length
-          } else {
-            return a.end !== b.end ? b.end - a.end : b.length - a.length
-          }
+          return a.label < b.label ? -1 : a.label > b.label ? 1 : 0
         })
         return val
       })
