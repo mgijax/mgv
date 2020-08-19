@@ -620,7 +620,7 @@ export default MComponent({
     featureH (f) {
       if (this.showDetails && this.spreadTranscripts && f.transcripts) {
         let tc = Math.max(f.transcripts.length, 1)
-        return this.featureHeight * tc + this.laneGap * (tc - 1)
+        return this.featureHeight * tc + this.laneGap * (tc - 1) + this.transcriptFontSize
       } else {
         return this.featureHeight
       }

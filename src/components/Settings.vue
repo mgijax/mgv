@@ -381,13 +381,19 @@ export default MComponent({
         }, {})
     },
     settingsInfo: function () {
+      // Defines the settings that are settable via URL.
+      // Each entry has a path, a parameter name, and a type
+      // indicator. 
+      //   path = the path from this to the setting
+      //   name = the parameter name to use in the URL
+      //   type = "n" numeric; "b" boolean; "s" string
+      // 
       return [
-        ["ZoomMain.stripGap",               "gg", "n"],
+        ["ZoomMain.stripGap",               "gg", "n"], 
         ["ZoomRegion.detailThreshold",      "fd", "n"],
         ["ZoomRegion.showFeatureLabels",    "fl", "b"],
         ["ZoomRegion.featureFontSize",      "ff", "n"],
         ["ZoomRegion.featureHeight",        "fh", "n"],
-        ["ZoomRegion.laneGap",              "tg", "n"],
         ["ZoomRegion.spreadTranscripts",    "tx", "b"],
         ["ZoomRegion.showTranscriptLabels", "tl", "b"],
         ["ZoomRegion.showProteinLabels",    "pl", "b"],
