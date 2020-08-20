@@ -529,7 +529,6 @@ class FeatureRegistrar {
     f.transcripts = []
     f.composite = {}
     f.sotype = f.type
-    f.tCount = parseInt(f.tCount)
     f.genome = this.genome
     f.chr = this.chr
     //
