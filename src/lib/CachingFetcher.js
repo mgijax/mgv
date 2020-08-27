@@ -21,6 +21,9 @@ class CachingFetcher {
         return u.fetch(url, type).then(val => {
           this.kstore.set(key, val)
           return val
+        }).catch(e => {
+          u.debug("Fetch got error:", e)
+          throw e
         })
       } else {
         return cachedval

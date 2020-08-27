@@ -114,6 +114,30 @@
         :font-weight="isCurrent ? 'bold' : 'normal'"
         :transform="`translate(${-myDelta},0)`"
         >{{coordinatesLabel}}<title>{{coordinatesLabel}}</title></text>
+      <!-- Variants -->
+      <g
+        v-for="(v, vi) in variants"
+        :key="'v'+vi"
+        >
+        <circle
+            :cx="b2p(v.start+0.5)"
+            :cy="-6"
+            :r="6"
+            :fill="variantColor(v)"
+            stroke="none"
+            ><title>{{v.ID}}</title></circle>
+        <rect
+            :x="b2p(v.start)"
+            :y="-zeroOffset"
+            :width="featureW(v)"
+            :height="Math.max(height,10)"
+            :stroke="variantColor(v)"
+            stroke-width="0.5"
+            stroke-opacity="0.5"
+            fill-opacity="0.5"
+            :fill="variantColor(v)"
+            />
+        </g> <!-- variants -->
       <!-- ======= sequence string ======= -->
       <text
         v-if="showSequence"
@@ -371,6 +395,7 @@ export default MComponent({
       blocks: [], // the synteny blocks to draw
       sequence: '', // the sequence to display
       seqStart: 0,
+      variants: [],
       busy: false,
       currRange: null,
       dragging: false, // true while dragging within a region
@@ -632,6 +657,20 @@ export default MComponent({
     featureColor (f) {
       return this.featureColorMap.getColor(f)
     },
+    variantColor (v) {
+        const imp = v.glImpact
+        if (!imp) {
+            return 'gray'
+        } else if (imp.includes('HIGH')) {
+            return 'red'
+        } else if (imp.includes('MODERATE')) {
+            return 'orange'
+        } else if (imp.includes('LOW')) {
+            return 'cyan'
+        } else {
+            return 'gray'
+        }
+    },
     isUTR (e) {
       return e.type && e.type.endsWith('utr')
     },
@@ -811,6 +850,13 @@ export default MComponent({
           })
         } else {
           this.sequence = ''
+        }
+        if (this.showDetails) {
+            this.dataManager().getVariants(r.genome, r.chr, r.start - delta, r.end + delta).then(data => {
+                this.variants = data
+            })
+        } else {
+            this.variants = []
         }
       }).catch(() => {
         this.$emit('busy-end')

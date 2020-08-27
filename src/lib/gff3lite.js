@@ -22,6 +22,10 @@ const strand = 6
 const phase = 7
 const attributes = 8
 
+// Turns a parsed GFF3 line (an array with 9 items, the last of which is an object) into
+// an object where:
+//    - columns 1-8 are assigned to named fields
+//    - all the attributes in column 9 are attributes of the returned object
 function record2object (r) {
   const o = {}
   o.seqid = r[seqid]
@@ -35,6 +39,8 @@ function record2object (r) {
   Object.assign(o, r[attributes])
   return o
 }
+// Parses column 9 into an object with attributes.
+// FIXME: does not deal with multivalues attributes. Each value is just a string.
 function parseAttributes (s) {
   const attrs = {}
   s.split(SEMI).forEach(x => {
@@ -43,6 +49,8 @@ function parseAttributes (s) {
   })
   return attrs
 }
+// Parses one line of a GFF3 file. Returns either a record (array)
+// or an object, according to the second parameter.
 function parseLine (s, returnObjects) {
   if (s.startsWith(HASH)) return s
   const r = s.split(TAB).map((v,i) => {
@@ -57,6 +65,7 @@ function parseLine (s, returnObjects) {
   })
   return returnObjects ? record2object(r) : r
 }
+// Parses the contents of a GFF3 file
 function parseFile (s, returnObjects) {
   return s.split(NL).filter(l => l).map(l => parseLine(l, returnObjects))
 }

@@ -3,7 +3,7 @@ import u from '@/lib/utils'
 import config from '@/config'
 import KeyStore from '@/lib/KeyStore'
 import CachingFetcher from '@/lib/CachingFetcher'
-import ChunkedGff3FileReader from '@/lib/ChunkedGff3FileReader'
+import { ChunkedGff3FileReader, ChunkedVcfFileReader } from '@/lib/ChunkedFileReader'
 //
 // -------------------------------------------------------------------------------
 // Container for track readers for a genome
@@ -17,6 +17,9 @@ class GenomeReader {
     this.readers = this.info.tracks.reduce((a,t) => {
       if (t.type === 'ChunkedGff3') {
         a[t.name] = new ChunkedGff3FileReader(this.fetcher, t.name, t.chunkSize, info, info.url + "models/")
+      }
+      else if (t.type === "ChunkedVcf") {
+        a[t.name] = new ChunkedVcfFileReader(this.fetcher, t.name, t.chunkSize, info, info.url )
       }
       return a
     }, {})

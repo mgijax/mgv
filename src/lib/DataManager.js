@@ -187,6 +187,36 @@ class DataManager {
   stripPrefix (s) {
         return s.substr(s.indexOf(':')+1)
   }
+  // Returns a promise for the variants in the specified range
+  getVariants (g, c, s, e) {
+    return this.greg.getReader(g, 'variants').then(reader => {
+      if (!reader) return []
+      return reader.readRange(c, s, e).then(vars => {
+          return vars.map(v => {
+            const attrs = v[7]
+            return {
+              ID: attrs['hgvs_nomenclature'],
+              chr: v[0],
+              start: v[1],
+              end: v[1] + v[3].length - 1,
+              ref: v[3],
+              alt: v[4],
+              so_term: attrs['soTerm'],
+              glConsequence: attrs['geneLevelConsequence'],
+              glImpact: attrs['geneImpact'],
+              allele: {
+                ID: attrs['allele_ids'],
+                symbol: attrs['allele_symbols'],
+                gene: {
+                  ID: attrs['allele_of_gene_ids'],
+                  symbol: attrs['allele_of_gene_symbols']
+                }
+              }
+            }
+          })
+      })
+    })
+  }
   // Returns a promise for the transcripts of features that overlap the 
   // specified range of the specified genome. Each transcript includes
   // its exons. Coding transcripts also contain the coordinates of the
