@@ -119,13 +119,11 @@
         v-for="(v, vi) in variants"
         :key="'v'+vi"
         >
-        <circle
-            :cx="b2p(v.start+0.5)"
-            :cy="-6"
-            :r="6"
+        <title>{{v.ID}}</title>
+        <path
+            :d="variantGlyph(v)"
             :fill="variantColor(v)"
-            stroke="none"
-            ><title>{{v.ID}}</title></circle>
+            />
         <rect
             :x="b2p(v.start)"
             :y="-zeroOffset"
@@ -197,7 +195,7 @@
           />
         <!-- ======= Transcripts ======= -->
         <g
-          v-if="showDetails"
+          v-if="showDetails && featureVisible(f)"
           class="transcripts"
           >
         <g
@@ -657,6 +655,35 @@ export default MComponent({
     featureColor (f) {
       return this.featureColorMap.getColor(f)
     },
+    variantGlyph (v) {
+      let x
+      switch (v.so_term) {
+        case 'point_mutation':
+          // diamond
+          x = this.b2p(v.start+0.5)   
+          return `m${x},0 l-5,-5 l5,-5 l5,5 l-5,5`
+
+        case 'delins':
+        case 'MNV':
+          // hourglass
+          x = this.b2p(v.start)   
+          return `m${x-5},0 l10,0 l-10,-10 l10,0 l-10,10`
+
+        case 'insertion':
+          // triangle down
+          x = this.b2p(v.start)   
+          return `m${x},0 l-5,-5 l10,0 l-5,5`
+
+        case 'deletion':
+          // box
+          x = this.b2p(v.start)
+          return `m${x},0 l0,-10 l5,0 l0,10 Z`
+
+        default:
+          throw "Don't know this type: " + v.soTerm
+      }
+
+    },
     variantColor (v) {
         const imp = v.glImpact
         if (!imp) {
@@ -821,7 +848,7 @@ export default MComponent({
       //
       if (r.genome.name === '') return
       //
-      let delta = Math.round((r.end - r.start + 1) / 2)
+      let delta = r.end - r.start + 1
       this.seqStart = r.start
       this.busy = true
       this.$emit('busy-start')

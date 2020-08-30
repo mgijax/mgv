@@ -22,8 +22,7 @@ class CachingFetcher {
           this.kstore.set(key, val)
           return val
         }).catch(e => {
-          u.debug("Fetch got error:", e)
-          throw e
+          throw e.toString()
         })
       } else {
         return cachedval
