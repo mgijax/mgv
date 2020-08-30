@@ -9,6 +9,7 @@ class ChunkedFileReader {
     this.genome = genome
     this.url = url
     this.type = type
+    this.holes = {} // chromosome -> set of block numbers
   }
   readAll () {
     if (this.chunkSize === 0) {
@@ -38,6 +39,9 @@ class ChunkedFileReader {
       const maxBlk = Math.max(minBlk, Math.floor(Math.min(e, c.length) / this.chunkSize))
       const ps = []
       for (let i = minBlk; i <= maxBlk; i++) {
+        if (this.holes[c] && this.holes[c].has(i)) {
+          continue
+        }
         url = `${this.url}/${this.name}/${c.name}/${i}.${this.type}`
         ps.push(this.fetcher.fetch(url, this.type))
       }
@@ -45,7 +49,18 @@ class ChunkedFileReader {
         // Chunk files only exist where there is data. Here we deal with the
         // fact that there can be "holes" in the range of chunks. The list of promises
         // generated for the range of chunks will have some fulfilled and some rejected.
+        // Keep/concatenate the fulfilled ones.
         const recs = u.concatAll(results.filter(r => r.status === "fulfilled").map(r => r.value))
+        // Record the rejected ones and avoid requesting them in the future.
+        results.forEach((r, i) => {
+          if (r.status === "fulfilled") {
+            return
+          } else if (r.reason.startsWith("404:")) {
+            const holes = this.holes[c] || new Set()
+            holes.add(minBlk + i)
+            this.holes[c] = holes
+          }
+        })
         // File chunking duplicates items that span chunk boundaries.
         // Here is where we deal with that.
         return u.uniqueItems(recs, r => this.getID(r))
