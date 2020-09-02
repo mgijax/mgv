@@ -483,13 +483,14 @@ class DataManager {
   //    fsize - font size
   //    useLabelFcn - function to return the proper label to use for sizing 
   // Returns:
-  //   Nothing. Sets lane values in the layout object of each feature
+  //   A Map() from feature to its layout object
   assignLanes (feats, ppb, fsize, useLabelFcn) {
     const ca = new ContigAssigner()
     const fp = new FeaturePacker(0, 1000)
     const fpp = new FeaturePacker(0, 1000)
     const fpm = new FeaturePacker(0, 1000)
     //
+    const lmap = new Map()
     useLabelFcn =  useLabelFcn || (() => true)
     feats.forEach(f => {
       const lbl = useLabelFcn(f) ? f.transcripts.reduce((a,t) => {
@@ -501,10 +502,13 @@ class DataManager {
       const start = f.start
       const end = Math.max(f.end, start + lblLenBp - 1)
       const fpa = f.strand === '-' ? fpm : fpp
-      f.layout.contig = ca.assignNext(start, end)
-      f.layout.l1 = 1 + fpa.assignNext(start, end, 2, f.ID)
-      f.layout.l2 = fp.assignNext(start, end, 1 + f.transcripts.length, f.ID)
+      lmap.set(f, {
+          contig: ca.assignNext(start, end),
+          l1: 1 + fpa.assignNext(start, end, 2, f.ID),
+          l2: fp.assignNext(start, end, 1 + f.transcripts.length, f.ID)
+      })
     })  
+    return lmap
   }
   //
   flushAllGenomeData () {
@@ -553,7 +557,7 @@ class FeatureRegistrar {
     this.symbol2feats = sym2f
   }
   // Args:
-  //   r - a parsed GFF3 record
+  //   r - a parsed GFF3(-like) record
   register (r) {
     const f = gff3.record2object(r)
     f.transcripts = []
@@ -567,11 +571,6 @@ class FeatureRegistrar {
       // console.log('Feature too big. Skipping: ', f)
       return null
     }
-    // A place to store layout attributes (such as swim lanes). Unlike
-    // the feature, the layout object is not frozen, so layout can be recalculated at any time.
-    // However because the owning object IS frozen, the layout objects will NOT be observed by vuejs.
-    // (This is a good thing.)
-    f.layout = {}
     //
     this.id2feat[f.ID] = f
     if (f.cID) {

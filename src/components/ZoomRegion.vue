@@ -536,7 +536,7 @@ export default MComponent({
       if (this.showDetails && this.spreadTranscripts) {
         return 1
       } else {
-        let x = this.features.filter(f => (f.strand === null || f.strand === '+') && this.featureVisible(f)).reduce((v, f) => Math.max(v, f.layout.l1), 0)
+        let x = this.features.filter(f => (f.strand === null || f.strand === '+') && this.featureVisible(f)).reduce((v, f) => Math.max(v, this.lmap.get(f).l1), 0)
         return Math.max(x, 1)
       }
     },
@@ -544,9 +544,9 @@ export default MComponent({
     maxLaneM: function () {
       let m
       if (this.showDetails && this.spreadTranscripts) {
-        m = this.features.filter(f => this.featureVisible(f)).reduce((v, f) => Math.max(v, f.layout.l2 + f.transcripts.length), 0)
+        m = this.features.filter(f => this.featureVisible(f)).reduce((v, f) => Math.max(v, this.lmap.get(f).l2 + f.transcripts.length), 0)
       } else {
-        m = this.features.filter(f => f.strand === '-' && this.featureVisible(f)).reduce((v, f) => Math.max(v, f.layout.l1), 0)
+        m = this.features.filter(f => f.strand === '-' && this.featureVisible(f)).reduce((v, f) => Math.max(v, this.lmap.get(f).l1), 0)
       }
       return Math.max(m, 1)
     },
@@ -601,7 +601,7 @@ export default MComponent({
            (this.spreadTranscripts ? fcn0 : (this.showFeatureLabels ? fcn0 : fcn1))
            :
            (this.showFeatureLabels ? fcn0 : fcn1)
-      this.dataManager().assignLanes(this.features, ppb, this.featureFontSize, fcn)
+      this.lmap = this.dataManager().assignLanes(this.features, ppb, this.featureFontSize, fcn)
       this.$nextTick(() => this.$emit('region-draw', this))
     },
     clientXtoBase: function (x) {  
@@ -632,12 +632,13 @@ export default MComponent({
       return Math.max(1, (f.end - f.start + 1) * this.ppb)
     },
     featureY (f) {
+      const lo = this.lmap.get(f)
       if (this.showDetails && this.spreadTranscripts) {
-        return f.layout.l2 * (this.featureHeight + this.laneGap) + this.featureFontSize
+        return lo.l2 * (this.featureHeight + this.laneGap) + this.featureFontSize
       } else if (!f.strand || f.strand === '+') {
-        return -f.layout.l1 * (this.featureHeight + this.featureFontSize)
+        return -lo.l1 * (this.featureHeight + this.featureFontSize)
       } else {
-        return (f.layout.l1 - 1) * (this.featureHeight + this.featureFontSize) + this.featureFontSize
+        return (lo.l1 - 1) * (this.featureHeight + this.featureFontSize) + this.featureFontSize
       }
     },
     featureH (f) {
