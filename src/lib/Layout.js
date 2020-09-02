@@ -19,6 +19,16 @@ class ContigAssigner {
   }
 }
 
+/*
+ * FeaturePacker
+ *
+ * The main layout used by the ZoomView.
+ * The caller iterates over a list of features (or whatever) sorted by increasing start position.
+ * Each call to assignNext passes the next rectangle's dimensions (xmin, xmax, height). 
+ * (Symbol is also passed but is unused.) The return value is the assigned y coordinate of the top
+ * of the rectangle in the layout.
+ * It is the caller's responsibility to adjust start/end to account for labels, glyphs, etc.
+ */ 
 class FeaturePacker {
   constructor (ygap, minXgap) {
     // y distance between blocks.
