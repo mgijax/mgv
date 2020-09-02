@@ -109,7 +109,7 @@ class DataManager {
   //
   _registerChr (g, c, feats) {
     let freg = new FeatureRegistrar(g, c, this.id2feat, this.cid2feats, this.hid2feats, this.symbol2feats)
-    let cfeats = feats.map(f => freg.register(f)).filter(x => x)
+    let cfeats = feats.sort((a,b) => a.start - b.start).map(f => freg.register(f)).filter(x => x)
     this.cache[g.name][c.name] = cfeats
     return cfeats
   }
