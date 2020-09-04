@@ -634,6 +634,7 @@ export default MComponent({
       this.currentListItem = 0
     },
     initKeyBindings () {
+      // Show/hide Labels
       this.keyManager.register({
        key: 'n',
        handler: () => {
@@ -641,11 +642,13 @@ export default MComponent({
        },
        thisObj: this
       })
+      // Expand/collapse
       this.keyManager.register({
        key: 'x',
        handler: () => this.toggleSpreadTranscripts(),
        thisObj: this
       })
+      // Paralogs
       this.keyManager.register({
        key: 'p',
        handler: () => {
@@ -653,16 +656,19 @@ export default MComponent({
        },
        thisObj: this
       })
+      // Help
       this.keyManager.register({
        key: 'h',
        handler: () => this.$refs.helpBox.toggleOpen(),
        thisObj: this
       })
+      // Tool drawer
       this.keyManager.register({
        key: 't',
        handler: () => this.toggleDrawer(),
        thisObj: this
       })
+      // Scroll lock
       this.keyManager.register({
        key: 'l',
        handler: () => {
@@ -670,6 +676,7 @@ export default MComponent({
        },
        thisObj: this
       })
+      // Cancel drag
       this.keyManager.register({
        key: 'Escape',
        handler: () => {
@@ -677,6 +684,7 @@ export default MComponent({
        },
        thisObj: this
       })
+      // Ref genome
       this.keyManager.register({
        key: 'r',
        handler: () => {
@@ -689,6 +697,7 @@ export default MComponent({
        },
        thisObj: this
       })
+      // Zoom in
       this.keyManager.register({
        key: 'ArrowUp',
        handler: (e) => {
@@ -699,6 +708,7 @@ export default MComponent({
        },
        thisObj: this
       })
+      // Zoom out
       this.keyManager.register({
        key: 'ArrowDown',
        handler: (e) => {
@@ -709,6 +719,7 @@ export default MComponent({
        },
        thisObj: this
       })
+      // Scroll right
       this.keyManager.register({
        key: 'ArrowRight',
        handler: (e) => {
@@ -720,6 +731,7 @@ export default MComponent({
        },
        thisObj: this
       })
+      // Scroll left
       this.keyManager.register({
        key: 'ArrowLeft',
        handler: (e) => {

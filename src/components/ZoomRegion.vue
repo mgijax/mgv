@@ -353,6 +353,7 @@ export default MComponent({
   name: 'ZoomRegion',
   inject: [
     'dataManager',
+    'regionManager',
     'featureColorMap',
     'getFacets'
   ],
@@ -595,13 +596,15 @@ export default MComponent({
     }
   },
   methods: {
-    assignLanes (newLayout) {
+    assignLanes (preserveLayout) {
       // Three feature packers - one for expanded view (x), one for over/under view plus strand (p), one
       // for over/under minus strand (m).
-      if (newLayout || !this.fpx) {
-          this.fpx = new FeaturePacker(0.2,1000)
-          this.fpp = new FeaturePacker(0.2,1000)
-          this.fpm = new FeaturePacker(0.2,1000)
+      const yGap = 0.2
+      const xGap = 0
+      if (!preserveLayout || !this.fpx) {
+          this.fpx = new FeaturePacker(yGap,xGap*this.bpp)
+          this.fpp = new FeaturePacker(yGap,xGap*this.bpp)
+          this.fpm = new FeaturePacker(yGap,xGap*this.bpp)
       }
       //
       this.lmap = new Map()
@@ -880,7 +883,8 @@ export default MComponent({
       this.dataManager().getGenes(r.genome, r.chr, r.start - delta, r.end + delta, this.showDetails).then(feats => {
         this.busy = false
         this.features = feats.filter(f => this.getFacets().test(f))
-        this.assignLanes()
+        const preserveLayout = this.regionManager().lastOp === "scroll"
+        this.assignLanes(preserveLayout)
         this.nextTick(() => {
           this.$emit('busy-end')
           this.$emit('region-draw', this)

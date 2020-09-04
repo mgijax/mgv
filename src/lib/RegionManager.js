@@ -12,6 +12,7 @@ class RegionManager {
     this.app = app
     this.currRegion = null
     this.rCount = 0
+    this.lastOp = null
     //
     this.app.$root.$on('region-current', r => {
       if (r) this.currRegion = r.region
@@ -833,6 +834,8 @@ class RegionManager {
       (this.app.rStrip && this.app.rStrip.regions[0]) ||
       (this.app.strips[0] && this.app.strips[0].regions[0]) ||
       null
+    //
+    this.lastOp = d.op
     //
     if (d.op === 'scroll') {
       if (this.app.scrollLock) {
