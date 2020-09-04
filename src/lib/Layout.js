@@ -30,45 +30,67 @@ class ContigAssigner {
  * It is the caller's responsibility to adjust start/end to account for labels, glyphs, etc.
  */ 
 class FeaturePacker {
-  constructor (ygap, minXgap) {
-    // y distance between blocks.
-    this.ygap = ygap || 0
-    // min allowed
-    this.minXgap = (minXgap === undefined || minXgap === null) ? 1 : minXgap
-    // overlapping features.
-    this.buffer = []
-  }
-  assignNext (fstart, fend, fheight, fsymbol) {
-    // buffer should contain only things that overlap
-    // or are no more than minXgap away
-    this.buffer = this.buffer.filter(ff => {
-      // return fstart <= ff.fend && fend >= ff.fstart
-      return fstart - ff.fend <= this.minXgap
-    })
-    // Look for a big enough gap in the y dimension between buffer items
-    // to fit this new one. If none found, stack on top.
-    // Buffer is maintained in sorted y order.
-    // NB: remember, positive y is down in screen coords
-    let minGap = fheight + 2 * this.ygap
-    let y = 0 // start off at baseline
-    let i
-    for (i = 0; i < this.buffer.length; i++) {
-      let ff = this.buffer[i]
-      // distance between current y and top of next block in buffer
-      let gapSize = ff.y - y
-      if (gapSize >= minGap) {
-        break
-      }
-      // set current y to bottom of this buffer block
-      y = ff.y + ff.fheight
+    constructor (yGap, minXgap) {
+        this.yGap = yGap || 0
+        this.minXgap = minXgap || 0
+        // features sorted by start position
+        this.features = []
+        this.id2feat = new Map()
     }
-    // Found y for new block's baseline. Want position at top of block.
-    y += this.ygap
-    // Insert into buffer. Maintain y sort.
-    this.buffer.splice(i, 0, {fstart, fend, fheight, y, fsymbol})
-    // here ya go
-    return y
-  }
+    add (fId, fStart, fEnd, fHeight) {
+        if (this.id2feat.has(fId)) {
+            return this.id2feat.get(fId).y
+        }
+        const f = {
+            ID: fId,
+            start: fStart,
+            end: fEnd,
+            height: fHeight,
+            y: undefined
+        }
+        this.id2feat.set(fId, f)
+        // First, find everything in the current layout that overlaps the new feature in the x dimension.
+        // Along the way, find the insertion point for the new feature.
+        const xOver = []
+        const minYgap = Math.max(1, fHeight) + 2 * this.yGap
+        let i = 0
+        let j = null
+        for (i in this.features) {
+            const f2 = this.features[i]
+            if (f2.start > f.start && j === null) {
+                // record f's insert position
+                j = i
+            }
+            if (f2.start > f.end + this.minXgap) {
+                // nothing else can overlap f after this point
+                break
+            } else if (f2.end >= f.start - this.minXgap) {
+               xOver.push(f2)
+            }
+        }
+        // Add new feature at insertion point
+        if (j === null) {
+            this.features.push(f)
+        } else {
+            this.features.splice(j, 0, f)
+        }
+
+        // Sort the overlapping features by their assigned y coordinates
+        xOver.sort((a,b) => a.y - b.y)
+
+        // Now find a y gap that's big enough to insert the new feature, or if none found,
+        // stack it on the last one.
+        let y = 0
+        for (i in xOver) {
+            let f2 = xOver[i]
+            if (f2.y - y >= minYgap) {
+                break
+            }
+            y = f2.y + f2.height
+        }
+        f.y = y + this.yGap
+        return f.y
+    }
 }
 
 //

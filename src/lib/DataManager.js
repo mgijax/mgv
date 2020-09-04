@@ -11,7 +11,6 @@
  */
 import gc from '@/lib/GenomeCoordinates'
 import u from '@/lib/utils'
-import { FeaturePacker, ContigAssigner } from '@/lib/Layout'
 import config from '@/config'
 import { GenomeRegistrar } from '@/lib/GenomeRegistrar'
 import HomologyManager from '@/lib/HomologyManager'
@@ -475,40 +474,6 @@ class DataManager {
   getTaxonId (f) {
     const t = f.genome.metadata.taxonid
     return this.fixTaxonId(t)
-  }
-  // Assigns lanes to features based on their coordinates AND their labels
-  // Args:
-  //    feats - list of Features, from same chromosome, sorted by start
-  //    ppb - pixels per base. Scaling factor.
-  //    fsize - font size
-  //    useLabelFcn - function to return the proper label to use for sizing 
-  // Returns:
-  //   A Map() from feature to its layout object
-  assignLanes (feats, ppb, fsize, useLabelFcn) {
-    const ca = new ContigAssigner()
-    const fp = new FeaturePacker(0, 1000)
-    const fpp = new FeaturePacker(0, 1000)
-    const fpm = new FeaturePacker(0, 1000)
-    //
-    const lmap = new Map()
-    useLabelFcn =  useLabelFcn || (() => true)
-    feats.forEach(f => {
-      const lbl = useLabelFcn(f) ? f.transcripts.reduce((a,t) => {
-          const ts = t.label || t.ID
-          return ts.length > a.length ? ts : a
-      }, f.symbol || f.ID) : ""
-      // estimate length of label.
-      const lblLenBp = ppb ? 0.6 * (lbl.length * fsize) / ppb : 0 
-      const start = f.start
-      const end = Math.max(f.end, start + lblLenBp - 1)
-      const fpa = f.strand === '-' ? fpm : fpp
-      lmap.set(f, {
-          contig: ca.assignNext(start, end),
-          l1: 1 + fpa.assignNext(start, end, 2, f.ID),
-          l2: fp.assignNext(start, end, 1 + f.transcripts.length, f.ID)
-      })
-    })  
-    return lmap
   }
   //
   flushAllGenomeData () {

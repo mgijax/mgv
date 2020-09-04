@@ -347,6 +347,7 @@
 import MComponent from '@/components/MComponent'
 import u from '@/lib/utils'
 import { complement } from '@/lib/genetic_code'
+import { FeaturePacker } from '@/lib/Layout'
 //
 export default MComponent({
   name: 'ZoomRegion',
@@ -536,7 +537,7 @@ export default MComponent({
       if (this.showDetails && this.spreadTranscripts) {
         return 1
       } else {
-        let x = this.features.filter(f => (f.strand === null || f.strand === '+') && this.featureVisible(f)).reduce((v, f) => Math.max(v, this.lmap.get(f).l1), 0)
+        let x = this.features.filter(f => (f.strand === null || f.strand === '+') && this.featureVisible(f)).reduce((v, f) => Math.max(v, this.lmap.get(f)), 0)
         return Math.max(x, 1)
       }
     },
@@ -544,9 +545,10 @@ export default MComponent({
     maxLaneM: function () {
       let m
       if (this.showDetails && this.spreadTranscripts) {
-        m = this.features.filter(f => this.featureVisible(f)).reduce((v, f) => Math.max(v, this.lmap.get(f).l2 + f.transcripts.length), 0)
+        m = this.features.filter(f => this.featureVisible(f))
+                .reduce((v, f) => Math.max(v, this.lmap.get(f) + f.transcripts.length), 0)
       } else {
-        m = this.features.filter(f => f.strand === '-' && this.featureVisible(f)).reduce((v, f) => Math.max(v, this.lmap.get(f).l1), 0)
+        m = 1 + this.features.filter(f => f.strand === '-' && this.featureVisible(f)).reduce((v, f) => Math.max(v, this.lmap.get(f)), 0)
       }
       return Math.max(m, 1)
     },
@@ -593,15 +595,36 @@ export default MComponent({
     }
   },
   methods: {
-    assignLanes () {
-      const ppb = this.ppb
-      const fcn0 = () => true
-      const fcn1 = (f) => this.featureHighlighted(f)
-      const fcn = this.showDetails ? 
-           (this.spreadTranscripts ? fcn0 : (this.showFeatureLabels ? fcn0 : fcn1))
-           :
-           (this.showFeatureLabels ? fcn0 : fcn1)
-      this.lmap = this.dataManager().assignLanes(this.features, ppb, this.featureFontSize, fcn)
+    assignLanes (newLayout) {
+      // Three feature packers - one for expanded view (x), one for over/under view plus strand (p), one
+      // for over/under minus strand (m).
+      if (newLayout || !this.fpx) {
+          this.fpx = new FeaturePacker(0.2,1000)
+          this.fpp = new FeaturePacker(0.2,1000)
+          this.fpm = new FeaturePacker(0.2,1000)
+      }
+      //
+      this.lmap = new Map()
+      //
+      this.features.forEach(f => {
+          // label length
+          let lblLenBp = 0
+          if ((this.spreadTranscripts && this.showDetails) || this.showFeatureLabels || this.featureHighlighted(f)) {
+            // estimate label length. Find longest.
+            const lbl = f.transcripts.reduce((a,t) => {
+              const ts = t.label || t.ID
+              return ts.length > a.length ? ts : a
+            }, f.symbol || f.ID)
+            lblLenBp = this.ppb ? 0.6 * (lbl.length * this.featureFontSize) / this.ppb : 0 
+          }
+          const fEnd = Math.max(f.end, f.start + lblLenBp - 1)
+          // height
+          const fHeight = this.spreadTranscripts && this.showDetails ? 1+f.transcripts.length : 1
+          //
+          const fp = (this.spreadTranscripts && this.showDetails) ? this.fpx : f.strand === '-' ? this.fpm : this.fpp
+          const xtra = (fp === this.fpx) ? 0 : 1
+          this.lmap.set(f, xtra + fp.add(f.ID, f.start, fEnd, fHeight))
+      })
       this.$nextTick(() => this.$emit('region-draw', this))
     },
     clientXtoBase: function (x) {  
@@ -634,11 +657,11 @@ export default MComponent({
     featureY (f) {
       const lo = this.lmap.get(f)
       if (this.showDetails && this.spreadTranscripts) {
-        return lo.l2 * (this.featureHeight + this.laneGap) + this.featureFontSize
+        return lo * (this.featureHeight + this.laneGap) + this.featureFontSize
       } else if (!f.strand || f.strand === '+') {
-        return -lo.l1 * (this.featureHeight + this.featureFontSize)
+        return -lo * (this.featureHeight + this.featureFontSize)
       } else {
-        return (lo.l1 - 1) * (this.featureHeight + this.featureFontSize) + this.featureFontSize
+        return (lo - 1) * (this.featureHeight + this.featureFontSize) + this.featureFontSize
       }
     },
     featureH (f) {
