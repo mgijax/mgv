@@ -546,7 +546,7 @@ class FeatureRegistrar {
       f.cID = null // make sure it's not undefined
     }
     //
-    f.symbol = f.symbol || f.Name
+    f.symbol = f.symbol || f.Name || f.gene_id
     //
     if (f.symbol) {
       let lc = f.symbol.toLowerCase()

@@ -118,12 +118,14 @@
       <g
         v-for="(v, vi) in variants"
         :key="'v'+vi"
+        class="variant"
         >
         <title>{{v.ID}}</title>
         <path
             :d="variantGlyph(v)"
             :fill="variantColor(v)"
             />
+        <!--
         <rect
             :x="b2p(v.start)"
             :y="-zeroOffset"
@@ -135,6 +137,7 @@
             fill-opacity="0.5"
             :fill="variantColor(v)"
             />
+            -->
         </g> <!-- variants -->
       <!-- ======= sequence string ======= -->
       <text
@@ -688,7 +691,7 @@ export default MComponent({
         case 'point_mutation':
           // diamond
           x = this.b2p(v.start+0.5)   
-          return `m${x},0 l-5,-5 l5,-5 l5,5 l-5,5`
+          return `m${x},4.5 l-5,-5 l5,-5 l5,5 l-5,5`
 
         case 'delins':
         case 'MNV':
