@@ -22,6 +22,9 @@
       :contextObject="contextObject"
       :closeButton="true"
       />
+    <variant-info
+      ref="variantInfo"
+      />
   </div>
 </template>
 
@@ -30,13 +33,14 @@ import MComponent from '@/components/MComponent'
 import ZoomControls from '@/components/ZoomControls'
 import ZoomRegionControls from '@/components/ZoomRegionControls'
 import ZoomMain from '@/components/ZoomMain'
+import VariantInfo from '@/components/VariantInfo'
 import MMenu from '@/components/MMenu'
 import getFeatureMenus from '@/lib/ZoomViewContextMenu'
 export default MComponent({
   name: 'ZoomView',
   props: ['context'],
   inject: ['dataManager'],
-  components: { ZoomControls, ZoomRegionControls, ZoomMain, MMenu },
+  components: { ZoomControls, ZoomRegionControls, ZoomMain, MMenu, VariantInfo },
   data: function () {
     return {
       contextMenu: [],
@@ -71,13 +75,14 @@ export default MComponent({
     showContextMenu: function (evt) {
       const rnode = evt.target.closest('.zoom-region')
       const fnode = evt.target.closest('.feature')
+      const vnode = evt.target.closest('.variant')
       const vm = rnode ? rnode.__vue__ : null
       if (!vm) return
       const y = evt.clientY // - cbb.y
       const x = evt.clientX // - cbb.x
       if (fnode) {
-        // Before showing f's context menu, be sure it's model has been read into the cache.
-        // FIXME: In fact, be sure this is done for f and all its visible homologs
+        // Before showing f's context menu, be sure its model has been read into the cache.
+        // Also be sure same is true of all visible homologs of f
         const dm = this.dataManager()
         const f = dm.getFeatureById(fnode.getAttribute('name'))
         const fhoms = dm.getHomologs(f)
@@ -91,6 +96,10 @@ export default MComponent({
           const cm = this.$refs.contextMenu
           cm.open(y, x)
         })
+      } else if (vnode) {
+        const vid = vnode.getAttribute('name')
+        const v = vm.variants.filter(vv => vv.ID === vid)[0]
+        if (v) this.$refs.variantInfo.open( v, y, x)
       } else {
         this.$refs.regionControls.open(vm.region, y-2, x-2)
       }

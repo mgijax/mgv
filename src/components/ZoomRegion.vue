@@ -119,6 +119,7 @@
         v-for="(v, vi) in variants"
         :key="'v'+vi"
         class="variant"
+        :name="v.ID"
         >
         <title>{{v.ID}}</title>
         <path

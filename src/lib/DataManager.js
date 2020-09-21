@@ -193,6 +193,23 @@ class DataManager {
       return reader.readRange(c, s, e).then(vars => {
           return vars.map(v => {
             const attrs = v[7]
+            let tl
+            if (attrs['transcriptLevelConsequence']) {
+                const tlc = attrs['transcriptLevelConsequence'].split(',')
+                const tli = attrs['transcriptImpact'].split(',')
+                const tld = attrs['allele_of_transcript_gff3_ids'].split(',')
+                tl = tld.map( (id, j) => {
+                  return {
+                    ID: id,
+                    consequence: tlc[j],
+                    impact: tli[j]
+                  }
+                }).sort((a,b) => {
+                  if (a.ID < b.ID) return -1
+                  else if (a.ID > b.ID) return 1
+                  else return 0
+                })
+            }
             return {
               ID: attrs['hgvs_nomenclature'],
               chr: v[0],
@@ -200,9 +217,11 @@ class DataManager {
               end: v[1] + v[3].length - 1,
               ref: v[3],
               alt: v[4],
+              attrs: attrs,
               so_term: attrs['soTerm'],
               glConsequence: attrs['geneLevelConsequence'],
               glImpact: attrs['geneImpact'],
+              tlEffects: tl,
               allele: {
                 ID: attrs['allele_ids'],
                 symbol: attrs['allele_symbols'],
