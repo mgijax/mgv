@@ -61,6 +61,7 @@ export default MComponent({
   name: 'Facet',
   props: {
     name: String, // facet name
+    type: String, // type of object the facet applies to
     values: Array, // list of string values
     colors: Array, // list of string color values
     initialSelection: [Array, Boolean, String, Number], // initially selected values
@@ -89,8 +90,12 @@ export default MComponent({
   methods: {
     // Returns true iff the given object is in a currently selected facet.
     test: function (f) {
-      let ffacet = this.mapper(f)
-      return this.selectedSet.has(ffacet)
+      const ffacet = this.mapper(f)
+      if (Array.isArray(ffacet)) {
+          return ffacet.some(val => this.selectedSet.has(val))
+      } else {
+          return this.selectedSet.has(ffacet)
+      }
     },
     check: function (allOrNone) {
       if (allOrNone === 'all') {

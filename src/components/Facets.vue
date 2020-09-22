@@ -15,6 +15,7 @@
        >
        <facet
          :name="fd.name"
+         :type="fd.type"
          :values="fd.values"
          :initialSelection="fd.initialSelection"
          :colors="fd.colors"
@@ -28,6 +29,7 @@
 </template>
 
 <script>
+import u from '@/lib/utils'
 import MComponent from '@/components/MComponent'
 import Facet from '@/components/Facet'
 import PageBox from '@/components/PageBox'
@@ -43,6 +45,7 @@ export default MComponent({
     return {
       someoneActive: false,
       facetData: [{
+        type: 'feature',
         name: 'Feature type',
         description: 'Limit the display to show only features of the selected types.',
         values: this.featureColorMap.getTypes(),
@@ -55,6 +58,7 @@ export default MComponent({
         }.bind(this),
         message: ""
       }, {
+        type: 'feature',
         name: 'Feature length',
         description: 'Limit the display to show only features with total genomic length in the selected ranges.',
         values: ['< 1kb', '1-10kb', '10-100kb', '100kb - 1Mb', '> 1Mb'],
@@ -67,7 +71,9 @@ export default MComponent({
         },
         message: ""
       }, {
+        /*
         name: 'Missing in some* genome',
+        type: 'feature',
         description: `
         If false, only shows features that are missing in some *displayed* genome.
         If true, only shows features that occur in all displayed genomes.
@@ -84,7 +90,9 @@ export default MComponent({
         },
         message: ""
       }, {
-        name: 'Is in current list',
+        */
+        name: 'Feature in current list',
+        type: 'feature',
         description: 'If true limits display to features in the currently selected list. If false, limits to features not in the list. Click a list in "Lists and Searches" to make it current.',
         values: [true, false, 'dont care'],
         initialSelection: 'dont care',
@@ -97,7 +105,8 @@ export default MComponent({
         },
         message: ""
       }, {
-        name: 'Is currently selected',
+        name: 'Feature currently selected',
+        type: 'feature',
         description: 'If true and some features are currently selected, limits display to those features. Good for looking at one feature at a time. If false, removes those features from display.',
         values: [true, false, 'dont care'],
         initialSelection: 'dont care',
@@ -112,6 +121,88 @@ export default MComponent({
           return false
         },
         message: ""
+      }, {
+        name: 'Variant type',
+        type: 'variant',
+        description: '',
+        values: ['point_mutation','insertion','deletion','delins','MNV'],
+        initialSelection: ['point_mutation','insertion','deletion','delins','MNV'],
+        multi: true,
+        initiallyOpen: false,
+        mapper: function (v) {
+          return v.so_term
+        },
+        message: ""
+      }, {
+        name: 'Variant impact',
+        type: 'variant',
+        description: '',
+        values: ['HIGH','MODERATE','LOW','MODIFIER'],
+        initialSelection: ['HIGH','MODERATE','LOW','MODIFIER'],
+        multi: true,
+        initiallyOpen: false,
+        mapper: function (v) {
+          return v.gEffects.map(g => g.impact)
+        },
+        message: ""
+      }, {
+        name: 'Variant consequence',
+        type: 'variant',
+        description: '',
+        values: [
+        '3_prime_UTR_variant',
+        '5_prime_UTR_variant',
+        'coding_sequence_variant',
+        'frameshift_variant',
+        'inframe_deletion',
+        'inframe_insertion',
+        'intergenic_variant',
+        'intron_variant',
+        'missense_variant',
+        'non_coding_transcript_exon_variant',
+        'non_coding_transcript_variant',
+        'protein_altering_variant',
+        'splice_acceptor_variant',
+        'splice_donor_variant',
+        'splice_region_variant',
+        'start_lost',
+        'start_retained_variant',
+        'stop_gained',
+        'stop_lost',
+        'stop_retained_variant',
+        'synonymous_variant',
+        'transcript_ablation',
+        ],
+        initialSelection: [
+        '3_prime_UTR_variant',
+        '5_prime_UTR_variant',
+        'coding_sequence_variant',
+        'frameshift_variant',
+        'inframe_deletion',
+        'inframe_insertion',
+        'intergenic_variant',
+        'intron_variant',
+        'missense_variant',
+        'non_coding_transcript_exon_variant',
+        'non_coding_transcript_variant',
+        'protein_altering_variant',
+        'splice_acceptor_variant',
+        'splice_donor_variant',
+        'splice_region_variant',
+        'start_lost',
+        'start_retained_variant',
+        'stop_gained',
+        'stop_lost',
+        'stop_retained_variant',
+        'synonymous_variant',
+        'transcript_ablation',
+        ],
+        multi: true,
+        initiallyOpen: false,
+        mapper: function (v) {
+          return u.flatten(v.gEffects.map(g => g.consequence))
+        },
+        message: ""
       }]
     }
   },
@@ -119,8 +210,8 @@ export default MComponent({
     facetOff: function (i) {
       this.$refs.facets[i].inactivate()
     },
-    test: function (f) {
-      return this.$refs.facets.every(facet => facet.test(f))
+    test: function (f, type) {
+      return this.$refs.facets.every(facet => facet.type !== type || facet.test(f))
     },
     getFacetState: function () {
       let active = this.$refs.facets.filter(f => f.active)

@@ -188,27 +188,79 @@ class DataManager {
   }
   // Returns a promise for the variants in the specified range
   getVariants (g, c, s, e) {
+    /*
+     * Splits strings coding multiple values ala VEP output.
+     * Strings may have 0, 1, or 2 levels of multiples
+     *  0 : no multiples, string is returned unchanged
+     *  1 : multiples separated by comma, eg "foo,bar,baz"
+     *  2 : multiples separated by pipe of multiples separated by comma
+     *      e.g. "foo1,foo2|bar1|baz1,baz2,baz3"
+     */
+    const splitString = function(s, levels) {
+      if (s === undefined) return
+      if (levels === 0) return s
+      if (levels === 1) return s.split(',')
+      if (levels === 2) return s.split(',').map(ss => ss.split('|'))
+    }
+    /*
+     * Parses structured data encoded in INFO column attributes.
+     * Args:
+     *    obj - a (simple) parsed INFO column value, ie, an object with attributes
+     *          and simple string values
+     *    info - list of descriptors of what obj attributes to parse. Each descriptor
+     *           is a list of 3 values: name of obj attribute to parse, the nesting level of
+     *           data in the string, and the name to use in the output objects.
+     * Returns:
+     *    A list of objects
+     */
+    const splitCombine = function (obj, info) {
+        const cols = info.map(v => splitString(obj[v[0]], v[1]))
+        const names = info.map(v => v[2])
+        const res = u.cols2rows(cols, names)
+        return res
+    }
+
     return this.greg.getReader(g, 'variants').then(reader => {
       if (!reader) return []
       return reader.readRange(c, s, e).then(vars => {
           return vars.map(v => {
             const attrs = v[7]
-            let tl
-            if (attrs['transcriptLevelConsequence']) {
-                const tlc = attrs['transcriptLevelConsequence'].split(',')
-                const tli = attrs['transcriptImpact'].split(',')
-                const tld = attrs['allele_of_transcript_gff3_ids'].split(',')
-                tl = tld.map( (id, j) => {
-                  return {
-                    ID: id,
-                    consequence: tlc[j],
-                    impact: tli[j]
-                  }
-                }).sort((a,b) => {
-                  if (a.ID < b.ID) return -1
-                  else if (a.ID > b.ID) return 1
+            //
+            if (attrs['geneLevelConsequence']) {
+                attrs['genes'] = splitCombine(attrs, [
+                    ['allele_of_gene_ids', 1, 'curie'],
+                    ['allele_of_gene_symbols', 1, 'symbol'],
+                    ['geneLevelConsequence', 2, 'consequence'],
+                    ['geneImpact', 1, 'impact']
+                 ])
+            } else {
+                attrs['genes'] = []
+            }
+            //
+            if (attrs['allele_ids']) {
+                attrs['alleles'] = splitCombine(attrs, [
+                    ['allele_ids', 1, 'curie' ],
+                    ['allele_symbols', 1, 'symbol'],
+                    ['allele_symbols_text', 1, 'symbolText']
+                ])
+            } else {
+                attrs['alleles'] = []
+            }
+            //
+            if (attrs['allele_of_transcript_ids']) {
+                attrs['transcripts'] = splitCombine(attrs, [
+                    ['allele_of_transcript_ids', 1, 'curie'],
+                    ['allele_of_transcript_gff3_ids', 1, 'gff3id'],
+                    ['allele_of_transcript_gff3_names', 1, 'gff3name'],
+                    ['transcriptLevelConsequence', 2, 'consequence'],
+                    ['transcriptImpact', 1, 'impact'],
+                ]).sort((a,b) => {
+                  if (a.curie < b.curie) return -1
+                  else if (a.curie > b.curie) return 1
                   else return 0
                 })
+            } else {
+                attrs['transcreipts'] = []
             }
             return {
               ID: attrs['hgvs_nomenclature'],
@@ -217,19 +269,10 @@ class DataManager {
               end: v[1] + v[3].length - 1,
               ref: v[3],
               alt: v[4],
-              attrs: attrs,
               so_term: attrs['soTerm'],
-              glConsequence: attrs['geneLevelConsequence'],
-              glImpact: attrs['geneImpact'],
-              tlEffects: tl,
-              allele: {
-                ID: attrs['allele_ids'],
-                symbol: attrs['allele_symbols'],
-                gene: {
-                  ID: attrs['allele_of_gene_ids'],
-                  symbol: attrs['allele_of_gene_symbols']
-                }
-              }
+              gEffects: attrs['genes'],
+              aEffects: attrs['alleles'],
+              tEffects: attrs['transcripts']
             }
           })
       })

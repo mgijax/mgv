@@ -420,10 +420,35 @@ function sortBy (lst, key) {
   }
   return lst.sort(comp)
 }
+/*
+ * Converts column structured data into row structured data. The input is a list of
+ * data columns, all of the same length. Output is a list of row objects, where
+ * each object has an attribute from each column.
+ * Args:
+ *    valueArrays: list of list. Each list holds a columns worth of data
+ *    names: list of strings to name the attributes
+ * Returns:
+ *    list of objects
+ */
+const cols2rows = function (valueArrays, names) {
+    const res = []
+    valueArrays.forEach((va,i) => {
+        const n = names[i]
+        va.forEach((val,j) => {
+            let obj = res[j]
+            if (!obj) {
+                res[j] = obj = {}
+            }
+            obj[n] = val
+        })
+    })
+    return res
+}
 // ---------------------------------------------
 export default {
   afterTicks,
   assert,
+  cols2rows,
   concatAll,
   debug,
   deepCopy,

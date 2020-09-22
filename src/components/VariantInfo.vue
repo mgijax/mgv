@@ -1,7 +1,7 @@
 <template>
     <div
       class="variant-info flexcolumn"
-      v-if="isOpen && variant"
+      v-show="isOpen && variant"
       :style="{ top: y + 'px', left: x + 'px', zIndex : 100, fontSize: '12px' }"
       @click.stop=""
       >
@@ -13,41 +13,65 @@
           />
         <div>
         <table
+          v-if="variant"
           >
           <tr>
-            <td colspan=2> {{ variant.ID }} </td>
+            <td class="label">HGVS:</td>
+            <td> {{ variant.ID }} </td>
             </tr>
           <tr>
-            <td>Type:</td>
+            <td class="label">Type:</td>
             <td>{{ variant.so_term }}</td>
             </tr>
           <tr>
-            <td>Consequence:</td>
-            <td>{{ variant.glConsequence.replaceAll("|", " ") }}</td>
-            </tr>
-          <tr>
-            <td>Impact:</td>
-            <td>{{ variant.glImpact.replaceAll("|", " ") }}</td>
-            </tr>
-          <tr>
-            <td>Ref seq:</td>
+            <td class="label">Ref seq:</td>
             <td>{{ variant.ref }}</td>
             </tr>
           <tr>
-            <td>Alt seq:</td>
+            <td class="label">Alt seq:</td>
             <td>{{ variant.alt }}</td>
             </tr>  
-          <tr v-if="variant.tlEffects && variant.tlEffects.length > 0">
+          <tr v-if="variant.aEffects && variant.aEffects.length > 0">
             <td colspan=2>
               <table>
-                <tr><td colspan=3>Transcript level effects</td></tr>
+                <tr><td  class="label" colspan=2>Alleles</td></tr>
                 <tr
-                v-for="tl in variant.tlEffects"
-                :key="tl.ID"
+                v-for="a in variant.aEffects"
+                :key="a.curie"
                 >
-                  <td>{{tl.ID}}</td>
-                  <td>{{tl.consequence.replaceAll("|", " ")}}</td>
-                  <td>{{tl.impact.replaceAll("|", " ")}}</td>
+                  <td>{{a.curie}}</td>
+                  <td>{{a.symbolText}}</td>
+                  </tr>
+                </table>
+            </td>
+            </tr>
+          <tr v-if="variant.gEffects && variant.gEffects.length > 0">
+            <td colspan=2>
+              <table>
+                <tr><td class="label" colspan=4>Gene level effects</td></tr>
+                <tr
+                v-for="g in variant.gEffects"
+                :key="g.curie"
+                >
+                  <td>{{g.curie}}</td>
+                  <td>{{g.symbol}}</td>
+                  <td>{{g.impact}}</td>
+                  <td>{{(g.consequence || []).join(',')}}</td>
+                  </tr>
+                </table>
+            </td>
+            </tr>
+          <tr v-if="variant.tEffects && variant.tEffects.length > 0">
+            <td colspan=2>
+              <table>
+                <tr><td class="label" colspan=3>Transcript level effects</td></tr>
+                <tr
+                v-for="t in variant.tEffects"
+                :key="t.ID"
+                >
+                  <td>{{t.curie}}</td>
+                  <td>{{t.impact}}</td>
+                  <td>{{(t.consequence || []).join(',')}}</td>
                   </tr>
                 </table>
             </td>
@@ -88,6 +112,13 @@ export default MComponent({
   mounted: function () {
     // close me if user clicks on background
     this.$root.$el.addEventListener('click', () => this.close())
+  },
+  updated: function () {
+    const bb = this.$el.getBoundingClientRect()
+    const dx = Math.max(0, bb.left + bb.width - window.innerWidth)
+    const dy = Math.max(0, bb.top + bb.height - window.innerHeight)
+    this.y -= dy
+    this.x -= dx
   }
 })
 </script>
@@ -107,5 +138,8 @@ export default MComponent({
 .variant-info td {
   text-align: start;
   vertical-align: top;
+}
+td.label {
+  font-weight: bold;
 }
 </style>

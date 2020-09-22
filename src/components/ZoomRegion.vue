@@ -716,14 +716,14 @@ export default MComponent({
 
     },
     variantColor (v) {
-        const imp = v.glImpact
-        if (!imp) {
+        const imps = v.gEffects.map(g => g.impact)
+        if (imps.length === 0) {
             return 'gray'
-        } else if (imp.includes('HIGH')) {
+        } else if (imps.indexOf('HIGH') >=0 ) {
             return 'red'
-        } else if (imp.includes('MODERATE')) {
+        } else if (imps.indexOf('MODERATE') >=0 ) {
             return 'orange'
-        } else if (imp.includes('LOW')) {
+        } else if (imps.indexOf('LOW') >=0 ) {
             return 'cyan'
         } else {
             return 'gray'
@@ -886,7 +886,7 @@ export default MComponent({
       this.blocks = []
       this.dataManager().getGenes(r.genome, r.chr, r.start - delta, r.end + delta, this.showDetails).then(feats => {
         this.busy = false
-        this.features = feats.filter(f => this.getFacets().test(f))
+        this.features = feats.filter(f => this.getFacets().test(f, 'feature'))
         const preserveLayout = this.regionManager().lastOp === "scroll"
         this.assignLanes(preserveLayout)
         this.nextTick(() => {
@@ -912,7 +912,7 @@ export default MComponent({
         }
         if (this.showDetails) {
             this.dataManager().getVariants(r.genome, r.chr, r.start - delta, r.end + delta).then(data => {
-                this.variants = data
+                this.variants = data.filter(v => this.getFacets().test(v, 'variant'))
             })
         } else {
             this.variants = []
