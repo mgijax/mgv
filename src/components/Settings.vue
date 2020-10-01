@@ -121,7 +121,7 @@
         :disabled="!ZoomRegion.showFeatureLabels || !ZoomRegion.showTranscriptLabels"
         />
   </div>
-  <!-- =================== -->
+  <!-- ===================
   <div
     class="flexrow"
     title="Set the font size of displayed transcript labels."
@@ -134,6 +134,7 @@
         max="24"
         />
   </div>
+  -->
   <!-- =================== -->
   <div
     class="flexrow"
@@ -354,11 +355,7 @@ export default MComponent({
     this.$watch('$data', () => this.save(), {deep: true})
     this.$watch('ZoomRegion.featureFontSize', () => {
       const zr = this.ZoomRegion
-      zr.transcriptFontSize = Math.min(zr.transcriptFontSize, zr.featureFontSize)
-    })
-    this.$watch('ZoomRegion.transcriptFontSize', () => {
-      const zr = this.ZoomRegion
-      zr.transcriptFontSize = Math.min(zr.transcriptFontSize, zr.featureFontSize)
+      zr.transcriptFontSize = zr.featureFontSize - 1
     })
   },
   computed: {
