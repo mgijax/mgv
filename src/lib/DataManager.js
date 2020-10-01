@@ -264,8 +264,9 @@ class DataManager {
             }
             return {
               ID: attrs['hgvs_nomenclature'],
+              genome: g,
+              chr: c,
               symbol: attrs['alleles'].map(a => a.symbolText).join(","),
-              chr: v[0],
               start: v[1],
               end: v[1] + v[3].length - 1,
               ref: v[3],

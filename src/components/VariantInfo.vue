@@ -24,6 +24,10 @@
             <td>{{ variant.so_term }}</td>
             </tr>
           <tr>
+            <td class="label">Position:</td>
+            <td>{{ variant.chr.name }}:{{ variant.start }}</td>
+            </tr>
+          <tr>
             <td class="label">Ref seq:</td>
             <td>{{ variant.ref }}</td>
             </tr>
