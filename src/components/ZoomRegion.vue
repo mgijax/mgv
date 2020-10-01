@@ -114,7 +114,7 @@
         :font-weight="isCurrent ? 'bold' : 'normal'"
         :transform="`translate(${-myDelta},0)`"
         >{{coordinatesLabel}}<title>{{coordinatesLabel}}</title></text>
-      <!-- Variants -->
+      <!-- ======= Variants ======= -->
       <g
         v-for="(v, vi) in variants"
         :key="'v'+vi"
@@ -122,23 +122,27 @@
         :name="v.ID"
         >
         <title>{{v.ID}}</title>
+        <text
+          v-if="featureShowLabel(v)"
+          :x="b2p(v.start)"
+          :y="featureY(v) - 10"
+          fill="black"
+          font-family="sans-serif"
+          :font-size="featureFontSize"
+          >{{ v.symbol }}</text>
+        <text
+          v-if="featureShowLabel(v) && showTranscriptLabels && v.so_term !== 'deletion' && v.so_term !== 'delins'"
+          :x="b2p(v.start) + 7"
+          :y="featureY(v) - 8"
+          fill="black"
+          font-family="sans-serif"
+          :font-size="featureFontSize"
+          dominant-baseline="hanging"
+          >{{ v.ref }}>{{ v.alt }}</text>
         <path
             :d="variantGlyph(v)"
             :fill="variantColor(v)"
             />
-        <!--
-        <rect
-            :x="b2p(v.start)"
-            :y="-zeroOffset"
-            :width="featureW(v)"
-            :height="Math.max(height,10)"
-            :stroke="variantColor(v)"
-            stroke-width="0.5"
-            stroke-opacity="0.5"
-            fill-opacity="0.5"
-            :fill="variantColor(v)"
-            />
-            -->
         </g> <!-- variants -->
       <!-- ======= sequence string ======= -->
       <text
@@ -542,8 +546,9 @@ export default MComponent({
       if (this.showDetails && this.spreadTranscripts) {
         return 1
       } else {
-        let x = this.features.filter(f => (f.strand === null || f.strand === '+') && this.featureVisible(f)).reduce((v, f) => Math.max(v, this.lmap.get(f)), 0)
-        return Math.max(x, 1)
+        let x = this.features.filter(f => (f.strand === null || f.strand === '+') && this.featureVisible(f)).reduce((v, f) => Math.max(v, this.lmap.get(f.ID)), 0)
+        let x2 = this.variants.filter(v => this.featureVisible(v)).reduce((vv,v) => Math.max(vv, this.lmap.get(v.ID) + 0.5), 0)
+        return Math.max(x,x2,1)
       }
     },
     // Max number of lanes below axis (minus strand)
@@ -551,9 +556,11 @@ export default MComponent({
       let m
       if (this.showDetails && this.spreadTranscripts) {
         m = this.features.filter(f => this.featureVisible(f))
-                .reduce((v, f) => Math.max(v, this.lmap.get(f) + f.transcripts.length), 0)
+                .reduce((v, f) => Math.max(v, this.lmap.get(f.ID) + f.transcripts.length), 0)
+        const m2 = this.variants.filter(v => this.featureVisible(v)).reduce((vv,v) => Math.max(vv, this.lmap.get(v.ID)), 0)
+        m = Math.max(m, m2)
       } else {
-        m = 1 + this.features.filter(f => f.strand === '-' && this.featureVisible(f)).reduce((v, f) => Math.max(v, this.lmap.get(f)), 0)
+        m = 1 + this.features.filter(f => f.strand === '-' && this.featureVisible(f)).reduce((v, f) => Math.max(v, this.lmap.get(f.ID)), 0)
       }
       return Math.max(m, 1)
     },
@@ -581,8 +588,8 @@ export default MComponent({
       if (newval !== oldval) this.getFeatures()
     },
     spreadTranscripts: function () {
-      this.assignLanes()
-      this.$nextTick(() => this.$emit('region-draw', this))
+      this.getFeatures()
+      //this.$nextTick(() => this.$emit('region-draw', this))
     },
     height: function () {
       this.$nextTick(() => this.$emit('region-draw', this))
@@ -593,44 +600,60 @@ export default MComponent({
       }
     },
     featureFontSize: function () {
-      this.assignLanes()
+      this.layout()
     },
     showFeatureLabels: function () {
-      this.assignLanes()
+      this.getFeatures()
     }
   },
   methods: {
-    assignLanes (preserveLayout) {
+    layout (preserveLast) {
       // Three feature packers - one for expanded view (x), one for over/under view plus strand (p), one
       // for over/under minus strand (m).
       const yGap = 0.2
       const xGap = 0
-      if (!preserveLayout || !this.fpx) {
+      if (!preserveLast || !this.fpx) {
           this.fpx = new FeaturePacker(yGap,xGap*this.bpp)
           this.fpp = new FeaturePacker(yGap,xGap*this.bpp)
           this.fpm = new FeaturePacker(yGap,xGap*this.bpp)
       }
       //
       this.lmap = new Map()
+      // 
+      this.variants.forEach(v => {
+          const glyphSize = 10
+          const delta = this.bpp * glyphSize
+          const start = v.start - delta/2
+          let lblLen = 0
+          if ((this.spreadTranscripts && this.showDetails) || this.showFeatureLabels || this.featureHighlighted(v)) {
+              lblLen = 0.6 * (v.symbol.length * this.featureFontSize) / this.ppb
+          }
+          const end = Math.max(v.start + lblLen, v.end + delta/2)
+          const fp = this.spreadTranscripts && this.showDetails ? this.fpx : this.fpp
+          this.lmap.set(v.ID, fp.add(v.ID, start, end, 1))
+      })
+      // Returns a string's approximate base pair length when rendered with
+      // given current font size and zoom factor
+      const sBpLength = s  => {
+          return this.ppb? 0.6 * (s.length * this.featureFontSize) / this.ppb : 0
+      }
       //
       this.features.forEach(f => {
-          // label length
-          let lblLenBp = 0
+          let fEnd = f.end
           if ((this.spreadTranscripts && this.showDetails) || this.showFeatureLabels || this.featureHighlighted(f)) {
             // estimate label length. Find longest.
-            const lbl = f.transcripts.reduce((a,t) => {
-              const ts = t.label || t.ID
-              return ts.length > a.length ? ts : a
-            }, f.symbol || f.ID)
-            lblLenBp = this.ppb ? 0.6 * (lbl.length * this.featureFontSize) / this.ppb : 0 
+            fEnd = Math.max(fEnd, f.transcripts.reduce((a,t) => {
+              const tlabel = t.cds && this.showProteinLabels ? t.cds.label : t.label
+              const tend = Math.max(t.end, t.start + sBpLength(tlabel))
+              return Math.max(a, tend)
+            }, f.start + sBpLength(f.symbol || f.ID)))
           }
-          const fEnd = Math.max(f.end, f.start + lblLenBp - 1)
           // height
           const fHeight = this.spreadTranscripts && this.showDetails ? 1+f.transcripts.length : 1
           //
           const fp = (this.spreadTranscripts && this.showDetails) ? this.fpx : f.strand === '-' ? this.fpm : this.fpp
           const xtra = (fp === this.fpx) ? 0 : 1
-          this.lmap.set(f, xtra + fp.add(f.ID, f.start, fEnd, fHeight))
+          this.lmap.set(f.ID, xtra + fp.add(f.ID, f.start, fEnd, fHeight))
       })
       this.$nextTick(() => this.$emit('region-draw', this))
     },
@@ -662,7 +685,7 @@ export default MComponent({
       return Math.max(1, (f.end - f.start + 1) * this.ppb)
     },
     featureY (f) {
-      const lo = this.lmap.get(f)
+      const lo = this.lmap.get(f.ID)
       if (this.showDetails && this.spreadTranscripts) {
         return lo * (this.featureHeight + this.laneGap) + this.featureFontSize
       } else if (!f.strand || f.strand === '+') {
@@ -688,27 +711,31 @@ export default MComponent({
     },
     variantGlyph (v) {
       let x
+      let len
+      let y = this.featureY(v)
       switch (v.so_term) {
         case 'point_mutation':
           // diamond
-          x = this.b2p(v.start+0.5)   
-          return `m${x},4.5 l-5,-5 l5,-5 l5,5 l-5,5`
+          x = this.b2p(v.start+0.5)
+          return `m${x},${y} l-5,-5 l5,-5 l5,5 l-5,5`
 
-        case 'delins':
         case 'MNV':
           // hourglass
           x = this.b2p(v.start)   
-          return `m${x-5},0 l10,0 l-10,-10 l10,0 l-10,10`
+          len = 10
+          return `m${x},${y} l${len},0 l${-len},-10 l${len},0 l${-len},10`
 
         case 'insertion':
           // triangle down
           x = this.b2p(v.start)   
-          return `m${x},0 l-5,-5 l10,0 l-5,5`
+          return `m${x},${y} l-5,-5 l10,0 l-5,5`
 
+        case 'delins':
         case 'deletion':
           // box
           x = this.b2p(v.start)
-          return `m${x},0 l0,-10 l5,0 l0,10 Z`
+          len = Math.max(this.b2p(v.end) - x, 5)
+          return `m${x},${y} l0,-10 l${len},0 l0,10 Z`
 
         default:
           throw "Don't know this type: " + v.soTerm
@@ -887,8 +914,8 @@ export default MComponent({
       this.dataManager().getGenes(r.genome, r.chr, r.start - delta, r.end + delta, this.showDetails).then(feats => {
         this.busy = false
         this.features = feats.filter(f => this.getFacets().test(f, 'feature'))
-        const preserveLayout = this.regionManager().lastOp === "scroll"
-        this.assignLanes(preserveLayout)
+        const preserveLast = this.regionManager().lastOp === "scroll"
+        this.layout(preserveLast)
         this.nextTick(() => {
           this.$emit('busy-end')
           this.$emit('region-draw', this)
@@ -913,6 +940,7 @@ export default MComponent({
         if (this.showDetails) {
             this.dataManager().getVariants(r.genome, r.chr, r.start - delta, r.end + delta).then(data => {
                 this.variants = data.filter(v => this.getFacets().test(v, 'variant'))
+                this.layout(preserveLast)
             })
         } else {
             this.variants = []
@@ -924,7 +952,10 @@ export default MComponent({
     getEventObjects (e) {
       const f = e.target.closest('.feature')
       if (!f) {
-        return
+        const v = e.target.closest('.variant')
+        if (!v) return
+        const vobj = this.variants.filter(vv => vv.ID === v.getAttribute('name'))[0]
+        return { feature: vobj }
       }
       const fid = f.getAttribute('name')
       const feat = this.fIndex[fid]
