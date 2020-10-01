@@ -33,45 +33,51 @@
             </tr>  
           <tr v-if="variant.aEffects && variant.aEffects.length > 0">
             <td colspan=2>
+              <label>Alleles</label>
               <table>
-                <tr><td  class="label" colspan=2>Alleles</td></tr>
                 <tr
                 v-for="a in variant.aEffects"
                 :key="a.curie"
                 >
-                  <td>{{a.curie}}</td>
                   <td>{{a.symbolText}}</td>
+                  <td><a
+                      :href="'https://www.alliancegenome.org/allele/' + a.curie"
+                      target="_blank"
+                      >{{a.curie}}</a></td>
                   </tr>
                 </table>
             </td>
             </tr>
           <tr v-if="variant.gEffects && variant.gEffects.length > 0">
             <td colspan=2>
+              <label>Gene level effects</label>
               <table>
-                <tr><td class="label" colspan=4>Gene level effects</td></tr>
                 <tr
                 v-for="g in variant.gEffects"
                 :key="g.curie"
                 >
-                  <td>{{g.curie}}</td>
                   <td>{{g.symbol}}</td>
+                  <td><a
+                      :href="'https://www.alliancegenome.org/gene/' + g.curie"
+                      target="_blank"
+                      >{{g.curie}}</a></td>
                   <td>{{g.impact}}</td>
-                  <td>{{(g.consequence || []).join(',')}}</td>
+                  <td>{{(g.consequence || []).join(' ')}}</td>
                   </tr>
                 </table>
             </td>
             </tr>
           <tr v-if="variant.tEffects && variant.tEffects.length > 0">
             <td colspan=2>
+              <label>Transcript level effects</label>
               <table>
-                <tr><td class="label" colspan=3>Transcript level effects</td></tr>
                 <tr
                 v-for="t in variant.tEffects"
                 :key="t.ID"
                 >
                   <td>{{t.curie}}</td>
                   <td>{{t.impact}}</td>
-                  <td>{{(t.consequence || []).join(',')}}</td>
+                  <td>{{(t.consequence || []).join(' ')}}</td>
                   </tr>
                 </table>
             </td>
@@ -139,7 +145,13 @@ export default MComponent({
   text-align: start;
   vertical-align: top;
 }
+.variant-info table {
+  table-layout: auto;
+}
 td.label {
+  font-weight: bold;
+}
+label {
   font-weight: bold;
 }
 </style>
