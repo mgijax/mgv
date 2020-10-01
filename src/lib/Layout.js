@@ -36,6 +36,7 @@ class FeaturePacker {
         // features sorted by start position
         this.features = []
         this.id2feat = new Map()
+        this.maxY = 0
     }
     add (fId, fStart, fEnd, fHeight) {
         if (this.id2feat.has(fId)) {
@@ -89,6 +90,7 @@ class FeaturePacker {
             y = f2.y + f2.height
         }
         f.y = y + this.yGap
+        this.maxY = Math.max(this.maxY, f.y)
         return f.y
     }
 }
