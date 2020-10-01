@@ -234,7 +234,7 @@ export default MComponent({
   },
   created: function () {
     this.$root.$on('selection-state-changed', () => {
-      const icsi = this.facetData.map(fd => fd.name).indexOf('Is currently selected')
+      const icsi = this.facetData.map(fd => fd.name).indexOf('Feature currently selected')
       const ics = this.$refs.facets[icsi]
       if (ics.active) {
         this.$root.$emit('facet-state', this.getFacetState())
