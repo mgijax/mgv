@@ -74,18 +74,6 @@ export default MComponent({
           return `${p1} ${p2} ${p3} ${p4}`
       }
     },
-    getVisibleHighlighted () {
-      const dm = this.dataManager()
-      const pel = this.$parent.$el
-      if (!pel) return []
-      const feats = new Set()
-      pel.querySelectorAll('.feature.highlight.visible').forEach(fel => {
-        const fid = fel.getAttribute('name')
-        const f = dm.getFeatureById(fid)
-        feats.add(f)
-      })
-      return Array.from(feats)
-    },
     //
     getGraphNodes () {
       const pel = this.$parent.$el
