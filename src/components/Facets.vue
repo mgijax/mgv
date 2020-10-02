@@ -105,7 +105,7 @@ export default MComponent({
         },
         message: ""
       }, {
-        name: 'Feature currently selected',
+        name: 'Feature is selected',
         type: 'feature',
         description: 'If true and some features are currently selected, limits display to those features. Good for looking at one feature at a time. If false, removes those features from display.',
         values: [true, false, 'dont care'],
@@ -234,7 +234,7 @@ export default MComponent({
   },
   created: function () {
     this.$root.$on('selection-state-changed', () => {
-      const icsi = this.facetData.map(fd => fd.name).indexOf('Feature currently selected')
+      const icsi = this.facetData.map(fd => fd.name).indexOf('Feature is selected')
       const ics = this.$refs.facets[icsi]
       if (ics.active) {
         this.$root.$emit('facet-state', this.getFacetState())
