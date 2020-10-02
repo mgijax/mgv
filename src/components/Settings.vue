@@ -394,7 +394,6 @@ export default MComponent({
         ["ZoomRegion.spreadTranscripts",    "tx", "b"],
         ["ZoomRegion.showTranscriptLabels", "tl", "b"],
         ["ZoomRegion.showProteinLabels",    "pl", "b"],
-        ["ZoomRegion.transcriptFontSize",   "tf", "n"],
         ["ZoomRegion.showStartStopCodons",  "tc", "b"],
         ["ZoomRegion.sequenceFontSize",     "sf", "n"],
         ["ZoomFiducials.showConnectors",    "h",  "b"],
