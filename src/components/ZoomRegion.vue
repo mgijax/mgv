@@ -546,8 +546,8 @@ export default MComponent({
       if (this.showDetails && this.spreadTranscripts) {
         return 1
       } else {
-        let x = this.features.filter(f => (f.strand === null || f.strand === '+') && this.featureVisible(f)).reduce((v, f) => Math.max(v, this.lmap.get(f.ID)), 0)
-        let x2 = this.variants.filter(v => this.featureVisible(v)).reduce((vv,v) => Math.max(vv, this.lmap.get(v.ID) + 0.5), 0)
+        let x = this.features.filter(f => (f.strand === null || f.strand === '+') && this.featureVisible(f)).reduce((v, f) => Math.max(v, f.layout.lane), 0)
+        let x2 = this.variants.filter(v => this.featureVisible(v)).reduce((vv,v) => Math.max(vv, v.layout.lane + 0.5), 0)
         return Math.max(x,x2,1)
       }
     },
@@ -556,11 +556,11 @@ export default MComponent({
       let m
       if (this.showDetails && this.spreadTranscripts) {
         m = this.features.filter(f => this.featureVisible(f))
-                .reduce((v, f) => Math.max(v, this.lmap.get(f.ID) + f.transcripts.length), 0)
-        const m2 = this.variants.filter(v => this.featureVisible(v)).reduce((vv,v) => Math.max(vv, this.lmap.get(v.ID)), 0)
+                .reduce((v, f) => Math.max(v, f.layout.lane + f.transcripts.length), 0)
+        const m2 = this.variants.filter(v => this.featureVisible(v)).reduce((vv,v) => Math.max(vv, v.layout.lane), 0)
         m = Math.max(m, m2)
       } else {
-        m = 1 + this.features.filter(f => f.strand === '-' && this.featureVisible(f)).reduce((v, f) => Math.max(v, this.lmap.get(f.ID)), 0)
+        m = 1 + this.features.filter(f => f.strand === '-' && this.featureVisible(f)).reduce((v, f) => Math.max(v, f.layout.lane), 0)
       }
       return Math.max(m, 1)
     },
@@ -616,9 +616,14 @@ export default MComponent({
           this.fpx = new FeaturePacker(yGap,xGap*this.bpp)
           this.fpp = new FeaturePacker(yGap,xGap*this.bpp)
           this.fpm = new FeaturePacker(yGap,xGap*this.bpp)
+          this.fpv = new FeaturePacker(yGap,xGap*this.bpp)
+      }
+      // Returns a string's approximate base pair length when rendered with
+      // given current font size and zoom factor
+      const sBpLength = s  => {
+          return this.ppb? 0.6 * (s.length * this.featureFontSize) / this.ppb : 0
       }
       //
-      this.lmap = new Map()
       // 
       this.variants.forEach(v => {
           const glyphSize = 10
@@ -626,17 +631,11 @@ export default MComponent({
           const start = v.start - delta/2
           let lblLen = 0
           if ((this.spreadTranscripts && this.showDetails) || this.showFeatureLabels || this.featureHighlighted(v)) {
-              lblLen = 0.6 * (v.symbol.length * this.featureFontSize) / this.ppb
+              lblLen = sBpLength(v.symbol)
           }
           const end = Math.max(v.start + lblLen, v.end + delta/2)
-          const fp = this.spreadTranscripts && this.showDetails ? this.fpx : this.fpp
-          this.lmap.set(v.ID, fp.add(v.ID, start, end, 1))
+          v.layout.lane = this.fpv.add(v.ID, start, end, 1)
       })
-      // Returns a string's approximate base pair length when rendered with
-      // given current font size and zoom factor
-      const sBpLength = s  => {
-          return this.ppb? 0.6 * (s.length * this.featureFontSize) / this.ppb : 0
-      }
       //
       this.features.forEach(f => {
           let fEnd = f.end
@@ -653,7 +652,24 @@ export default MComponent({
           //
           const fp = (this.spreadTranscripts && this.showDetails) ? this.fpx : f.strand === '-' ? this.fpm : this.fpp
           const xtra = (fp === this.fpx) ? 0 : 1
-          this.lmap.set(f.ID, xtra + fp.add(f.ID, f.start, fEnd, fHeight))
+          f.layout.lane = xtra + fp.add(f.ID, f.start, fEnd, fHeight)
+      })
+      let minY = 0
+      this.variants.forEach(v => {
+          v.layout.y = -v.layout.lane * (10 + this.featureFontSize)
+          minY = Math.min(minY, v.layout.y)
+      })
+      this.features.forEach(f => {
+          const lo = f.layout.lane
+          let fy
+          if (this.showDetails && this.spreadTranscripts) {
+            fy = lo * (this.featureHeight + this.laneGap) + this.featureFontSize
+          } else if (!f.strand || f.strand === '+') {
+            fy = -lo * (this.featureHeight + this.featureFontSize) + minY
+          } else {
+            fy = (lo - 1) * (this.featureHeight + this.featureFontSize) + this.featureFontSize
+          }
+          f.layout.y = fy
       })
       this.$nextTick(() => this.$emit('region-draw', this))
     },
@@ -685,14 +701,7 @@ export default MComponent({
       return Math.max(1, (f.end - f.start + 1) * this.ppb)
     },
     featureY (f) {
-      const lo = this.lmap.get(f.ID)
-      if (this.showDetails && this.spreadTranscripts) {
-        return lo * (this.featureHeight + this.laneGap) + this.featureFontSize
-      } else if (!f.strand || f.strand === '+') {
-        return -lo * (this.featureHeight + this.featureFontSize)
-      } else {
-        return (lo - 1) * (this.featureHeight + this.featureFontSize) + this.featureFontSize
-      }
+      return f.layout.y
     },
     featureH (f) {
       if (this.showDetails && this.spreadTranscripts && f.transcripts) {

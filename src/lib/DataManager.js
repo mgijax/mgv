@@ -274,7 +274,12 @@ class DataManager {
               so_term: attrs['soTerm'],
               gEffects: attrs['genes'],
               aEffects: attrs['alleles'],
-              tEffects: attrs['transcripts']
+              tEffects: attrs['transcripts'],
+              layout: {
+                  lane: 0,
+                  y: 0,
+                  height: 0
+              }
             }
           })
       })
@@ -621,6 +626,12 @@ class FeatureRegistrar {
     // For convenience...
     f.id = f.cID || f.ID
     f.label = f.symbol || f.id
+    //
+    f.layout = {
+        lane: 0,
+        y: 0,
+        height : 0
+    }
     // For performance. Don't want to observe 10,000s of objects.
     // Vue is not reactive to frozen objects.
     Object.freeze(f)
