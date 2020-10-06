@@ -222,8 +222,8 @@ export default MComponent({
       this.busyCount -= 1
     },
     setHeight () {
-      this.allMinY = Math.min(0, Math.min.apply(null, this.$children.map(r => r.minY)))
-      this.allMaxY = Math.max(0, Math.max.apply(null, this.$children.map(r => r.maxY)))
+      this.allMinY = Math.min(0, Math.min.apply(null, this.$children.map(r => r.minY))) - 10
+      this.allMaxY = Math.max(0, Math.max.apply(null, this.$children.map(r => r.maxY))) + 10
       this.height = Math.max.apply(null, this.$children.map(r => r.height))
       this.$emit('height-changed', this)
     },
