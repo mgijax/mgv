@@ -9,8 +9,8 @@
       :key="zr.id"
       :context="context"
       :region="zr"
-      :allMaxLaneP="allMaxLaneP"
-      :allMaxLaneM="allMaxLaneM"
+      :allMinY="allMinY"
+      :allMaxY="allMaxY"
       :pad="cfg.pad"
       @region-draw="setHeight"
       @region-delete="setHeight"
@@ -138,8 +138,8 @@ export default MComponent({
       height: 60,
       dragY: 0,
       zoomY: -1, // causes new strips to add to the top of the view
-      allMaxLaneP: 0,
-      allMaxLaneM: 0,
+      allMinY: 0,
+      allMaxY: 0,
       dragging: false,
       rDragging: false,
       featureHeight: 14,
@@ -222,8 +222,8 @@ export default MComponent({
       this.busyCount -= 1
     },
     setHeight () {
-      this.allMaxLaneP = Math.max(1, Math.max.apply(null, this.$children.map(r => r.maxLaneP)))
-      this.allMaxLaneM = Math.max(1, Math.max.apply(null, this.$children.map(r => r.maxLaneM)))
+      this.allMinY = Math.min(0, Math.min.apply(null, this.$children.map(r => r.minY)))
+      this.allMaxY = Math.max(0, Math.max.apply(null, this.$children.map(r => r.maxY)))
       this.height = Math.max.apply(null, this.$children.map(r => r.height))
       this.$emit('height-changed', this)
     },

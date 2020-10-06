@@ -381,13 +381,11 @@ export default MComponent({
       type: Object,
       default: null
     },
-    // maximum maxLaneP value for all regions in my strip
-    allMaxLaneP: {
+    allMinY: {
       type: Number,
       default: 0
     },
-    // maximum maxLaneM value for all regions in my strip
-    allMaxLaneM: {
+    allMaxY: {
       type: Number,
       default: 0
     },
@@ -400,10 +398,12 @@ export default MComponent({
   data: function () {
     return {
       features: [], // the features to draw
+      variants: [], // the variants to draw
       blocks: [], // the synteny blocks to draw
       sequence: '', // the sequence to display
       seqStart: 0,
-      variants: [],
+      yMin: 0,
+      yMax: 0,
       busy: false,
       currRange: null,
       dragging: false, // true while dragging within a region
@@ -541,46 +541,13 @@ export default MComponent({
     maxBase: function () {
       return this.region.end + this.direction * this.deltaB
     },
-    // Max number of lanes above axis (plus strand)
-    maxLaneP: function () {
-      if (this.showDetails && this.spreadTranscripts) {
-        return 1
-      } else {
-        let x = this.features.filter(f => (f.strand === null || f.strand === '+') && this.featureVisible(f)).reduce((v, f) => Math.max(v, f.layout.lane), 0)
-        let x2 = this.variants.filter(v => this.featureVisible(v)).reduce((vv,v) => Math.max(vv, v.layout.lane + 0.5), 0)
-        return Math.max(x,x2,1)
-      }
-    },
-    // Max number of lanes below axis (minus strand)
-    maxLaneM: function () {
-      let m
-      if (this.showDetails && this.spreadTranscripts) {
-        m = this.features.filter(f => this.featureVisible(f))
-                .reduce((v, f) => Math.max(v, f.layout.lane + f.transcripts.length), 0)
-        const m2 = this.variants.filter(v => this.featureVisible(v)).reduce((vv,v) => Math.max(vv, v.layout.lane), 0)
-        m = Math.max(m, m2)
-      } else {
-        m = 1 + this.features.filter(f => f.strand === '-' && this.featureVisible(f)).reduce((v, f) => Math.max(v, f.layout.lane), 0)
-      }
-      return Math.max(m, 1)
-    },
     // Total height
     height: function () {
-      let h
-      if (this.showDetails && this.spreadTranscripts) {
-        h = (this.allMaxLaneP + this.allMaxLaneM) * (this.featureHeight + this.laneGap) + 2 * this.featureFontSize
-      } else {
-        h = (this.allMaxLaneP + this.allMaxLaneM) * (this.featureHeight + this.featureFontSize) + this.featureFontSize
-      }
-      return Math.max(h, this.cfg.minHeight)
+      return this.allMaxY - this.allMinY
     },
     // Y-distance from axis to top of box
     zeroOffset: function () {
-      if (this.showDetails && this.spreadTranscripts) {
-        return this.sequenceFontSize * 2 + 10
-      } else {
-        return this.allMaxLaneP * (this.featureHeight + this.featureFontSize) + this.featureFontSize
-      }
+      return -this.allMinY
     }
   },
   watch: {
@@ -654,20 +621,25 @@ export default MComponent({
           const xtra = (fp === this.fpx) ? 0 : 1
           f.layout.lane = xtra + fp.add(f.ID, f.start, fEnd, fHeight)
       })
-      let minY = 0
+      this.minY = 0
+      this.maxY = 0
       this.variants.forEach(v => {
           v.layout.y = -v.layout.lane * (10 + this.featureFontSize)
-          minY = Math.min(minY, v.layout.y)
+          this.minY = Math.min(this.minY, v.layout.y - this.featureFontSize)
       })
+      const dY = this.minY
       this.features.forEach(f => {
           const lo = f.layout.lane
           let fy
           if (this.showDetails && this.spreadTranscripts) {
             fy = lo * (this.featureHeight + this.laneGap) + this.featureFontSize
+            this.maxY = Math.max(this.maxY, fy + this.featureH(f))
           } else if (!f.strand || f.strand === '+') {
-            fy = -lo * (this.featureHeight + this.featureFontSize) + minY
+            fy = -lo * (this.featureHeight + this.featureFontSize) + dY
+            this.minY = Math.min(this.minY, fy - this.featureFontSize)
           } else {
             fy = (lo - 1) * (this.featureHeight + this.featureFontSize) + this.featureFontSize
+            this.maxY = Math.max(this.maxY, fy + this.featureH(f))
           }
           f.layout.y = fy
       })
