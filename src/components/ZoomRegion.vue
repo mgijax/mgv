@@ -566,6 +566,9 @@ export default MComponent({
         this.$nextTick(() => this.$emit('region-draw', this))
       }
     },
+    featureHeight: function () {
+      this.layout()
+    },
     featureFontSize: function () {
       this.layout()
     },
