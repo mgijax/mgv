@@ -625,21 +625,24 @@ export default MComponent({
       this.maxY = 0
       this.variants.forEach(v => {
           v.layout.y = -v.layout.lane * (10 + this.featureFontSize)
-          this.minY = Math.min(this.minY, v.layout.y - this.featureFontSize)
+          if (this.featureVisible(v)) {
+              this.minY = Math.min(this.minY, v.layout.y - this.featureFontSize)
+          }
       })
       const dY = this.minY
       this.features.forEach(f => {
           const lo = f.layout.lane
           let fy
+          let fvis = this.featureVisible(f)
           if (this.showDetails && this.spreadTranscripts) {
             fy = lo * (this.featureHeight + this.laneGap) + this.featureFontSize
-            this.maxY = Math.max(this.maxY, fy + this.featureH(f))
+            if (fvis) this.maxY = Math.max(this.maxY, fy + this.featureH(f))
           } else if (!f.strand || f.strand === '+') {
             fy = -lo * (this.featureHeight + this.featureFontSize) + dY
-            this.minY = Math.min(this.minY, fy - this.featureFontSize)
+            if (fvis) this.minY = Math.min(this.minY, fy - this.featureFontSize)
           } else {
             fy = (lo - 1) * (this.featureHeight + this.featureFontSize) + this.featureFontSize
-            this.maxY = Math.max(this.maxY, fy + this.featureH(f))
+            if (fvis) this.maxY = Math.max(this.maxY, fy + this.featureH(f))
           }
           f.layout.y = fy
       })
