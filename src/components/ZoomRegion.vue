@@ -17,20 +17,6 @@
     <g
       :transform="`translate(${myDelta},${zeroOffset})`"
       >
-      <!-- ======= synteny blocks =======
-      <g class="sblocks">
-        <rect
-         v-for="(b,i) in blocks"
-         :key="i"
-         :x="b2p(b.start)"
-         :y="-zeroOffset"
-         :width="b2p(b.end) - b2p(b.start)"
-         :height="Math.max(height, 20)"
-         :fill="b.ori === '-' ? 'red' : 'white'"
-         opacity="0.2"
-         />
-      </g>
-      -->
       <!-- ======= axis line ======= -->
       <line
         class="axis noevents"
@@ -399,7 +385,6 @@ export default MComponent({
     return {
       features: [], // the features to draw
       variants: [], // the variants to draw
-      blocks: [], // the synteny blocks to draw
       sequence: '', // the sequence to display
       seqStart: 0,
       minY: 0,
@@ -555,7 +540,7 @@ export default MComponent({
       if (newval !== oldval) this.getFeatures()
     },
     spreadTranscripts: function () {
-      this.getFeatures()
+      this.layout()
     },
     height: function () {
       this.$nextTick(() => this.$emit('region-draw', this))
@@ -572,7 +557,7 @@ export default MComponent({
       this.layout()
     },
     showFeatureLabels: function () {
-      this.getFeatures()
+      this.layout()
     }
   },
   methods: {
@@ -894,45 +879,48 @@ export default MComponent({
       //
       let delta = r.end - r.start + 1
       this.seqStart = r.start
-      this.busy = true
       this.$emit('busy-start')
-      this.blocks = []
-      this.dataManager().getGenes(r.genome, r.chr, r.start - delta, r.end + delta, this.showDetails).then(feats => {
-        this.busy = false
+      const preserveLast = this.regionManager().lastOp === "scroll"
+      const dataPromises = []
+      // Promise for the feature data
+      dataPromises.push( this.dataManager().getGenes(r.genome, r.chr, r.start - delta, r.end + delta, this.showDetails).then(feats => {
         this.features = feats.filter(f => this.getFacets().test(f, 'feature'))
-        const preserveLast = this.regionManager().lastOp === "scroll"
-        this.layout(preserveLast)
-        this.nextTick(() => {
-          this.$emit('busy-end')
-          this.$emit('region-draw', this)
-        })
-        if (this.showSequence) {
-          this.$emit('busy-start')
-          this.dataManager().getSequence(r.genome, r.chr, r.start - delta, r.end + delta).then(data => {
-            if (data) {
-              this.seqStart = r.start - delta - 1
-              this.sequence = data
-            } else {
-              this.sequence = ''
-            }
-            this.$emit('busy-end')
-          }).catch(() => {
+      }).catch( reason => {
+        u.debug("Error in Feature promise. " + reason)
+        this.features = []
+      }) )
+      // Promise for sequence string
+      if (this.showSequence) {
+        dataPromises.push( this.dataManager().getSequence(r.genome, r.chr, r.start - delta, r.end + delta).then(data => {
+          if (data) {
+            this.seqStart = r.start - delta - 1
+            this.sequence = data
+          } else {
             this.sequence = ''
-            this.$emit('busy-end')
-          })
-        } else {
+          }
+        }).catch(reason => {
+          u.debug("Error in Sequence promise. " + reason)
           this.sequence = ''
-        }
-        if (this.showDetails) {
-            this.dataManager().getVariants(r.genome, r.chr, r.start - delta, r.end + delta).then(data => {
-                this.variants = data.filter(v => this.getFacets().test(v, 'variant'))
-                this.layout(preserveLast)
-            })
-        } else {
+        }) )
+      } else {
+          this.sequence = ''
+      }
+      // Promise for variants
+      if (this.showDetails) {
+          dataPromises.push( this.dataManager().getVariants(r.genome, r.chr, r.start - delta, r.end + delta).then(data => {
+              this.variants = data.filter(v => this.getFacets().test(v, 'variant'))
+              this.layout(preserveLast)
+          }).catch(reason => {
+            u.debug("Error in Variant promise. " + reason)
             this.variants = []
-        }
-      }).catch(() => {
-        this.$emit('busy-end')
+          }) )
+      } else {
+          this.variants = []
+      }
+      // When all data promises are settled, do the layout and signal end of busy phase
+      Promise.allSettled(dataPromises).then( () => {
+          this.layout(preserveLast)
+          this.$emit('busy-end')
       })
     },
     getEventObjects (e) {
