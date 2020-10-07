@@ -131,7 +131,7 @@
           :font-size="featureFontSize"
           >{{ v.symbol }}</text>
         <text
-          v-if="featureShowLabel(v) && showTranscriptLabels && v.so_term !== 'deletion' && v.so_term !== 'delins'"
+          v-if="featureShowLabel(v) && v.so_term !== 'deletion' && v.so_term !== 'delins'"
           :x="b2p(v.start) + 7"
           :y="featureY(v) - 8"
           fill="black"
@@ -556,7 +556,6 @@ export default MComponent({
     },
     spreadTranscripts: function () {
       this.getFeatures()
-      //this.$nextTick(() => this.$emit('region-draw', this))
     },
     height: function () {
       this.$nextTick(() => this.$emit('region-draw', this))
