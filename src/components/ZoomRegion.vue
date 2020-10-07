@@ -402,8 +402,8 @@ export default MComponent({
       blocks: [], // the synteny blocks to draw
       sequence: '', // the sequence to display
       seqStart: 0,
-      yMin: 0,
-      yMax: 0,
+      minY: 0,
+      maxY: 0,
       busy: false,
       currRange: null,
       dragging: false, // true while dragging within a region
