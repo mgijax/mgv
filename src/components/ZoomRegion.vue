@@ -137,6 +137,7 @@
         :font-size="sequenceFontSize"
         fill=black
         stroke=none
+        dominant-baseline="hanging"
         >
         <!-- forward strand -->
         <tspan
@@ -483,11 +484,7 @@ export default MComponent({
       return parseInt(this.cfg.sequenceFontSize)
     },
     sequenceY: function () {
-      if (this.showDetails && this.spreadTranscripts) {
-        return -this.zeroOffset + this.sequenceFontSize
-      } else {
-        return -0.3 * this.sequenceFontSize
-      }
+      return -2 * this.sequenceFontSize
     },
     // context string. watch for changes to feature range
     cxtString: function () {
@@ -578,7 +575,7 @@ export default MComponent({
           return this.ppb? 0.6 * (s.length * this.featureFontSize) / this.ppb : 0
       }
       //
-      // 
+      // Assign variant lanes
       this.variants.forEach(v => {
           const glyphSize = 10
           const delta = this.bpp * glyphSize
@@ -590,7 +587,7 @@ export default MComponent({
           const end = Math.max(v.start + lblLen, v.end + delta/2)
           v.layout.lane = this.fpv.add(v.ID, start, end, 1)
       })
-      //
+      // Assign feature lanes
       this.features.forEach(f => {
           let fEnd = f.end
           if ((this.spreadTranscripts && this.showDetails) || this.showFeatureLabels || this.featureHighlighted(f)) {
@@ -608,15 +605,23 @@ export default MComponent({
           const xtra = (fp === this.fpx) ? 0 : 1
           f.layout.lane = xtra + fp.add(f.ID, f.start, fEnd, fHeight)
       })
+      // Assign Y coordinates
       this.minY = 0
       this.maxY = 0
+      //
+      if (this.showSequence) {
+          this.minY = -2 * this.sequenceFontSize
+      }
+      let dY = this.minY
+      // Assign variant Y
       this.variants.forEach(v => {
-          v.layout.y = -v.layout.lane * (10 + this.featureFontSize)
+          v.layout.y = -v.layout.lane * (10 + this.featureFontSize) + dY
           if (this.featureVisible(v)) {
               this.minY = Math.min(this.minY, v.layout.y - this.featureFontSize)
           }
       })
-      const dY = this.minY
+      // Assign feature Y
+      dY = this.minY
       this.features.forEach(f => {
           const lo = f.layout.lane
           let fy
@@ -705,7 +710,7 @@ export default MComponent({
         case 'deletion':
           // box
           x = this.b2p(v.start)
-          len = Math.max(this.b2p(v.end) - x, 5)
+          len = Math.max(this.b2p(v.end+1) - x, 5)
           return `m${x},${y} l0,-10 l${len},0 l0,10 Z`
 
         default:
