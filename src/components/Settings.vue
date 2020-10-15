@@ -146,7 +146,7 @@
         v-model="ZoomRegion.showStartStopCodons"
         />
   </div>
-  <!-- ============== SEQUENCES section  ============== -->
+  <!-- ============== SEQUENCES section  ==============
   <div class="section"><label>Sequences</label></div>
   <div
     title="Set the font size of displayed sequences."
@@ -160,6 +160,7 @@
         max="24"
         />
   </div>
+  -->
   <!-- ============== FIDUCIALS section  ============== -->
   <div class="section"><label>Homology Connections</label></div>
   <!-- =================== -->
@@ -171,6 +172,17 @@
     <input
         type="checkbox"
         v-model="ZoomFiducials.showConnectors"
+        />
+  </div>
+  <!-- =================== -->
+  <div
+    title="Show connectors for all visible features, not just highlighted ones."
+    class="flexrow"
+    >
+    <label>Show all connectors</label>
+    <input
+        type="checkbox"
+        v-model="ZoomFiducials.showAllConnectors"
         />
   </div>
   <!-- =================== -->
@@ -356,6 +368,10 @@ export default MComponent({
     this.$watch('ZoomRegion.featureFontSize', () => {
       const zr = this.ZoomRegion
       zr.transcriptFontSize = zr.featureFontSize - 1
+      zr.sequenceFontSize = zr.featureFontSize - 1
+    })
+    this.$watch('ZoomFiducials.showAllConnectors', () => {
+      this.$root.$emit('zoom-main-updated')
     })
   },
   computed: {
@@ -395,7 +411,6 @@ export default MComponent({
         ["ZoomRegion.showTranscriptLabels", "tl", "b"],
         ["ZoomRegion.showProteinLabels",    "pl", "b"],
         ["ZoomRegion.showStartStopCodons",  "tc", "b"],
-        ["ZoomRegion.sequenceFontSize",     "sf", "n"],
         ["ZoomFiducials.showConnectors",    "h",  "b"],
         ["ZoomFiducials.showInversions",    "hi", "b"],
         ["ZoomRegion.contrast",             "hc", "n"],
