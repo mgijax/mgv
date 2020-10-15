@@ -215,9 +215,9 @@
             :key="e.ID"
             class="exon noevents"
             :x="featureX(e)"
-            :y="isUTR(e) ? featureHeight / 4 : 0"
+            :y="isCoding(t,e) ? 0: featureHeight / 4"
             :width="featureW(e)"
-            :height="featureHeight * (isUTR(e) ? 0.5 : 1)"
+            :height="featureHeight * (isCoding(t,e) ? 1 : 0.5)"
             :fill="featureColor(f)"
             fill-opacity="0.5"
             stroke="none"
@@ -732,8 +732,8 @@ export default MComponent({
             return 'gray'
         }
     },
-    isUTR (e) {
-      return e.type && e.type.endsWith('utr')
+    isCoding (t, e) {
+      return t.cds && !(e.type && e.type.endsWith('utr'))
     },
     featureOpacity (f) {
       const nobodyHighlighted = !(this.context.currentMouseover || this.selectedSet.size || this.context.currentListSet)
