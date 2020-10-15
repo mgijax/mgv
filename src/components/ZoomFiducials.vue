@@ -78,6 +78,7 @@ export default MComponent({
     getGraphNodes () {
       const pel = this.$parent.$el
       if (!pel) return []
+      const selector = this.cfg.showAllConnectors ? '.feature.visible' : '.feature.highlight.visible'
       const clickedFeatures = []
       const boxesByStrip = []
       pel.querySelectorAll('.zoom-strip').forEach(zel => {
@@ -85,7 +86,7 @@ export default MComponent({
        boxesByStrip.push(boxes)
        zel.querySelectorAll('.zoom-region').forEach(rel => {
         const rev = rel.classList.contains('reversed')
-        rel.querySelectorAll('.feature.highlight.visible').forEach(fel => {
+        rel.querySelectorAll(selector).forEach(fel => {
           //
           if (fel.classList.contains('selected')) clickedFeatures.push(fel.getBoundingClientRect())
           //

@@ -13,7 +13,7 @@ export default {
   // Timestamp used at page load to determine whether to flush user's setting cache.
   //
   // IMPORTANT!!! You MUST update this value whenever this config file changes!!!
-  TIMESTAMP: 'Tue May 15 06:59:39 EST 2019',
+  TIMESTAMP: 'Tue May 16 06:59:39 EST 2019',
   ///////////////////////////////////////////
 
   //
@@ -133,6 +133,7 @@ export default {
   },
   ZoomFiducials: {
     showConnectors: true,
+    showAllConnectors: false,
     fillOpacity: 0.05,
     showInversions: true
   },
