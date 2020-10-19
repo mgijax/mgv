@@ -29,7 +29,7 @@
 </template>
 
 <script>
-import u from '@/lib/utils'
+// import u from '@/lib/utils'
 import MComponent from '@/components/MComponent'
 import Facet from '@/components/Facet'
 import PageBox from '@/components/PageBox'
@@ -119,6 +119,7 @@ export default MComponent({
           return false
         },
         message: ""
+      /*
       }, {
         name: 'Variant type',
         type: 'variant',
@@ -201,6 +202,7 @@ export default MComponent({
           return u.flatten(v.gEffects.map(g => g.consequence))
         },
         message: ""
+        */
       }]
     }
   },

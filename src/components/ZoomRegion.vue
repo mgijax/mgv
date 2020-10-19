@@ -100,7 +100,7 @@
         :font-weight="isCurrent ? 'bold' : 'normal'"
         :transform="`translate(${-myDelta},0)`"
         >{{coordinatesLabel}}<title>{{coordinatesLabel}}</title></text>
-      <!-- ======= Variants ======= -->
+      <!-- ======= Variants =======
       <g
         v-for="(v, vi) in variants"
         :key="'v'+vi"
@@ -129,7 +129,9 @@
             :d="variantGlyph(v)"
             :fill="variantColor(v)"
             />
-        </g> <!-- variants -->
+        </g>
+      -->
+        <!-- variants -->
       <!-- ======= sequence string ======= -->
       <text
         v-if="showSequence"
@@ -910,6 +912,7 @@ export default MComponent({
       } else {
           this.sequence = ''
       }
+      /*
       // Promise for variants
       if (this.showDetails) {
           dataPromises.push( this.dataManager().getVariants(r.genome, r.chr, r.start - delta, r.end + delta).then(data => {
@@ -922,6 +925,7 @@ export default MComponent({
       } else {
           this.variants = []
       }
+      */
       // When all data promises are settled, do the layout and signal end of busy phase
       Promise.allSettled(dataPromises).then( () => {
           this.layout(preserveLast)
