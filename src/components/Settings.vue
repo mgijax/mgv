@@ -176,17 +176,6 @@
   </div>
   <!-- =================== -->
   <div
-    title="Show connectors for all visible features, not just highlighted ones."
-    class="flexrow"
-    >
-    <label>Show all connectors</label>
-    <input
-        type="checkbox"
-        v-model="ZoomFiducials.showAllConnectors"
-        />
-  </div>
-  <!-- =================== -->
-  <div
     :title="paralogsButtonTitle"
     class="flexrow"
     :style="{ opacity: paralogsEnabled ? 1 : 0.3 }"

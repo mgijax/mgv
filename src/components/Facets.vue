@@ -71,7 +71,6 @@ export default MComponent({
         },
         message: ""
       }, {
-        /*
         name: 'Missing in some* genome',
         type: 'feature',
         description: `
@@ -90,7 +89,6 @@ export default MComponent({
         },
         message: ""
       }, {
-        */
         name: 'Feature in current list',
         type: 'feature',
         description: 'If true limits display to features in the currently selected list. If false, limits to features not in the list. Click a list in "Lists and Searches" to make it current.',
