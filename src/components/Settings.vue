@@ -99,7 +99,7 @@
   <!-- =================== -->
   <div
     class="flexrow"
-    title="Display all transcript labels when view width is below display threshold and 'Spread transcripts' is checked."
+    title="Display all transcript labels when view width is below display threshold and 'Show transcripts' is checked."
     >
     <label>Show all<sup title="When zoomed in">*</sup> labels</label>
     <input

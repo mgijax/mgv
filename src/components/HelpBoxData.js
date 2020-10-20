@@ -320,7 +320,7 @@ export default [{
           options under "Add sequences to cart." You can select genomic, transcript,
           composite transcript, or CDS sequences; you may select these sequences the current gene only or for that
           gene and its homologs. A composite transcript consists of the union of all the
-          exons of all the transcripts of a gene; these are what you see when "Spread transcripts" is off,
+          exons of all the transcripts of a gene; these are what you see when "Show transcripts" is off,
           and all transcripts for a gene are piled on top of one another.
           `
       }, {
@@ -434,7 +434,7 @@ export default [{
           size is below the details threshold.
           `
     }, {
-      label: `Spread transcripts`,
+      label: `Show transcripts`,
       text: `When checked, transcripts for a gene are spread out so they are all visible. 
           When unchecked, only shows a single "composite" transcript for each gene, for a more compact view.
           Same as using the 'x' keyboard shortcut.
@@ -453,7 +453,7 @@ export default [{
       label: `Show start/stop codons`,
       text: `When checked, marks the positions of start and stop codons. Start codons are blue triangles 
           pointing in the direction of transcription. Stop codons are red triangles pointing down.
-          When "Spread transcripts" is unchecked, only shows codong for the longest CDS. 
+          When "Show transcripts" is unchecked, only shows codong for the longest CDS. 
           `
     }, {
       heading: `Sequences. When zoomed in far enough (less than a few hundred bases), the genomic 
