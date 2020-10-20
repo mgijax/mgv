@@ -34,10 +34,10 @@
   </div>
   <!-- =================== -->
   <div
-    title="Display all feature labels when view width is below display threshold."
+    title="Shows labels for all features. When unchecked, only shows labels for selected features."
     class="flexrow"
     >
-    <label>Show all<sup title="When zoomed in">*</sup> labels</label>
+    <label>Show all labels</label>
     <input
         type="checkbox"
         v-model="ZoomRegion.showFeatureLabels"
@@ -45,7 +45,7 @@
   </div>
   <!-- =================== -->
   <div
-    title="Set the font size of displayed feature labels."
+    title="Sets the font size of displayed feature labels."
     class="flexrow"
     >
     <label>Font size</label>
@@ -58,7 +58,7 @@
   </div>
   <!-- =================== -->
   <div
-    title="Set the thickness of rectangles used to represent features."
+    title="Sets the thickness of rectangles used to represent features."
     class="flexrow"
     >
     <label>Height</label>
@@ -69,7 +69,7 @@
         max="24"
         />
   </div>
-  <!-- =================== 
+  <!-- =================== -->
   <div
     title="Set the amount of space separating feature swim lanes."
     class="flexrow"
@@ -82,7 +82,6 @@
         max="24"
         />
   </div>
-  -->
   <!-- ============== TRANSCRIPTS section  ============== -->
   <div class="section"><label>Transcripts</label></div>
   <!-- =================== -->
@@ -121,20 +120,6 @@
         :disabled="!ZoomRegion.showFeatureLabels || !ZoomRegion.showTranscriptLabels"
         />
   </div>
-  <!-- ===================
-  <div
-    class="flexrow"
-    title="Set the font size of displayed transcript labels."
-    >
-    <label>Font size</label>
-    <input
-        type="range"
-        v-model="ZoomRegion.transcriptFontSize"
-        min="1"
-        max="24"
-        />
-  </div>
-  -->
   <!-- =================== -->
   <div
     class="flexrow"
@@ -391,19 +376,20 @@ export default MComponent({
       //   type = "n" numeric; "b" boolean; "s" string
       // 
       return [
-        ["ZoomMain.stripGap",               "gg", "n"], 
-        ["ZoomRegion.detailThreshold",      "fd", "n"],
-        ["ZoomRegion.showFeatureLabels",    "fl", "b"],
-        ["ZoomRegion.featureFontSize",      "ff", "n"],
-        ["ZoomRegion.featureHeight",        "fh", "n"],
-        ["ZoomRegion.spreadTranscripts",    "tx", "b"],
-        ["ZoomRegion.showTranscriptLabels", "tl", "b"],
-        ["ZoomRegion.showProteinLabels",    "pl", "b"],
-        ["ZoomRegion.showStartStopCodons",  "tc", "b"],
-        ["ZoomFiducials.showConnectors",    "h",  "b"],
-        ["ZoomFiducials.showInversions",    "hi", "b"],
-        ["ZoomRegion.contrast",             "hc", "n"],
-        ["ZoomFiducials.fillOpacity",       "ho", "n"]
+        ["ZoomMain.stripGap",               "gg", "n"], // gap between genomes (strips)
+        ["ZoomRegion.laneGap",              "tg", "n"], // gap between transcripts
+        ["ZoomRegion.detailThreshold",      "fd", "n"], // below this range, show gene model; above, just rectangles
+        ["ZoomRegion.showFeatureLabels",    "fl", "b"], // show all feature labels
+        ["ZoomRegion.featureFontSize",      "ff", "n"], // feature font size
+        ["ZoomRegion.featureHeight",        "fh", "n"], // feature height (ie height of rectangles used to draw exons)
+        ["ZoomRegion.spreadTranscripts",    "tx", "b"], // whether to show transcripts or not
+        ["ZoomRegion.showTranscriptLabels", "tl", "b"], // whether to show transcript labels or not.
+        ["ZoomRegion.showProteinLabels",    "pl", "b"], // if true, displays protein label, if the transcript is a CDS
+        ["ZoomRegion.showStartStopCodons",  "tc", "b"], // if true, displays glyphs marking transcript start/stop sites
+        ["ZoomFiducials.showConnectors",    "h",  "b"], // if true, displays connectors between (visible) homologs
+        ["ZoomFiducials.fillOpacity",       "ho", "n"], // opacity of fill color for connectors
+        ["ZoomFiducials.showInversions",    "hi", "b"], // if true, draws inversions with a twist and in a different color
+        ["ZoomRegion.contrast",             "hc", "n"]  // amount to fade un-selected features
       ]
     }
   }

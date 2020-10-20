@@ -552,6 +552,9 @@ export default MComponent({
     featureHeight: function () {
       this.layout()
     },
+    laneGap: function () {
+      this.layout()
+    },
     featureFontSize: function () {
       this.layout()
     },
