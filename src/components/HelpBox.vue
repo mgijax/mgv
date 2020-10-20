@@ -41,6 +41,7 @@
 import MComponent from '@/components/MComponent'
 import MButton from '@/components/MButton'
 import helpData from '@/components/HelpBoxData'
+import u from "@/lib/utils"
 export default MComponent({
     name: 'HelpBox',
     inject: ['preferencesManager'],
@@ -56,6 +57,13 @@ export default MComponent({
      select: function (i) {
        this.collapsed = false
        this.selectedSection = i
+     },
+     addSection: function (name, url) {
+         const item = { name: name, description: '' }
+         this.sections.push(item)
+         u.fetch(url).then(txt => {
+           item.description = txt
+         }).catch(() => {})
      }
    },
    computed: {
@@ -69,9 +77,9 @@ export default MComponent({
          this.$parent.open()
        }
      })
+     this.addSection('Data provenance', this.app.runtimeConfig.dataUrl + '/info.html')
    }
 })
-
 </script>
 
 <style>
