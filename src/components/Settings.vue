@@ -69,19 +69,6 @@
         max="24"
         />
   </div>
-  <!-- =================== -->
-  <div
-    title="Set the amount of space separating feature swim lanes."
-    class="flexrow"
-    >
-    <label>Lane gap</label>
-    <input
-        type="range"
-        v-model="ZoomRegion.laneGap"
-        min="1"
-        max="24"
-        />
-  </div>
   <!-- ============== TRANSCRIPTS section  ============== -->
   <div class="section"><label>Transcripts</label></div>
   <!-- =================== -->
@@ -118,6 +105,19 @@
         type="checkbox"
         v-model="ZoomRegion.showProteinLabels"
         :disabled="!ZoomRegion.showFeatureLabels || !ZoomRegion.showTranscriptLabels"
+        />
+  </div>
+  <!-- =================== -->
+  <div
+    title="Set the amount of space separating transcripts of a gene."
+    class="flexrow"
+    >
+    <label>Transcript gap</label>
+    <input
+        type="range"
+        v-model="ZoomRegion.laneGap"
+        min="1"
+        max="24"
         />
   </div>
   <!-- =================== -->
