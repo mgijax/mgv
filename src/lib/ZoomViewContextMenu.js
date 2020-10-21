@@ -71,11 +71,13 @@ function getMenus(thisObj) {
         const ident = target ? target.ID : ''
         const all = whichGene === 'all'
         const allT = whichTxp === 'all'
+        const xtra = type !== 'composite transcript' ? '' :
+            ' A composite transcript is constructed for each gene by unioning the exons of its actual transcripts.'
         if (all || allT) {
           const homPart = all ? ' and homologs from all currently displayed genomes' : ''
-          return `Adds all ${type} sequences to your cart for ${f.ID}${homPart}.`
+          return `Adds all ${type} sequences to your cart for ${f.ID}${homPart}. ${xtra}`
         } else {
-          return `Adds ${type} sequence ${ident} to your cart.`
+          return `Adds ${type} sequence ${ident} to your cart. ${xtra}`
         }
       },
       disabled: cxt => {
