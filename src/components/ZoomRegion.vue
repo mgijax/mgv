@@ -643,7 +643,10 @@ export default MComponent({
           }
           f.layout.y = fy
       })
-      this.$nextTick(() => this.$emit('region-draw', this))
+      this.$nextTick(() => {
+          this.$forceUpdate()
+          this.$emit('region-draw', this)
+      })
     },
     clientXtoBase: function (x) {  
       const rx = this.$refs.underlay.getBoundingClientRect().left
