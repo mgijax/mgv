@@ -499,33 +499,36 @@ export default [{
           `
     }]
   }, {
-    name: `Shortcuts`,
-    description: `Some common commands have keyboard shortcuts. If MGV seems unresponsive to key
-        commands, try clicking in any displayed region.`,
+    name: `Key commands`,
+    description: `Some commands have keyboard shortcuts. If MGV seems unresponsive to key
+        commands, try clicking in any displayed region. Note that you do not need to hold the shift key
+        down when typing these commands.
+        `,
     items: [{
-      label: `h`,
-      text: `Open/close this help window. Same as clicking ${i('info')}.`
+      label: `H`,
+      text: `Open/close this help window. Same as clicking ${i('info')} in the page header.`
     },{
-      label: `l`,
-      text: `Same as clicking the lock icon. Turns lock on
-          (${i('lock','rgb(255, 127, 14)')}) and off (${i('lock_open')}).
+      label: `L`,
+      text: `Turns lock on
+          (${i('lock','rgb(255, 127, 14)')}) or off (${i('lock_open')}).
+          Same as clicking the lock icon.
           NOTE: when lock is turned on, the reference genome (if any) is de-selected.
           `
     },{
-      label: `n`,
-      text: `Show/don't show all gene names (when view size is below threshold). Same as clicking "Show all labels" under Settings.`
+      label: `N`,
+      text: `Show/don't show all gene names. Same as clicking "Show all labels" under Settings.`
     },{
-      label: `p`,
+      label: `P`,
       text: `Include/exclude paralogs. Same as clicking the P icon.`
     },{
-      label: `r`,
+      label: `R`,
       text: `Turn reference genome on/off. The top genome in the view is made the reference. Same as clicking the R in the genome's left end cap. NOTE: when ref genome is selected, the lock is turned off.`
     },{
-      label: `t`,
+      label: `T`,
       text: `Open/close the left-side tool panel. Same as clicking the ${i('settings')} in the page header.`
     },{
-      label: `x`,
-      text: `Collapse/expand transcript display. Same as clicking 'Spread trancripts' under  ${ref('Settings')}.`
+      label: `X`,
+      text: `Collapse/expand transcript display. Same as clicking 'Show trancripts' under  ${ref('Settings')}.`
     },{
       heading: `The following shortcuts use the arrow keys.`
     },{
@@ -540,5 +543,41 @@ export default [{
     },{
       label: `${i('arrow_downward')}`,
       text: `Zoom out. Hold the shift key down to zoom out more.`
+    }]
+  }, {
+    name: `Mouse commands`,
+    description: `Here is a quick summary of mouse actions you can perform in the ZoomView.
+        NOTE that when the scroll lock is on (${i('lock','rgb(255, 127, 14)')}), drag actions apply to all current regions.
+        `,
+    items: [{
+        label: 'Click a feature',
+        text: `Selects the feature. Hold down the shift key (shift-click) to select multiple features.`
+    },{
+        label: `Double click on background`,
+        text: `De-delects all features.`
+    },{
+        label: `Control-click a feature`,
+        text: `Opens context menu for the feature. Linkouts, download options, etc.`
+    },{
+        label: `Control-click on background`,
+        text: `Opens context menu for that region. Controls to split/remove region, reverse orientation, etc.`
+    },{
+        label: `Drag`,
+        text: `Scrolls the view. You can also use a trackpad or mouse wheel or the arrow keys.`
+    },{
+        label: `Shift-drag`,
+        text: `Zooms into that region. Dragged region fills view.`
+    },{
+        label: `Command-shift-drag`,
+        text: `Zooms out. Current view shrinks to fill dragged region.`
+    },{
+        label: `Option-drag`,
+        text: `Adds selected genomic sequence to sequence cart. If drag direction is right-to-left, sequence is reverse complemented.`
+    },{
+        label: `Option-click on background`,
+        text: `Splits the region at that point into two independently scrollable regions.`
+    },{
+        label: `Option-click on divider bar`,
+        text: `Joins the two regions on either side of the bar.`
     }]
 }]

@@ -84,7 +84,7 @@ export default MComponent({
 
 <style>
 .help-box {
-  width: 450px;
+  width: 650px;
   text-align: left;
   position: relative;
 }
@@ -94,6 +94,8 @@ export default MComponent({
 }
 .help-box .top-part {
   padding-right: 50px;
+  margin-bottom: 8px;
+  border-bottom: thin solid black;
 }
 .help-box .bottom-part {
   max-height: 500px;
