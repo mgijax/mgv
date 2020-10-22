@@ -413,24 +413,12 @@ export default MComponent({
       this.$refs.facets.$refs.facets[3].selected = true
     },
     */
-    // Toggle whether we are showing all gene labels or not.
+    // Toggle whether we are showing all feature labels or not.
     // When showing transcripts, toggles between 3 states: show gene labels,
     // show gene and transcript labels, and show no labels.
     toggleShowAllLabels: function () {
       const cfg = config.ZoomRegion
-      if (cfg.spreadTranscripts) {
-          if (cfg.showFeatureLabels) {
-            if (cfg.showTranscriptLabels) {
-              cfg.showFeatureLabels = cfg.showTranscriptLabels = false
-            } else {
-              cfg.showTranscriptLabels = true
-            }
-          } else {
-            cfg.showFeatureLabels = true
-          }
-      } else {
-          cfg.showFeatureLabels = !cfg.showFeatureLabels
-      }
+      cfg.showFeatureLabels = !cfg.showFeatureLabels
     },
     toggleSpreadTranscripts: function () {
         config.ZoomRegion.spreadTranscripts = !config.ZoomRegion.spreadTranscripts
@@ -468,7 +456,9 @@ export default MComponent({
       })
     },
     //
-    // this routine is called at initialization time or when user hit Back or Forward button
+    // This routine is called at initialization time or when user hit Back or Forward button
+    // Sets the viewer state according to cxt, which basically is a set of arguments parsed from URL #-part
+    //
     setContext: function (cxt, quietly) {
       //
       this.scrollLock =
@@ -549,10 +539,11 @@ export default MComponent({
       }
       // Set current selection from highlight ids
       p.then(() => {
+        //
         this.currentSelection = []
         // resolve current selection IDs to features
-        this.vGenomes.forEach(g => {
-          this.dataManager.ensureFeatures(g).then(() => {
+        const prs = this.vGenomes.map(g => {
+          return this.dataManager.ensureFeatures(g).then(() => {
             (cxt.currentSelection || []).forEach(ident => {
               this.dataManager.getFeaturesBy(ident).filter(f => f.genome === g).forEach(f => {
                 if (!f.cID || !this.currentSelectionSet.has(f.cID)) {
@@ -561,6 +552,12 @@ export default MComponent({
               })
             })
           })
+        })
+        Promise.all(prs).then(() => {
+            // make sure the genome order matches the order specified in the URL
+            this.$nextTick(() => {
+                this.$refs.zoomView.$refs.main.setYs('model')
+            })
         })
         if (!quietly) this.$root.$emit('context-changed')
       })
