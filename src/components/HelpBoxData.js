@@ -559,6 +559,9 @@ export default [{
         label: `Control-click a feature`,
         text: `Opens context menu for the feature. Linkouts, download options, etc.`
     },{
+        label: `Option-click a feature`,
+        text: `Centers the view around that feature and its homologs. Holding down the command key (option-command-click) scales the regions in a way that is useful when homologs are of very different sizes.`
+    },{
         label: `Control-click on background`,
         text: `Opens context menu for that region. Controls to split/remove region, reverse orientation, etc.`
     },{
