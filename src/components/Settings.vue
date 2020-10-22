@@ -1,14 +1,14 @@
 <template>
   <div class="settings flexcolumn">
   <form>
-  <!-- ============== FEATURES section  ============== -->
-  <div class="section"><label>Genomes</label></div>
+  <!-- ============== LAYOUT section  ============== -->
+  <div class="section"><label>Sizes</label></div>
   <!-- =================== -->
   <div
     title="Set the amount of space between genomes/strips"
     class="flexrow"
     >
-    <label>Gap</label>
+    <label>Genome gap</label>
     <input
         type="range"
         v-model="ZoomMain.stripGap"
@@ -16,31 +16,17 @@
         max="125"
         />
   </div>
-
-  <!-- ============== FEATURES section  ============== -->
-  <div class="section"><label>Features</label></div>
   <!-- =================== -->
   <div
-    title="Above this threshold, features are simply boxes. Below this threshold, exon structure becomes visible."
-    class="flexrow">
-    <label>Details threshold</label>
-    <input
-        min=0
-        max=10
-        step=1
-        type="number"
-        v-model="ZoomRegion.detailThreshold"
-        />Mbp
-  </div>
-  <!-- =================== -->
-  <div
-    title="Shows labels for all features. When unchecked, only shows labels for selected features."
+    title="Set the amount of space separating transcripts of a gene."
     class="flexrow"
     >
-    <label>Show all labels</label>
+    <label>Transcript gap</label>
     <input
-        type="checkbox"
-        v-model="ZoomRegion.showFeatureLabels"
+        type="range"
+        v-model="ZoomRegion.laneGap"
+        min="1"
+        max="24"
         />
   </div>
   <!-- =================== -->
@@ -61,7 +47,7 @@
     title="Sets the thickness of rectangles used to represent features."
     class="flexrow"
     >
-    <label>Height</label>
+    <label>Exon thickness</label>
     <input
         type="range"
         v-model="ZoomRegion.featureHeight"
@@ -69,8 +55,33 @@
         max="24"
         />
   </div>
-  <!-- ============== TRANSCRIPTS section  ============== -->
-  <div class="section"><label>Transcripts</label></div>
+  <!-- =================== -->
+  <div
+    title="Above this threshold, features are simply boxes. Below this threshold, exon structure becomes visible."
+    class="flexrow">
+    <label>Details threshold</label>
+    <input
+        min=0
+        max=10
+        step=1
+        type="number"
+        v-model="ZoomRegion.detailThreshold"
+        />Mbp
+  </div>
+
+  <!-- ============== FEATURES section  ============== -->
+  <div class="section"><label>Features</label></div>
+  <!-- =================== -->
+  <div
+    title="Shows labels for all features. When unchecked, only shows labels for selected features."
+    class="flexrow"
+    >
+    <label>Show all labels</label>
+    <input
+        type="checkbox"
+        v-model="ZoomRegion.showFeatureLabels"
+        />
+  </div>
   <!-- =================== -->
   <div
     title="When checked, spreads transcripts so you can see them all. When unchecked, piles them on top of one another for a compact view. In spread view, strand is indicated by arrows. In the collapsed view, strand is indicated by position above (+) or below (-) the axis line."
@@ -85,39 +96,13 @@
   <!-- =================== -->
   <div
     class="flexrow"
-    title="Display all transcript labels when view width is below display threshold and 'Show transcripts' is checked."
+    title="When showing transcript labels, show the Protein ID if the transcript is a CDS."
     >
-    <label>Show all<sup title="When zoomed in">*</sup> labels</label>
-    <input
-        type="checkbox"
-        v-model="ZoomRegion.showTranscriptLabels"
-        :disabled="!ZoomRegion.showFeatureLabels"
-        />
-  </div>
-  <!-- =================== -->
-  <div
-    class="flexrow"
-    title="For coding transcripts, show the protein ID intead of transcript id."
-    >
-    <div></div>
     <label>Show protein labels</label>
     <input
         type="checkbox"
         v-model="ZoomRegion.showProteinLabels"
-        :disabled="!ZoomRegion.showFeatureLabels || !ZoomRegion.showTranscriptLabels"
-        />
-  </div>
-  <!-- =================== -->
-  <div
-    title="Set the amount of space separating transcripts of a gene."
-    class="flexrow"
-    >
-    <label>Transcript gap</label>
-    <input
-        type="range"
-        v-model="ZoomRegion.laneGap"
-        min="1"
-        max="24"
+        :disabled="!ZoomRegion.showFeatureLabels || !ZoomRegion.spreadTranscripts"
         />
   </div>
   <!-- =================== -->
@@ -129,36 +114,25 @@
     <input
         type="checkbox"
         v-model="ZoomRegion.showStartStopCodons"
+        :disabled="!ZoomRegion.spreadTranscripts"
         />
   </div>
-  <!-- ============== SEQUENCES section  ==============
-  <div class="section"><label>Sequences</label></div>
-  <div
-    title="Set the font size of displayed sequences."
-    class="flexrow"
-    >
-    <label>Font size</label>
-    <input
-        type="range"
-        v-model="ZoomRegion.sequenceFontSize"
-        min="1"
-        max="24"
-        />
-  </div>
-  -->
-  <!-- ============== FIDUCIALS section  ============== -->
-  <div class="section"><label>Homology Connections</label></div>
   <!-- =================== -->
   <div
-    title="For selected features, show connectors between homologs."
+    title="Make highlighted features stand out more by fading unconnected features."
     class="flexrow"
     >
-    <label>Show connectors</label>
+    <label>Contrast</label>
     <input
-        type="checkbox"
-        v-model="ZoomFiducials.showConnectors"
+        type="range"
+        v-model="ZoomRegion.contrast"
+        min="0"
+        max=".9"
+        step=".1"
         />
   </div>
+  <!-- ============== FIDUCIALS section  ============== -->
+  <div class="section"><label>Homology Connections</label></div>
   <!-- =================== -->
   <div
     :title="paralogsButtonTitle"
@@ -173,6 +147,17 @@
   </div>
   <!-- =================== -->
   <div
+    title="For selected features, show connectors between homologs."
+    class="flexrow"
+    >
+    <label>Show connectors</label>
+    <input
+        type="checkbox"
+        v-model="ZoomFiducials.showConnectors"
+        />
+  </div>
+  <!-- =================== -->
+  <div
     title="Draw inversions with a twist and a different color."
     class="flexrow"
     >
@@ -180,20 +165,6 @@
     <input
         type="checkbox"
         v-model="ZoomFiducials.showInversions"
-        />
-  </div>
-  <!-- =================== -->
-  <div
-    title="Make connected features stand out more by fading unconnected features."
-    class="flexrow"
-    >
-    <label>Contrast</label>
-    <input
-        type="range"
-        v-model="ZoomRegion.contrast"
-        min="0"
-        max=".9"
-        step=".1"
         />
   </div>
   <!-- =================== -->
@@ -383,7 +354,6 @@ export default MComponent({
         ["ZoomRegion.featureFontSize",      "ff", "n"], // feature font size
         ["ZoomRegion.featureHeight",        "fh", "n"], // feature height (ie height of rectangles used to draw exons)
         ["ZoomRegion.spreadTranscripts",    "tx", "b"], // whether to show transcripts or not
-        ["ZoomRegion.showTranscriptLabels", "tl", "b"], // whether to show transcript labels or not.
         ["ZoomRegion.showProteinLabels",    "pl", "b"], // if true, displays protein label, if the transcript is a CDS
         ["ZoomRegion.showStartStopCodons",  "tc", "b"], // if true, displays glyphs marking transcript start/stop sites
         ["ZoomFiducials.showConnectors",    "h",  "b"], // if true, displays connectors between (visible) homologs

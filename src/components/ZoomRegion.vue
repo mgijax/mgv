@@ -258,7 +258,7 @@
           :transform="transcriptTransform(f, t, ti)"
           >
           <text
-            v-if="spreadTranscripts && showDetails && (showFeatureLabels && showTranscriptLabels || transcriptHighlighted(t))"
+            v-if="spreadTranscripts && showDetails && featureShowLabel(f)"
             :x="transcriptTextX(t)"
             :y="featureHeight + 2"
             font-family="sans-serif"
@@ -454,9 +454,6 @@ export default MComponent({
     },
     showFeatureLabels: function () {
       return this.cfg.showFeatureLabels
-    },
-    showTranscriptLabels: function () {
-      return this.cfg.showTranscriptLabels
     },
     showProteinLabels: function () {
       return this.cfg.showProteinLabels

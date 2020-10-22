@@ -13,7 +13,7 @@ export default {
   // Timestamp used at page load to determine whether to flush user's setting cache.
   //
   // IMPORTANT!!! You MUST update this value whenever this config file changes!!!
-  TIMESTAMP: 'Tue May 16 06:59:39 EST 2019',
+  TIMESTAMP: 'Tue May 17 06:59:39 EST 2019',
   ///////////////////////////////////////////
 
   //
@@ -108,7 +108,6 @@ export default {
     wheelTimeout: 300, // ms
     spreadTranscripts: false,
     showFeatureLabels: true,
-    showTranscriptLabels: false,
     showProteinLabels: true,
     showStartStopCodons: false,
     contrast: 0,
