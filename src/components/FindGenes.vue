@@ -15,6 +15,10 @@
       :placeholder="selection.placeholder"
       @keypress="submitOnEnter"
       />
+    <span
+       class="help-text"
+       v-html="selection.helpText"
+       ></span>
   </div>
 </template>
 
@@ -63,4 +67,7 @@ export default MComponent({
 </script>
 
 <style scoped>
+.help-text {
+    font-size: 10px;
+}
 </style>

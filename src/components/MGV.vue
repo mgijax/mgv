@@ -855,15 +855,14 @@ export default MComponent({
     //
     this.$root.$on('list-edit-new', data => {
       if (data) {
-        this.currentEditList = this.listManager.newList(data.name, data.items, data.color)
+        this.listManager.newList(data.name, data.items, data.color)
       } else {
         this.currentEditList = null
-        this.$refs.listEditor.open()
       }
     })
     //
     this.$root.$on('list-edit-newfromselected', () => {
-      this.currentEditList = this.listManager.newList("selected", this.currentSelectionToList, "#cccccc")
+      this.listManager.newList("selected", this.currentSelectionToList, "#cccccc")
     })
     //
     this.$root.$on('list-edit-open', data => {

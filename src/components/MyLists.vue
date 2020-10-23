@@ -1,6 +1,5 @@
 <template>
   <div class="my-lists">
-     <!-- List of user's lists -->
      <div class="flexcolumn">
      <!-- Create list controls -->
      <div class="flexrow">
@@ -13,12 +12,14 @@
        </select>
        <button class="gobutton" @click="clickedGo">GO</button>
      </div>
+     <!-- -->
      <find-genes
        style="width: 95%; float: right;"
        ref="findGenes"
        v-show="createMethod === 'newFromQuery'"
        />
-       <span><span style="font-size: smaller;">({{ lists.length }} list{{ lists.length === 1 ? '' : 's' }})</span></span>
+     <!-- -->
+     <span><span style="font-size: smaller;">({{ lists.length }} list{{ lists.length === 1 ? '' : 's' }})</span></span>
        <div class="flexrow"
          v-if="lists.length > 0"
          style="justify-content: space-around;cursor:pointer;max-height:12px;">
@@ -58,14 +59,14 @@ export default MComponent({
   data: function () {
     return {
       createOptions: [{
-        label: 'Create empty list',
-        value: 'newEmpty'
-      }, {
-        label: 'Create list from selection',
-        value: 'newFromSel'
-      }, {
         label: 'Create list from MouseMine search',
         value: 'newFromQuery'
+      }, {
+        label: 'Create list from selected features',
+        value: 'newFromSel'
+      }, {
+        label: 'Create empty list',
+        value: 'newEmpty'
       }],
       createMethod: 'newFromQuery',
       currentSort: {
@@ -90,9 +91,6 @@ export default MComponent({
     },
     newFromSel () {
       this.$root.$emit('list-edit-newfromselected')
-    },
-    newFromCombo () {
-      this.$root.$emit('list-edit-new')
     },
     newFromQuery () {
       this.$refs.findGenes.doSearch()

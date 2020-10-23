@@ -17,28 +17,27 @@ class MouseMineQueries {
   getQueries () {
     return [{
       name: 'Phenotype or disease',
-      label: '...by phenotype or disease',
+      label: 'Search by phenotype or disease',
       placeholder: 'Pheno/disease (MP/DO) term or IDs',
+      helpText: 'Returns IDs of mouse genes associated with specified disease/phenotypes. Find terms/IDs for <a target="_blank" href="http://www.informatics.jax.org/vocab/mp_ontology/">phenotypes</a> and <a target="_blank" href="http://www.informatics.jax.org/disease">diseases</a>.',
       handler: (val) => this.queryByPhenoDisease(val)
     }, {
       name: 'Expression',
-      label: '...by expression location',
+      label: 'Search by expression location',
       placeholder: 'Anatomy (EMAPA) terms or IDs',
+      helpText: 'Returns IDs of mouse genes with expression results in the specified tissue or anatomical structure. Find terms/IDs for <a target="_blank" href="http://www.informatics.jax.org/vocab/gxd/anatomy/EMAPA:16039">mouse anatomy</a>.',
       handler: (val) => this.queryByExpression(val)
     }, {
       name: 'Function',
-      label: '...by cellular function',
+      label: 'Search by cellular function',
       placeholder: 'Gene Ontology (GO) terms or IDs',
+      helpText: 'Returns IDs of genes associated with the specified cellular process, function, or location. Find GO terms/IDs for gene cellular <a target="_blank" href="http://www.informatics.jax.org/vocab/gene_ontology">function, process, and location.</a>.',
       handler: (val) => this.queryByFunction(val)
     }, {
-      name: 'Pathway',
-      label: '...by pathway',
-      placeholder: 'Reactome pathways names, IDs',
-      handler: (val) => this.queryByPathway(val)
-    }, {
       name: 'Symbol/ID',
-      label: '...by symbol/ID',
+      label: 'Search by symbol/ID',
       placeholder: 'MGI names, synonyms, etc.',
+      helpText: '',
       handler: (val) => this.queryByLookup(val)
     }]
   }
