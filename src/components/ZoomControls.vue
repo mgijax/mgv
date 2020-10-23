@@ -173,11 +173,9 @@ export default MComponent({
       if (e.keyCode === 13) this.findLandmark(e.target.value)
     },
     scroll (amt) {
-      this.app.scrollLock = true
       this.$root.$emit('region-change', { op: 'scroll', amt: amt, sType: "%" })
     },
     zoom (amt) {
-      this.app.scrollLock = true
       this.$root.$emit('region-change', { op: 'zoom', amt: amt })
     },
     lockClicked () {
@@ -188,18 +186,17 @@ export default MComponent({
       const fs = this.dataManager().getFeaturesBy(n)
       const fsf = fs.filter(f => this.app.vGenomes.indexOf(f.genome) !== -1)
       const f = fsf[0]
-      //const f = this.dataManager().getFeaturesBy(n).filter(f => this.app.vGenomes.indexOf(f.genome) !== -1)[0]
       if (f) {
         // user entered a valid symbol
-        this.app.scrollLock = true
         this.$root.$emit('region-change', { op : 'feature-align', feature: f })
       } else {
         // not a valid symbol. try parsing as coords.
         const c = gc.parse(n)
         if (c) {
-          this.app.scrollLock = true
+          // valid coords. 
           this.$root.$emit('region-change', { op: 'jump-to', coords: c })
         } else {
+          // No luck. Complain...
           alert('Landmark not found: ' + n)
         }
       }

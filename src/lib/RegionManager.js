@@ -308,21 +308,16 @@ class RegionManager {
   }
   //--------------------------------------
   jumpTo (coords) {
-    let strips = this.app.strips
-    if (!this.app.scrollLock) {
-      const s = this.app.strips.filter(s => s.order === 0)[0] || this.app.strips[0]
-      strips = [s]
+    let strip = this.app.strips.filter(s => s.order === 0)[0] || this.app.strips[0]
+    if (!strip) return
+    if (!this.app.rGenome) {
+      this.app.rGenome = strip.genome
     }
-    strips.forEach(s => {
-      const g = s.genome
-      const r = s.regions[0]
-      if (!r) return
-      const cc = gc.validate(coords, g, true)
-      if (!cc) return
-      s.regions.splice(1, s.regions.length - 1)
-      this.setRegion(r, cc)
-    })
+    const cc = gc.validate(coords, this.app.rGenome, true)
+    if (!cc) return
+    strip.regions = [cc]
     this.layout()
+    this.computeMappedRegions()
   }
   //--------------------------------------
   reverseRegion (r, value) {
