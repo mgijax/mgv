@@ -32,7 +32,7 @@
         ============ Gene Lists ==============
         -->
         <page-box
-          label="Lists and searches"
+          label="Gene lists"
           icon="list"
           >
           <my-lists

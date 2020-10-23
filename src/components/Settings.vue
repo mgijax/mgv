@@ -61,6 +61,7 @@
     class="flexrow">
     <label>Details threshold</label>
     <input
+        size=5
         min=0
         max=10
         step=1
@@ -76,7 +77,7 @@
     title="Shows labels for all features. When unchecked, only shows labels for selected features."
     class="flexrow"
     >
-    <label>Show all labels</label>
+    <label>Show all feature labels</label>
     <input
         type="checkbox"
         v-model="ZoomRegion.showFeatureLabels"
@@ -119,7 +120,7 @@
   </div>
   <!-- =================== -->
   <div
-    title="Make highlighted features stand out more by fading unconnected features."
+    title="Make highlighted features stand out more by fading all other features."
     class="flexrow"
     >
     <label>Contrast</label>
