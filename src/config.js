@@ -13,7 +13,7 @@ export default {
   // Timestamp used at page load to determine whether to flush user's setting cache.
   //
   // IMPORTANT!!! You MUST update this value whenever this config file changes!!!
-  TIMESTAMP: 'Tue May 17 06:59:39 EST 2019',
+  TIMESTAMP: 'Tue May 18 06:59:39 EST 2019',
   ///////////////////////////////////////////
 
   //
@@ -106,7 +106,7 @@ export default {
     detailThreshold: 3, // Mb
     detailThresholdLimit: 20, // Mb
     wheelTimeout: 300, // ms
-    showAllTranscripts: false,
+    showAllTranscripts: true,
     showFeatureLabels: true,
     showProteinLabels: true,
     showStartStopCodons: false,

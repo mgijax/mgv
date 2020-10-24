@@ -103,7 +103,6 @@
     <input
         type="checkbox"
         v-model="ZoomRegion.showProteinLabels"
-        :disabled="!ZoomRegion.showFeatureLabels"
         />
   </div>
   <!-- =================== -->
@@ -115,7 +114,6 @@
     <input
         type="checkbox"
         v-model="ZoomRegion.showStartStopCodons"
-        :disabled="!ZoomRegion.showAllTranscripts"
         />
   </div>
   <!-- =================== -->
