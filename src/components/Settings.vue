@@ -85,13 +85,13 @@
   </div>
   <!-- =================== -->
   <div
-    title="When checked, spreads transcripts so you can see them all. When unchecked, piles them on top of one another for a compact view. In spread view, strand is indicated by arrows. In the collapsed view, strand is indicated by position above (+) or below (-) the axis line."
+    title="When checked, shows all transcripts for all visible features, if view width is below the Details threshold. You have to click on a feature to see its transcripts."
     class="flexrow"
     >
-    <label>Show transcripts</label>
+    <label>Show all transcripts</label>
     <input
         type="checkbox"
-        v-model="ZoomRegion.spreadTranscripts"
+        v-model="ZoomRegion.showAllTranscripts"
         />
   </div>
   <!-- =================== -->
@@ -103,7 +103,7 @@
     <input
         type="checkbox"
         v-model="ZoomRegion.showProteinLabels"
-        :disabled="!ZoomRegion.showFeatureLabels || !ZoomRegion.spreadTranscripts"
+        :disabled="!ZoomRegion.showFeatureLabels"
         />
   </div>
   <!-- =================== -->
@@ -115,7 +115,7 @@
     <input
         type="checkbox"
         v-model="ZoomRegion.showStartStopCodons"
-        :disabled="!ZoomRegion.spreadTranscripts"
+        :disabled="!ZoomRegion.showAllTranscripts"
         />
   </div>
   <!-- =================== -->
@@ -354,7 +354,7 @@ export default MComponent({
         ["ZoomRegion.showFeatureLabels",    "fl", "b"], // show all feature labels
         ["ZoomRegion.featureFontSize",      "ff", "n"], // feature font size
         ["ZoomRegion.featureHeight",        "fh", "n"], // feature height (ie height of rectangles used to draw exons)
-        ["ZoomRegion.spreadTranscripts",    "tx", "b"], // whether to show transcripts or not
+        ["ZoomRegion.showAllTranscripts",   "tx", "b"], // whether to show all transcripts or just selected ones
         ["ZoomRegion.showProteinLabels",    "pl", "b"], // if true, displays protein label, if the transcript is a CDS
         ["ZoomRegion.showStartStopCodons",  "tc", "b"], // if true, displays glyphs marking transcript start/stop sites
         ["ZoomFiducials.showConnectors",    "h",  "b"], // if true, displays connectors between (visible) homologs

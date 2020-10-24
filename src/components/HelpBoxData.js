@@ -553,7 +553,7 @@ export default [{
         label: 'Click a feature',
         text: `Selects the feature. Hold down the shift key (shift-click) to select multiple features.`
     },{
-        label: `Double click on background`,
+        label: `Click the background`,
         text: `De-delects all features.`
     },{
         label: `Control-click a feature`,

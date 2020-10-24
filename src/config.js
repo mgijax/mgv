@@ -106,7 +106,7 @@ export default {
     detailThreshold: 3, // Mb
     detailThresholdLimit: 20, // Mb
     wheelTimeout: 300, // ms
-    spreadTranscripts: false,
+    showAllTranscripts: false,
     showFeatureLabels: true,
     showProteinLabels: true,
     showStartStopCodons: false,

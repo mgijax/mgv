@@ -27,7 +27,7 @@
         stroke="black"
         stroke-opacity="0.3"
         :transform="`translate(${-myDelta},0)`"
-        v-show="!spreadTranscripts || !showDetails"
+        v-show="!showDetails"
         />
       <!-- ======= tick marks ======= -->
       <g class="tickmarks">
@@ -197,7 +197,7 @@
           >
         <g
           class="transcript"
-          v-for="(t, ti) in spreadTranscripts ? f.transcripts : f.composite.exons ? [f.composite] : []"
+          v-for="(t, ti) in visibleTranscripts(f)"
           :key="t.ID"
           :name="t.ID"
           :transform="transcriptTransform(f, t, ti)"
@@ -210,7 +210,7 @@
             :width="featureW(t)"
             :height="featureH(t)"
             fill="white"
-            :fill-opacity="spreadTranscripts ? (transcriptHighlighted(t) ? 0.6 : 0.2) : 0"
+            :fill-opacity="showTranscripts(f) ? (transcriptHighlighted(t) ? 0.6 : 0.2) : 0"
             />
           <!-- ======= Exons ======= -->
           <rect v-for="e in t.cds ? t.cds.pieces : t.exons"
@@ -252,13 +252,13 @@
         </g>
         <!-- Transcript labels -->
         <g
-          class="transcript"
-          v-for="(t, ti) in spreadTranscripts ? f.transcripts : f.composite.exons ? [f.composite] : []"
+          class="transcript noevents"
+          v-for="(t, ti) in visibleTranscripts(f)"
           :key="t.ID+'.lbl'"
           :transform="transcriptTransform(f, t, ti)"
           >
           <text
-            v-if="spreadTranscripts && showDetails && featureShowLabel(f)"
+            v-if="showTranscripts(f) && featureShowLabel(f)"
             :x="transcriptTextX(t)"
             :y="featureHeight + 2"
             font-family="sans-serif"
@@ -449,8 +449,8 @@ export default MComponent({
     trackMouse: function () {
       return this.cfg.trackMouse
     },
-    spreadTranscripts: function () {
-      return this.cfg.spreadTranscripts
+    showAllTranscripts: function () {
+      return this.cfg.showAllTranscripts
     },
     showFeatureLabels: function () {
       return this.cfg.showFeatureLabels
@@ -535,7 +535,7 @@ export default MComponent({
     cxtString: function (newval, oldval) {
       if (newval !== oldval) this.getFeatures()
     },
-    spreadTranscripts: function () {
+    showAllTranscripts: function () {
       this.layout()
     },
     height: function () {
@@ -560,22 +560,23 @@ export default MComponent({
     }
   },
   methods: {
-    layout (preserveLast) {
+    layout () {
       // Three feature packers - one for expanded view (x), one for over/under view plus strand (p), one
       // for over/under minus strand (m).
-      const yGap = 0.2
-      const xGap = 0
-      if (!preserveLast || !this.fpx) {
-          this.fpx = new FeaturePacker(yGap,xGap*this.bpp)
-          this.fpp = new FeaturePacker(yGap,xGap*this.bpp)
-          this.fpm = new FeaturePacker(yGap,xGap*this.bpp)
-          this.fpv = new FeaturePacker(yGap,xGap*this.bpp)
-      }
+      const yGap = 0.5
+      const xGap = this.showDetails? 10 : 0
+      //
+      this.fpx = new FeaturePacker(yGap,xGap*this.bpp)
+      this.fpp = new FeaturePacker(yGap,xGap*this.bpp)
+      this.fpm = new FeaturePacker(yGap,xGap*this.bpp)
+      this.fpv = new FeaturePacker(yGap,xGap*this.bpp)
+      //
       // Returns a string's approximate base pair length when rendered with
       // given current font size and zoom factor
       const sBpLength = s  => {
           return this.ppb? 0.6 * (s.length * this.featureFontSize) / this.ppb : 0
       }
+      /*
       //
       // Assign variant lanes
       this.variants.forEach(v => {
@@ -583,16 +584,18 @@ export default MComponent({
           const delta = this.bpp * glyphSize
           const start = v.start - delta/2
           let lblLen = 0
-          if ((this.spreadTranscripts && this.showDetails) || this.showFeatureLabels || this.featureHighlighted(v)) {
+          if ((this.showAllTranscripts && this.showDetails) || this.showFeatureLabels || this.featureHighlighted(v)) {
               lblLen = sBpLength(v.symbol)
           }
           const end = Math.max(v.start + lblLen, v.end + delta/2)
           v.layout.lane = this.fpv.add(v.ID, start, end, 1)
       })
+      */
       // Assign feature lanes
       this.features.forEach(f => {
           let fEnd = f.end
-          if ((this.spreadTranscripts && this.showDetails) || this.showFeatureLabels || this.featureHighlighted(f)) {
+          const showTs = this.showTranscripts(f)
+          if (showTs || this.showFeatureLabels || this.featureHighlighted(f)) {
             // estimate label length. Find longest.
             fEnd = Math.max(fEnd, f.transcripts.reduce((a,t) => {
               const tlabel = t.cds && this.showProteinLabels ? t.cds.label : t.label
@@ -601,9 +604,9 @@ export default MComponent({
             }, f.start + sBpLength(f.symbol || f.ID)))
           }
           // height
-          const fHeight = this.spreadTranscripts && this.showDetails ? 1+f.transcripts.length : 1
+          const fHeight = Math.max(1, this.visibleTranscripts(f).length)
           //
-          const fp = (this.spreadTranscripts && this.showDetails) ? this.fpx : f.strand === '-' ? this.fpm : this.fpp
+          const fp = this.showDetails ? this.fpx : f.strand === '-' ? this.fpm : this.fpp
           const xtra = (fp === this.fpx) ? 0 : 1
           f.layout.lane = xtra + fp.add(f.ID, f.start, fEnd, fHeight)
       })
@@ -628,7 +631,7 @@ export default MComponent({
           const lo = f.layout.lane
           let fy
           let fvis = this.featureVisible(f)
-          if (this.showDetails && this.spreadTranscripts) {
+          if (this.showDetails) {
             fy = lo * (this.featureHeight + this.laneGap) + this.featureFontSize
             if (fvis) this.maxY = Math.max(this.maxY, fy + this.featureH(f))
           } else if (!f.strand || f.strand === '+') {
@@ -676,9 +679,9 @@ export default MComponent({
       return f.layout.y
     },
     featureH (f) {
-      if (this.showDetails && this.spreadTranscripts && f.transcripts) {
-        let tc = Math.max(f.transcripts.length, 1)
-        return this.featureHeight * tc + this.laneGap * (tc - 1) + this.transcriptFontSize
+      if (this.showTranscripts(f)) {
+        let tc = Math.max(this.visibleTranscripts(f).length, 1)
+        return this.featureHeight * tc + this.laneGap * (tc - 1)
       } else {
         return this.featureHeight
       }
@@ -689,6 +692,19 @@ export default MComponent({
     },
     featureColor (f) {
       return this.featureColorMap.getColor(f)
+    },
+    // Returns the transcripts to draw for the given feature
+    visibleTranscripts (f) {
+        if (f.transcripts && this.showTranscripts(f)) {
+            return f.transcripts 
+        } else if (f.composite && f.composite.exons) {
+            return [f.composite]
+        } else {
+            return []
+        }
+    },
+    showTranscripts (f) {
+        return this.showDetails && (this.showAllTranscripts || this.featureSelected(f))
     },
     variantGlyph (v) {
       let x
@@ -823,11 +839,11 @@ export default MComponent({
       return this.b2p(s)
     },
     transcriptTransform (f, t, ti) {
-      let y = this.spreadTranscripts ? ti * (this.featureHeight + this.laneGap) : 0
+      let y = this.showTranscripts(f) ? ti * (this.featureHeight + this.laneGap) : 0
       return `translate(0, ${y})`
     },
     transcriptY (f, t, i) {
-      if (this.spreadTranscripts) {
+      if (this.showAllTranscripts) {
         return this.featureY(f) + i * (this.featureHeight + this.laneGap)
       } else {
         return this.featureY(f)
@@ -863,7 +879,7 @@ export default MComponent({
       let x2 = Math.max(tx1, tx2)
       let ext = 10
       let h = 5
-      if (!this.spreadTranscripts || !f.strand) {
+      if (!this.showDetails || !f.strand) {
         return `${x1} ${y} ${x2} ${y}`
       }
       const rev = this.region.reversed
@@ -890,7 +906,6 @@ export default MComponent({
       let delta = r.end - r.start + 1
       this.seqStart = r.start
       this.$emit('busy-start')
-      const preserveLast = this.regionManager().lastOp === "scroll"
       const dataPromises = []
       // Promise for the feature data
       dataPromises.push( this.dataManager().getGenes(r.genome, r.chr, r.start - delta, r.end + delta, this.showDetails).then(feats => {
@@ -920,7 +935,7 @@ export default MComponent({
       if (this.showDetails) {
           dataPromises.push( this.dataManager().getVariants(r.genome, r.chr, r.start - delta, r.end + delta).then(data => {
               this.variants = data.filter(v => this.getFacets().test(v, 'variant'))
-              this.layout(preserveLast)
+              this.layout()
           }).catch(reason => {
             u.debug("Error in Variant promise. " + reason)
             this.variants = []
@@ -931,7 +946,7 @@ export default MComponent({
       */
       // When all data promises are settled, do the layout and signal end of busy phase
       Promise.allSettled(dataPromises).then( () => {
-          this.layout(preserveLast)
+          this.layout()
           this.$emit('busy-end')
       })
     },

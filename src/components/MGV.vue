@@ -111,7 +111,7 @@
           >
           <gene-view
             :genes="detailFeatures"
-            :spreadTranscripts="false"
+            :showAllTranscripts="false"
             ref="geneView"
             title="GeneView shows the details of a single gene."
             />
@@ -420,8 +420,8 @@ export default MComponent({
       const cfg = config.ZoomRegion
       cfg.showFeatureLabels = !cfg.showFeatureLabels
     },
-    toggleSpreadTranscripts: function () {
-        config.ZoomRegion.spreadTranscripts = !config.ZoomRegion.spreadTranscripts
+    toggleShowAllTranscripts: function () {
+        config.ZoomRegion.showAllTranscripts = !config.ZoomRegion.showAllTranscripts
     },
     toggleIncludeParalogs: function () {
       this.includeParalogs = !this.includeParalogs
@@ -642,7 +642,7 @@ export default MComponent({
       // Expand/collapse
       this.keyManager.register({
        key: 'x',
-       handler: () => this.toggleSpreadTranscripts(),
+       handler: () => this.toggleShowAllTranscripts(),
        thisObj: this
       })
       // Paralogs
