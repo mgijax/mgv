@@ -2,7 +2,7 @@
   <svg
     class="zoom-main"
     :height="height"
-    @dblclick="dblClick($event)"
+    @click="clicked($event)"
     >
     <!-- underlay -->
     <rect
@@ -78,8 +78,8 @@ export default MComponent({
     }
   },
   methods: {
-    dblClick: function () {
-      this.$root.$emit('clear-selection')
+    clicked: function (e) {
+      if (!e.shiftKey) this.$root.$emit('clear-selection')
     },
     downloadImage: function (e) {
       if (e.shiftKey) {
