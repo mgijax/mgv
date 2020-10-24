@@ -145,7 +145,7 @@ export default MComponent({
       featureHeight: 14,
       laneGap: 8,
       busyCount: 0,
-      busyMessage: 'Busy...'
+      busyMessage: 'Loading...'
     }
   },
   computed: {

@@ -31,7 +31,7 @@
         :width="r.width+2"
         :height="r.height-2"
         stroke="black"
-        opacity=0.6
+        opacity=0.3
         fill="none"
         />
     </g>
