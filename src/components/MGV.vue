@@ -421,7 +421,8 @@ export default MComponent({
       cfg.showFeatureLabels = !cfg.showFeatureLabels
     },
     toggleShowAllTranscripts: function () {
-        config.ZoomRegion.showAllTranscripts = !config.ZoomRegion.showAllTranscripts
+        config.ZoomRegion.showWhichTranscripts = (config.ZoomRegion.showWhichTranscripts + 1) % 3
+        if (config.ZoomRegion.showWhichTranscripts === 1 && this.currentSelection.length === 0) config.ZoomRegion.showWhichTranscripts = 2
     },
     toggleIncludeParalogs: function () {
       this.includeParalogs = !this.includeParalogs

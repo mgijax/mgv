@@ -449,8 +449,8 @@ export default MComponent({
     trackMouse: function () {
       return this.cfg.trackMouse
     },
-    showAllTranscripts: function () {
-      return this.cfg.showAllTranscripts
+    showWhichTranscripts: function () {
+      return this.cfg.showWhichTranscripts
     },
     showFeatureLabels: function () {
       return this.cfg.showFeatureLabels
@@ -535,7 +535,7 @@ export default MComponent({
     cxtString: function (newval, oldval) {
       if (newval !== oldval) this.getFeatures()
     },
-    showAllTranscripts: function () {
+    showWhichTranscripts: function () {
       this.layout()
     },
     height: function () {
@@ -564,7 +564,7 @@ export default MComponent({
       // Three feature packers - one for expanded view (x), one for over/under view plus strand (p), one
       // for over/under minus strand (m).
       const yGap = 0.5
-      const xGap = this.showDetails? 10 : 0
+      const xGap = this.showDetails? 12 : 0
       //
       this.fpx = new FeaturePacker(yGap,xGap*this.bpp)
       this.fpp = new FeaturePacker(yGap,xGap*this.bpp)
@@ -584,7 +584,7 @@ export default MComponent({
           const delta = this.bpp * glyphSize
           const start = v.start - delta/2
           let lblLen = 0
-          if ((this.showAllTranscripts && this.showDetails) || this.showFeatureLabels || this.featureHighlighted(v)) {
+          if ((this.showWhichTranscripts && this.showDetails) || this.showFeatureLabels || this.featureHighlighted(v)) {
               lblLen = sBpLength(v.symbol)
           }
           const end = Math.max(v.start + lblLen, v.end + delta/2)
@@ -704,7 +704,7 @@ export default MComponent({
         }
     },
     showTranscripts (f) {
-        return this.showDetails && (this.showAllTranscripts || this.featureSelected(f))
+        return this.showDetails && (this.showWhichTranscripts == 2 || this.showWhichTranscripts == 1 && this.featureSelected(f))
     },
     variantGlyph (v) {
       let x
@@ -843,7 +843,7 @@ export default MComponent({
       return `translate(0, ${y})`
     },
     transcriptY (f, t, i) {
-      if (this.showAllTranscripts) {
+      if (this.showWhichTranscripts) {
         return this.featureY(f) + i * (this.featureHeight + this.laneGap)
       } else {
         return this.featureY(f)

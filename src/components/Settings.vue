@@ -85,14 +85,15 @@
   </div>
   <!-- =================== -->
   <div
-    title="When checked, shows all transcripts for all visible features, if view width is below the Details threshold. You have to click on a feature to see its transcripts."
+    title="Which features to expand so that transcripts are shown. The X key can also be used."
     class="flexrow"
     >
-    <label>Show all transcripts</label>
-    <input
-        type="checkbox"
-        v-model="ZoomRegion.showAllTranscripts"
-        />
+    <label>Expand to show transcripts</label>
+    <select v-model="ZoomRegion.showWhichTranscripts">
+      <option :value="2">All</option>
+      <option :value="1">Selected</option>
+      <option :value="0">None</option>
+    </select>
   </div>
   <!-- =================== -->
   <div
@@ -352,7 +353,7 @@ export default MComponent({
         ["ZoomRegion.showFeatureLabels",    "fl", "b"], // show all feature labels
         ["ZoomRegion.featureFontSize",      "ff", "n"], // feature font size
         ["ZoomRegion.featureHeight",        "fh", "n"], // feature height (ie height of rectangles used to draw exons)
-        ["ZoomRegion.showAllTranscripts",   "tx", "b"], // whether to show all transcripts or just selected ones
+        ["ZoomRegion.showWhichTranscripts",   "tx", "n"], // whether to show all transcripts, just selected ones, or none
         ["ZoomRegion.showProteinLabels",    "pl", "b"], // if true, displays protein label, if the transcript is a CDS
         ["ZoomRegion.showStartStopCodons",  "tc", "b"], // if true, displays glyphs marking transcript start/stop sites
         ["ZoomFiducials.showConnectors",    "h",  "b"], // if true, displays connectors between (visible) homologs
