@@ -55,6 +55,19 @@
         max="24"
         />
   </div>
+  <!-- ============== FEATURES section  ============== -->
+  <div class="section"><label>Features</label></div>
+  <!-- =================== -->
+  <div
+    title="Shows labels for all features. When unchecked, only shows labels for selected features."
+    class="flexrow"
+    >
+    <label>Show all feature labels</label>
+    <input
+        type="checkbox"
+        v-model="ZoomRegion.showFeatureLabels"
+        />
+  </div>
   <!-- =================== -->
   <div
     title="Above this threshold, features are simply boxes. Below this threshold, exon structure becomes visible."
@@ -68,20 +81,6 @@
         type="number"
         v-model="ZoomRegion.detailThreshold"
         />Mbp
-  </div>
-
-  <!-- ============== FEATURES section  ============== -->
-  <div class="section"><label>Features</label></div>
-  <!-- =================== -->
-  <div
-    title="Shows labels for all features. When unchecked, only shows labels for selected features."
-    class="flexrow"
-    >
-    <label>Show all feature labels</label>
-    <input
-        type="checkbox"
-        v-model="ZoomRegion.showFeatureLabels"
-        />
   </div>
   <!-- =================== -->
   <div

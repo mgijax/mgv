@@ -414,8 +414,6 @@ export default MComponent({
     },
     */
     // Toggle whether we are showing all feature labels or not.
-    // When showing transcripts, toggles between 3 states: show gene labels,
-    // show gene and transcript labels, and show no labels.
     toggleShowAllLabels: function () {
       const cfg = config.ZoomRegion
       cfg.showFeatureLabels = !cfg.showFeatureLabels
