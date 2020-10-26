@@ -557,19 +557,24 @@ export default MComponent({
     },
     showFeatureLabels: function () {
       this.layout()
+    },
+    selectedSet:  function () {
+      this.layout()
     }
   },
   methods: {
-    layout () {
+    layout (preserveLast) {
       // Three feature packers - one for expanded view (x), one for over/under view plus strand (p), one
       // for over/under minus strand (m).
       const yGap = 0.5
       const xGap = this.showDetails? 12 : 0
       //
-      this.fpx = new FeaturePacker(yGap,xGap*this.bpp)
-      this.fpp = new FeaturePacker(yGap,xGap*this.bpp)
-      this.fpm = new FeaturePacker(yGap,xGap*this.bpp)
-      this.fpv = new FeaturePacker(yGap,xGap*this.bpp)
+      if (!preserveLast || !this.fpx) {
+          this.fpx = new FeaturePacker(yGap,xGap*this.bpp)
+          this.fpp = new FeaturePacker(yGap,xGap*this.bpp)
+          this.fpm = new FeaturePacker(yGap,xGap*this.bpp)
+          this.fpv = new FeaturePacker(yGap,xGap*this.bpp)
+      }
       //
       // Returns a string's approximate base pair length when rendered with
       // given current font size and zoom factor
@@ -946,7 +951,7 @@ export default MComponent({
       */
       // When all data promises are settled, do the layout and signal end of busy phase
       Promise.allSettled(dataPromises).then( () => {
-          this.layout()
+          this.layout(this.regionManager().lastOp === "scroll")
           this.$emit('busy-end')
       })
     },
