@@ -856,6 +856,7 @@ export default MComponent({
       if (data) {
         this.listManager.newList(data.name, data.items, data.color)
       } else {
+        this.listManager.newList("New list")
         this.currentEditList = null
       }
     })
