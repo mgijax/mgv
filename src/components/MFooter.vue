@@ -7,7 +7,7 @@
     <a href="http://www.informatics.jax.org" target="_blank">MGI</a>,
     <a href="http://www.mousemine.org" target="_blank">MouseMine</a>,
     <a href="https://vuejs.org/" target="_blank">Vue.js</a>,
-    <a href="https://material.io/icons/" target="_blank">Material Icons</a>
+    <a href="https://material.io/tools/icons/" target="_blank">Material Icons</a>
     </span>
     <span><a tabindex="-1" target="_blank" href="https://github.com/mgijax/mgv">MGV@GitHub</a></span>
   </div>
