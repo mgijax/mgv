@@ -25,42 +25,6 @@ export default [{
         `,
     items: []
   }, {
-    name: `Overview`,
-    description: ``,
-    items: [{
-      label: `Page Layout`,
-      text: `The page is divided into two columns of boxes.
-          The left column, which contains various tools, can be hidden or shown
-          by typing "t" (for "tools"), or by clicking the ${i('settings')} button
-          in the header.
-          The right column, containing various views, is always visible.
-          Each box can be opened/closed by clicking the "X" in its top right corner.
-          (Shift-click the "X" to open that box and close others in its column.)
-          Boxes can be repositioned vertically in their columns by dragging the grab
-          handle (${i('drag_indicator')}) in the box's top right corner.
-          `
-    }, {
-      label: `Views`,
-      text: `
-      The two main sections of the page are the ${ref('ZoomView')},
-          which shows specified chromosomal regions from one or more genomes, and the
-          ${ref('GenomeView')}, which shows all the chromosomes of a single genome.
-          The two views are synchronized. E.g., clicking on a strip in ${ref('ZoomView')}
-          refocuses ${ref('GenomeView')} to display that genome.
-          `
-    }, {
-      label: `Genomes and Regions`,
-      text: `In the ${ref('ZoomView')}, each genomic region is displayed in its own "mini browser" 
-          that can be scrolled and zoomed. The size of a region
-          ranges from a full chromosome to a few bases.
-          <p/>
-          Regions shown in the ${ref('GenomeView')} and ${ref('ZoomView')} for a given
-          genome correspond, and changes in one are reflected in the other.
-          Clicking in a genome region in the ${ref('ZoomView')} highlights the
-          corresponding region in the ${ref('GenomeView')}, and vice versa.
-          `
-    }]
-  }, {
     name: `Genomes`,
     description: `MGV lets you explore multiple regions from multiple genomes at once.
         Each region is a mini-browser, and regions can be controlled individually or in sync.
@@ -73,13 +37,13 @@ export default [{
           To see metadata for a genome, hover the mouse over the genome's name.
           To select one genome and remove all others, shift-click the box.
           Buttons at the bottom of the list provide ways to
-          select predefine sets of genomes.
+          select predefined sets of genomes.
           `
       }, {
       label: `Rearranging genomes`,
       text: `
           In the ${ref('ZoomView')}, genomes are displayed as horizontal "strips".
-          Strips (i.e. genomes) can be reordered by dragging;
+          Strips can be reordered by dragging;
           grab the center handle (<span style="font-weight: bold;">::</span>) in the left endcap 
           and drag up or down.
           You can also sort the genomes alphabetically by clicking the ${i('sort')} icon in the control area.
@@ -93,7 +57,7 @@ export default [{
           <li>The reference genome always stays at the top of the view; other genomes may still be rearranged.
           <li>The reference genome is always displayed; you cannot turn off its checkox (in ${ref('Genomes')}) while it is the reference.
           <li>To "turn off" the reference genome, click its "R" again.
-          <li>Hitting the "R" key is a quick way to turn on/off the reference genome.
+          <li>Use the R key to turn on/off the reference genome.
           </ul>
           `
       }, {
@@ -107,11 +71,13 @@ export default [{
       text: `Adding a genome creates a new region.
           To add another region for the same genome, shift-drag on a chromosome in the GenomeView.
           Alternatively, split an existing region, then navigate one side to the desired location.
+          To navigate a single region, control-click its background, then use the dialog box.
           `
       }, {
       label: `Aligning regions around a gene`,
-      text: `To center all the views around a gene (and turn on ${i('lock')}), alt-click 
-          on the gene, or select "Align on this gene" from the gene's popup menu, or search for the gene 
+      text: `To center all displayed genomes around a gene and its homologs (and turn on ${i('lock')}), 
+          alt-click (option-click) 
+          on the gene, or select "Align on this gene" from the gene's context menu menu, or search for the gene 
           via the Find box. If the gene has paralogs, they are/are not included in this operation depending whether 
           the paralogs toggle ("P") is on or off, respectively.
           `
@@ -119,7 +85,7 @@ export default [{
       label: `Region controls`,
       text: `To access controls for an individual region within a genome,
           right-click on its background (not on a feature).
-          Changes made here affect only that region (and switch to ${i('lock_open')} mode).
+          Changes made here affect only that region.
           `
       }, {
       label: `Splitting a region`,
@@ -154,12 +120,18 @@ export default [{
     }]
   }, {  
     name: `Modes`,
-    description: `MGV has three modes which determine how the displayed regions are calculated and how actions synchronize (or not). Transitions between modes are designed to be fluid and natural.
+    description: `MGV has three modes which determine how the displayed regions are calculated and how actions synchronize (or not).
       `,
     items: [{
       label: `Reference`,
       text: `
-       <span style="color: white; background-color: rgb(255, 127, 14); width: 16px;">&nbsp;R&nbsp;</span> One genome is chosen as the reference. Coordinates are specified for the reference; coordinates for all other genomes are calculated. Navigating in the reference genome causes all other genomes to update. To make a genome the reference, click on the R in its left end cap. Alternativelty, typing 'R' makes the genome at the top of the display the reference. Clicking or typing R again turns off reference mode.
+       <span style="color: white; background-color: rgb(255, 127, 14); width: 16px;">&nbsp;R&nbsp;</span> 
+       One genome is chosen as the reference. The regions displayed for all other genomes depend on the reference, 
+       such that all homologs of all genes in the reference region(s) are displayed.
+       Navigating in the reference genome causes all other genomes to update. To 
+       make a genome the reference, click on the R in its left end cap. Alternativelty, typing 'R' makes the 
+       genome at the top of the display the reference. Clicking or typing R again turns off reference mode.
+       Finally, entering coordinates in the Find box automatically makes the top genome the reference.
       `
     }, {
       label: `Lockstep`,
@@ -177,7 +149,7 @@ export default [{
     name: `Homologs`,
     description: `
       MGV uses homology relationships to draw connections, to calculate what regions to display, 
-      and other stuff. There are three kinds of homology relationships:
+      and other stuff. MGV distinguishes three kinds of homology relationships:
       <ol>
       <li>Orthologs. Homology assertions between genes of different species come from the 
       Alliance of Genome Resources (stringent set).
@@ -185,8 +157,8 @@ export default [{
       from common orthology. Inference of paralogs depends on the set of species you are viewing and is 
       calculated on the fly. You can control whether or not inferred paralogs are used by
       clicking the <span style="color: rgb(255, 127, 14); font-weight: bold;">P</span> icon in the control area next to the Find box.
-      <li>Genologs. Assertions of gene equivalence across genomes within a species (eg, 
-      the annotated mouse strains) is accomplished by shared canonical identifier (MGI id).
+      <li>Genologs. Assertions of gene equivalence across genomes within a species
+      is accomplished by shared canonical identifiers, eg, MGI ids for the annotated inbred strains.
       </ol>
        `,
     items: [{
@@ -207,7 +179,7 @@ export default [{
     }]
   }, {  
     name: `Navigation`,
-    description: `The following commands all apply to the ${ref('ZoomView')}.`,
+    description: ``,
     items: [{
       label: `Jump to a gene`,
       text: `Enter the gene symbol or ID in the Find input box at the top of
@@ -222,7 +194,7 @@ export default [{
             `
     }, {
       label: `Specify coordinates`,
-      text: `Type or paste coordinates in the Find box. Use the format chr:start..end, e.g., "2:105641053..105726252". Then hit enter or tab.
+      text: `Type or paste coordinates in the Find box. Use the format chr:start..end, e.g., "2:105641053..105726252". Then hit enter or tab. The coordinates apply to the top displayed genome, which also becomes the reference; other genomes' coordinates are then derived.
             `
     }, {
       label: `Scroll`,
@@ -235,9 +207,9 @@ export default [{
     }, {
       label: `Zoom`,
       text: `
-          Zoom by shift-dragging (for zoom in) or command-dragging (for zoom out) over the region you're interested in. 
-          For zooming in, the dragged region expands to fill view, and for zooming out, the current view shrinks into the dragged region.
-          Both actions actually involve scrolling as well as zooming.
+          Zoom by shift-dragging (for zoom in) or command-dragging (for zoom out) over part of a region. 
+          For zooming in, the dragged region expands to fill the view, and for zooming out, the current 
+          view shrinks to fill the dragged area.
           <br/>
           You can do centered zooming by clicking the ${i('zoom_in')} and ${i('zoom_out')} buttons, or by
           hitting the ${i('arrow_upward')} and ${i('arrow_downward')} keys.
@@ -255,7 +227,7 @@ export default [{
       text: `
        When a filter is "on", ${i('warning', 'rgb(255, 127, 14)')} is shown in the ${ref('ZoomView')} header to remind
        you of that fact.  You can click on this icon to turn off all filters.
-       The same icon is diaplayed on each filter that is currently active; click these icons to turn off individual filters.
+       The same icon is displayed on each filter that is currently active; click these icons to turn off individual filters.
 	  `
     }, {
       label: `True/False filters`,
@@ -305,7 +277,7 @@ export default [{
     description: `You can select sequences and download them in FASTA format or copy them to the clipboard.
         The ${ref('SequenceCart')} contains (descriptors of) sequences that you select plus
         controls for downloading. Actual sequences are not materialized until download
-        time, so large(-ish) sequences are ok. If you want whole chromosomes, though,
+        time, so the SequenceCart itself takes little space. If you want whole chromosomes, though,
         you should go to <a href="ftp://ftp.ensembl.org/pub/" target="_blank">Ensembl</a>.
         `,
     items: [{
@@ -351,17 +323,18 @@ export default [{
           click the ${i('delete','red')} button.`
     }]
   }, {
-    name: `Lists and searches`,
-    description: `You can create and display lists of genes. Your current lists plus controls for creating new lists are
-        available under ${ref('Lists and searches')}. You can create lists by selecting specific
-        genes, by entering a list of symbols or IDs, by searching a disease, phenotype or other category,
-        or by combining other lists.
-        <span style="color: red;">Note that lists created by searching are currently limited to mouse only.</span>
+    name: `Gene lists`,
+    description: `You can create and display lists of genes (actually, gene IDs).
+        Your current lists plus controls for creating new lists are
+        available under ${ref('Gene lists')}. You can create lists by selecting specific
+        genes, by entering a list of symbols or IDs, or by searching a disease, phenotype or other category.
+        <span style="color: red;">Note that lists created by searching are limited to mouse only.</span>
         `,
     items: [{
-      label: `Create by search`,
-      text: `Under Create, choose a category (e.g. "...by phenotype or disease"), enter a term
-          (e.g. "Parkinson") and click the "GO" button. The results are shown as a new list entry under MyLists.
+      label: `Create from MouseMine search`,
+      text: `Under Create, choose a category (e.g. "Search by phenotype or disease"), enter a term
+          (e.g. "Parkinson") and click the "GO" button. Links to appropriate browsers are displayed for each category to
+          assist in finding appropriate search terms/IDs. The results are shown as a new list entry.
           If your category term retured no or unexpected results, check 
           <a href="http://www.mousemine.org/" target="_blank">MouseMine</a> for term usage.
           `
@@ -371,18 +344,6 @@ export default [{
           than one. Then, under Create, select "New list from ZoomView selection" and click the "GO" button.
           The new list is given a default name and color, which you can change.
 	  `
-      }, {
-      label: `Create by combining`,
-      text: `Example: you have lists A and B and you want to create C containing the genes common to
-          both. (1) Under Create, select "New list from combining lists", and click "GO". The ${ref('ListEditor')} appears.
-	  (2) Drag list A from MyLists onto the ${ref('ListEditor')} items area.
-          (3) Drag list B onto the set intersection area. (Neighboring areas support intersection and difference.)
-          (4) Click the Create button at the bottom of the ${ref('ListEditor')} to generate
-          the set of intersection genes, which are also displayed in the ${ref('GenomeView')}.
-          <p/>
-          You can also combine a list with the current selection by clicking on one of the operator areas.
-          Example: to add the current selection to a list, click the union area.
-          `
       }, {
       label: `Display a list`,
       text: `Click on the list under MyLists. The positions of all list items (up to a max size) are shown
@@ -407,78 +368,107 @@ export default [{
       text: `Click on the ${i('highlight_off')} button for that list.`
     }]
   }, {
+    name: `Page layout`,
+    description: ``,
+    items: [{
+      label: `Page Layout`,
+      text: `The page is divided into two columns of boxes.
+          The left column, which contains various tools, can be hidden or shown
+          by typing "t" (for "tools"), or by clicking the ${i('settings')} button
+          in the header.
+          The right column, containing various views, is always visible.
+          Each box can be opened/closed by clicking the "X" in its top right corner.
+          (Shift-click the "X" to open that box and close others in its column.)
+          Boxes can be repositioned vertically in their columns by dragging the grab
+          handle (${i('drag_indicator')}) in the box's top right corner.
+          `
+    }, {
+      label: `Views`,
+      text: `
+      The two main sections of the page are the ${ref('ZoomView')},
+          which shows specified chromosomal regions from one or more genomes, and the
+          ${ref('GenomeView')}, which shows all the chromosomes of a single genome.
+          The two views are synchronized. E.g., clicking on a strip in ${ref('ZoomView')}
+          refocuses ${ref('GenomeView')} to display that genome.
+          `
+    }, {
+      label: `Genomes and Regions`,
+      text: `In the ${ref('ZoomView')}, each genomic region is displayed in its own "mini browser" 
+          that can be scrolled and zoomed. The size of a region
+          ranges from a full chromosome to a few bases.
+          <p/>
+          Regions shown in the ${ref('GenomeView')} and ${ref('ZoomView')} for a given
+          genome correspond, and changes in one are reflected in the other.
+          Clicking in a genome region in the ${ref('ZoomView')} highlights the
+          corresponding region in the ${ref('GenomeView')}, and vice versa.
+          `
+    }]
+  }, {
     name: `Settings`,
     description: `Under ${ref('Settings')} are numerous parameters you can change to customize the display. At any point,
         you can also download the current display as a png or svg (click the ${i('camera_alt')} icon).`,
     items: [{
+      heading: `Sizes`
+    }, {
+      label: `Genome gap`,
+      text: `Changes the amount of space separating the genomes (horizontal strips).`
+    }, {
+      label: `Transcript gap`,
+      text: `Changes the amount of space separating the transcripts within a gene.`
+    }, {
+      label: `Font size`,
+      text: `Sets the size of the font used for gene and transcript labels.`
+    }, {
+      label: `Exon thickness`,
+      text: `Sets the height of the rectangles used to draw features.`
+
+
+
+
+    }, {
       heading: `Features`
+    }, {
+      label: `Show all feature labels`,
+      text: `When checked and view region is below the details threshold, displays labels for all 
+          visible genes and transcripts. When unchecked or when view region is above the threshold, labels are
+          displayed only for highlighted genes. Keyboard shortcut: N.
+          `
     }, {
       label: `Details threshold`,
       text: `When the view region is below this size, the details of gene model structure become visible. 
           Above this size, genes are simply drawn as boxes. Higher values use more memory.
           `
     }, {
-      label: `Show all labels`,
-      text: `When checked and view region is below the details threshold, displays labels for all 
-          visible genes. When unchecked or when view region is above the threshold, labels are
-          displayed only for highlighted genes. Keyboard shortcut: n.
+      label: `Expand to show transcripts`,
+      text: `
+          When view width is below the Details threshold, transcript structure becomes visible.
+          This selector controls which genes are "expanded" so that all transcripts are visible.
+          Same as using the 'X' keyboard shortcut.
           `
     }, {
-      label: `Font size`,
-      text: `Sets the size of the font used for gene labels.`
-    }, {
-      label: `Height`,
-      text: `Sets the height of the rectangles used to draw features.`
-    }, {
-      heading: `Transcripts. Note that transcripts are only visible when the view region 
-          size is below the details threshold.
-          `
-    }, {
-      label: `Show transcripts`,
-      text: `When checked, transcripts for a gene are spread out so they are all visible. 
-          When unchecked, only shows a single "composite" transcript for each gene, for a more compact view.
-          Same as using the 'x' keyboard shortcut.
-          If "Show start/stop codons" is checked, blue and red triangles (respectively) are displayed for each CDS.
-          The compact view shows only the longest CDS.
-          `
-    }, {
-      label: `Show all labels`,
-      text: `When checked, and transcripts are spread, displays labels for all visible transcripts. 
-          Not recommended unless you're pretty far zoomed in.
-          `
-    }, {
-      label: `Font size`,
-      text: `Sets the size of the font for transcript labels.`
+      label: `Show protein labels`,
+      text: `When checked, the label for a displayed CDS is its protein ID. Otherwise, the transcript id.`
     }, {
       label: `Show start/stop codons`,
-      text: `When checked, marks the positions of start and stop codons. Start codons are blue triangles 
-          pointing in the direction of transcription. Stop codons are red triangles pointing down.
-          When "Show transcripts" is unchecked, only shows codong for the longest CDS. 
+      text: `When checked, marks the positions of start and stop codons with blue and red triangles, respectively.
           `
-    }, {
-      heading: `Sequences. When zoomed in far enough (less than a few hundred bases), the genomic 
-          sequence is displayed.
-          `
-    }, {
-      label: `Font size`,
-      text: `Size of the font used to draw the sequence letters.`
-    }, {
-      heading: `Homology Connections`
-    }, {
-      label: `Show connectors`,
-      text: `When checked, connectors are drawn joining highlighted genes across genomes.`
-    }, {
-      label: `Include paralogs`,
-      text: `Same as clicking the P icon in the view area. Controls whether paralogs are (on) or are not (off) included in region calculations, connector drawing, etc.
-      `
-    }, {
-      label: `Highlight inversions`,
-      text: `If on, connectors between features on opposite strands ('inversions') in red and with a twist.
-      `
     }, {
       label: `Contrast`,
       text: `Fades non-selected features to make the selected feature stand out.
           `
+    }, {
+      heading: `Homology Connections`
+    }, {
+      label: `Infer paralogs`,
+      text: `Same as clicking the P icon in the view area. Controls whether paralogs are (on) or are not (off) included in region calculations, connector drawing, etc.
+      `
+    }, {
+      label: `Show connectors`,
+      text: `When checked, connectors are drawn joining highlighted genes across genomes.`
+    }, {
+      label: `Highlight inversions`,
+      text: `If on, connectors between features on opposite strands ('inversions') in red and with a twist.
+      `
     }, {
       label: `Fill opacity`,
       text: `Sets the opacity of the connector fill area.`
@@ -516,7 +506,7 @@ export default [{
           `
     },{
       label: `N`,
-      text: `Show/don't show all gene names. Same as clicking "Show all labels" under Settings.`
+      text: `Show/don't show all feature labels. Same as clicking "Show all feature labels" under Settings.`
     },{
       label: `P`,
       text: `Include/exclude paralogs. Same as clicking the P icon.`
@@ -528,7 +518,7 @@ export default [{
       text: `Open/close the left-side tool panel. Same as clicking the ${i('settings')} in the page header.`
     },{
       label: `X`,
-      text: `Collapse/expand transcript display. Same as clicking 'Show trancripts' under  ${ref('Settings')}.`
+      text: `Cycle through the values (none/selected/all) specifying which transcripts to display. Same as 'Expand to show transcripts' under Settings.`
     },{
       heading: `The following shortcuts use the arrow keys.`
     },{

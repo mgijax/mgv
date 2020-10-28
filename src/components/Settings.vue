@@ -70,9 +70,9 @@
   </div>
   <!-- =================== -->
   <div
-    title="Above this threshold, features are simply boxes. Below this threshold, exon structure becomes visible."
+    title="When viewing a region smaller than the threshold (ie, when zoomed in), gene structure is visible. When zoomed out, genes are simply boxes."
     class="flexrow">
-    <label>Details threshold</label>
+    <label>Details threshold (Mbp)</label>
     <input
         size=5
         min=0
@@ -80,7 +80,7 @@
         step=1
         type="number"
         v-model="ZoomRegion.detailThreshold"
-        />Mbp
+        />
   </div>
   <!-- =================== -->
   <div
