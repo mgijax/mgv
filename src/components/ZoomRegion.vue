@@ -567,7 +567,7 @@ export default MComponent({
       // Three feature packers - one for expanded view (x), one for over/under view plus strand (p), one
       // for over/under minus strand (m).
       const yGap = 0.5
-      const xGap = this.showDetails? 12 : 0
+      const xGap = this.showDetails? 20 : 0
       //
       if (!preserveLast || !this.fpx) {
           this.fpx = new FeaturePacker(yGap,xGap*this.bpp)
