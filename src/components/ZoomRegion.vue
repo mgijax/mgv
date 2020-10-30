@@ -1001,11 +1001,6 @@ export default MComponent({
     },
     clicked: function (e) {
       this.$root.$emit('region-current', { region: this.region })
-      if (this.absorbNextClick) {
-        e.stopPropagation()
-        this.absorbNextClick = false
-        return
-      }
       if (e.altKey) {
         this.altClicked(e)
         return
