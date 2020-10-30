@@ -292,7 +292,7 @@ export default MComponent({
     }
 
   },
-  mounted: function () {
+  created: function () {
     this.$root.$on('sequence-selected', rs => {
       rs.unselectAll && this.unselectAll()
       rs.sequences.forEach(r => this.add(r))
@@ -303,8 +303,12 @@ export default MComponent({
         this.$root.$emit('message', { message: `Added ${rs.sequences.length} sequences to cart` })
       }
     })
-    this.kstore = new KeyStore(this.cfg.dbName)
-    this.restore()
+    this.$root.$once('mgv-initialized', () => {
+        // have to wait til MGV is initialized before restoring sequences because we
+        // need to be able to resolve genome names.
+        this.kstore = new KeyStore(this.cfg.dbName)
+        this.restore()
+    })
   }
 })
 </script>

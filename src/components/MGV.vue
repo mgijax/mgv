@@ -451,7 +451,9 @@ export default MComponent({
         const ih = u.deepCopy(this.historyManager.initialHash)
         ih.width = u.wWidth()
         // console.log('MGV: setting initial context', ih)
-        this.setContext(ih, true)
+        this.setContext(ih, true).then(() => {
+            this.$root.$emit('mgv-initialized')
+        })
       })
     },
     //
@@ -537,7 +539,7 @@ export default MComponent({
         p = this.regionManager.initializeRegions(strips) 
       }
       // Set current selection from highlight ids
-      p.then(() => {
+      return p.then(() => {
         //
         this.currentSelection = []
         // resolve current selection IDs to features
@@ -552,13 +554,13 @@ export default MComponent({
             })
           })
         })
-        Promise.all(prs).then(() => {
+        return Promise.all(prs).then(() => {
             // make sure the genome order matches the order specified in the URL
             this.$nextTick(() => {
                 this.$refs.zoomView.$refs.main.setYs('model')
             })
+            if (!quietly) this.$root.$emit('context-changed')
         })
-        if (!quietly) this.$root.$emit('context-changed')
       })
     },
     unAlign: function () {
