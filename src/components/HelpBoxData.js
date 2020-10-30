@@ -14,7 +14,7 @@ export default [{
         related genomes, download corresponding sequence regions, display lists of genes, and 
         other functions.
         <p/>
-        To open/close this Help at any time, click the ${i('info')} button in the page header, or type 'h'.
+        To open/close this Help at any time, click the ${i('info')} button in the page header, or type 'H'.
         This popup provides basic help.
         For more details see:
         <a href="http://www.informatics.jax.org/userhelp/MGV_help.shtml" target="_blank">MGV help doc at MGI</a>

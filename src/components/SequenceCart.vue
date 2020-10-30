@@ -30,9 +30,10 @@
          :disabled="cartEmpty"
          />
 
-       <!-- spacer -->
+       <!-- Selected count and length  -->
        <div style="flex-grow: 1;"></div>
        <span style="font-size: 12px;">{{selectedLengthLabel}}</span>
+       <span v-if="warningMessage" class="warning"><i class="material-icons" :title="warningMessage">warning</i></span>
        <div style="flex-grow: 1;"></div>
 
        <!-- Delete selected button -->
@@ -60,7 +61,7 @@
                <m-button
                  icon="cloud_download"
                  title="Download selected sequences to a file. Enter file name."
-                 @click="downloadToFile"
+                 @click="downloadTo('file')"
                  :disabled="nothingSelected || noFileName"
                  />
                <label>File</label>
@@ -76,7 +77,7 @@
                <m-button
                  icon="cloud_download"
                  title="Download selected sequences to a new browser tab."
-                 @click="downloadToBrowser"
+                 @click="downloadTo('browser')"
                  :disabled="nothingSelected"
                  />
                <label>Browser</label>
@@ -86,7 +87,7 @@
                <m-button
                  icon="cloud_download"
                  title="Copy selected sequences to the clipboard."
-                 @click="downloadToClipboard"
+                 @click="downloadTo('clipboard')"
                  :disabled="nothingSelected"
                  v-show="!cbText"
                  />
@@ -143,6 +144,18 @@ export default MComponent({
     selected () {
       return this.cart.filter(item => item.selected)
     },
+    selectedCount () {
+      return this.selected.length
+    },
+    warningMessage () {
+      if (this.selectedCount > this.cfg.maxDownloadCount) {
+        return `Selected items exceed maximum download count of ${this.cfg.maxDownloadCount}.`
+      } else if (this.selectedLength > this.cfg.maxDownloadLength) {
+        return `Selected items exceed maximum download size of ${u.prettyPrintBases(this.cfg.maxDownloadLength)}.`
+      } else {
+        return ''
+      }
+    },
     selectedLength () {
       return this.selected.reduce((a,v) => a + v.totalLength, 0)
     },
@@ -193,16 +206,33 @@ export default MComponent({
     unselectAll: function () {
       this.cart.forEach(item => {item.selected = false})
     },
-    downloadToFile: function () {
+    downloadTo: function (where) {
       if (this.nothingSelected) return
+      if (this.warningMessage) {
+        this.app.logEvent('DownloadSequence', 'BLOCKED', this.selectedLength)
+        alert(this.warningMessage + ' Please deselect some sequences and try again.')
+        return
+      }
+      this.app.logEvent('DownloadSequence', where, this.selectedLength)
+      switch(where) {
+      case 'file':
+          this.downloadToFile()
+          break
+      case 'clipboard':
+          this.downloadToClipboard()
+          break
+      case 'browser':
+          this.downloadToBrowser()
+          break
+      }
+    },
+    downloadToFile: function () {
       this.descriptors = JSON.stringify(this.selected)
       this.$nextTick(() => {
           this.$refs.sequenceDownloadForm.submit()
       })
-      this.app.logEvent('DownloadSequence', 'file', this.selectedLength)
     },
     downloadToClipboard: function () {
-      if (this.nothingSelected) return
       this.dataManager().getSequences(this.selected).then(text => { this.cbText = text })
     },
     downloadToClipboardPt2: function () {
@@ -213,17 +243,14 @@ export default MComponent({
       document.execCommand("copy");
       document.body.removeChild(dummy);
       this.cbText = ''
-      this.app.logEvent('DownloadSequence', 'clipboard', this.selectedLength)
     },
     cancelClipboard: function () {
       this.cbText = ''
     },
     downloadToBrowser: function () {
-      if (this.nothingSelected) return
       this.dataManager().getSequences(this.selected).then(text => {
         const w = window.open("","_blank")
         w.document.write('<pre>', text, '</pre>')
-        this.app.logEvent('DownloadSequence', 'browser', this.selectedLength)
       })
     },
     viewFetched: function () {
@@ -297,5 +324,10 @@ export default MComponent({
 }
 .download-option > * {
   margin-left: 12px;
+}
+.warning .material-icons {
+   font-size:12px;
+   color: #ff9800;
+   cursor: pointer;
 }
 </style>
