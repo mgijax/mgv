@@ -543,7 +543,7 @@ export default MComponent({
     },
     showDetails: function(newval, oldval) {
       if (newval !== oldval) {
-        this.$nextTick(() => this.$emit('region-draw', this))
+        this.getFeatures()
       }
     },
     featureHeight: function () {
