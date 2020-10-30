@@ -1,5 +1,4 @@
 {
-    "xataUrl" : "./mgv_web_data/",
-    "dataUrl" : "http://proto.informatics.jax.org/prototypes/mgv_data/",
+    "dataUrl" : "./mgv_web_data/",
     "exitUrl": "http://www.informatics.jax.org"
 }
