@@ -22,6 +22,9 @@ export default [{
         Help is also available from MGI User Support via <a href="mailto:mgi-help@jax.org">email</a>, online 
         <a href="http://www.informatics.jax.org/mgihome/support/mgi_inbox.shtml" target="_blank">form</a>, 
         or phone (207-288-6445).
+        <p/>
+        MGV has been tested on MacOS 10.15.6 (Catalina) with these browsers:
+        Chrome version 85, Safari version 14, and FireFox version 79.
         `,
     items: []
   }, {
@@ -544,7 +547,7 @@ export default [{
         text: `Selects the feature. Hold down the shift key (shift-click) to select multiple features.`
     },{
         label: `Click the background`,
-        text: `De-delects all features.`
+        text: `Unselects all features.`
     },{
         label: `Control-click a feature`,
         text: `Opens context menu for the feature. Linkouts, download options, etc.`

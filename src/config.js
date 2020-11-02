@@ -13,7 +13,7 @@ export default {
   // Timestamp used at page load to determine whether to flush user's setting cache.
   //
   // IMPORTANT!!! You MUST update this value whenever this config file changes!!!
-  TIMESTAMP: 'Tue May 22 06:59:39 EST 2019',
+  TIMESTAMP: 'Tue May 23 06:59:39 EST 2019',
   ///////////////////////////////////////////
 
   //
@@ -156,8 +156,8 @@ export default {
   },
   SequenceCart: {
     dbName: DATACACHE_PREFIX + 'user-seqs',
-    maxDownloadCount: 25,
-    maxDownloadLength: 1000000
+    maxDownloadCount: 4000,
+    maxDownloadLength: 100000000
   },
   DataManager: {
     featureSizeLimit: 10000000
