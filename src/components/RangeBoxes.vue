@@ -249,6 +249,7 @@ export default MComponent({
       }
 
       d.vms.forEach(vm => vm.regionScrollDelta = 0)
+      if (!d.wheeled) d.vm.absorbNextClick = true
       this.dragData = null
       this.dragging = false
       this.boxes = []

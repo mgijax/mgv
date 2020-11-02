@@ -1001,6 +1001,11 @@ export default MComponent({
     },
     clicked: function (e) {
       this.$root.$emit('region-current', { region: this.region })
+      if (this.absorbNextClick) {
+        e.stopPropagation()
+        this.absorbNextClick = false
+        return
+      }
       if (e.altKey) {
         this.altClicked(e)
         return
@@ -1053,7 +1058,8 @@ export default MComponent({
             startX: e.clientX,
             startY: e.clientY,
             deltaX: 0,
-            deltaY: 0
+            deltaY: 0,
+            wheeled: true
           }
           this.$root.$emit("region-dragstart", { region: this.region, vm: this, evt: e, data: this.wheelData })
       } else {
