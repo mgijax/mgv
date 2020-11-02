@@ -581,7 +581,7 @@ export default MComponent({
       const sBpLength = s  => {
           return this.ppb? 0.6 * (s.length * this.featureFontSize) / this.ppb : 0
       }
-      /*
+      /* Not ready for prime time.
       //
       // Assign variant lanes
       this.variants.forEach(v => {
@@ -598,15 +598,18 @@ export default MComponent({
       */
       // Assign feature lanes
       this.features.forEach(f => {
+          // feature's layout width depend on both coordinates and displayed labels' widths
           let fEnd = f.end
           const showTs = this.showTranscripts(f)
           if (showTs || this.showFeatureLabels || this.featureHighlighted(f)) {
-            // estimate label length. Find longest.
-            fEnd = Math.max(fEnd, f.transcripts.reduce((a,t) => {
+            const fLabelEnd = f.start + sBpLength(f.symbol || f.ID)
+            const fTranscriptEnd = f.transcripts.reduce((a,t) => {
               const tlabel = t.cds && this.showProteinLabels ? t.cds.label : t.label
               const tend = Math.max(t.end, t.start + sBpLength(tlabel))
               return Math.max(a, tend)
-            }, f.start + sBpLength(f.symbol || f.ID)))
+            }, 0)
+            // estimate label length. Find longest.
+            fEnd = Math.max(fEnd, fLabelEnd, showTs ? fTranscriptEnd : 0)
           }
           // height
           const fHeight = Math.max(1, this.visibleTranscripts(f).length)
