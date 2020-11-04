@@ -14,6 +14,7 @@
         v-model="ZoomMain.stripGap"
         min="25"
         max="125"
+        @mouseup="announce"
         />
   </div>
   <!-- =================== -->
@@ -27,6 +28,7 @@
         v-model="ZoomRegion.laneGap"
         min="1"
         max="24"
+        @mouseup="announce"
         />
   </div>
   <!-- =================== -->
@@ -40,6 +42,7 @@
         v-model="ZoomRegion.featureFontSize"
         min="1"
         max="24"
+        @mouseup="announce"
         />
   </div>
   <!-- =================== -->
@@ -53,6 +56,7 @@
         v-model="ZoomRegion.featureHeight"
         min="1"
         max="24"
+        @mouseup="announce"
         />
   </div>
   <!-- ============== FEATURES section  ============== -->
@@ -66,6 +70,7 @@
     <input
         type="checkbox"
         v-model="ZoomRegion.showFeatureLabels"
+        @change="announce"
         />
   </div>
   <!-- =================== -->
@@ -80,6 +85,7 @@
         step=1
         type="number"
         v-model="ZoomRegion.detailThreshold"
+        @change="announce"
         />
   </div>
   <!-- =================== -->
@@ -88,7 +94,10 @@
     class="flexrow"
     >
     <label>Expand to show transcripts</label>
-    <select v-model="ZoomRegion.showWhichTranscripts">
+    <select
+      v-model="ZoomRegion.showWhichTranscripts"
+      @change="announce"
+      >
       <option :value="2">All</option>
       <option :value="1">Selected</option>
       <option :value="0">None</option>
@@ -103,6 +112,7 @@
     <input
         type="checkbox"
         v-model="ZoomRegion.showProteinLabels"
+        @change="announce"
         />
   </div>
   <!-- =================== -->
@@ -114,6 +124,7 @@
     <input
         type="checkbox"
         v-model="ZoomRegion.showStartStopCodons"
+        @change="announce"
         />
   </div>
   <!-- =================== -->
@@ -128,6 +139,7 @@
         min="0"
         max=".9"
         step=".1"
+        @mouseup="announce"
         />
   </div>
   <!-- ============== FIDUCIALS section  ============== -->
@@ -142,6 +154,7 @@
     <input
         type="checkbox"
         v-model="MGV.includeParalogs"
+        @change="announce"
         />
   </div>
   <!-- =================== -->
@@ -153,6 +166,7 @@
     <input
         type="checkbox"
         v-model="ZoomFiducials.showConnectors"
+        @change="announce"
         />
   </div>
   <!-- =================== -->
@@ -164,6 +178,7 @@
     <input
         type="checkbox"
         v-model="ZoomFiducials.showInversions"
+        @change="announce"
         />
   </div>
   <!-- =================== -->
@@ -178,6 +193,7 @@
         min="0"
         max="0.4"
         step="0.01"
+        @mouseup="announce"
         />
   </div>
   <!-- ============== MISC section  ============== -->
@@ -233,6 +249,9 @@ export default MComponent({
     return config
   },
   methods: {
+    announce: function () {
+      this.$root.$emit("context-changed")
+    },
     // saves current settings to database
     save: function () {
       return this.kstore.set('settings', this.$data)
@@ -352,7 +371,7 @@ export default MComponent({
         ["ZoomRegion.showFeatureLabels",    "fl", "b"], // show all feature labels
         ["ZoomRegion.featureFontSize",      "ff", "n"], // feature font size
         ["ZoomRegion.featureHeight",        "fh", "n"], // feature height (ie height of rectangles used to draw exons)
-        ["ZoomRegion.showWhichTranscripts",   "tx", "n"], // whether to show all transcripts, just selected ones, or none
+        ["ZoomRegion.showWhichTranscripts", "tx", "n"], // whether to show all transcripts (2), just selected ones (1), or none (0)
         ["ZoomRegion.showProteinLabels",    "pl", "b"], // if true, displays protein label, if the transcript is a CDS
         ["ZoomRegion.showStartStopCodons",  "tc", "b"], // if true, displays glyphs marking transcript start/stop sites
         ["ZoomFiducials.showConnectors",    "h",  "b"], // if true, displays connectors between (visible) homologs
