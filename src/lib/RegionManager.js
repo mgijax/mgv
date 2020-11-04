@@ -268,7 +268,7 @@ class RegionManager {
   //--------------------------------------
   zoomRegion (r, zAmt) {
     const L = r.end - r.start + 1
-    const L2 = Math.round(zAmt * L)
+    const L2 = Math.max(2, Math.round(zAmt * L))
     const mp = (r.start + r.end) / 2
     r.start = Math.round(mp - L2 / 2)
     r.end = r.start + L2 - 1
