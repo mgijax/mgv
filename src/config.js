@@ -13,7 +13,7 @@ export default {
   // Timestamp used at page load to determine whether to flush user's setting cache.
   //
   // IMPORTANT!!! You MUST update this value whenever this config file changes!!!
-  TIMESTAMP: 'Tue May 23 06:59:39 EST 2019',
+  TIMESTAMP: 'Tue May 25 06:59:39 EST 2019',
   ///////////////////////////////////////////
 
   //
@@ -33,7 +33,7 @@ export default {
     }
   },
   MGV: {
-    defaultHash: 'regions=C57BL/6J::14:44798909..46294274/1019|CAROLI/EiJ::14:36689781..38185146/1019|A/J::14:37282962..38778327/1019&lock=on&highlight=MGI:2385001',
+    defaultHash: 'regions=C57BL/6J::11:69552084..69621239/998|CAST/EiJ::11:69639374..69708529/998|H.%20sapiens::17:7644315..7713470/998&highlight=MGI:98834,HGNC:11998&lock=on&paralogs=off&style=gg:40,tg:6,fd:3,fl:1,ff:10,fh:10,tx:1,pl:1,tc:0,h:1,ho:0.05,hi:1,hc:0',
     genomeSets: [{
       label: 'DO/CC founders',
       genomes: '129S1/SvImJ,A/J,C57BL/6J,CAST/EiJ,NOD/ShiLtJ,NZO/HlLtJ,PWK/PhJ,WSB/EiJ',
