@@ -618,7 +618,7 @@ class RegionManager {
     })
   }
   //--------------------------------------
-  // Returns a promise for regions around the specified landmark in the specified geneoms.
+  // Returns a promise for regions around the specified landmark in the specified genomes.
   // The promise resolves to a list of strips, each of which has a list of regions.
   // It is possible for there to be multiple copies of a landmark in a genome leading 
   // to multiple regions in that strip.
@@ -634,8 +634,10 @@ class RegionManager {
           // compute the landmark region in the target genome
           const lmr = this.computeLandmarkRegion(lcoords, g)
           if (lmr) return lmr
-          // landmark does not exist in target genome.
-          // Try mapping the region instead
+          // if genome already being displayed, return current regions unchanged
+          const cstrip = this.findStrip(g)
+          if (cstrip >= 0) return this.app.strips[cstrip]
+          // final fallback: mapping 
           const mr = this.mapLandmarkRegion(lcoords, g)
           return mr
         })
