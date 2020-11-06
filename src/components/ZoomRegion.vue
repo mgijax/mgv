@@ -61,7 +61,7 @@
         :y="-zeroOffset"
         :width="Math.max(0, region.reversed ? (region.width - b2p(0) - myDelta) : (b2p(0) + myDelta))"
         :height="Math.max(height, 20)"
-        fill="gray"
+        fill="lightgray"
         />
       <!-- ======= right end underlay, shows when you scroll past the end of the chr  ======= -->
       <rect
@@ -71,7 +71,7 @@
         :y="-zeroOffset"
         :width="Math.max(0,ppb * (region.end - region.chr.length) - direction * myDelta)"
         :height="Math.max(height, 20)"
-        fill="gray"
+        fill="lightgray"
         />
       <!-- ======= underlay ======= -->
       <rect
