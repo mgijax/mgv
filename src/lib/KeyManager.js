@@ -13,7 +13,11 @@ class KeyManager {
     }
   }
   findHandlers (e) {
-    return (this.handlers[e.key] || []).filter(d => {
+    let k = e.key
+    if (k.length === 1 && k >= 'A' && k <= 'Z') {
+      k = k.toLowerCase()
+    }
+    return (this.handlers[k] || []).filter(d => {
       if ('ctrlKey' in d && d.ctrlKey !== e.ctrlKey) return false
       if ('shiftKey' in d && d.shiftKey !== e.shiftKey) return false
       if ('altKey' in d && d.altKey !== e.altKey) return false
