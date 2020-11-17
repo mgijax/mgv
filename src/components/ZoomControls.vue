@@ -13,6 +13,17 @@
           :title="context.scrollLock ? 'Scroll lock is ON. Click to turn OFF.' : 'Scroll lock is OFF. Click to turn ON'"
           :style="{ color: context.scrollLock ? 'rgb(255, 127, 14)' : 'black' }"
           />
+        <m-button
+          icon="N"
+          @click="app.toggleShowAllLabels()"
+          :style="{ textDecoration: context.config.ZoomRegion.showFeatureLabels ? 'none' : 'line-through' }"
+          title="Click to show/hide labels for all genes and transcripts."
+          />
+        <m-button
+          :icon="expandBtnIcon"
+          @click="app.toggleShowAllTranscripts()"
+          title="Click to transcripts for all genes, selected genes, or no genes."
+          />
         </div>
       <!-- Search box -->
       <div class="flexrow">
@@ -135,6 +146,16 @@ export default MComponent({
   ],
   inject: ['dataManager'],
   computed: {
+    expandBtnIcon: function () {
+      switch (this.app.config.ZoomRegion.showWhichTranscripts) {
+      case 0:
+          return "dehaze"
+      case 1:
+          return "view_day"
+      case 2:
+          return "view_agenda"
+      }
+    },
     currListTitle: function () {
       const clist = this.context.currentList
       if (!clist) return 'No current list.'
@@ -149,7 +170,6 @@ export default MComponent({
       return this.app.vTaxons.length > 1
     },
     paralogsButtonTitle: function () {
-      
       return this.paralogsEnabled ?
         (this.app.includeParalogs ?
             'Inferred paralogs are being included in searches, drawing, selecting, etc. Click to exclude.'

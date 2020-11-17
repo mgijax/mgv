@@ -1,7 +1,7 @@
 <template>
   <i
     class="m-button"
-    :class="{ 'material-icons' : isMaterialIcon }"
+    :class="{ 'material-icons' : isMaterialIcon, 'other-icon' : !isMaterialIcon }"
     v-on="$listeners"
     :style="style"
     @mouseover="hover=true"
@@ -61,6 +61,7 @@ export default MComponent({
   cursor: default;
   opacity: 0.5;
 }
-.m-button:hover:not([disabled]) {
+.other-icon {
+  font-style: normal;
 }
 </style>

@@ -316,7 +316,9 @@ export default MComponent({
       // list of currently active facets
       activeFacets: [],
       // visible Height minus header and footer
-      visHeight: 350
+      visHeight: 350,
+      //
+      config: config
     }
   },
   computed: {
@@ -397,22 +399,6 @@ export default MComponent({
     logEvent: function (action, label, value) {
       ga.ga_logEvent("MGV", action, label, value)
     },
-    /*
-    // A higher level operation that focusses the user's view on the currently selected gene(s) by:
-    // 1. Creating a list from the current selection
-    // 2. Making it the current list
-    // 3. Turning on the filter "Is in current list"
-    // This has the effect of disappearing everything else
-    focusOnSelected () {
-      if (this.currentSelection.length === 0) {
-        alert("Cannot focus on current selection: nothing selected.")
-        return
-      }
-      const lst = this.listManager.newList("__focus__", this.currentSelectionToList, "#cccccc")
-      this.setCurrentList(lst)
-      this.$refs.facets.$refs.facets[3].selected = true
-    },
-    */
     // Toggle whether we are showing all feature labels or not.
     toggleShowAllLabels: function () {
       const cfg = config.ZoomRegion
@@ -420,7 +406,6 @@ export default MComponent({
     },
     toggleShowAllTranscripts: function () {
         config.ZoomRegion.showWhichTranscripts = (config.ZoomRegion.showWhichTranscripts + 1) % 3
-        if (config.ZoomRegion.showWhichTranscripts === 1 && this.currentSelection.length === 0) config.ZoomRegion.showWhichTranscripts = 2
     },
     toggleIncludeParalogs: function () {
       this.includeParalogs = !this.includeParalogs
@@ -563,10 +548,6 @@ export default MComponent({
         })
       })
     },
-    unAlign: function () {
-      this.lcoords.landmark = null
-      this.$root.$emit('context-changed')
-    },
     getContextString: function () {
       let cs = this.regionManager.getParameterString()
       if (this.currentSelection && this.currentSelection.length) {
@@ -649,9 +630,7 @@ export default MComponent({
       // Paralogs
       this.keyManager.register({
        key: 'p',
-       handler: () => {
-         this.toggleIncludeParalogs()
-       },
+       handler: () => this.toggleIncludeParalogs(),
        thisObj: this
       })
       // Help
@@ -806,8 +785,6 @@ export default MComponent({
         this.purgeAndExit()
       }
     })
-    //
-    this.$root.$on('no-align', () => this.unAlign())
     //
     this.$root.$on('clear-selection', () => {
       this.currentSelection = []
