@@ -24,9 +24,78 @@ export default [{
         or phone (207-288-6445).
         <p/>
         MGV has been tested on MacOS 10.15.6 (Catalina) with these browsers:
-        Chrome version 85, Safari version 14, and FireFox version 79.
+        Chrome
+        version 85, Safari version 14, and FireFox version 79.
         `,
     items: []
+  }, {
+    name: `Quick Start`,
+    description: ``,
+    items: [{
+      heading: 'Four basic examples'
+    }, {
+      label: `View a gene and its homologs`,
+      text: `
+          Example: view the structure of Pax6 in C57BL/6J, M. caroli, and human.
+          <ol>
+          <li> Select the three genomes. <li> Type Pax6 into to the "Find" box and hit return.</ol>
+          <a href="#regions=C57BL/6J::2:105639381..105727925/1229|CAROLI/EiJ::2:99105819..99194363/1229|H.%20sapiens::11:31759221..31847765/1229&highlight=MGI:97490&lock=on&paralogs=off&style=gg:40,tg:6,fd:3,fl:1,ff:10,fh:10,tx:0,pl:1,tc:0,h:1,ho:0.05,hi:1,hc:0">See result</a>.
+          Alternative: for any gene currently being displayed, option-click on it.
+          `
+      }, {
+      label: `View a reference region and related regions.
+        `,
+      text: `Example: view the region 3:18511623..20827190 in C57BL/6J (this is 1.5 Mb around Trim55) and the corresponding regions in human.
+        <ol><li> Select the two genomes. Be sure C57BL/6J is on top. <li> Copy/paste the coordinates into the Find box and hit return.
+        <a href="#regions=C57BL/6J::3:18511623..20827190/1229|H.%20sapiens::8:65562539..66207794/635,3:148670671..149269074/588&ref=C57BL/6J&paralogs=off&style=gg:40,tg:6,fd:3,fl:1,ff:10,fh:10,tx:0,pl:1,tc:0,h:1,ho:0.05,hi:1,hc:0">See result</a>.
+        </ol>
+        Alternatively, you can get to approximately the same view by first typing "Trim55" into the Find box and hit return
+        (as in the previous example). Then click the "R" in the left endcap of the C57BL/6J strip, and zoom out.
+        `
+      }, {
+      label: `Download CDS sequences for a gene and its homologs`,
+      text: `
+        Here is <a href="#regions=C3H/HeJ::X:162520208..162667468/1229|DBA/2J::X:160235347..160382607/1229|C57BL/6J::X:164093183..164240443/1229|A/J::X:161354381..161501641/1229&highlight=MGI:1917258&lock=on&paralogs=off&style=gg:40,tg:6,fd:3,fl:1,ff:10,fh:10,tx:1,pl:1,tc:0,h:1,ho:0.05,hi:1,hc:0">Foxa2</a> for several mouse genomes.
+        <ol>
+        <li> Right-click on Foxa2 in any of the genomes. A popup menu appears.
+        <li> Mouse over "Add sequences to cart ... for this gene and all homologs" and select "All cds sequences".
+        Fourteen entries are added to the Sequence Cart, and they are all selected.
+        <li> In the Sequence Cart download area, enter a file name and click the download button. You can also view the sequences in the browser or copy them into the clipboard (so you can paste them elsewhere.
+        </ol>
+        `
+      }, {
+      label: `Download arbitrary genomic regions`,
+      text: `
+        Here is a region centered around the <a href="#regions=DBA/2J::X:160260853..160302497/1229|C57BL/6J::X:164119327..164160971/1229|A/J::X:161380314..161421958/1229&lock=on&paralogs=off&style=gg:40,tg:6,fd:3,fl:1,ff:10,fh:10,tx:1,pl:1,tc:0,h:1,ho:0.05,hi:1,hc:0">proximal end of Ace2</a> in three mouse genomes. We want to download the genomic region containing the first two exons from all three genomes. Note the the lock icon is ON.
+        <ol>
+        <li> Hold down the option (or alt) key while dragging left-to-right over the desired region. Three sequences are added to the Sequence Cart.
+        <li> In the Sequence Cart download area, enter a file name and click the download button.
+        </ol>
+        `
+      }, {
+      heading: `Tips`
+      }, {
+      label: 'Use the back button',
+      text: `Using the browser's back undoes most actions.
+        `
+      }, {
+      label: 'Refresh the page',
+      text: `If the viewer gets into a weird state, try refreshing the page.
+        `
+      }, {
+      label: 'Tooltips',
+      text: `Most controls have tooltips that appear when you hover the mouse over them.
+        `
+      }, {
+      label: 'Select only',
+      text: `
+        Shift-clicking a checkbox in a list of checkboxes selects ONLY that item; everything else is unselected.
+        `
+      }, {
+      label: 'Cancel drag',
+      text: `Can cancel an in-progress drag operation by hitting the ESC key.
+        `
+      }]
   }, {
     name: `Genomes`,
     description: `MGV lets you explore multiple regions from multiple genomes at once.
@@ -521,7 +590,7 @@ export default [{
       text: `Open/close the left-side tool panel. Same as clicking the ${i('settings')} in the page header.`
     },{
       label: `X`,
-      text: `Cycle through the values (none/selected/all) specifying which transcripts to display. Same as 'Expand to show transcripts' under Settings.`
+      text: `Cycle through the values (none/selected/all) specifying which genes are "expanded" to show transcripts. Same as 'Expand to show transcripts' under Settings.`
     },{
       heading: `The following shortcuts use the arrow keys.`
     },{
