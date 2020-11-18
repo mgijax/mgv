@@ -170,7 +170,7 @@
       <page-box
         label="MGV Help"
         :floating="true"
-        :initialX="350"
+        :initialX="65"
         :initialY="150"
         :initiallyOpen="false"
         ref="helpBox"
