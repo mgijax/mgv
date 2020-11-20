@@ -261,6 +261,7 @@ export default MComponent({
   border: thin solid black;
   z-index: 100;
   min-width: 250px;
+  box-shadow: 6px 6px gray;
 }
 .pagebox.floating.closed {
   display: none;
