@@ -22,7 +22,7 @@
         <m-button
           :icon="expandBtnIcon"
           @click="app.toggleShowAllTranscripts()"
-          title="Click to transcripts for all genes, selected genes, or no genes."
+          title="Click to show transcripts for all genes, selected genes, or no genes."
           />
         </div>
       <!-- Search box -->
