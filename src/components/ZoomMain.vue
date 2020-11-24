@@ -79,7 +79,7 @@ export default MComponent({
   },
   methods: {
     clicked: function (e) {
-      if (!e.shiftKey) this.$root.$emit('clear-selection')
+      if (!e.shiftKey && e.target.classList.contains('underlay')) this.$root.$emit('clear-selection')
     },
     downloadImage: function (e) {
       if (e.shiftKey) {

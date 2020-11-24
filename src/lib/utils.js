@@ -256,6 +256,8 @@ function fetch (url, type, postData) {
   })
 }
 // ---------------------------------------------
+// Concatenates a list of lists. See also flatten.
+//
 function concatAll (listOfLists) {
   return [].concat.apply([], listOfLists)
 }
@@ -373,7 +375,7 @@ function mergeArrays (A, B, mergeItems) {
 }
 
 //--------------------------------------
-// Recursively flattens arrays of arrays.
+// Recursively flattens arrays of arrays. See also concatAll
 function flatten (lst) {
     return lst.reduce((a,v) => {
       if (Array.isArray(v)) {

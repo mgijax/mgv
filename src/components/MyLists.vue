@@ -1,7 +1,7 @@
 <template>
   <div class="my-lists">
      <div class="flexcolumn">
-     <!-- Create list controls -->
+     <!-- Controls for creating lists -->
      <div class="flexrow">
        <select v-model="createMethod">
          <option
