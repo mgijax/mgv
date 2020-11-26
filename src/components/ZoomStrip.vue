@@ -11,6 +11,7 @@
       :region="zr"
       :allMinY="allMinY"
       :allMaxY="allMaxY"
+      :allBelowThreshold="allBelowThreshold"
       :pad="cfg.pad"
       @region-draw="setHeight"
       @region-delete="setHeight"
@@ -140,6 +141,7 @@ export default MComponent({
       zoomY: -1, // causes new strips to add to the top of the view
       allMinY: 0,
       allMaxY: 0,
+      allShowDetails: true,
       dragging: false,
       rDragging: false,
       featureHeight: 14,
@@ -225,6 +227,7 @@ export default MComponent({
       this.allMinY = Math.min(0, Math.min.apply(null, this.$children.map(r => r.minY))) - 10
       this.allMaxY = Math.max(0, Math.max.apply(null, this.$children.map(r => r.maxY))) + 10
       this.height = Math.max.apply(null, this.$children.map(r => r.height))
+      this.allBelowThreshold = this.$children.map(r => r.belowThreshold).reduce((a,v) => a && v, true)
       this.$emit('height-changed', this)
     },
     deleteClicked () {

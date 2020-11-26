@@ -378,6 +378,10 @@ export default MComponent({
       type: Number,
       default: 0
     },
+    allBelowThreshold: {
+      type: Boolean,
+      default: true
+    },
     // amount by which to pad the rendered region
     pad: {
       type: Number,
@@ -458,8 +462,11 @@ export default MComponent({
     showProteinLabels: function () {
       return this.cfg.showProteinLabels
     },
-    showDetails: function () {
+    belowThreshold: function () {
       return (this.region.end - this.region.start + 1) < this.detailThreshold
+    },
+    showDetails: function () {
+      return this.allBelowThreshold
     },
     showSequence: function () {
       return this.ppb >= 1
