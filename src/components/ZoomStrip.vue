@@ -141,7 +141,7 @@ export default MComponent({
       zoomY: -1, // causes new strips to add to the top of the view
       allMinY: 0,
       allMaxY: 0,
-      allShowDetails: true,
+      allBelowThreshold: true,
       dragging: false,
       rDragging: false,
       featureHeight: 14,
