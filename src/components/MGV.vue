@@ -309,9 +309,10 @@ export default MComponent({
       currentList: null,
       // index into currently diaplayed list (for cycling through the features)
       currentListItem: 0,
-      // current list as a Set for fast membership testing
+      // current list as a set of ids. Includes homologs.
       currentListSet: null,
-      currentListSet2: null,
+      //  current list as a set of ids. Excludes homologs.
+      currentListSetStrict: null,
       // list currently being edited
       currentEditList: null,
       // list of currently active facets
@@ -548,6 +549,8 @@ export default MComponent({
             // make sure the genome order matches the order specified in the URL
             this.$nextTick(() => {
                 this.$refs.zoomView.$refs.main.setYs('model')
+                // force a recalculation of selected sets
+                window.setTimeout( () => this.currentSelection.splice(0,0), 1000)
             })
             if (!quietly) this.$root.$emit('context-changed')
         })
@@ -611,7 +614,7 @@ export default MComponent({
       // this list includes homologs
       this.currentListSet = new Set(idents)
       // this one doesn't
-      this.currentListSet2 = new Set(lst.items)
+      this.currentListSetStrict = new Set(lst.items)
       this.currentListItem = 0
     },
     stepCurrentList: function () {

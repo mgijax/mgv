@@ -282,7 +282,7 @@
             fontWeight: featureMouseover(f) ? 'bold' : 'normal'
           }"
           ><tspan
-            v-if="featureInList2(f)"
+            v-if="featureInListStrict(f)"
             :fill="context.currentList.color"
             stroke="black"
             :font-size="2*featureFontSize"
@@ -809,9 +809,9 @@ export default MComponent({
       return s && (s.has(f.cID) || s.has(f.ID))
     },
     // Returns true iff f's ID or cID is a member of the currently displayed list.
-    featureInList2: function (f) {
+    featureInListStrict: function (f) {
       if (!this.context.currentList) return false
-      const s = this.context.currentListSet2
+      const s = this.context.currentListSetStrict
       return s && (s.has(f.cID) || s.has(f.ID))
     },
     // Returns true iff the feature is currently visible, ie, it overlaps the coordinate range of this region
