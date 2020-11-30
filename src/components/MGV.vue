@@ -311,6 +311,7 @@ export default MComponent({
       currentListItem: 0,
       // current list as a Set for fast membership testing
       currentListSet: null,
+      currentListSet2: null,
       // list currently being edited
       currentEditList: null,
       // list of currently active facets
@@ -376,6 +377,10 @@ export default MComponent({
   watch: {
     vTaxons: function () {
       this.$root.$emit('taxons-changed')
+    },
+    vGenomes: function () {
+      // if genomes change, force recalc of current list sets
+      if (this.currentList) this.setCurrentList(this.currentList)
     }
   },
   methods: {
@@ -601,7 +606,12 @@ export default MComponent({
     },
     setCurrentList: function (lst) {
       this.currentList = lst
-      this.currentListSet = new Set(lst.items)
+      const listFeats = u.flatten(lst.items.map(id => this.dataManager.getHomologs(id)))
+      const idents = listFeats.map(f => f.cID || f.ID)
+      // this list includes homologs
+      this.currentListSet = new Set(idents)
+      // this one doesn't
+      this.currentListSet2 = new Set(lst.items)
       this.currentListItem = 0
     },
     stepCurrentList: function () {
@@ -619,6 +629,12 @@ export default MComponent({
        handler: () => {
          this.toggleShowAllLabels()
        },
+       thisObj: this
+      })
+      // Create  list from selection
+      this.keyManager.register({
+       key: 's',
+       handler: () => this.$root.$emit('list-edit-newfromselected'),
        thisObj: this
       })
       // Expand/collapse
