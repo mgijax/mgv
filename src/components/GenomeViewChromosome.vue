@@ -47,21 +47,25 @@
         />
       <!-- Glyphs for current list items -->
       <g v-if="glyphStyle === 'smallList'">
-        <g
+        <line
           v-for="g in myGlyphs"
           :key="g.f.ID"
+          :name="g.f.ID"
+          class="list-item noevents"
+          :x1="g.gPoint[0]"
+          :y1="g.gPoint[1]"
+          :x2="g.aPoint[0]"
+          :y2="g.aPoint[1]"
+          stroke="black"
+          />
+
+        <g
+          v-for="g in myGlyphs"
+          :key="g.f.ID+'.2'"
           :name="g.f.ID"
           class="list-item"
           @click="clickedGlyph(g.f)"
           >
-          <line
-            class="noevents"
-            :x1="g.gPoint[0]"
-            :y1="g.gPoint[1]"
-            :x2="g.aPoint[0]"
-            :y2="g.aPoint[1]"
-            stroke="black"
-            />
           <circle
             class="glyph"
             :cx="g.gPoint[0]"
@@ -69,6 +73,8 @@
             :r="glyphRadius"
             stroke="black"
             :fill="currentListColor"
+            :stroke-opacity="g.inList ? 1 : 0"
+            :fill-opacity="g.inList ? 1 : 0"
             >
           <title>{{ g.f.symbol || g.f.ID }}</title>
           </circle>
@@ -92,7 +98,6 @@
           :x2="g.aPoint[0]"
           :y2="g.aPoint[1]"
           :stroke="currentListColor"
-          @click="clickedGlyph(g.f)"
           ><title>{{ g.f.symbol || g.f.ID }}</title></line>
       </g>
 
@@ -136,6 +141,7 @@ export default MComponent({
     'font-color',
     'width',
     'currentList',
+    'currentListIds',
     'currentListColor',
     'currRegion',
     'showLabels',
@@ -179,6 +185,7 @@ export default MComponent({
       const gs = this.myList.map(f => {
         return {
           f: f,
+          inList: this.currentListIds.has(f.cID) || this.currentListIds.has(f.ID),
           gPoint: [this.glyphX(f), this.glyphY(f)], // where glyph is centered
           aPoint: [0, this.glyphY(f)] // where connector line attaches to axis
         }
@@ -187,7 +194,7 @@ export default MComponent({
         a[g.f.strand || '+'].push(g)
         return a
       }, {'+':[], '-': [] })
-      const th = this.showLabels ? 12 : 0
+      const th = this.showLabels ? 12 : 0 // text height
       for (let strand in gsByStrand) {
         const sgs = gsByStrand[strand]
         const segs = sgs.map(g => {
@@ -325,9 +332,6 @@ export default MComponent({
 </script>
 
 <style scoped>
-.genome-view-chromosome *:not([name="dragrect"]) {
-  transition: height 0.5s;
-}
 .list-item {
   cursor: pointer;
 }

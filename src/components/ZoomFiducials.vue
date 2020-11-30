@@ -27,11 +27,11 @@
         v-for="(r,j) in clickedFeatures"
         :key="'rect_'+j"
         :x="r.x-1"
-        :y="r.y+3"
+        :y="r.y+2"
         :width="r.width+2"
-        :height="r.height-2"
-        stroke="black"
-        opacity=0.3
+        :height="r.height-1"
+        :stroke="selectedColor"
+        stroke-width="2"
         fill="none"
         />
     </g>
@@ -40,6 +40,7 @@
 
 <script>
 import MComponent from '@/components/MComponent'
+import config from '@/config'
 export default MComponent({
   name: 'ZoomFiducials',
   props: ['height'],
@@ -49,6 +50,11 @@ export default MComponent({
       deltaX: 0,
       clickedFeatures: [],
       edges: []
+    }
+  },
+  computed: {
+    selectedColor () {
+      return config.ZoomRegion.selectedFeature.stroke
     }
   },
   methods: {

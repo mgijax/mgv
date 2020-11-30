@@ -309,8 +309,10 @@ export default MComponent({
       currentList: null,
       // index into currently diaplayed list (for cycling through the features)
       currentListItem: 0,
-      // current list as a Set for fast membership testing
+      // current list as a set of ids. Includes homologs.
       currentListSet: null,
+      //  current list as a set of ids. Excludes homologs.
+      currentListSetStrict: null,
       // list currently being edited
       currentEditList: null,
       // list of currently active facets
@@ -376,6 +378,10 @@ export default MComponent({
   watch: {
     vTaxons: function () {
       this.$root.$emit('taxons-changed')
+    },
+    vGenomes: function () {
+      // if genomes change, force recalc of current list sets
+      if (this.currentList) this.setCurrentList(this.currentList)
     }
   },
   methods: {
@@ -409,6 +415,7 @@ export default MComponent({
     },
     toggleIncludeParalogs: function () {
       this.includeParalogs = !this.includeParalogs
+      this.currentList && this.setCurrentList(this.currentList)
       this.$root.$emit('context-changed')
     },
     clearFacets: function () {
@@ -543,6 +550,8 @@ export default MComponent({
             // make sure the genome order matches the order specified in the URL
             this.$nextTick(() => {
                 this.$refs.zoomView.$refs.main.setYs('model')
+                // force a recalculation of selected sets
+                window.setTimeout( () => this.currentSelection.splice(0,0), 1000)
             })
             if (!quietly) this.$root.$emit('context-changed')
         })
@@ -601,7 +610,12 @@ export default MComponent({
     },
     setCurrentList: function (lst) {
       this.currentList = lst
-      this.currentListSet = new Set(lst.items)
+      const listFeats = u.flatten(lst.items.map(id => this.dataManager.getHomologs(id)))
+      const idents = listFeats.map(f => f.cID || f.ID)
+      // this list includes homologs
+      this.currentListSet = new Set(idents)
+      // this one doesn't
+      this.currentListSetStrict = new Set(lst.items)
       this.currentListItem = 0
     },
     stepCurrentList: function () {
@@ -619,6 +633,12 @@ export default MComponent({
        handler: () => {
          this.toggleShowAllLabels()
        },
+       thisObj: this
+      })
+      // Create  list from selection
+      this.keyManager.register({
+       key: 's',
+       handler: () => this.$root.$emit('list-edit-newfromselected'),
        thisObj: this
       })
       // Expand/collapse
@@ -841,7 +861,7 @@ export default MComponent({
     })
     //
     this.$root.$on('list-edit-newfromselected', () => {
-      this.listManager.newList("selected", this.currentSelectionToList, "#cccccc")
+      this.listManager.newList("selected", this.currentSelectionToList)
     })
     //
     this.$root.$on('list-edit-open', data => {

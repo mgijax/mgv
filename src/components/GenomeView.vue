@@ -21,6 +21,15 @@
         class="flexrow" 
         style="justify-content: flex-start; flex-grow: unset;"
         >
+        <!-- Open height control -->
+        <input
+          type="range"
+          min="250"
+          max="800"
+          v-model="openHeight"
+          v-show="isOpen"
+          title="Height of GenomeView when open."
+          />
         <!-- Scroll chromosome down button -->
         <m-button
           title="Scroll chromosomes down."
@@ -91,12 +100,13 @@
           :orientation="orientation"
           :height="chrLen(c)"
           :width="chrWidth"
-          :glyphStyle="currentListHomologs.length >= 200 ? 'bigList' : 'smallList'"
+          :glyphStyle="currentListHomologs.length >= 500 ? 'bigList' : 'smallList'"
           :currentList="currentListHomologsByChr[c.name] || []"
+          :currentListIds="context.currentListSetStrict"
           :currentListColor="context.currentList ? context.currentList.color : 'gray'"
           :currRegion="context.currRegion"
           :showLabels="showLabels"
-          :glyphRadius="4"
+          :glyphRadius="5"
           @dragstart="dragstart"
           @dragend="dragend"
           :currMBrush="currMBrush"
@@ -147,6 +157,7 @@ export default MComponent({
     return {
       genome: null, // the genome to show
       currentListHomologs: [],
+      currentListCount: 0,
       currentFacets: [],
       isOpen: true, // when open, shows all chrs (vertical); when closed, shows 1 chr (horiz).
       width: 600, // view width
@@ -172,11 +183,9 @@ export default MComponent({
       const clist = this.context.currentList
       if (!clist) return 'No current list.'
       const clen = clist.items.length 
-      const cglen = this.currentListHomologs.length
-      const s = clen === 1 ? '' : 's'
-      const sz = cglen === clen ? `${clen} item${s}` : `${cglen} of ${clen} item${s} found in this genome`
-      const lim = cglen > this.maxListLength ? ` ${this.maxListLength} shown` : ''
-      return `${clist.name} (${sz}${lim})`
+      const ninlist = this.currentListCount
+      const cglen = this.currentListHomologs.length - ninlist
+      return `${clist.name} (List has: ${clen} ids. Genome has: ${ninlist} list members, ${cglen} homologs.)`
     },
     genomeName: function () {
       return this.genome ? this.genome.name : ''
@@ -235,7 +244,6 @@ export default MComponent({
     },
     resize: function () {
       this.width = this.$el.getBoundingClientRect().width
-      this.openHeight = this.cfg.openHeight
     },
     scrollChromosomes (inc) {
       let v = this.scrollDelta + inc
@@ -263,13 +271,15 @@ export default MComponent({
         this.dataManager().ensureFeatures(this.genome).then(() => {
           const seen = new Set()
           this.currentListHomologs = this.context.currentList.items.map(id => {
-            return this.dataManager().getHomologs(id, [this.genome])
-          }).reduce((a,v) => a.concat(v), []).filter(x => {
-            if (!x) return false
-            if (seen.has(x.ID)) return false
-            seen.add(x.ID)
-            return this.getFacets().test(x)
-          })
+                return this.dataManager().getHomologs(id, [this.genome])
+              }).reduce((a,v) => a.concat(v), []).filter(x => {
+                if (!x) return false
+                if (seen.has(x.ID)) return false
+                seen.add(x.ID)
+                return this.getFacets().test(x)
+              })
+          const ss = this.context.currentListSetStrict
+          this.currentListCount = this.currentListHomologs.map(h => (ss.has(h.cID) || ss.has(h.ID) ? 1 : 0)).reduce((a,v) => a+v, 0)
           this.currentListHomologsByChr = this.currentListHomologs.slice(0, this.maxListLegth).reduce((a,g) => {
             const n = g.chr.name
             if (!a[n]) a[n] = []
