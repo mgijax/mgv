@@ -36,9 +36,6 @@ class DataManager {
   getFeaturesByCid (cid) {
     return this.cid2feats[cid] || []
   }
-  getFeaturesByHid (hid) {
-    return this.hid2feats[hid] || []
-  }
   getFeaturesBySymbol (symbol) {
     return this.symbol2feats[symbol.toLowerCase()] || []
   }
@@ -107,7 +104,7 @@ class DataManager {
 
   //
   _registerChr (g, c, feats) {
-    let freg = new FeatureRegistrar(g, c, this.id2feat, this.cid2feats, this.hid2feats, this.symbol2feats)
+    let freg = new FeatureRegistrar(g, c, this.id2feat, this.cid2feats, this.symbol2feats)
     let cfeats = feats.map(f => freg.register(f)).filter(x => x)
     this.cache[g.name][c.name] = cfeats.sort((a,b) => a.start - b.start)
     return cfeats
@@ -570,7 +567,7 @@ class DataManager {
 }
 // Registers features for one chromsome of a genome
 class FeatureRegistrar {
-  constructor (g, c, id2f, cid2f, hid2f, sym2f) {
+  constructor (g, c, id2f, cid2f, sym2f) {
     // each chromosome of each genome has its own registrar
     this.genome = g
     this.chr = c
