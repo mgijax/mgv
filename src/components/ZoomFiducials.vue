@@ -31,6 +31,7 @@
         :width="r.width+2"
         :height="r.height-1"
         :stroke="selectedColor"
+        stroke-width="2"
         fill="none"
         />
     </g>

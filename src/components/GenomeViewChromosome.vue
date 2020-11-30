@@ -69,6 +69,8 @@
             :r="glyphRadius"
             stroke="black"
             :fill="currentListColor"
+            :stroke-opacity="g.inList ? 1 : 0"
+            :fill-opacity="g.inList ? 1 : 0"
             >
           <title>{{ g.f.symbol || g.f.ID }}</title>
           </circle>
@@ -92,7 +94,7 @@
           :x2="g.aPoint[0]"
           :y2="g.aPoint[1]"
           :stroke="currentListColor"
-          @click="clickedGlyph(g.f)"
+          @click="lickedGlyph(g.f)"
           ><title>{{ g.f.symbol || g.f.ID }}</title></line>
       </g>
 
@@ -136,6 +138,7 @@ export default MComponent({
     'font-color',
     'width',
     'currentList',
+    'currentListIds',
     'currentListColor',
     'currRegion',
     'showLabels',
@@ -179,6 +182,7 @@ export default MComponent({
       const gs = this.myList.map(f => {
         return {
           f: f,
+          inList: this.currentListIds.has(f.cID) || this.currentListIds.has(f.ID),
           gPoint: [this.glyphX(f), this.glyphY(f)], // where glyph is centered
           aPoint: [0, this.glyphY(f)] // where connector line attaches to axis
         }
@@ -187,7 +191,7 @@ export default MComponent({
         a[g.f.strand || '+'].push(g)
         return a
       }, {'+':[], '-': [] })
-      const th = this.showLabels ? 12 : 0
+      const th = this.showLabels ? 12 : 0 // text height
       for (let strand in gsByStrand) {
         const sgs = gsByStrand[strand]
         const segs = sgs.map(g => {
