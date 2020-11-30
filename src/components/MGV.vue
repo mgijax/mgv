@@ -415,6 +415,7 @@ export default MComponent({
     },
     toggleIncludeParalogs: function () {
       this.includeParalogs = !this.includeParalogs
+      this.currentList && this.setCurrentList(this.currentList)
       this.$root.$emit('context-changed')
     },
     clearFacets: function () {
