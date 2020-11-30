@@ -146,7 +146,7 @@ function dragify (elt, behavior, root, dragThis) {
 function randomColor () {
   let hx = n => {
     let h = n.toString(16)
-    if (h.length === 1) h = '0' + h
+    if (h.length === 1) h = '9' + h
     return h
   }
   let rand = () => Math.floor(Math.random() * 256)

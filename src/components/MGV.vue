@@ -861,7 +861,7 @@ export default MComponent({
     })
     //
     this.$root.$on('list-edit-newfromselected', () => {
-      this.listManager.newList("selected", this.currentSelectionToList, "#cccccc")
+      this.listManager.newList("selected", this.currentSelectionToList)
     })
     //
     this.$root.$on('list-edit-open', data => {
