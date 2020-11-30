@@ -47,21 +47,25 @@
         />
       <!-- Glyphs for current list items -->
       <g v-if="glyphStyle === 'smallList'">
-        <g
+        <line
           v-for="g in myGlyphs"
           :key="g.f.ID"
+          :name="g.f.ID"
+          class="list-item noevents"
+          :x1="g.gPoint[0]"
+          :y1="g.gPoint[1]"
+          :x2="g.aPoint[0]"
+          :y2="g.aPoint[1]"
+          stroke="black"
+          />
+
+        <g
+          v-for="g in myGlyphs"
+          :key="g.f.ID+'.2'"
           :name="g.f.ID"
           class="list-item"
           @click="clickedGlyph(g.f)"
           >
-          <line
-            class="noevents"
-            :x1="g.gPoint[0]"
-            :y1="g.gPoint[1]"
-            :x2="g.aPoint[0]"
-            :y2="g.aPoint[1]"
-            stroke="black"
-            />
           <circle
             class="glyph"
             :cx="g.gPoint[0]"
@@ -94,7 +98,6 @@
           :x2="g.aPoint[0]"
           :y2="g.aPoint[1]"
           :stroke="currentListColor"
-          @click="lickedGlyph(g.f)"
           ><title>{{ g.f.symbol || g.f.ID }}</title></line>
       </g>
 
