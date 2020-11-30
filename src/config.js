@@ -13,7 +13,7 @@ export default {
   // Timestamp used at page load to determine whether to flush user's setting cache.
   //
   // IMPORTANT!!! You MUST update this value whenever this config file changes!!!
-  TIMESTAMP: 'Tue May 25 06:59:39 EST 2019',
+  TIMESTAMP: 'Tue May 26 06:59:39 EST 2019',
   ///////////////////////////////////////////
 
   //
@@ -137,7 +137,7 @@ export default {
     showInversions: true
   },
   GenomeView: {
-    openHeight: 250,
+    openHeight: 450,
     closedHeight: 100
   },
   GenomeViewChromosome: {

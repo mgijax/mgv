@@ -329,9 +329,6 @@ export default MComponent({
 </script>
 
 <style scoped>
-.genome-view-chromosome *:not([name="dragrect"]) {
-  transition: height 0.5s;
-}
 .list-item {
   cursor: pointer;
 }

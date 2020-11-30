@@ -21,6 +21,15 @@
         class="flexrow" 
         style="justify-content: flex-start; flex-grow: unset;"
         >
+        <!-- Open height control -->
+        <input
+          type="range"
+          min="250"
+          max="800"
+          v-model="openHeight"
+          v-show="isOpen"
+          title="Height of GenomeView when open."
+          />
         <!-- Scroll chromosome down button -->
         <m-button
           title="Scroll chromosomes down."
@@ -91,7 +100,7 @@
           :orientation="orientation"
           :height="chrLen(c)"
           :width="chrWidth"
-          :glyphStyle="currentListHomologs.length >= 200 ? 'bigList' : 'smallList'"
+          :glyphStyle="currentListHomologs.length >= 500 ? 'bigList' : 'smallList'"
           :currentList="currentListHomologsByChr[c.name] || []"
           :currentListIds="context.currentListSetStrict"
           :currentListColor="context.currentList ? context.currentList.color : 'gray'"
@@ -236,7 +245,6 @@ export default MComponent({
     },
     resize: function () {
       this.width = this.$el.getBoundingClientRect().width
-      this.openHeight = this.cfg.openHeight
     },
     scrollChromosomes (inc) {
       let v = this.scrollDelta + inc
