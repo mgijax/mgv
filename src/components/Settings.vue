@@ -191,7 +191,7 @@
         type="range"
         v-model="ZoomFiducials.fillOpacity"
         min="0"
-        max="0.4"
+        max="0.2"
         step="0.01"
         @mouseup="announce"
         />

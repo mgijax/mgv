@@ -267,14 +267,17 @@ export default MComponent({
       lst.items.forEach(i => s.has(i) && ss.add(i))
       this.items = Array.from(ss)
     },
-    addSelected: function () {
-      this.union({items:this.app.currentSelectionToList})
+    selectionList: function (includeHoms) {
+      return includeHoms ? this.app.currentSelectionToListWithHoms : this.app.currentSelectionToList
     },
-    removeSelected: function () {
-      this.difference({items:this.app.currentSelectionToList})
+    addSelected: function (e) {
+      this.union({items:this.selectionList(e.shiftKey)})
     },
-    intersectWithSelected: function () {
-      this.intersection({items:this.app.currentSelectionToList})
+    removeSelected: function (e) {
+      this.difference({items:this.selectionList(e.shiftKey)})
+    },
+    intersectWithSelected: function (e) {
+      this.intersection({items:this.selectionList(e.shiftKey)})
     }
   }
 })

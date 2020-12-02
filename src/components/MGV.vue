@@ -325,6 +325,10 @@ export default MComponent({
   },
   computed: {
     currentSelectionToList: function () {
+      const s = new Set(this.currentSelection.map(f => f.cID || f.ID))
+      return Array.from(s)
+    },
+    currentSelectionToListWithHoms: function () {
       const cHoms = this.currentSelection.map(f => this.dataManager.getHomologs(f, this.vGenomes))
       const cHomIds = new Set(u.flatten(cHoms).map(f => f.cID || f.ID))
       return Array.from(cHomIds)
@@ -638,7 +642,7 @@ export default MComponent({
       // Create  list from selection
       this.keyManager.register({
        key: 's',
-       handler: () => this.$root.$emit('list-edit-newfromselected'),
+       handler: e => this.$root.$emit('list-edit-newfromselected', {includeHomologs:e.shiftKey}),
        thisObj: this
       })
       // Expand/collapse
@@ -860,8 +864,12 @@ export default MComponent({
       }
     })
     //
-    this.$root.$on('list-edit-newfromselected', () => {
-      this.listManager.newList("selected", this.currentSelectionToList)
+    this.$root.$on('list-edit-newfromselected', d => {
+      if (d && d.includeHomologs) {
+        this.listManager.newList("selected", this.currentSelectionToListWithHoms)
+      } else {
+        this.listManager.newList("selected", this.currentSelectionToList)
+      }
     })
     //
     this.$root.$on('list-edit-open', data => {

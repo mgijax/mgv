@@ -65,6 +65,9 @@ export default MComponent({
         label: 'Create list from selected features',
         value: 'newFromSel'
       }, {
+        label: 'Create from selected and homologs',
+        value: 'newFromSelWithHom'
+      }, {
         label: 'Create empty list',
         value: 'newEmpty'
       }],
@@ -90,7 +93,18 @@ export default MComponent({
       this.$root.$emit('list-edit-new')
     },
     newFromSel () {
-      this.$root.$emit('list-edit-newfromselected')
+      if (this.app.currentSelection.length === 0) {
+        alert("Nothing selected. Click on a feature to select it. Shift-click to select multiple.")
+      } else {
+        this.$root.$emit('list-edit-newfromselected', { includeHomologs: false })
+      }
+    },
+    newFromSelWithHom () {
+      if (this.app.currentSelection.length === 0) {
+        alert("Nothing selected. Click on a feature to select it. Shift-click to select multiple.")
+      } else {
+        this.$root.$emit('list-edit-newfromselected', { includeHomologs: true })
+      }
     },
     newFromQuery () {
       this.$refs.findGenes.doSearch()
