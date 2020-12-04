@@ -493,10 +493,6 @@ export default [{
     }, {
       label: `Exon thickness`,
       text: `Sets the height of the rectangles used to draw features.`
-
-
-
-
     }, {
       heading: `Features`
     }, {
@@ -585,6 +581,10 @@ export default [{
     },{
       label: `R`,
       text: `Turn reference genome on/off. The top genome in the view is made the reference. Same as clicking the R in the genome's left end cap. NOTE: when ref genome is selected, the lock is turned off.`
+    },{
+      label: `S`,
+      text: `Creates a new list from the currently selected features. Holding down the shift key includes homologs.
+        `
     },{
       label: `T`,
       text: `Open/close the left-side tool panel. Same as clicking the ${i('settings')} in the page header.`
