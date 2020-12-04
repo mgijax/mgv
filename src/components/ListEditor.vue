@@ -53,7 +53,10 @@
              <div
                name="union"
                class="listop"
-               title="DRAG a list here to ADD its items to this list. CLICK here to add the current selection."
+               title=
+"DRAG a list here to ADD its items to this list.
+CLICK here to add the current selection.
+Shift-CLICK to add selection and homologs."
                @dragover="dragover"
                @dragleave="dragleave"
                @drop="drop"
@@ -66,7 +69,10 @@
              <div
                name="intersection"
                class="listop"
-               title="DRAG a list here to INTERSECT its items with this list. CLICK here to intersect with the current selection."
+               title=
+"DRAG a list here to INTERSECT its items with this list.
+CLICK here to intersect with the current selection.
+Shift-CLICK to intersect with selection and homologs."
                @dragover="dragover"
                @dragleave="dragleave"
                @drop="drop"
@@ -79,7 +85,10 @@
              <div
                name="difference"
                class="listop"
-               title="DRAG a list here to REMOVE its items from this list. CLICK here to remove the current selection."
+               title=
+"DRAG a list here to REMOVE its items from this list.
+CLICK here to remove the current selection.
+Shift-CLICK to remove selection and homologs."
                @dragover="dragover"
                @dragleave="dragleave"
                @drop="drop"
@@ -271,13 +280,13 @@ export default MComponent({
       return includeHoms ? this.app.currentSelectionToListWithHoms : this.app.currentSelectionToList
     },
     addSelected: function (e) {
-      this.union({items:this.selectionList(e.shiftKey)})
+      this.app.verifyCurrentSelection() && this.union({items:this.selectionList(e.shiftKey)})
     },
     removeSelected: function (e) {
-      this.difference({items:this.selectionList(e.shiftKey)})
+      this.app.verifyCurrentSelection() && this.difference({items:this.selectionList(e.shiftKey)})
     },
     intersectWithSelected: function (e) {
-      this.intersection({items:this.selectionList(e.shiftKey)})
+      this.app.verifyCurrentSelection() && this.intersection({items:this.selectionList(e.shiftKey)})
     }
   }
 })

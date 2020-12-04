@@ -612,6 +612,13 @@ export default MComponent({
       this.$root.$emit('selection-state-changed')
       this.$root.$emit('context-changed')
     },
+    verifyCurrentSelection: function (quietly) {
+      if (this.currentSelection.length === 0) {
+          !quietly && alert("Nothing selected. Click on a feature to select it. Shift-click to select multiple.")
+          return false
+      }
+      return true
+    },
     setCurrentList: function (lst) {
       this.currentList = lst
       const listFeats = u.flatten(lst.items.map(id => this.dataManager.getHomologs(id)))
@@ -642,7 +649,7 @@ export default MComponent({
       // Create  list from selection
       this.keyManager.register({
        key: 's',
-       handler: e => this.$root.$emit('list-edit-newfromselected', {includeHomologs:e.shiftKey}),
+       handler: e => this.verifyCurrentSelection() && this.$root.$emit('list-edit-newfromselected', {includeHomologs:e.shiftKey}),
        thisObj: this
       })
       // Expand/collapse

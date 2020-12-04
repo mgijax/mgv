@@ -40,6 +40,7 @@
            :key="item.name"
            :item="item"
            :class="{ current: item === currentList }"
+           ref="listItems"
            />
        </div>
      </div>
@@ -89,20 +90,22 @@ export default MComponent({
       this[this.createMethod]()
       this.app.logEvent('ListOp', 'new')
     },
+    scrollToTop () {
+      const items = this.$refs.listItems
+      if (items.length === 0) return
+      const parentDiv = this.$el.querySelector('.listolists')
+      parentDiv.scrollTop = items[0].$el.offsetTop
+    },
     newEmpty () {
       this.$root.$emit('list-edit-new')
     },
     newFromSel () {
-      if (this.app.currentSelection.length === 0) {
-        alert("Nothing selected. Click on a feature to select it. Shift-click to select multiple.")
-      } else {
+      if (this.app.verifyCurrentSelection()) {
         this.$root.$emit('list-edit-newfromselected', { includeHomologs: false })
       }
     },
     newFromSelWithHom () {
-      if (this.app.currentSelection.length === 0) {
-        alert("Nothing selected. Click on a feature to select it. Shift-click to select multiple.")
-      } else {
+      if (this.app.verifyCurrentSelection()) {
         this.$root.$emit('list-edit-newfromselected', { includeHomologs: true })
       }
     },
