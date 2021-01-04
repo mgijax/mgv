@@ -526,6 +526,7 @@ export default MComponent({
                 chr: g.chromosomes.filter(c => c.name === r.chr)[0],
                 start: r.start,
                 end: r.end,
+                reversed: r.reversed,
                 length: r.end - r.start + 1,
                 width: r.width || r.end - r.start + 1
               }
