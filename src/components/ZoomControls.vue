@@ -205,7 +205,7 @@ export default MComponent({
       if (!n) return
       const fs = this.dataManager().getFeaturesBy(n)
       const fsf = fs.filter(f => this.app.vGenomes.indexOf(f.genome) !== -1)
-      const f = fsf[0]
+      const f = fsf[0] // picks first arbitrary
       if (f) {
         // user entered a valid symbol
         this.$root.$emit('region-change', { op : 'feature-align', feature: f })

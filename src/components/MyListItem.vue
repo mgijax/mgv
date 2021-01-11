@@ -20,6 +20,9 @@ export default MComponent({
   name: 'MyListItem',
   props: ['item'],
   components: { MButton },
+  mounted: function () {
+    this.$parent.scrollToTop(this)
+  },
   methods: {
     deleteClicked: function () {
       this.$root.$emit('list-delete', this.item)

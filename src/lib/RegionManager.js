@@ -353,6 +353,7 @@ class RegionManager {
     this.layout()
   }
   //--------------------------------------
+  // Join region r with its right neighbor.
   joinRegion (r) {
     const rr = this.findRegion(r)
     const si = rr[0], ri = rr[1]
@@ -371,6 +372,7 @@ class RegionManager {
     this.layout()
   }
   //--------------------------------------
+  // Try to reduce the number of regions in the list through merging.
   //
   mergeRegions (g, regions) {
     const rs = regions.reduce((newRs, r) => {
@@ -589,11 +591,11 @@ class RegionManager {
       l = 3 * f.length
     }
     const lcoords = {
-      landmark: f.cID || f.ID,
-      lfeature: f,
-      lgenome: f.genome,
-      anchor: anchor,
-      delta: 0,
+      landmark: f.cID || f.ID,  // the landmark's id (prefer canonical)
+      lfeature: f,              // the landmark
+      lgenome: f.genome,        // landmark's genome
+      anchor: anchor,           // anchor position (0 to 1)
+      delta: 0,                 // added scroll delta
     }
     if (d.region) {
       if (d.event.metaKey) {

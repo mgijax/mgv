@@ -90,11 +90,9 @@ export default MComponent({
       this[this.createMethod]()
       this.app.logEvent('ListOp', 'new')
     },
-    scrollToTop () {
-      const items = this.$refs.listItems
-      if (items.length === 0) return
+    scrollToTop (item) {
       const parentDiv = this.$el.querySelector('.listolists')
-      parentDiv.scrollTop = items[0].$el.offsetTop
+      parentDiv.scrollTop = item.$el.offsetTop
     },
     newEmpty () {
       this.$root.$emit('list-edit-new')
