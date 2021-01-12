@@ -447,9 +447,27 @@ const cols2rows = function (valueArrays, names) {
     return res
 }
 // ---------------------------------------------
+// A comparison function for sorting a list of features or regions by chromosome
+// and start position
+//
+const byChrStart = function (a, b) {
+    if (a.chr.index < b.chr.index) {
+        return -1
+    } else if (a.chr.index > b.chr.index) {
+        return 1
+    } else if (a.start < b.start) {
+        return -1
+    } else if (a.start > b.start) {
+        return 0
+    } else {
+        return 0
+    }
+}
+// ---------------------------------------------
 export default {
   afterTicks,
   assert,
+  byChrStart,
   cols2rows,
   concatAll,
   debug,

@@ -224,10 +224,17 @@ export default MComponent({
       this.busyCount -= 1
     },
     setHeight () {
-      this.allMinY = Math.min(0, Math.min.apply(null, this.$children.map(r => r.minY))) - 10
-      this.allMaxY = Math.max(0, Math.max.apply(null, this.$children.map(r => r.maxY))) + 10
-      this.height = Math.max.apply(null, this.$children.map(r => r.height))
-      this.allBelowThreshold = this.$children.map(r => r.belowThreshold).reduce((a,v) => a && v, true)
+      if (this.$children.length === 0) {
+          this.allMinY = 0
+          this.allMaxY = 60
+          this.height = 60
+          this.allBelowThreshold = true
+      } else {
+          this.allMinY = Math.min(0, Math.min.apply(null, this.$children.map(r => r.minY))) - 10
+          this.allMaxY = Math.max(0, Math.max.apply(null, this.$children.map(r => r.maxY))) + 10
+          this.height = Math.max.apply(null, this.$children.map(r => r.height))
+          this.allBelowThreshold = this.$children.map(r => r.belowThreshold).reduce((a,v) => a && v, true)
+      }
       this.$emit('height-changed', this)
     },
     deleteClicked () {
