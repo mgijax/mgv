@@ -512,7 +512,7 @@ export default MComponent({
         } else {
            lcoords.length = cxt.length || 1000000
         }
-        p = this.regionManager.alignOnLandmark(lcoords, genomes)
+        p = this.regionManager.alignOnLandmark([lcoords], genomes)
       } else if (cxt.strips) {
         // Map regions specs to specs with genome and chromosome names resolved to objects.
         const strips = cxt.strips.map(s => {

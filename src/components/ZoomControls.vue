@@ -203,12 +203,12 @@ export default MComponent({
     },
     findLandmark (n) {
       if (!n) return
-      const fs = this.dataManager().getFeaturesBy(n)
-      const fsf = fs.filter(f => this.app.vGenomes.indexOf(f.genome) !== -1)
-      const f = fsf[0] // picks first arbitrary
-      if (f) {
-        // user entered a valid symbol
-        this.$root.$emit('region-change', { op : 'feature-align', feature: f })
+      const fs = n.replaceAll(",", " ").trim().split(/\s+/).map(nn => {
+        const fss = this.dataManager().getFeaturesBy(nn.trim())
+        return fss.filter(f => this.app.vGenomes.indexOf(f.genome) !== -1)[0]
+      }).filter(x => x)
+      if (fs.length > 0) {
+        this.$root.$emit('region-change', { op : 'feature-align', features: fs })
       } else {
         // not a valid symbol. try parsing as coords.
         const c = gc.parse(n)

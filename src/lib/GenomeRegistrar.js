@@ -110,6 +110,7 @@ class GenomeRegistrar {
   registerGenome (url, info) {
     info.url = info.url || url
     info.name2chr = info.chromosomes.reduce((a,c) => { a[c.name] = c; return a }, {})
+    info.chromosomes.forEach((c,i) => { c.index = i })
     this.name2genome[info.name] = info
     this.name2reader[info.name] = new GenomeReader(this, info)
     return info
