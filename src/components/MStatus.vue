@@ -26,38 +26,35 @@ export default MComponent({
   props: ['version'],
   data: function () {
     return {
-      style: config.MHeader.style,
+      style: config.MStatus.style,
       status: '',
       queue: [],
       timeout: null,
-      shortInterval: 500,
-      longInterval: 2000,
+      displayTime: config.MStatus.displayTime,
       intervalTotal: 0
     }
   },
   methods: {
     addMessage: function (m) {
       this.queue.push(m)
-      if (!this.timeout) this.startTimeout()
+      if (!this.timeout) {
+        this.nextMessage()
+        this.startTimeout()
+      }
     },
     nextMessage: function () {
       this.status = this.queue.shift() || ''
     },
     startTimeout: function () {
-      this.timeout = window.setInterval(() => {
+      this.timeout = window.setTimeout(() => {
         if (this.queue.length) {
           this.nextMessage()
-          this.intervalTotal = 0
+          this.startTimeout()
         } else {
-          this.intervalTotal += this.shortInterval
-          if (this.intervalTotal >= this.longInterval) {
-            this.status = ''
-            this.intervalTotal = 0
-            window.clearInterval(this.timeout)
-            this.timeout = null
-          }
+          this.status = ''
+          this.timeout = null
         }
-      }, this.shortInterval)
+      }, this.displayTime )
     }
   },
   mounted: function () {
@@ -72,9 +69,11 @@ export default MComponent({
   width: 100%;
   font-size: 12px;
   font-weight: bold;
-  transition: height 0.5s;
+  transition: height 0.5s, opacity 0.5s;
+  justify-content: center;
 }
 .hidden {
   height: 0px;
+  opacity: 0;
 }
 </style>
