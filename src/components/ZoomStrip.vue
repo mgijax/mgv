@@ -2,7 +2,19 @@
   <g class="zoom-strip"
     :class="{ dragging: dragging, rGenome: genome === rGenome }"
     :transform="`translate(0,${zoomY + dragY + 14})`"
+    :name="genome.name"
   >
+    <!-- underlay -->
+    <rect 
+        class="underlay"
+        x=0
+        y=0
+        :height="height"
+        :width="width"
+        stroke="none"
+        fill="white"
+        fill-opacity="0"
+        />
     <!-- list of ZoomRegions -->
     <zoom-region
       v-for="zr in regions"
@@ -131,7 +143,7 @@ export default MComponent({
     'width',
     'strip',
     'regions',
-    'rGenome'
+    'rGenome',
   ],
   inject: ['regionManager'],
   data: function () {

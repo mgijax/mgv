@@ -35,6 +35,32 @@
         fill="none"
         />
     </g>
+    <!-- invisible homologs -->
+    <g
+      v-for="(h,k) in invisHomologs"
+      :key="'inv_'+k"
+      >
+        <g
+          v-if="h.feats.length > 0"
+          >
+          <rect
+            :x="h.x"
+            :y="h.y"
+            :width="12"
+            :height="12"
+            stroke="gray"
+            stroke-width="1"
+            fill="rgb(52, 255, 154)"
+            ><title>This genome has invisible homologs: {{h.feats.join(",")}}</title></rect>
+          <text 
+            :x="h.x + 6"
+            :y="h.y + 10"
+            text-anchor="middle"
+            style="font-size: 12px; font-weight: bold; font-family: sans-serif; pointer-events: none;"
+            fill="red"
+            >!</text>
+        </g>
+    </g>
   </g>
 </template>
 
@@ -48,8 +74,10 @@ export default MComponent({
   data: function () {
     return {
       deltaX: 0,
-      clickedFeatures: [],
-      edges: []
+      clickedFeatures: [], // list of features the user clicked on`
+      edges: [], // edges to draw. List of (box1, box2) where box1 and box2 are the
+                 // bounding boxes of the features to be joined
+      invisHomologs: [] // list of off-screen features that are homologs of current visible highlighted features
     }
   },
   computed: {
@@ -85,10 +113,18 @@ export default MComponent({
       const pel = this.$parent.$el
       if (!pel) return []
       const fselector = this.cfg.showAllConnectors ? '.feature.visible' : '.feature.highlight.visible'
-      const clickedFeatures = []
-      const boxesByStrip = []
+      const clickedFeatures = [] // features the user actually clicked on
+      const boxesByStrip = [] // list of lists of highlighted features with their bounding boxes
+      const vhfs = new Set() // visible highlighted features
+      const allHoms = new Set() // all homologs of vhfs
+      const sboxes = [] // list of zoom strip bounding boxes
       pel.querySelectorAll('.zoom-strip').forEach(zel => {
-       const boxes = []
+       //
+       const sgenome = this.dataManager().getGenomeByName(zel.getAttribute('name'))
+       const sbox = zel.querySelector('.underlay').getBoundingClientRect()
+       sboxes.push({ rect: sbox, elt: zel, genome: sgenome })
+       //
+       const boxes = [] // list of feature bounding boxes
        boxesByStrip.push(boxes)
        zel.querySelectorAll('.zoom-region').forEach(rel => {
         const rev = rel.classList.contains('reversed')
@@ -106,9 +142,34 @@ export default MComponent({
           //
           // Each node has a feature, a rectangle, and a reachable set.
           boxes.push({fel: fel, rect:rect, feature:f, reachable: (new Set())})
-        })
-       })
+          //
+          vhfs.add(f)
+          this.dataManager().getHomologs(f).forEach(h => {
+              allHoms.add(h)
+          })
+        }) // features
+       }) // regions
+      }) // strips
+
+      // compute invisible homologs of vhfs, grouped by genome
+      // Then emit the resulting Map
+      const invis = Array.from(allHoms).filter(h => !vhfs.has(h))
+      const invisGrouped = invis.reduce((m,f) => {
+          if (! m[f.genome.name]) {
+            m[f.genome.name] = new Set()
+          }
+          m[f.genome.name].add(f.symbol || f.cID || f.ID)
+          return m
+      }, {})
+      this.invisHomologs = sboxes.map(sb => {
+        return {
+          x: sb.rect.x,
+          y: sb.rect.y - 14,
+          feats: Array.from(invisGrouped[sb.genome.name] || [])
+        }
       })
+      ////
+
       // Remove empty lists then sort by strip y-position.
       const boxesByStrip2 = boxesByStrip.filter(x => x.length > 0)
       boxesByStrip2.sort((a,b) => a[0].rect.y - b[0].rect.y)

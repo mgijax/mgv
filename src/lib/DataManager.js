@@ -30,6 +30,9 @@ class DataManager {
     this.genomes = this.greg.register(this.url)
     this.homologyManager = new HomologyManager(this, this.url)
   }
+  getGenomeByName (n) {
+    return this.greg.lookupGenome(n)
+  }
   getFeatureById (id) {
     return this.id2feat[id]
   }

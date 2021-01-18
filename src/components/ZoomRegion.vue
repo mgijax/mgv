@@ -999,6 +999,7 @@ export default MComponent({
     mouseenter: function (e) {
       document.body.focus()
       this.$root.$emit('region-mouseenter', { region: this.region, vm: this, evt: e })
+      this.$root.$emit('region-current', { region: this.region })
     },
     mouseleave: function (e) {
       if (this.dragging) return
