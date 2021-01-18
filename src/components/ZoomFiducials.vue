@@ -42,23 +42,30 @@
       >
         <g
           v-if="h.feats.length > 0"
+          :transform="`translate(${h.x},${h.y + 4})`"
           >
           <rect
-            :x="h.x"
-            :y="h.y"
+            :x="0"
+            :y="0"
             :width="12"
             :height="12"
             stroke="gray"
             stroke-width="1"
             fill="rgb(52, 255, 154)"
-            ><title>This genome has invisible homologs: {{h.feats.join(",")}}</title></rect>
+            ></rect>
           <text 
-            :x="h.x + 6"
-            :y="h.y + 10"
-            text-anchor="middle"
+            :x="3"
+            :y="10"
+            text-anchor="left"
             style="font-size: 12px; font-weight: bold; font-family: sans-serif; pointer-events: none;"
             fill="red"
             >!</text>
+          <text 
+            :x="15"
+            :y="10"
+            text-anchor="left"
+            style="font-size: 12px; font-family: sans-serif;" 
+            >Not visible: {{ h.feats.join(", ") }}</text>
         </g>
     </g>
   </g>
@@ -121,7 +128,7 @@ export default MComponent({
       pel.querySelectorAll('.zoom-strip').forEach(zel => {
        //
        const sgenome = this.dataManager().getGenomeByName(zel.getAttribute('name'))
-       const sbox = zel.querySelector('.underlay').getBoundingClientRect()
+       const sbox = zel.querySelector(':scope > text[name="label"]').getBoundingClientRect()
        sboxes.push({ rect: sbox, elt: zel, genome: sgenome })
        //
        const boxes = [] // list of feature bounding boxes
@@ -131,10 +138,16 @@ export default MComponent({
         const feats = rel.querySelectorAll(fselector)
         feats.forEach(fel => {
           //
-          if (fel.classList.contains('selected')) clickedFeatures.push(fel.getBoundingClientRect())
-          //
           const fid = fel.getAttribute('name')
           const f = this.dataManager().getFeatureById(fid)
+          //
+          vhfs.add(f)
+          this.dataManager().getHomologs(f).forEach(h => {
+              allHoms.add(h)
+          })
+          if (fel.classList.contains('selected')) {
+              clickedFeatures.push(fel.getBoundingClientRect())
+          }
           //
           const rect = fel.querySelector('.feature > rect').getBoundingClientRect()
           rect.strand = fel.getAttribute('strand')
@@ -143,10 +156,6 @@ export default MComponent({
           // Each node has a feature, a rectangle, and a reachable set.
           boxes.push({fel: fel, rect:rect, feature:f, reachable: (new Set())})
           //
-          vhfs.add(f)
-          this.dataManager().getHomologs(f).forEach(h => {
-              allHoms.add(h)
-          })
         }) // features
        }) // regions
       }) // strips
@@ -163,8 +172,8 @@ export default MComponent({
       }, {})
       this.invisHomologs = sboxes.map(sb => {
         return {
-          x: sb.rect.x,
-          y: sb.rect.y - 14,
+          x: sb.rect.x + sb.rect.width + 16,
+          y: sb.rect.y,
           feats: Array.from(invisGrouped[sb.genome.name] || [])
         }
       })
