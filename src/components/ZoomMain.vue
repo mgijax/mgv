@@ -3,6 +3,7 @@
     class="zoom-main"
     :height="height"
     @click="clicked($event)"
+    @wheel="wheeled"
     >
     <!-- underlay -->
     <rect
@@ -78,6 +79,13 @@ export default MComponent({
     }
   },
   methods: {
+    wheeled: function (e) {
+        if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
+            return
+        }
+        e.stopPropagation()
+        e.preventDefault()
+    },
     clicked: function (e) {
       if (!e.shiftKey && e.target.classList.contains('underlay')) this.$root.$emit('clear-selection')
     },
