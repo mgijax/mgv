@@ -143,7 +143,7 @@ export default MComponent({
           //
           vhfs.add(f)
           this.dataManager().getHomologs(f).forEach(h => {
-              allHoms.add(h)
+              if (this.app.currentSelectionSet.has(h.cID) || this.app.currentMouseoverSet.has(h.cID)) allHoms.add(h)
           })
           if (fel.classList.contains('selected')) {
               clickedFeatures.push(fel.getBoundingClientRect())
