@@ -138,6 +138,7 @@ import MButton from '@/components/MButton'
 import MMenuItem from '@/components/MMenuItem'
 import GenomeSelector from '@/components/GenomeSelector'
 import gc from '@/lib/GenomeCoordinates'
+import u from '@/lib/utils'
 export default MComponent({
   name: 'ZoomControls',
   components: { MButton, MMenuItem, GenomeSelector },
@@ -203,10 +204,10 @@ export default MComponent({
     },
     findLandmark (n) {
       if (!n) return
-      const fs = n.replaceAll(",", " ").trim().split(/\s+/).map(nn => {
+      const fs = u.flatten(n.replaceAll(",", " ").trim().split(/\s+/).map(nn => {
         const fss = this.dataManager().getFeaturesBy(nn.trim())
-        return fss.filter(f => this.app.vGenomes.indexOf(f.genome) !== -1)[0]
-      }).filter(x => x)
+        return fss.filter(f => this.app.vGenomes.indexOf(f.genome) !== -1)
+      }))
       if (fs.length > 0) {
         this.$root.$emit('region-change', { op : 'feature-align', features: fs })
       } else {
