@@ -931,10 +931,8 @@ export default MComponent({
       // Promise for the feature data
       dataPromises.push( this.dataManager().getGenes(r.genome, r.chr, r.start - delta, r.end + delta, this.showDetails).then(feats => {
         this.features = feats.filter(f => this.getFacets().test(f, 'feature'))
-      }).catch( reason => {
-        u.debug("Error in Feature promise. " + reason)
-        this.features = []
-      }) )
+        return
+      }))
       // Promise for sequence string
       if (this.showSequence) {
         dataPromises.push( this.dataManager().getSequence(r.genome, r.chr, r.start - delta, r.end + delta).then(data => {
@@ -1023,30 +1021,11 @@ export default MComponent({
         this.absorbNextClick = false
         return
       }
-      if (e.altKey) {
-        this.altClicked(e)
-        return
-      }
       let f = this.getEventObjects(e)
       if (f) {
         this.$root.$emit('feature-click', { region: this.region, feature: f.feature, transcript: f.transcript, event: e })
         e.stopPropagation()
-      }
-    },
-    altClicked: function (e) {
-      let f = this.getEventObjects(e)
-      if (f) {
-        // alt clicked on a feature
-        this.$root.$emit('region-change', {
-          op : 'feature-align',
-          region: this.region,
-          feature: f.feature,
-          transcript: f.transcript,
-          event: e,
-          basePos: this.clientXtoBase(e.clientX)
-        })
-        e.stopPropagation()
-      } else {
+      } else if (e.altKey) {
         // alt clicked on region background
         // split region at that point
         const regionRect = this.$refs.underlay.getBoundingClientRect()
@@ -1144,7 +1123,7 @@ export default MComponent({
       this.getFeatures()
     }
     this.cbSelectionState = () => {
-      this.getFeatures()
+      // this.getFeatures()
     }
     //
     this.$root.$on('facet-state', this.cbFacetState)
