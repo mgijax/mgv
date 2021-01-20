@@ -116,6 +116,18 @@ export default MComponent({
       }
     },
     //
+    clipBoxAtRegionBoundary (fel, rel) {
+        const box = fel.getBoundingClientRect()
+        const cbox = rel.__vue__.$refs.underlay.getBoundingClientRect()
+        const x = Math.max(box.x, cbox.x)
+        const y = Math.max(box.y, cbox.y)
+        const right = Math.min(box.x + box.width, cbox.x + cbox.width)
+        const bottom = Math.min(box.y + box.height, cbox.y + cbox.height)
+        const width = right - x
+        const height = bottom - y
+        return { x, y, width, height }
+    },
+    //
     getGraphNodes () {
       const pel = this.$parent.$el
       if (!pel) return []
@@ -134,7 +146,9 @@ export default MComponent({
        const boxes = [] // list of feature bounding boxes
        boxesByStrip.push(boxes)
        zel.querySelectorAll('.zoom-region').forEach(rel => {
+        // const rvm = rel.__vue__ // the ZoomRegion object
         const rev = rel.classList.contains('reversed')
+
         const feats = rel.querySelectorAll(fselector)
         feats.forEach(fel => {
           //
@@ -146,10 +160,10 @@ export default MComponent({
               if (this.app.currentSelectionSet.has(h.cID) || this.app.currentMouseoverSet.has(h.cID)) allHoms.add(h)
           })
           if (fel.classList.contains('selected')) {
-              clickedFeatures.push(fel.getBoundingClientRect())
+              clickedFeatures.push(this.clipBoxAtRegionBoundary(fel, rel))
           }
           //
-          const rect = fel.querySelector('.feature > rect').getBoundingClientRect()
+          const rect = this.clipBoxAtRegionBoundary(fel.querySelector('.feature > rect'), rel)
           rect.strand = fel.getAttribute('strand')
           if (rev) rect.strand = rect.strand === '+' ? '-' : '+'
           //
