@@ -1031,6 +1031,7 @@ export default MComponent({
         const regionRect = this.$refs.underlay.getBoundingClientRect()
         const px = e.clientX - regionRect.left
         this.$root.$emit('region-change', { region: this.region, op: 'split', pos: px / regionRect.width })
+        e.stopPropagation()
       }
     },
     // Turns wheel (left/right) events into drags.
