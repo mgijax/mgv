@@ -35,11 +35,15 @@
         fill="none"
         />
     </g>
-    <!-- invisible homologs -->
+    <!-- invisible homologs : when there's a visible gene that's been selected (or moused over) and another genome
+         has a homolog that's not visible, alert the user by showing a warning message. Consists of a glyph and
+         a message like "Not visible: Abc1, Def2a1, ..." This group is positioned to the right of the genome's name.
+    -->
     <g
       v-for="(h,k) in invisHomologs"
       :key="'inv_'+k"
       >
+        <title>This genome contains off-screen homologs of highlighted genes. Click to bring into view.</title>
         <g
           v-if="h.feats.length > 0"
           :transform="`translate(${h.x},${h.y + 4})`"
@@ -52,6 +56,8 @@
             stroke="gray"
             stroke-width="1"
             fill="rgb(52, 255, 154)"
+            style="cursor : pointer;"
+            @click.stop="clicked"
             ></rect>
           <text 
             :x="3"
@@ -93,6 +99,9 @@ export default MComponent({
     }
   },
   methods: {
+    clicked () {
+        this.$root.$emit('region-change', { op : 'feature-align', features: this.app.currentSelection })
+    },
     translate () {
       if (!this.$parent.$el) return ''
       let pbb = this.$parent.$el.getBoundingClientRect()
