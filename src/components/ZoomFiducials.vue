@@ -80,7 +80,7 @@
       v-for="(h,k) in messages"
       :key="'inv_2_'+k"
       >
-        <title>This genome has no homologs for selected genes.</title>
+        <title>This genome has no homologs for some highlighted genes.</title>
         <g
           v-if="h.missing.length > 0"
           :transform="`translate(${h.x + h.delta},${h.y + (h.height - 13)/2 - 1})`"
@@ -90,7 +90,7 @@
             :y="10"
             text-anchor="left"
             style="font-size: 12px; font-family: sans-serif;" 
-            ><tspan font-size="16" dy="2">⚠</tspan><tspan dy="-2">No homologs: {{ h.missing }}</tspan></text>
+            ><tspan font-size="16" dy="2">⚠</tspan><tspan dy="-2">No homologs for: {{ h.missing }}</tspan></text>
         </g>
     </g>
   </g>
@@ -175,32 +175,31 @@ export default MComponent({
        const boxes = [] // list of feature bounding boxes
        boxesByStrip.push(boxes)
        zel.querySelectorAll('.zoom-region').forEach(rel => {
-        // const rvm = rel.__vue__ // the ZoomRegion object
-        const rev = rel.classList.contains('reversed')
-        const feats = rel.querySelectorAll(fselector)
-        // For each visible, highlighted feature
-        feats.forEach(fel => {
-          // get the feature model object and add to vhf set
-          const fid = fel.getAttribute('name')
-          const f = this.dataManager().getFeatureById(fid)
-          vhfs.add(f)
-          // Given a visible, highlighted feature, only care about its homologs that are also in the highlighted set.
-          this.dataManager().getHomologs(f).forEach(h => {
-              if (this.app.currentSelectionSet.has(h.cID) || this.app.currentMouseoverSet.has(h.cID)) allHoms.add(h)
-          })
-          // Keep track of which specific features to draw a box around (the ones actually clicked)
-          if (fel.classList.contains('selected')) {
-              clickedFeatures.push(this.clipBoxAtRegionBoundary(fel, rel))
-          }
-          // Add descriptor for feature.
-          const rect = this.clipBoxAtRegionBoundary(fel.querySelector('.feature > rect'), rel)
-          rect.strand = fel.getAttribute('strand')
-          if (rev) rect.strand = rect.strand === '+' ? '-' : '+'
-          //
-          // Each node has a feature, a rectangle, and a reachable set.
-          boxes.push({fel: fel, rect:rect, feature:f, reachable: (new Set())})
-          //
-        }) // features
+         const rev = rel.classList.contains('reversed')
+         const feats = rel.querySelectorAll(fselector)
+         // For each visible, highlighted feature
+         feats.forEach(fel => {
+           // get the feature model object and add to vhf set
+           const fid = fel.getAttribute('name')
+           const f = this.dataManager().getFeatureById(fid)
+           vhfs.add(f)
+           // Given a visible, highlighted feature, only care about its homologs that are also in the highlighted set.
+           this.dataManager().getHomologs(f).forEach(h => {
+               if (this.app.currentSelectionSet.has(h.cID) || this.app.currentMouseoverSet.has(h.cID)) allHoms.add(h)
+           })
+           // Keep track of which specific features to draw a box around (the ones actually clicked)
+           if (fel.classList.contains('selected')) {
+               clickedFeatures.push(this.clipBoxAtRegionBoundary(fel, rel))
+           }
+           // Add descriptor for feature.
+           const rect = this.clipBoxAtRegionBoundary(fel.querySelector('.feature > rect'), rel)
+           rect.strand = fel.getAttribute('strand')
+            if (rev) rect.strand = rect.strand === '+' ? '-' : '+'
+           //
+           // Each node has a feature, a rectangle, and a reachable set.
+           boxes.push({fel: fel, rect:rect, feature:f, reachable: (new Set())})
+           //
+         }) // features
        }) // regions
       }) // strips
 
