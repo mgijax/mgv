@@ -43,6 +43,15 @@ export default [{
           Alternative: for any gene currently being displayed, option-click on it.
           `
       }, {
+      label: `View two or more gene and their homologs`,
+      text: `
+          Example: view the structure of Pax2, Pax4, and Pax6 in C57BL/6J, M. caroli, and human.
+          <ol>
+          <li> Select the three genomes. <li> Type "Pax2 Pax4 Pax6" into to the "Find" box and hit return.</ol>
+          <a href="#regions=C57BL/6J::19:44650612..44934258/157,6:28434067..28457619/157,2:105639381..105727925/157|CAROLI/EiJ::19:41317435..41601081/157,6:23286968..23310520/157,2:99105819..99194363/157|H.%20sapiens::10:100640847..100924493/157,7:127602441..127625993/157,11:31759221..31847765/157&highlight=MGI:97486,HGNC:8616,MGI:97488,HGNC:8618,MGI:97490,HGNC:8620&lock=on&paralogs=off&style=gg:40,tg:6,fd:3,fl:1,ff:10,fh:10,tx:0,pl:1,tc:0,h:1,ho:0.05,hi:1,hc:0">See result</a>.
+          Alternative: shift-option-click on multiple genes
+          `
+      }, {
       label: `View a reference region and related regions.
         `,
       text: `Example: view the region 3:18511623..20827190 in C57BL/6J (this is 1.5 Mb around Trim55) and the corresponding regions in human.
@@ -138,7 +147,12 @@ export default [{
           Information such as the genome build number is displayed when you mouse over a
           genome's name in the ${ref('Genomes')} box. 
           `
-      }, {
+      }]
+  }, {
+    name: `Regions`,
+    description: `
+        `,
+    items: [{
       label: `Add regions to the view`,
       text: `Adding a genome creates a new region.
           To add another region for the same genome, shift-drag on a chromosome in the GenomeView.
@@ -190,6 +204,41 @@ export default [{
           neighboring regions.
           `
     }]
+  }, {
+    name: `Homologs`,
+    description: `
+      MGV uses homology relationships between genes to draw connections, to calculate what regions to display, 
+      and other stuff. MGV distinguishes three kinds of homology relationships:
+      <ol>
+      <li>Orthologs. Homology assertions between genes of different species come from the 
+      Alliance of Genome Resources (stringent set).
+      <li>(Inferred) paralogs. Homology assertions between different genes in the same species are inferred
+      from common orthology. Inference of paralogs depends on the set of species you are currently viewing and is 
+      calculated on the fly. You can control whether or not inferred paralogs are used by
+      clicking the <span style="color: rgb(255, 127, 14); font-weight: bold;">P</span> icon in the control area next to the Find box.
+      <li>Genologs. Assertions of gene equivalence across genomes within a species
+      is accomplished by shared canonical identifiers, eg, MGI ids for the annotated inbred strains.
+      </ol>
+       `,
+    items: [{
+      label: `Connections`,
+      text: `MGV draws connections between equivalent genes in neighboring strips when you mouse over or click on them. When the strips are from different species, connections are drawn from a gene to all orthologs in the view. When the strips are from the same species (eg different mouse strains), connections are drawn from a gene to the same gene only (P off), or to the same gene and all its paralogs (P on). Note that connections are only drawn between features that are already in view. To be certain you are seeing all paralogs, you should align on that gene (see below).
+      If a genome does <u>not</u> have a homolog to a gene that is highlighted, a warning message is displayed.
+      Similarly, a warning is displayed if a genome <u>does</u> have a homolog that is currently not in view.
+      `
+    }, {
+      label: `Align on a gene`,
+      text: `Alt-click (or option-click) on a gene. Determines regions to draw based on equivalence to the clicked feature. In a different species, regions include all orthologs. In the same species, regions include the same gene only (P off) or that gene and its paralogs (P on).
+      If a genome does not have a homolog of the clicked gene, a warning message is displayed and the the genome shows nothing.
+      `
+    }, {
+      label: `Searching`,
+      text: `Enter a gene's symbol or ID in the Find box. Essentially does a lookup followed by an alignment. See Align on a gene.`,
+    }, {
+      label: `Picking sequences`,
+      text: `When you open a feature's menu (right-click or control-click on the feature), there are options to add various sequences to your sequence cart. The options under 'This gene and all homologs' are sensitive to whether P is on or off.
+        `,
+    }]
   }, {  
     name: `Modes`,
     description: `MGV has three modes which determine how the displayed regions are calculated and how actions synchronize (or not).
@@ -217,52 +266,22 @@ export default [{
       `
     }]
 
-  }, {
-    name: `Homologs`,
-    description: `
-      MGV uses homology relationships to draw connections, to calculate what regions to display, 
-      and other stuff. MGV distinguishes three kinds of homology relationships:
-      <ol>
-      <li>Orthologs. Homology assertions between genes of different species come from the 
-      Alliance of Genome Resources (stringent set).
-      <li>(Inferred) paralogs. Homology assertions between different genes in the same species are inferred
-      from common orthology. Inference of paralogs depends on the set of species you are viewing and is 
-      calculated on the fly. You can control whether or not inferred paralogs are used by
-      clicking the <span style="color: rgb(255, 127, 14); font-weight: bold;">P</span> icon in the control area next to the Find box.
-      <li>Genologs. Assertions of gene equivalence across genomes within a species
-      is accomplished by shared canonical identifiers, eg, MGI ids for the annotated inbred strains.
-      </ol>
-       `,
-    items: [{
-      label: `Connections`,
-      text: `MGV draws connections between equivalent genes in neighboring strips when you mouse over or click on them. When the strips are from different species, connections are drawn from a gene to all orthologs in the view. When the strips are from the same species (eg different mouse strains), connections are drawn from a gene to the same gene only (P off), or to the same gene and all its paralogs (P on). Note that connections are only drawn between features that are already in view. To be certain you are seeing all paralogs, you should align on that gene (see below).
-      `
-    }, {
-      label: `Align on a gene`,
-      text: `Alt-click (or option-click) on a gene. Determines regions to draw based on equivalence to the clicked feature. In a different species, regions include all orthologs. In the same species, regions include the same gene only (P off) or that gene and its paralogs (P on).
-      `
-    }, {
-      label: `Searching`,
-      text: `Enter a gene's symbol or ID in the Find box. Essentially does a lookup followed by an alignment. See Align on a gene.`,
-    }, {
-      label: `Picking sequences`,
-      text: `When you open a feature's menu (right-click or control-click on the feature), there are options to add various sequences to your sequence cart. The options under 'This gene and all homologs' are sensitive to whether P is on or off.
-        `,
-    }]
   }, {  
     name: `Navigation`,
     description: ``,
     items: [{
       label: `Jump to a gene`,
-      text: `Enter the gene symbol or ID in the Find input box at the top of
-      the ${ref('ZoomView')}. Then hit enter or tab. Also lines up view on that gene.
+      text: `Enter the gene symbol or ID in the Find box at the top of
+      the ${ref('ZoomView')}. Then hit enter or tab. Lines up the view on that gene.
+      You can enter multiple symbols/IDs separated by commas and/or spaces to align view the around multiple genes.
       `
     }, {
       label: `Line up on a gene`,
       text: `
-        Alt-click (option-click) on a gene to align all genome views around that gene and its homologs.
+        You can option-click (alt-click) on a gene to align the view around that gene or its homologs in all genomes.
         Hold down the command/meta key (or not) to scale the region sizes.
         Scaling can help when the homologs are of very different sizes.
+        If a genome does not have a homolog of the clicked gene, a warning message is displayed and the genome displays nothing.
             `
     }, {
       label: `Specify coordinates`,
@@ -400,7 +419,6 @@ export default [{
         Your current lists plus controls for creating new lists are
         available under ${ref('Gene lists')}. You can create lists by selecting specific
         genes, by entering a list of symbols or IDs, or by searching a disease, phenotype or other category.
-        <span style="color: red;">Note that lists created by searching are limited to mouse only.</span>
         `,
     items: [{
       label: `Create from MouseMine search`,
@@ -409,6 +427,7 @@ export default [{
           assist in finding appropriate search terms/IDs. The results are shown as a new list entry.
           If your category term retured no or unexpected results, check 
           <a href="http://www.mousemine.org/" target="_blank">MouseMine</a> for term usage.
+          <span style="color: red;">Note that lists created by searching MouseMine are limited to mouse only.</span>
           `
       }, {
       label: `Create from selection`,
