@@ -333,6 +333,7 @@ export default MComponent({
       const cHomIds = new Set(u.flatten(cHoms).map(f => f.cID || f.ID))
       return Array.from(cHomIds)
     },
+    // Returns the set of canonical IDs homologous to anything in the current selection
     currentSelectionSet: function () {
       const sids = u.flatten(this.currentSelection.map(f => this.dataManager.getHomologCids(f)))
       return new Set(sids)
@@ -342,6 +343,7 @@ export default MComponent({
       ids.sort()
       return ids.join(", ")
     },
+    // Returns the set of canonical IDs homologous to the current mouseover.
     currentMouseoverSet: function () {
       if (this.currentMouseover) {
         const f = this.currentMouseover
@@ -349,6 +351,22 @@ export default MComponent({
       } else {
         return new Set()
       }
+    },
+    // 
+    missingByGenome: function () {
+        const feats = this.currentSelection.concat(this.currentMouseover ? [this.currentMouseover] : [])
+        const g2missing = this.vGenomes.reduce((m,g) => {
+            const gmissing = new Set()
+            m.set(g, gmissing)
+            feats.forEach(f => {
+                const fhoms = this.dataManager.getHomologs(f, g)
+                if (fhoms.length === 0) {
+                    gmissing.add(f.symbol || f.cID || f.ID)
+                }
+            })
+            return m
+        }, new Map())
+        return g2missing
     },
     agIndex: function () {
       return this.allGenomes.reduce((ix, g) => { ix[g.name] = g; return ix }, {})

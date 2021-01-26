@@ -40,13 +40,13 @@
          a message like "Not visible: Abc1, Def2a1, ..." This group is positioned to the right of the genome's name.
     -->
     <g
-      v-for="(h,k) in invisHomologs"
+      v-for="(h,k) in messages"
       :key="'inv_'+k"
       >
         <title>This genome contains off-screen homologs of highlighted genes. Click to bring into view.</title>
         <g
-          v-if="h.feats.length > 0"
-          :transform="`translate(${h.x},${h.y + 4})`"
+          v-if="h.invisHomologs.length > 0"
+          :transform="`translate(${h.x},${h.y + (h.height - 13)/2 - 1})`"
           >
           <rect
             :x="0"
@@ -71,7 +71,26 @@
             :y="10"
             text-anchor="left"
             style="font-size: 12px; font-family: sans-serif;" 
-            >Not visible: {{ h.feats.join(", ") }}</text>
+            >Not visible: {{ h.invisHomologs }}</text>
+        </g>
+    </g>
+    <!-- No homolog.
+    -->
+    <g
+      v-for="(h,k) in messages"
+      :key="'inv_2_'+k"
+      >
+        <title>This genome has no homologs for selected genes.</title>
+        <g
+          v-if="h.missing.length > 0"
+          :transform="`translate(${h.x + h.delta},${h.y + (h.height - 13)/2 - 1})`"
+          >
+          <text 
+            :x="0"
+            :y="10"
+            text-anchor="left"
+            style="font-size: 12px; font-family: sans-serif;" 
+            ><tspan font-size="16" dy="2">⚠</tspan><tspan dy="-2">No homologs: {{ h.missing }}</tspan></text>
         </g>
     </g>
   </g>
@@ -90,7 +109,7 @@ export default MComponent({
       clickedFeatures: [], // list of features the user clicked on`
       edges: [], // edges to draw. List of (box1, box2) where box1 and box2 are the
                  // bounding boxes of the features to be joined
-      invisHomologs: [] // list of off-screen features that are homologs of current visible highlighted features
+      messages: [] // list of off-screen features that are homologs of current visible highlighted features
     }
   },
   computed: {
@@ -146,6 +165,7 @@ export default MComponent({
       const vhfs = new Set() // visible highlighted features
       const allHoms = new Set() // all homologs of vhfs
       const sboxes = [] // list of zoom strip bounding boxes
+      const m_by_g = this.app.missingByGenome
       pel.querySelectorAll('.zoom-strip').forEach(zel => {
        //
        const sgenome = this.dataManager().getGenomeByName(zel.getAttribute('name'))
@@ -157,21 +177,22 @@ export default MComponent({
        zel.querySelectorAll('.zoom-region').forEach(rel => {
         // const rvm = rel.__vue__ // the ZoomRegion object
         const rev = rel.classList.contains('reversed')
-
         const feats = rel.querySelectorAll(fselector)
+        // For each visible, highlighted feature
         feats.forEach(fel => {
-          //
+          // get the feature model object and add to vhf set
           const fid = fel.getAttribute('name')
           const f = this.dataManager().getFeatureById(fid)
-          //
           vhfs.add(f)
+          // Given a visible, highlighted feature, only care about its homologs that are also in the highlighted set.
           this.dataManager().getHomologs(f).forEach(h => {
               if (this.app.currentSelectionSet.has(h.cID) || this.app.currentMouseoverSet.has(h.cID)) allHoms.add(h)
           })
+          // Keep track of which specific features to draw a box around (the ones actually clicked)
           if (fel.classList.contains('selected')) {
               clickedFeatures.push(this.clipBoxAtRegionBoundary(fel, rel))
           }
-          //
+          // Add descriptor for feature.
           const rect = this.clipBoxAtRegionBoundary(fel.querySelector('.feature > rect'), rel)
           rect.strand = fel.getAttribute('strand')
           if (rev) rect.strand = rect.strand === '+' ? '-' : '+'
@@ -183,9 +204,9 @@ export default MComponent({
        }) // regions
       }) // strips
 
-      // compute invisible homologs of vhfs, grouped by genome
-      // Then emit the resulting Map
+      // compute invisible homologs of vhfs
       const invis = Array.from(allHoms).filter(h => !vhfs.has(h))
+      // group by genome
       const invisGrouped = invis.reduce((m,f) => {
           if (! m[f.genome.name]) {
             m[f.genome.name] = new Set()
@@ -193,11 +214,17 @@ export default MComponent({
           m[f.genome.name].add(f.symbol || f.cID || f.ID)
           return m
       }, {})
-      this.invisHomologs = sboxes.map(sb => {
+      // generate list of descriptors for drawing the warning messages.
+      this.messages = sboxes.map(sb => {
+        const feats = Array.from(invisGrouped[sb.genome.name] || []).join(", ")
+        const missing = (Array.from(m_by_g.get(sb.genome)) || []).join(", ")
         return {
           x: sb.rect.x + sb.rect.width + 16,
           y: sb.rect.y,
-          feats: Array.from(invisGrouped[sb.genome.name] || [])
+          height: sb.rect.height,
+          invisHomologs: feats,
+          missing: missing,
+          delta: feats.length === 0 ? 0 : 0.6*((feats.length+12) * 12)
         }
       })
       ////
