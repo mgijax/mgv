@@ -639,14 +639,6 @@ class RegionManager {
               // couldn't find landmark
               this.app.$root.$emit('message', { message : `Feature ${lcoords.lfeature.symbol} not found in ${g.name}.` })
               return { genome: g, regions: [] }
-              /*
-              // if genome already being displayed, return current regions unchanged
-              const cstrip = this.findStrip(g)
-              if (cstrip >= 0) return this.app.strips[cstrip]
-              // final fallback: mapping 
-              const mr = this.mapLandmarkRegion(lcoords, g)
-              return mr
-              */
             })
           })
           return Promise.all(ps)

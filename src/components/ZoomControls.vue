@@ -120,7 +120,7 @@
         <span v-if="app.currentSelectionLabel.length > 0">
           <m-button
             icon="highlight_off"
-            title="Click to clear current list."
+            title="Click to deselect."
             color="red"
             @click="clearSelection"
             style="font-size: 12px;"
