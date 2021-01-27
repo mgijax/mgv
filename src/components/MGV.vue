@@ -352,7 +352,7 @@ export default MComponent({
         return new Set()
       }
     },
-    // 
+    // Returns a Map from genome to the Set of currently selected features for which the genome contains no homolog
     missingByGenome: function () {
         const feats = this.currentSelection.concat(this.currentMouseover ? [this.currentMouseover] : [])
         const g2missing = this.vGenomes.reduce((m,g) => {

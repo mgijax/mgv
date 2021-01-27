@@ -166,42 +166,50 @@ export default MComponent({
       const allHoms = new Set() // all homologs of vhfs
       const sboxes = [] // list of zoom strip bounding boxes
       const m_by_g = this.app.missingByGenome
+      // For each genome / ZoomStrip
       pel.querySelectorAll('.zoom-strip').forEach(zel => {
-       //
-       const sgenome = this.dataManager().getGenomeByName(zel.getAttribute('name'))
-       const sbox = zel.querySelector(':scope > text[name="label"]').getBoundingClientRect()
-       sboxes.push({ rect: sbox, elt: zel, genome: sgenome })
-       //
-       const boxes = [] // list of feature bounding boxes
-       boxesByStrip.push(boxes)
-       zel.querySelectorAll('.zoom-region').forEach(rel => {
-         const rev = rel.classList.contains('reversed')
-         const feats = rel.querySelectorAll(fselector)
-         // For each visible, highlighted feature
-         feats.forEach(fel => {
-           // get the feature model object and add to vhf set
-           const fid = fel.getAttribute('name')
-           const f = this.dataManager().getFeatureById(fid)
-           vhfs.add(f)
-           // Given a visible, highlighted feature, only care about its homologs that are also in the highlighted set.
-           this.dataManager().getHomologs(f).forEach(h => {
-               if (this.app.currentSelectionSet.has(h.cID) || this.app.currentMouseoverSet.has(h.cID)) allHoms.add(h)
-           })
-           // Keep track of which specific features to draw a box around (the ones actually clicked)
-           if (fel.classList.contains('selected')) {
-               clickedFeatures.push(this.clipBoxAtRegionBoundary(fel, rel))
-           }
-           // Add descriptor for feature.
-           const rect = this.clipBoxAtRegionBoundary(fel.querySelector('.feature > rect'), rel)
-           rect.strand = fel.getAttribute('strand')
+        // Get the genome model object and get the reference bounding box for positioning warning messages
+        const sgenome = this.dataManager().getGenomeByName(zel.getAttribute('name'))
+        const sbox = zel.querySelector(':scope > text[name="label"]').getBoundingClientRect()
+        sboxes.push({ rect: sbox, elt: zel, genome: sgenome })
+        // Keep track of the bounding boxes of highlighted features, per genome
+        const boxes = [] // list of feature bounding boxes
+        boxesByStrip.push(boxes)
+        // For each region within this strip
+        zel.querySelectorAll('.zoom-region').forEach(rel => {
+          //
+          const rev = rel.classList.contains('reversed')
+          // For each visible, highlighted feature in this region
+          const feats = rel.querySelectorAll(fselector)
+          feats.forEach(fel => {
+            // get the feature model object and add to vhf set
+            const fid = fel.getAttribute('name')
+            const f = this.dataManager().getFeatureById(fid)
+            vhfs.add(f)
+            // Given a visible, highlighted feature, only care about its homologs that are also in the highlighted set.
+            this.dataManager().getHomologs(f).forEach(h => {
+                if (this.app.currentSelectionSet.has(h.cID) || this.app.currentMouseoverSet.has(h.cID)) allHoms.add(h)
+            })
+            // Keep track of which specific features to draw a box around (the ones actually clicked)
+            if (fel.classList.contains('selected')) {
+                clickedFeatures.push(this.clipBoxAtRegionBoundary(fel, rel))
+            }
+            // Add descriptor for feature.
+            const rect = this.clipBoxAtRegionBoundary(fel.querySelector('.feature > rect'), rel)
+            rect.strand = fel.getAttribute('strand')
             if (rev) rect.strand = rect.strand === '+' ? '-' : '+'
-           //
-           // Each node has a feature, a rectangle, and a reachable set.
-           boxes.push({fel: fel, rect:rect, feature:f, reachable: (new Set())})
-           //
-         }) // features
-       }) // regions
+            //
+            // Add descriptor for this feature to the list for this strip
+            boxes.push({fel: fel, rect:rect, feature:f, reachable: (new Set())})
+            //
+          }) // features
+        }) // regions
       }) // strips
+
+      // Remove empty lists then sort by strip y-position.
+      const boxesByStrip2 = boxesByStrip.filter(x => x.length > 0)
+      boxesByStrip2.sort((a,b) => a[0].rect.y - b[0].rect.y)
+      this.clickedFeatures = clickedFeatures
 
       // compute invisible homologs of vhfs
       const invis = Array.from(allHoms).filter(h => !vhfs.has(h))
@@ -215,23 +223,18 @@ export default MComponent({
       }, {})
       // generate list of descriptors for drawing the warning messages.
       this.messages = sboxes.map(sb => {
-        const feats = Array.from(invisGrouped[sb.genome.name] || []).join(", ")
+        const invis = Array.from(invisGrouped[sb.genome.name] || []).join(", ")
         const missing = (Array.from(m_by_g.get(sb.genome)) || []).join(", ")
         return {
           x: sb.rect.x + sb.rect.width + 16,
           y: sb.rect.y,
           height: sb.rect.height,
-          invisHomologs: feats,
+          invisHomologs: invis,
           missing: missing,
-          delta: feats.length === 0 ? 0 : 0.6*((feats.length+12) * 12)
+          delta: invis.length === 0 ? 0 : 0.6*((invis.length+12) * 12)
         }
       })
-      ////
-
-      // Remove empty lists then sort by strip y-position.
-      const boxesByStrip2 = boxesByStrip.filter(x => x.length > 0)
-      boxesByStrip2.sort((a,b) => a[0].rect.y - b[0].rect.y)
-      this.clickedFeatures = clickedFeatures
+      //
       return boxesByStrip2
     },
     //
