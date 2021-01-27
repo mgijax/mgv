@@ -423,14 +423,14 @@ export default MComponent({
     },
     tickPositions: function () {
       const r = this.region
-      const nticks = Math.floor(r.width / 20)
+      const nticks = Math.floor(r.width / 30)
       const l = r.end - r.start + 1
       const bounds = u.niceBounds(r.start - l/2, r.end + l/2, nticks)
       const ticks = []
       for (let x = bounds.min; x <= bounds.max; x += bounds.steps) ticks.push(x)
-      return ticks.map((x,i) => {
+      return ticks.map((x) => {
         return {
-          label: i%2 ? '' : u.prettyPrintBases(x, true),
+          label: u.prettyPrintBases(x, true),
           px: this.b2p(x)
         }
       })
