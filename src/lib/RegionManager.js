@@ -637,7 +637,6 @@ class RegionManager {
               const lmr = this.computeLandmarkRegion(lcoords, g)
               if (lmr) return lmr
               // couldn't find landmark
-              this.app.$root.$emit('message', { message : `Feature ${lcoords.lfeature.symbol} not found in ${g.name}.` })
               return { genome: g, regions: [] }
             })
           })
