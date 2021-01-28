@@ -45,7 +45,7 @@
       >
         <title>This genome contains off-screen homologs of visible highlighted features. Click to bring into view.</title>
         <g
-          v-if="h.invisHomologs.length > 0"
+          v-if="h.invisHomologString.length > 0"
           :transform="`translate(${h.x},${h.y + (h.height - 13)/2 - 1})`"
           >
           <rect
@@ -57,7 +57,7 @@
             stroke-width="1"
             fill="rgb(52, 255, 154)"
             style="cursor : pointer;"
-            @click.stop="clicked"
+            @click.stop="clicked(h)"
             ></rect>
           <text 
             :x="3"
@@ -71,7 +71,7 @@
             :y="10"
             text-anchor="left"
             style="font-size: 12px; font-family: sans-serif;" 
-            >Not visible: {{ h.invisHomologs }}</text>
+            >Not visible: {{ h.invisHomologString }}</text>
         </g>
     </g>
     <!-- No homolog.
@@ -82,7 +82,7 @@
       >
         <title>This genome has no homologs for some highlighted genes.</title>
         <g
-          v-if="h.missing.length > 0"
+          v-if="h.missingString.length > 0"
           :transform="`translate(${h.x + h.delta},${h.y + (h.height - 13)/2 - 1})`"
           >
           <text 
@@ -90,7 +90,7 @@
             :y="10"
             text-anchor="left"
             style="font-size: 12px; font-family: sans-serif;" 
-            ><tspan font-size="16" dy="2">⚠</tspan><tspan dy="-2">No homologs for: {{ h.missing }}</tspan></text>
+            ><tspan font-size="16" dy="2">⚠</tspan><tspan dy="-2">No homologs for: {{ h.missingString }}</tspan></text>
         </g>
     </g>
   </g>
@@ -119,7 +119,12 @@ export default MComponent({
     }
   },
   methods: {
-    clicked () {
+    clicked (desc) {
+        for (let f of desc.invisHomologs) {
+            if (! this.app.csSet.has(f)) {
+               this.app.currentSelection.push(f)
+            }
+        }
         this.$root.$emit('region-change', { op : 'feature-align', features: this.app.currentSelection })
     },
     translate () {
@@ -227,27 +232,30 @@ export default MComponent({
           if (! m[f.genome.name]) {
             m[f.genome.name] = new Set()
           }
-          m[f.genome.name].add(f.symbol || f.cID || f.ID)
+          m[f.genome.name].add(f)
           return m
       }, {})
+
       // generate list of descriptors for drawing the warning messages.
       this.messages = sboxes.map(sb => {
-        const invis = Array.from(invisGrouped[sb.genome.name] || []).join(", ")
+        const invisHomologs =  Array.from(invisGrouped[sb.genome.name] || [])
+        const invisHomologString = invisHomologs.map(f => f.symbol || f.cID || f.ID).sort().join(", ")
         const gmissing = Array.from(this.app.missingByGenome.get(sb.genome) || []).filter(f => {
             for (let hf of this.dataManager().getHomologs(f)) {
                 if (vhfs.has(hf)) return true
             }
             return false
         })
-        const gmissingString = Array.from(new Set(gmissing.map(f => f.symbol || f.cID || f.ID))).sort().join(", ")
+        const missingString = Array.from(new Set(gmissing.map(f => f.symbol || f.cID || f.ID))).sort().join(", ")
         //
         return {
           x: sb.rect.x + sb.rect.width + 16,
           y: sb.rect.y,
           height: sb.rect.height,
-          invisHomologs: invis,
-          missing: gmissingString,
-          delta: invis.length === 0 ? 0 : 0.6*((invis.length+12) * 12)
+          invisHomologString: invisHomologString,
+          invisHomologs: invisHomologs,
+          missingString: missingString,
+          delta: invisHomologString.length === 0 ? 0 : 0.6*((invisHomologString.length+12) * 12)
         }
       })
       //
