@@ -43,7 +43,7 @@
       v-for="(h,k) in messages"
       :key="'inv_'+k"
       >
-        <title>This genome contains off-screen homologs of highlighted genes. Click to bring into view.</title>
+        <title>This genome contains off-screen homologs of visible highlighted features. Click to bring into view.</title>
         <g
           v-if="h.invisHomologs.length > 0"
           :transform="`translate(${h.x},${h.y + (h.height - 13)/2 - 1})`"
@@ -99,6 +99,7 @@
 <script>
 import MComponent from '@/components/MComponent'
 import config from '@/config'
+//import u from '@/lib/utils'
 export default MComponent({
   name: 'ZoomFiducials',
   props: ['height'],
@@ -165,7 +166,6 @@ export default MComponent({
       const vhfs = new Set() // visible highlighted features
       const allHoms = new Set() // all homologs of vhfs
       const sboxes = [] // list of zoom strip bounding boxes
-      const m_by_g = this.app.missingByGenome
       // For each genome / ZoomStrip
       pel.querySelectorAll('.zoom-strip').forEach(zel => {
         // Get the genome model object and get the reference bounding box for positioning warning messages
@@ -186,9 +186,11 @@ export default MComponent({
             const fid = fel.getAttribute('name')
             const f = this.dataManager().getFeatureById(fid)
             vhfs.add(f)
-            // Given a visible, highlighted feature, only care about its homologs that are also in the highlighted set.
+            //
             this.dataManager().getHomologs(f).forEach(h => {
-                if (this.app.currentSelectionSet.has(h.cID) || this.app.currentMouseoverSet.has(h.cID)) allHoms.add(h)
+                if (this.app.currentSelectionSet.has(h.cID)
+                || this.app.currentMouseoverSet.has(h.cID)
+                || this.app.currentListSet && this.app.currentListSet.has(h.cID)) allHoms.add(h)
             })
             // Keep track of which specific features to draw a box around (the ones actually clicked)
             if (fel.classList.contains('selected')) {
@@ -211,8 +213,15 @@ export default MComponent({
       boxesByStrip2.sort((a,b) => a[0].rect.y - b[0].rect.y)
       this.clickedFeatures = clickedFeatures
 
-      // compute invisible homologs of vhfs
-      const invis = Array.from(allHoms).filter(h => !vhfs.has(h))
+      // find all highlightable features that are (a) not in the visible highlighted set and (b) are homologs to something that is
+      const invis = Array.from(allHoms).filter(h => {
+          if (vhfs.has(h)) return false
+          for (let hh of this.dataManager().getHomologs(h)) {
+              if (vhfs.has(hh)) return true
+          }
+          return false
+      })
+
       // group by genome
       const invisGrouped = invis.reduce((m,f) => {
           if (! m[f.genome.name]) {
@@ -224,13 +233,20 @@ export default MComponent({
       // generate list of descriptors for drawing the warning messages.
       this.messages = sboxes.map(sb => {
         const invis = Array.from(invisGrouped[sb.genome.name] || []).join(", ")
-        const missing = (Array.from(m_by_g.get(sb.genome)) || []).join(", ")
+        const gmissing = Array.from(this.app.missingByGenome.get(sb.genome) || []).filter(f => {
+            for (let hf of this.dataManager().getHomologs(f)) {
+                if (vhfs.has(hf)) return true
+            }
+            return false
+        })
+        const gmissingString = Array.from(new Set(gmissing.map(f => f.symbol || f.cID || f.ID))).sort().join(", ")
+        //
         return {
           x: sb.rect.x + sb.rect.width + 16,
           y: sb.rect.y,
           height: sb.rect.height,
           invisHomologs: invis,
-          missing: missing,
+          missing: gmissingString,
           delta: invis.length === 0 ? 0 : 0.6*((invis.length+12) * 12)
         }
       })

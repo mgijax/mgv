@@ -324,6 +324,48 @@ export default MComponent({
     }
   },
   computed: {
+    // Returns the currentMouseover as a Set of (0 or 1) features
+    cmSet: function () {
+        return this.currentMouseover ? new Set([this.currentMouseover]) : new Set()
+    },
+    // Returns current mouseover and its homologs as a set of features
+    cmSetH: function () {
+        const h = this.currentMouseover ? this.dataManager.getHomologs(this.currentMouseover) : []
+        return new Set(h)
+    },
+    // returns current selection as a Set of features
+    csSet: function () {
+        return new Set(this.currentSelection)
+    },
+    // returns current selection and all their homologs (for currently visible genomes) as a Set of features
+    csSetH: function () {
+        const csHomologs = this.currentSelection.map(f => this.dataManager.getHomologs(f))
+        return new Set(u.flatten(csHomologs))
+    },
+    // Returns current list as a set of features
+    clSet : function () {
+        if (this.currentList && this.vGenomes) {
+            const feats = this.currentList.items.map(cid => this.dataManager.getFeaturesBy(cid))
+            return new Set(u.flatten(feats))
+        } else {
+            return new Set()
+        }
+    },
+    // Returns current list with their homologs as a set of features
+    clSetH : function () {
+        const ans = new Set()
+        for (let f of this.clSet) {
+            this.dataManager.getHomologs(f).forEach(h => ans.add(h))
+        }
+        return ans
+    },
+    // Returns set of features currently selected, moused over, or in current list.
+    cSet: function () {
+        return u.set.union(this.cmSet, this.csSet, this.clSet)
+    },
+    // 
+    // FIXME: refactor the existing calls
+    //
     currentSelectionToList: function () {
       const s = new Set(this.currentSelection.map(f => f.cID || f.ID))
       return Array.from(s)
@@ -354,14 +396,15 @@ export default MComponent({
     },
     // Returns a Map from genome to the Set of currently selected features for which the genome contains no homolog
     missingByGenome: function () {
-        const feats = this.currentSelection.concat(this.currentMouseover ? [this.currentMouseover] : [])
+        //const feats = this.currentSelection.concat(this.currentMouseover ? [this.currentMouseover] : [])
+        const feats = this.cSet
         const g2missing = this.vGenomes.reduce((m,g) => {
             const gmissing = new Set()
             m.set(g, gmissing)
             feats.forEach(f => {
                 const fhoms = this.dataManager.getHomologs(f, g)
                 if (fhoms.length === 0) {
-                    gmissing.add(f.symbol || f.cID || f.ID)
+                    gmissing.add(f)
                 }
             })
             return m

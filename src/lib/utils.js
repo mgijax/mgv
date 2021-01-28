@@ -464,6 +464,20 @@ const byChrStart = function (a, b) {
     }
 }
 // ---------------------------------------------
+const set = {
+    // Returns a new Set from the union of the argument Sets
+    union: function (...sets) {
+        return sets.reduce((ans, s) => {
+            s.forEach(item => ans.add(item))
+            return ans
+        }, new Set())
+    },
+    // Returns the set of values resulting from applying a function to every element in a set.
+    map: function(s, func) {
+        return new Set(Array.from(s).map(item => func(item)))
+    }
+}
+// ---------------------------------------------
 export default {
   afterTicks,
   assert,
@@ -484,6 +498,7 @@ export default {
   prettyPrintBases,
   randomColor,
   removeDups,
+  set,
   sortBy,
   uniqueItems,
   unselectAllText,
