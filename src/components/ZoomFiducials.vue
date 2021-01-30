@@ -35,74 +35,63 @@
         fill="none"
         />
     </g>
-    <!-- invisible homologs : when there's a visible gene that's been selected (or moused over) and another genome
-         has a homolog that's not visible, alert the user by showing a warning message. Consists of a glyph and
-         a message like "Not visible: Abc1, Def2a1, ..." This group is positioned to the right of the genome's name.
-    -->
     <g
       v-for="(h,k) in messages"
       :key="'inv_'+k"
       >
-        <title>This genome contains off-screen homologs of visible highlighted features. Click to bring into view.</title>
-        <g
-          v-if="h.invisHomologString.length > 0"
-          :transform="`translate(${h.x},${h.y + (h.height - 13)/2 - 1})`"
-          >
-          <rect
-            :x="0"
-            :y="0"
-            :width="12"
-            :height="12"
-            stroke="gray"
-            stroke-width="1"
-            fill="rgb(52, 255, 154)"
-            style="cursor : pointer;"
-            @click.stop="clicked(h)"
-            ></rect>
-          <text 
-            :x="3"
-            :y="10"
-            text-anchor="left"
-            style="font-size: 12px; font-weight: bold; font-family: sans-serif; pointer-events: none;"
-            fill="red"
-            >!</text>
-          <text 
-            :x="15"
-            :y="10"
-            text-anchor="left"
-            style="font-size: 12px; font-family: sans-serif;" 
-            >Not visible: {{ h.invisHomologString }}</text>
-        </g>
-    </g>
-    <!-- No homolog.
-    -->
-    <g
-      v-for="(h,k) in messages"
-      :key="'inv_2_'+k"
-      >
-        <title>This genome has no homologs for some highlighted genes.</title>
-        <g
-          v-if="h.missingString.length > 0"
-          :transform="`translate(${h.x + h.delta},${h.y + (h.height - 13)/2 - 1})`"
-          >
-          <text 
-            :x="0"
-            :y="10"
-            text-anchor="left"
-            style="font-size: 12px; font-family: sans-serif;" 
-            ><tspan font-size="16" dy="2">⚠</tspan><tspan dy="-2">No homologs for: {{ h.missingString }}</tspan></text>
-        </g>
+          <g @click.stop="clicked(h)">
+          <message-box
+              v-if="cfg.showWarnings && h.invisHomologString.length > 0"
+              :transform="`translate(${h.x},${h.y + (h.height - 13)/2 + 9})`"
+              :width="200"
+              :message="' Not visible: ' + h.invisHomologString"
+              title="This genome contains off-screen homologs of visible highlighted features. Click to bring into view."
+              style="cursor : pointer;"
+
+              :message-size="12"
+              message-color="black"
+              message-background="#eee"
+              message-border="none"
+              icon="⚠"
+              :icon-size="16"
+              icon-color="rgb(52, 255, 154)"
+              icon-background="black"
+              icon-border="rgb(52, 255, 154)"
+              />
+          </g>
+          <message-box
+              v-if="cfg.showWarnings && h.missingString.length > 0"
+              :transform="`translate(${h.x +  (h.invisHomologString.length ? 210 : 0)}, ${h.y + (h.height - 13)/2 + 9})`"
+              :width="200"
+              :message="' No homologs for: ' + h.missingString"
+              title="This genome has no homologs for some highlighted genes."
+
+              :message-size="12"
+              message-color="black"
+              message-background="#eee"
+              message-border="none"
+
+              icon="⚠"
+              :icon-size="16"
+              icon-color="yellow"
+              icon-background="black"
+              icon-border="yellow"
+              />
     </g>
   </g>
 </template>
 
 <script>
 import MComponent from '@/components/MComponent'
+import MessageBox from '@/components/MessageBox'
 import config from '@/config'
 //import u from '@/lib/utils'
 export default MComponent({
   name: 'ZoomFiducials',
   props: ['height'],
+  components: {
+      MessageBox
+  },
   inject: ['dataManager'],
   data: function () {
     return {
@@ -254,8 +243,7 @@ export default MComponent({
           height: sb.rect.height,
           invisHomologString: invisHomologString,
           invisHomologs: invisHomologs,
-          missingString: missingString,
-          delta: invisHomologString.length === 0 ? 0 : 0.6*((invisHomologString.length+12) * 12)
+          missingString: missingString
         }
       })
       //
@@ -287,18 +275,51 @@ export default MComponent({
           addEdges(node, i)
         })
       })
-      this.nodes = nstrips
       this.edges = edges
     }
   },
   mounted: function () {
-    const build2 = () => {
+    this.suspended = false
+    this.timeout = null
+    // 
+    this.build2 = () => {
+      if (this.suspended) return
       this.buildGraph()
-      window.setTimeout(() => this.buildGraph(), 300)
+      if (this.timeout) { window.clearTimeout(this.timeout) }
+      this.timeout = window.setTimeout(() => {
+          this.buildGraph()
+          this.timeout = null
+      }, 300)
     }
-    this.$root.$on('region-update', build2)
-    this.$root.$on('strip-move', build2)
-    this.$root.$on('zoom-main-updated', build2)
+    this.rds = () => {
+        if (! this.cfg.continuousUpdate) {
+            this.edges = []
+            this.clickedFeatures = []
+            this.suspended = true
+        }
+    }
+    this.rde = () => {
+        if (! this.cfg.continuousUpdate) {
+            this.suspended = false
+            this.build2()
+        }
+    }
+    this.$root.$on('region-update', this.build2)
+    this.$root.$on('strip-move', this.build2)
+    this.$root.$on('zoom-main-updated', this.build2)
+    this.$root.$on('region-dragstart', this.rds)
+    this.$root.$on('region-dragend', this.rde)
+    this.$root.$on('strip-dragstart', this.rds)
+    this.$root.$on('strip-dragend', this.rde)
+  },
+  destroyed: function () {
+    this.$root.$off('region-update', this.build2)
+    this.$root.$off('strip-move', this.build2)
+    this.$root.$off('zoom-main-updated', this.build2)
+    this.$root.$off('region-dragstart', this.rds)
+    this.$root.$off('region-dragend', this.rde)
+    this.$root.$off('strip-dragstart', this.rds)
+    this.$root.$off('strip-dragend', this.rde)
   }
 })
 </script>

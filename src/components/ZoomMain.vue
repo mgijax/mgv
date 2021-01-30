@@ -136,7 +136,7 @@ export default MComponent({
         const s = strips.splice(rgi,1)[0]
         strips.splice(0,0,s)
       }
-      let dy = 0
+      let dy = 10
       strips.forEach((s,i) => {
         if(!s.dragging) s.zoomY = dy
         s.strip.order = i

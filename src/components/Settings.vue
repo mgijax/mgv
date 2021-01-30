@@ -171,6 +171,18 @@
   </div>
   <!-- =================== -->
   <div
+    title="Show warning messages when homologs of highlighted features are either off-screen or missing from a genome."
+    class="flexrow"
+    >
+    <label>Show warnings</label>
+    <input
+        type="checkbox"
+        v-model="ZoomFiducials.showWarnings"
+        @change="announce"
+        />
+  </div>
+  <!-- =================== -->
+  <div
     title="Draw inversions with a twist and a different color."
     class="flexrow"
     >
@@ -194,6 +206,18 @@
         max="0.2"
         step="0.01"
         @mouseup="announce"
+        />
+  </div>
+  <!-- =================== -->
+  <div
+    title="When checked, connectors move/stretch as you scroll/drag. Uncheck for smoother scrolling."
+    class="flexrow"
+    >
+    <label>Continuous update</label>
+    <input
+        type="checkbox"
+        v-model="ZoomFiducials.continuousUpdate"
+        @change="announce"
         />
   </div>
   <!-- ============== MISC section  ============== -->

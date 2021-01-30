@@ -280,13 +280,16 @@ export default MComponent({
         data.vm = self
         data.genome = self.genome
         self.$emit('dragstart', { evt, data })
+        self.$root.$emit('strip-dragstart', { evt, data })
       },
       drag: function (evt, data) {
         self.$emit('drag', { evt, data })
+        self.$root.$emit('strip-drag', { evt, data })
       },
       dragend: function (evt, data) {
         self.dragging = false
         self.$emit('dragend', { evt, data })
+        self.$root.$emit('strip-dragend', { evt, data })
       }
     }, this.$root.$el)
   }
