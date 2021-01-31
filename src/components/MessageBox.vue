@@ -96,9 +96,9 @@ export default MComponent({
                this.stopscroll()
                this.textDelta = td
            } else {
-               this.textDelta += 4
+               this.textDelta += 1
            }
-       }, 50)
+       }, 25)
     },
     stopscroll: function () {
        if (this.interval) window.clearInterval(this.interval)
