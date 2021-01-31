@@ -139,13 +139,15 @@ export default MComponent({
         label: label,
         scrollDelta: 0
       }
-    }
+    },
+
   },
   mounted: function () {
     this.dragData = null
     this.dragging = false
+
     // mousemove
-    this.$root.$on('region-mousemove', d => {
+    this.cbRegionMouseMove = d => {
       if (!this.cfg.trackMouse) return
       // bounding box of the region that sent the event
       const bb = d.vm.$refs.underlay.getBoundingClientRect()
@@ -154,13 +156,13 @@ export default MComponent({
       // 
       //this.drawLines(this.getRegionVms(d.vm), pxLeft / bb.width)
       this.drawLines([d.vm], pxLeft / bb.width)
-    })
+    }
     // mouseleave
-    this.$root.$on('region-mouseleave', () => {
-      this.boxes = []
-    })
+    this.cbRegionMouseLeave = () => {
+        this.boxes = []
+    }
     // dragstart
-    this.$root.$on('region-dragstart', d => {
+    this.cbRegionDragstart = d => {
       // console.log('dragstart', d)
       this.dragData = d.data
       this.dragging = true
@@ -171,10 +173,9 @@ export default MComponent({
       d.data.metaDrag = d.evt.metaKey
       d.data.vm = d.vm
       d.data.vms = this.getRegionVms(d.vm)
-    })
+    }
     // drag
-    this.$root.$on('region-drag', d => {
-      // console.log('drag', d)
+    this.cbRegionDrag = d => {
       d.data.dragged = true
       if (d.data.shiftDrag || d.data.altDrag || d.data.metaDrag) {
         let x1 = d.data.startX - d.data.bb.x
@@ -190,9 +191,9 @@ export default MComponent({
           b.scrollDelta = d.data.deltaX
         })
       }
-    })
+    }
     // dragend
-    this.$root.$on('region-dragend', d => {
+    this.cbRegionDragend = d => {
       // dig out the event and re-point d at the data obj
       const e = d.evt
       d = d.data
@@ -253,16 +254,30 @@ export default MComponent({
       this.dragData = null
       this.dragging = false
       this.boxes = []
-    })
-    //
-    this.$root.$on('escape-pressed', () => {
+    }
+    this.cbEscapePressed = () => {
       if (!this.dragging) return
       this.dragData.vms.forEach(vm => vm.regionScrollDelta = 0)
       this.dragData.cancel()
       this.dragData = null
       this.dragging = false
       this.boxes = []
-    })
+    }
+    //
+    this.$root.$on('region-mousemove',  this.cbRegionMouseMove)
+    this.$root.$on('region-mouseleave', this.cbRegionMouseLeave)
+    this.$root.$on('region-dragstart',  this.cbRegionDragstart)
+    this.$root.$on('region-drag',       this.cbRegionDrag)
+    this.$root.$on('region-dragend',    this.cbRegionDragend)
+    this.$root.$on('escape-pressed',    this.cbEscapePressed)
+  },
+  destroyed: function () {
+    this.$root.$off('region-mousemove',  this.cbRegionMouseMove)
+    this.$root.$off('region-mouseleave', this.cbRegionMouseLeave)
+    this.$root.$off('region-dragstart',  this.cbRegionDragstart)
+    this.$root.$off('region-drag',       this.cbRegionDrag)
+    this.$root.$off('region-dragend',    this.cbRegionDragend)
+    this.$root.$off('escape-pressed',    this.cbEscapePressed)
   }
 })
 </script>
