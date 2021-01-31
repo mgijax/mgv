@@ -15,6 +15,7 @@
       />
     <zoom-fiducials
       :height="height"
+      :width="width"
       ref="fiducials"
       />
     <zoom-strip

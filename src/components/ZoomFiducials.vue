@@ -43,14 +43,14 @@
           <message-box
               v-if="cfg.showWarnings && h.invisHomologString.length > 0"
               :transform="`translate(${h.x},${h.y + (h.height - 13)/2 + 9})`"
-              :width="200"
+              :width="300"
               :message="' Not visible: ' + h.invisHomologString"
               title="This genome contains off-screen homologs of visible highlighted features. Click to bring into view."
               style="cursor : pointer;"
 
               :message-size="12"
               message-color="black"
-              message-background="#eee"
+              message-background="rgb(200 200 200 / 43%)"
               message-border="none"
               icon="⚠"
               :icon-size="16"
@@ -61,14 +61,14 @@
           </g>
           <message-box
               v-if="cfg.showWarnings && h.missingString.length > 0"
-              :transform="`translate(${h.x +  (h.invisHomologString.length ? 210 : 0)}, ${h.y + (h.height - 13)/2 + 9})`"
-              :width="200"
+              :transform="`translate(${h.x +  (h.invisHomologString.length ? 310 : 0)}, ${h.y + (h.height - 13)/2 + 9})`"
+              :width="300"
               :message="' No homologs for: ' + h.missingString"
               title="This genome has no homologs for some highlighted genes."
 
               :message-size="12"
               message-color="black"
-              message-background="#eee"
+              message-background="rgb(200 200 200 / 43%)"
               message-border="none"
 
               icon="⚠"
@@ -88,7 +88,7 @@ import config from '@/config'
 //import u from '@/lib/utils'
 export default MComponent({
   name: 'ZoomFiducials',
-  props: ['height'],
+  props: ['height', 'width'],
   components: {
       MessageBox
   },
@@ -291,14 +291,15 @@ export default MComponent({
           this.timeout = null
       }, 300)
     }
-    this.rds = () => {
+    this.rds = () => { // rds = region drag start
         if (! this.cfg.continuousUpdate) {
+            this.messages = []
             this.edges = []
             this.clickedFeatures = []
             this.suspended = true
         }
     }
-    this.rde = () => {
+    this.rde = () => { // rde = region drag end
         if (! this.cfg.continuousUpdate) {
             this.suspended = false
             this.build2()

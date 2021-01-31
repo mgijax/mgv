@@ -208,18 +208,6 @@
         @mouseup="announce"
         />
   </div>
-  <!-- =================== -->
-  <div
-    title="When checked, connectors move/stretch as you scroll/drag. Uncheck for smoother scrolling."
-    class="flexrow"
-    >
-    <label>Continuous update</label>
-    <input
-        type="checkbox"
-        v-model="ZoomFiducials.continuousUpdate"
-        @change="announce"
-        />
-  </div>
   <!-- ============== MISC section  ============== -->
   <div class="section"><label>Misc</label></div>
   <!-- =================== -->
