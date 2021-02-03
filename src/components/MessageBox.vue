@@ -89,21 +89,21 @@ export default MComponent({
     startscroll: function () {
        const bbox = this.$refs.tspan.getBoundingClientRect()
        if (bbox.width <= this.width) return
+       let pause = 0
        this.interval = window.setInterval(() => {
            const d = bbox.width - this.width - this.textDelta + this.mTranslateAmount + 6
            if (d < 0) {
-               const td = this.textDelta
-               this.stopscroll()
-               this.textDelta = td
+               this.textDelta = 0
+               pause = 500
            } else {
-               this.textDelta += 1
+               this.textDelta += (pause > 0 ? 0 : 1)
+               pause -= 25
            }
        }, 25)
     },
     stopscroll: function () {
        if (this.interval) window.clearInterval(this.interval)
        this.interval = null
-       this.textDelta = 0
     }
   }
 })
