@@ -21,6 +21,8 @@ function assert (cond, message) {
 // If key is not specified, the item itself is used as the key (useful for indexing lists of words).
 // If unique is unspecified or is true, builds a unique index - each key maps to one element.
 // If unique is false, builds a non-unique index - each kep maps to a list of elements.
+// If ofunc is not specified, the map will contain the list elements; if specified, the map contains
+// the results of calling ofun on each list element.
 //
 function index (list, key, unique, ofunc) {
   let fkey

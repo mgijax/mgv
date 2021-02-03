@@ -324,6 +324,10 @@ export default MComponent({
     }
   },
   computed: {
+    // Returns a promise that resolves when all visible genomes have cached their features
+    gdReady () {
+        return Promise.all(this.vGenomes.map(g => this.dataManager.ensureFeatures(g)))
+    },
     // Returns the currentMouseover as a Set of (0 or 1) features
     cmSet: function () {
         return this.currentMouseover ? new Set([this.currentMouseover]) : new Set()
@@ -599,14 +603,14 @@ export default MComponent({
       // Set current selection from highlight ids
       return p.then(() => {
         //
-        this.currentSelection = []
+        this.clearCurrentSelection()
         // resolve current selection IDs to features
         const prs = this.vGenomes.map(g => {
           return this.dataManager.ensureFeatures(g).then(() => {
             (cxt.currentSelection || []).forEach(ident => {
               this.dataManager.getFeaturesBy(ident).filter(f => f.genome === g).forEach(f => {
                 if (!f.cID || !this.currentSelectionSet.has(f.cID)) {
-                  this.currentSelection.push(f)
+                  this.addToCurrentSelection(f)
                 }
               })
             })
@@ -661,15 +665,15 @@ export default MComponent({
     featureClick: function (f, t, e) {
       this.detailFeatures = this.dataManager.getHomologs(f, this.vGenomes)
       if (e.shiftKey) {
-        const i = this.currentSelection.indexOf(f)
-        if (i >= 0) {
-          this.currentSelection.splice(i,1)
+        const cs = this.currentSelection.filter(ff => !(ff.cID && ff.cID === f.cID))
+        if (cs.length !== this.currentSelection.length) {
+          this.setCurrentSelection(cs)
           this.currentMouseover = null
         } else {
-          this.currentSelection.push(f)
+          this.addToCurrentSelection(f)
         }
       } else {
-        this.currentSelection = [f]
+        this.setCurrentSelection(f)
       }
       if (e.altKey) {
         // alt clicked on a feature
@@ -691,6 +695,22 @@ export default MComponent({
           return false
       }
       return true
+    },
+    setCurrentSelection: function (f) {
+        if (Array.isArray(f)) {
+            this.clearCurrentSelection()
+            f.forEach(ff => this.addToCurrentSelection(ff))
+        } else {
+            this.currentSelection = [f]
+        }
+    },
+    addToCurrentSelection: function (f) {
+        const cs = this.currentSelection.filter(c => !(c.cID && c.cID === f.cID))
+        cs.push(f)
+        this.currentSelection = cs
+    },
+    clearCurrentSelection: function (){
+        this.currentSelection = []
     },
     setCurrentList: function (lst) {
       this.currentList = lst
@@ -891,7 +911,7 @@ export default MComponent({
     })
     //
     this.$root.$on('clear-selection', () => {
-      this.currentSelection = []
+      this.clearCurrentSelection()
       this.$root.$emit('selection-state-changed')
       this.$root.$emit('context-changed')
     })

@@ -111,7 +111,7 @@ export default MComponent({
     clicked (desc) {
         for (let f of desc.invisHomologs) {
             if (! this.app.csSet.has(f)) {
-               this.app.currentSelection.push(f)
+               this.app.addToCurrentSelection(f)
             }
         }
         this.$root.$emit('region-change', { op : 'feature-align', features: this.app.currentSelection })
@@ -188,7 +188,10 @@ export default MComponent({
             })
             // Keep track of which specific features to draw a box around (the ones actually clicked)
             if (fel.classList.contains('selected')) {
-                clickedFeatures.push(this.clipBoxAtRegionBoundary(fel, rel))
+                const bb = this.clipBoxAtRegionBoundary(fel, rel)
+                if (bb.height > 0 && bb.width > 0) {
+                    clickedFeatures.push(bb)
+                }
             }
             // Add descriptor for feature.
             const rect = this.clipBoxAtRegionBoundary(fel.querySelector('.feature > rect'), rel)

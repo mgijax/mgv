@@ -577,10 +577,67 @@ class RegionManager {
   }
   //--------------------------------------
   featureAlign (d) {
+    return this.app.gdReady.then(() => {
+        // aligning on a feature(s) sets the lock mode
+        this.setLockMode()
+        //
+        if (d.feature) {
+          d.features = Array.isArray(d.feature) ? d.feature : [ d.feature ]
+        }
+        //
+        const rLength = d.region ? (d.region.end - d.region.start + 1) : 0
+        //
+        this.app.setCurrentSelection(d.features)
+        if (d.features.length === 0) return Promise.resolve(true)
+        // create a Map from genome to features in the current selection set
+        const g2homs = new Map()
+        for (let h of this.app.csSetH) {
+            if (g2homs.has(h.genome)) {
+                g2homs.get(h.genome).push(h)
+            } else {
+                g2homs.set(h.genome, [h])
+            }
+        }
+        //
+        const strips =  this.currentGenomes().map(g => {
+            const ghoms = (g2homs.get(g) || []).map(f => {
+                return {
+                    genome: g,
+                    chr: f.chr,
+                    start: f.start,
+                    end: f.end,
+                    width: 1,
+                    deltaX: 0
+                }
+            }).sort(u.byChrStart)
+            const regions = this.mergeRegions(g, ghoms).map(r => {
+                  const len = r.end - r.start + 1
+                  let delta
+                  if (len < rLength) {
+                      delta = Math.floor((rLength - len) / 2)
+                  } else {
+                      delta = Math.floor(0.9 * len)
+                  }
+                  r.start -= delta
+                  r.end += delta
+                  return r
+              })
+            return {
+              genome: g,
+              regions: regions
+            }
+        })
+        this.mergeUpdate(strips)
+        this.layout()
+    })
+  }
+  //--------------------------------------
+  featureAlign2 (d) {
     if (d.feature) {
       d.features = Array.isArray(d.feature) ? d.feature : [ d.feature ]
     }
-    this.app.currentSelection = Array.from(d.features)
+    this.app.setCurrentSelection(d.features)
+    if (d.features.length === 0) return Promise.resolve(true)
     const lcoordsList = d.features.map(f => {
         const anchor = d.basePos ? ((d.basePos - f.start + 1) / (f.end - f.start + 1)) : null
         const lcoords = {
@@ -651,7 +708,6 @@ class RegionManager {
         for(let i = 1; i < d.length; i += 1){
             for(let j = 0; j < d0.length; j++) {
                 d0[j].regions = d0[j].regions.concat(d[i][j].regions)
-                //d0[j].regions.sort(u.byChrStart)
             }
         }
         d0.forEach(x => x.regions = this.mergeRegions(x.genome, x.regions))
