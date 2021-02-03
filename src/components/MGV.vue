@@ -675,8 +675,7 @@ export default MComponent({
       } else {
         this.setCurrentSelection(f)
       }
-      if (e.altKey) {
-        // alt clicked on a feature
+      if (!e.altKey) {
         this.$root.$emit('region-change', {
           op : 'feature-align',
           region: this.currRegion,
@@ -684,9 +683,8 @@ export default MComponent({
           event: e,
           //basePos: this.clientXtoBase(e.clientX)
         })
-      } else {
-        this.$root.$emit('selection-state-changed')
       }
+      this.$root.$emit('selection-state-changed')
       this.$root.$emit('context-changed')
     },
     verifyCurrentSelection: function (quietly) {
