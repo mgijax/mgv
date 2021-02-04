@@ -651,7 +651,7 @@ export default MComponent({
     },
     toggleDrawer: function () {
       this.drawerOpen = !this.drawerOpen
-      window.setTimeout(this.resize.bind(this), this.cfg.animDur * 1000)
+      window.setTimeout(this.resize.bind(this), 500)
     },
     // FIXME All these handlers for features really belong somewhere else
     featureOver: function (f, t) {
