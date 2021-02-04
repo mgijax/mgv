@@ -613,7 +613,11 @@ class RegionManager {
         //
         const rLength = d.region ? (d.region.end - d.region.start + 1) : 0
         //
-        this.app.setCurrentSelection(d.features)
+        if (d.features) {
+            this.app.setCurrentSelection(d.features)
+        } else {
+            d.features = this.app.currentSelection
+        }
         if (d.features.length === 0) return Promise.resolve(true)
         // create a Map from genome to features in the current selection set
         const g2homs = new Map()
