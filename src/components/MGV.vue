@@ -675,7 +675,7 @@ export default MComponent({
       } else {
         this.setCurrentSelection(f)
       }
-      if (!e.altKey) {
+      if (e.altKey) {
         this.$root.$emit('region-change', {
           op : 'feature-align',
           region: this.currRegion,
@@ -729,6 +729,14 @@ export default MComponent({
       this.currentListItem = 0
     },
     initKeyBindings () {
+      // Align
+      this.keyManager.register({
+       key: 'a',
+       handler: () => {
+         this.verifyCurrentSelection() && this.$root.$emit('region-change', { 'op' : 'feature-align' })
+       },
+       thisObj: this
+      })
       // Show/hide Labels
       this.keyManager.register({
        key: 'n',

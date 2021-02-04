@@ -17,12 +17,18 @@
           icon="N"
           @click="app.toggleShowAllLabels()"
           :style="{ textDecoration: context.config.ZoomRegion.showFeatureLabels ? 'none' : 'line-through' }"
-          title="Click to show/hide labels for all genes and transcripts."
+          title="Show/hide labels for all genes and transcripts."
           />
         <m-button
           :icon="expandBtnIcon"
           @click="app.toggleShowAllTranscripts()"
-          title="Click to show transcripts for all genes, selected genes, or no genes."
+          title="Show transcripts for all genes, selected genes, or no genes."
+          />
+        <m-button
+          :disabled="app.currentSelection.length === 0"
+          icon="align_horizontal_left"
+          @click="alignFeatures()"
+          :title="(app.currentSelection.length === 0 ? 'Align disabled because no features are currently selected.' : 'Align the view around currently selected features.')"
           />
         </div>
       <!-- Search box -->
@@ -39,13 +45,13 @@
           />
         <div class="flexrow"
           :style="{cursor: 'pointer', opacity: paralogsEnabled ? 1 : 0.3}"
+          @click="paralogsEnabled && app.toggleIncludeParalogs()"
           >
           <i class="material-icons"
             :style="{ opacity: app.includeParalogs && paralogsEnabled ? 0 : 1 }"
             >not_interested</i>
           <span
             :title="paralogsButtonTitle"
-            @click="paralogsEnabled && app.toggleIncludeParalogs()"
             :style="{
               position:'relative',
               left:'-21px',
@@ -202,6 +208,10 @@ export default MComponent({
     lockClicked () {
       this.$root.$emit('region-change', { op : this.context.scrollLock ? 'clear-lock-mode' : 'set-lock-mode'})
     },
+    alignFeatures (fs) {
+        fs = fs || this.app.currentSelection
+        this.$root.$emit('region-change', { op : 'feature-align', features: fs })
+    },
     findLandmark (n) {
       if (!n) return
       const fs = u.flatten(n.replaceAll(",", " ").trim().split(/\s+/).map(nn => {
@@ -209,7 +219,7 @@ export default MComponent({
         return fss.filter(f => this.app.vGenomes.indexOf(f.genome) !== -1)
       }))
       if (fs.length > 0) {
-        this.$root.$emit('region-change', { op : 'feature-align', features: fs })
+        this.alignFeatures(fs)
       } else {
         // not a valid symbol. try parsing as coords.
         const c = gc.parse(n)
