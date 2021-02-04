@@ -4,6 +4,7 @@
 //`
 import u from '@/lib/utils'
 import gc from '@/lib/GenomeCoordinates'
+import config from '@/config'
 
 // The RegionManager maintains the set of genomic regions that specify what to display in the ZoomView.
 class RegionManager {
@@ -377,22 +378,47 @@ class RegionManager {
   mergeRegions (g, regions) {
     const rs = regions.reduce((newRs, r) => {
       let merged = false
+      r.length = r.end - r.start + 1
+      // For each region, r, try to merge it with a region in newRs.
+      // If r can't be merged, it becomes a new element in newRs
       for (let i = 0; i < newRs.length; i++) {
         const r0 = newRs[i]
+        //
+        if (r0.chr !== r.chr) continue
+        //
+        const newStart  = Math.min(r0.start, r.start)
+        const newEnd    = Math.max(r0.end, r.end)
+        const newLength = newEnd - newStart + 1
+        const newMaxLen = Math.max(r0.maxLen, r.length)
+        if (newMaxLen / newLength >= config.RegionManager.mergeThreshold) {
+            r0.start = newStart
+            r0.end = newEnd
+            r0.length = newLength
+            r0.maxLen = newMaxLen
+            merged = true
+            break
+        }
+        /*
         const db = gc.distanceBetween(r0, r)
         // compute an estimated merge widow, which is the size
         // region estimated to contain a max number of features
         const maxIncrease = 25
         const mergeWindow = 1000000 * (maxIncrease / g.featureDensity)
         if (db <= mergeWindow) {
+          // merge r into r0 (a existing region in newRs)
           r0.start = Math.min(r0.start, r.start)
           r0.end = Math.max(r0.end, r.end)
           r0.length = r0.end - r0.start + 1
+          r0.maxLen = Math.max(r0.maxLen, r.length)
           merged = true
           break
         }
+        */
       }
-      !merged && newRs.push(r)
+      if (!merged) {
+          r.maxLen = r.length
+          newRs.push(r)
+      }
       return newRs
     }, [])
     return rs
@@ -609,17 +635,17 @@ class RegionManager {
                     width: 1,
                     deltaX: 0
                 }
-            }).sort(u.byChrStart)
+            })
             const regions = this.mergeRegions(g, ghoms).map(r => {
-                  const len = r.end - r.start + 1
                   let delta
-                  if (len < rLength) {
-                      delta = Math.floor((rLength - len) / 2)
+                  if (r.length < rLength) {
+                      delta = Math.floor((rLength - r.length) / 2)
                   } else {
-                      delta = Math.floor(0.9 * len)
+                      delta = r.maxLen
                   }
                   r.start -= delta
                   r.end += delta
+                  r.length = r.end - r.start + 1
                   return r
               })
             return {
