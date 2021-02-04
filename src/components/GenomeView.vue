@@ -349,12 +349,6 @@ export default MComponent({
 </script>
 
 <style scoped>
-.genome-view-chromosome {
-    -webkit-transition: transform 0.5s;
-    -moz-transition: transform 0.5s;
-    -o-transition: transform 0.5s;
-    transition: transform 0.5s;
-}
 .rotate90 {
   transform: rotate(90deg)scale(1,-1);
 }
