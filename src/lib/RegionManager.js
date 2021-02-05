@@ -644,7 +644,11 @@ class RegionManager {
         const rLength = d.region ? (d.region.end - d.region.start + 1) : 0
         //
         if (d.features) {
-            this.app.setCurrentSelection(d.features)
+            if (d.shift) {
+                this.app.addToCurrentSelection(d.features)
+            } else {
+                this.app.setCurrentSelection(d.features)
+            }
         } else {
             d.features = this.app.currentSelection
         }

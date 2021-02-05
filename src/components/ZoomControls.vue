@@ -197,7 +197,7 @@ export default MComponent({
       e.target.select()
     },
     submitOnEnter (e) {
-      if (e.keyCode === 13) this.findLandmark(e.target.value)
+      if (e.keyCode === 13) this.findLandmark(e.target.value, e.shiftKey)
     },
     scroll (amt) {
       this.$root.$emit('region-change', { op: 'scroll', amt: amt, sType: "%" })
@@ -208,18 +208,18 @@ export default MComponent({
     lockClicked () {
       this.$root.$emit('region-change', { op : this.context.scrollLock ? 'clear-lock-mode' : 'set-lock-mode'})
     },
-    alignFeatures (fs) {
+    alignFeatures (fs, shift) {
         fs = fs || this.app.currentSelection
-        this.$root.$emit('region-change', { op : 'feature-align', features: fs })
+        this.$root.$emit('region-change', { op : 'feature-align', features: fs, shift: shift })
     },
-    findLandmark (n) {
+    findLandmark (n, shift) {
       if (!n) return
       const fs = u.flatten(n.replaceAll(",", " ").trim().split(/\s+/).map(nn => {
         const fss = this.dataManager().getFeaturesBy(nn.trim())
         return fss.filter(f => this.app.vGenomes.indexOf(f.genome) !== -1)
       }))
       if (fs.length > 0) {
-        this.alignFeatures(fs)
+        this.alignFeatures(fs, shift)
       } else {
         // not a valid symbol. try parsing as coords.
         const c = gc.parse(n)
