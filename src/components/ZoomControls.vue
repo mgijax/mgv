@@ -28,7 +28,7 @@
           :disabled="app.currentSelection.length === 0"
           icon="align_horizontal_left"
           @click="alignFeatures()"
-          :title="(app.currentSelection.length === 0 ? 'Align disabled because no features are currently selected.' : 'Align the view around currently selected features.')"
+          :title="(app.currentSelection.length === 0 ? 'Align disabled because no features are currently selected.' : 'Align the view around the currently selected feature(s).')"
           />
         </div>
       <!-- Search box -->
