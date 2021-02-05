@@ -100,49 +100,40 @@ class RegionManager {
   //--------------------------------------
   // Add a strip to the display for genome g. 
   addStrip (g) {
-    let p
-    if (this.app.currentSelection.length) {
-      const ps = this.app.currentSelection.map(f => {
-        const lcoords = {
-          lfeature: f,
-          lgenome: f.genome,
-          delta: 0,
-          mlength: 3
+    return this.app.dataManager.ensureFeatures(g).then(() => {
+        let p
+        const ghoms = this.app.currentSelection.reduce((a,f) => {
+            const homs = this.app.dataManager.getHomologs(f, g)
+            return a.concat(homs)
+        }, [])
+        if (ghoms.length) {
+          const rs = this.makeRegionsFromFeatures(ghoms, g)
+          p = Promise.resolve(rs)
+        } else if (this.app.rGenome && this.app.rStrip) {
+          p = this.mapRegionsToGenome(this.app.rStrip.regions, g)
+        } else if (this.app.strips.length) {
+          p = this.mapRegionsToGenome(this.app.strips[0].regions, g)
+        } else {
+          const chr = g.chromosomes[0]
+          const approxNgenes = 150
+          const len = Math.round(1000000 * approxNgenes / g.featureDensity)
+          p = Promise.resolve({
+            genome: g,
+            regions: [{
+              genome: g,
+              chr: chr,
+              start: 1,
+              end: Math.min(len, chr.length),
+              width: 1 // value doesn't matter here
+              }]
+          })
         }
-        return this.computeLandmarkRegions([lcoords], [g])
-      })
-      p = Promise.all(ps).then(results => {
-        const results2 =  u.flatten(results).reduce((a,v) => {
-          a.regions = a.regions.concat(v.regions)
-          return a
-        }, { genome:g, regions: [] })
-        results2.regions = this.mergeRegions(g, results2.regions)
-        return results2
-      })
-    } else if (this.app.rGenome && this.app.rStrip) {
-      p = this.mapRegionsToGenome(this.app.rStrip.regions, g)
-    } else if (this.app.strips.length) {
-      p = this.mapRegionsToGenome(this.app.strips[0].regions, g)
-    } else {
-      const chr = g.chromosomes[0]
-      const approxNgenes = 150
-      const len = Math.round(1000000 * approxNgenes / g.featureDensity)
-      p = Promise.resolve({
-        genome: g,
-        regions: [{
-          genome: g,
-          chr: chr,
-          start: 1,
-          end: Math.min(len, chr.length),
-          width: 1 // value doesn't matter here
-          }]
-      })
-    }
-    return p.then(strip => {
-      strip.regions.forEach(r => r.width = r.end - r.start + 1)
-      if (this.app.strips.filter(s => s.genome === strip.genome).length === 0) {
-          this.app.strips.push(this.layoutStrip(strip))
-      }
+        return p.then(strip => {
+          strip.regions.forEach(r => r.width = r.end - r.start + 1)
+          if (this.app.strips.filter(s => s.genome === strip.genome).length === 0) {
+              this.app.strips.push(this.layoutStrip(strip))
+          }
+        })
     })
   }
   //--------------------------------------
@@ -602,6 +593,36 @@ class RegionManager {
     return rbs
   }
   //--------------------------------------
+  makeRegionsFromFeatures (feats, g, targetLen) {
+    targetLen = targetLen || 0
+    const ghoms = feats.map(f => {
+        return {
+            genome: g,
+            chr: f.chr,
+            start: f.start,
+            end: f.end,
+            width: 1,
+            deltaX: 0
+        }
+    })
+    const regions = this.mergeRegions(g, ghoms).map(r => {
+          let delta
+          if (r.length < targetLen) {
+              delta = Math.floor((targetLen - r.length) / 2)
+          } else {
+              delta = r.maxLen
+          }
+          r.start -= delta
+          r.end += delta
+          r.length = r.end - r.start + 1
+          return r
+      })
+    return {
+      genome: g,
+      regions: regions
+    }
+  }
+  //--------------------------------------
   featureAlign (d) {
     return this.app.gdReady.then(() => {
         // aligning on a feature(s) sets the lock mode
@@ -629,212 +650,10 @@ class RegionManager {
             }
         }
         //
-        const strips =  this.currentGenomes().map(g => {
-            const ghoms = (g2homs.get(g) || []).map(f => {
-                return {
-                    genome: g,
-                    chr: f.chr,
-                    start: f.start,
-                    end: f.end,
-                    width: 1,
-                    deltaX: 0
-                }
-            })
-            const regions = this.mergeRegions(g, ghoms).map(r => {
-                  let delta
-                  if (r.length < rLength) {
-                      delta = Math.floor((rLength - r.length) / 2)
-                  } else {
-                      delta = r.maxLen
-                  }
-                  r.start -= delta
-                  r.end += delta
-                  r.length = r.end - r.start + 1
-                  return r
-              })
-            return {
-              genome: g,
-              regions: regions
-            }
-        })
+        const strips =  this.currentGenomes().map(g => this.makeRegionsFromFeatures(g2homs.get(g) || [], g, rLength))
         this.mergeUpdate(strips)
         this.layout()
     })
-  }
-  //--------------------------------------
-  featureAlign2 (d) {
-    if (d.feature) {
-      d.features = Array.isArray(d.feature) ? d.feature : [ d.feature ]
-    }
-    this.app.setCurrentSelection(d.features)
-    if (d.features.length === 0) return Promise.resolve(true)
-    const lcoordsList = d.features.map(f => {
-        const anchor = d.basePos ? ((d.basePos - f.start + 1) / (f.end - f.start + 1)) : null
-        const lcoords = {
-          landmark: f.cID || f.ID,  // the landmark's id (prefer canonical)
-          lfeature: f,              // the landmark
-          lgenome: f.genome,        // landmark's genome
-          anchor: anchor,           // anchor position (0 to 1)
-          delta: 0,                 // added scroll delta
-        }
-        if (d.region) {
-          if (d.event.metaKey) {
-            lcoords.mlength = (d.region.end - d.region.start + 1) / f.length
-          } else {
-            lcoords.length = d.region.end - d.region.start + 1
-          }
-        } else {
-          lcoords.length = 3 * f.length
-        }
-        return lcoords
-    })
-    return this.alignOnLandmark(lcoordsList)
-  }
-  //--------------------------------------
-  // High level call for lining up on a landmark. Computes the regions, does the update, sets the scroll lock,
-  // and announces context change. 
-  alignOnLandmark (lcoordsList, genomes) {
-    this.setLockMode()
-    genomes = genomes || this.currentGenomes()
-    return this.computeLandmarkRegions(lcoordsList, genomes).then(strips => {
-      this.mergeUpdate(strips)
-      this.layout()
-    })
-  }
-  //--------------------------------------
-  // Returns a promise for regions around the specified landmark in the specified genomes.
-  // The promise resolves to a list of strips, each of which has a list of regions.
-  // It is possible for there to be multiple copies of a landmark in a genome leading 
-  // to multiple regions in that strip.
-  // It is also possible for there to be no landmark in a genome, in which case mapped
-  // region(s) are computed.
-  //
-  // Returns promise for list of strip descriptors, one per genome. Each descriptor
-  // includes a list of regions.
-  //
-  computeLandmarkRegions (lcoordsList, genomes) {
-    const result = lcoordsList.map(lcoords => {
-        // ensure the landmark genome has been loaded
-        return this.app.dataManager.ensureFeatures(lcoords.lgenome).then(() => {
-          // for each target genome
-          const ps = genomes.map(g => {
-            // ensure that genome has been loaded
-            return this.app.dataManager.ensureFeatures(g).then(() => {
-              // compute the landmark region in the target genome
-              const lmr = this.computeLandmarkRegion(lcoords, g)
-              if (lmr) return lmr
-              // couldn't find landmark
-              return { genome: g, regions: [] }
-            })
-          })
-          return Promise.all(ps)
-        })
-    })
-    return Promise.all(result).then(d => {
-        // d is a list of lists of { genome, regions } objects
-        // Outer list is one per item in lcoordsList. Inner list is one per visible genome.
-        // Here we combine the lists of regions per genome.
-        const d0 = d[0]
-        for(let i = 1; i < d.length; i += 1){
-            for(let j = 0; j < d0.length; j++) {
-                d0[j].regions = d0[j].regions.concat(d[i][j].regions)
-            }
-        }
-        d0.forEach(x => x.regions = this.mergeRegions(x.genome, x.regions))
-        return d0
-    })
-  }
-  //
-  //--------------------------------------
-  // Computes the regions around all homologs of the given landmark in the given genome.
-  // Assumes the genome has been loaded!
-  // Args:
-  //    lcoords (object) the landmark specification. Contains:
-  //        One of:
-  //            landmark (string) name of the landmark
-  //            lfeature (object) the landmark feature itself
-  //        lgenome (object) the genome where the landmark was selected
-  //        delta (number, default=0) amount to shift the view from the landmark
-  //        anchor (number from 0 to 1, default=0.5) Defines reference point on the landmark
-  //            to align to. Number specifies relative position, from 
-  //            start coordinate (0) to end coordinate (1).
-  //    Exactly one of the following must be specified:
-  //        length (number, default=undefined) length of the region, in bp
-  //            Total width = length
-  //        mlength (number, default = 3) 
-  //            Total width is mlength * feature length
-  //        flank (number, default=undefined) specifies a flanking amount in bp.
-  //            Total width is 2*flank + feature length
-  //        
-  //
-  //    genome (object) the genome for which to compute the coordinates
-  computeLandmarkRegion (lcoords, genome) {
-    const lms = this.app.dataManager.getHomologs(lcoords.landmark || lcoords.lfeature, [genome])
-    //
-    if (lms.length === 0) {
-      return null
-    }
-    const regions = lms.map(lm => {
-      // compute the region around landmark feature lm
-      //
-      // compute anchor point
-      let lmp
-      if (typeof(lcoords.anchor) === 'number') {
-        lmp = lm.start + lcoords.anchor * lm.length
-      } else {
-        lmp = Math.floor((lm.start + lm.end) / 2)
-      }
-      // 
-      let w
-      let s
-      if (typeof(lcoords.length) === 'number') {
-        w = lcoords.length
-        s = lmp - w / 2
-      } else if (typeof(lcoords.flank) === 'number') {
-        w = lm.length + 2*lcoords.flank
-        s = lm.start - lcoords.flank
-      } else if (typeof(lcoords.mlength) === 'number') {
-        w = lcoords.mlength * lm.length
-        s = lmp - w / 2
-      } else {
-        throw "Must specify one of: length, mlength, or flank"
-      }
-      //
-      s = Math.round(s)
-      w = Math.round(w)
-      //
-      return this.makeRegion({
-        genome: genome,
-        chr: lm.chr,
-        start: s,
-        end: s + w - 1,
-      })
-    })
-    return {
-      genome: genome,
-      regions: this.mergeRegions(genome, regions)
-    }
-  }
-  //--------------------------------------
-  // When a landmark does not exist in a given genome, use mapping as a fallback.
-  // 
-  mapLandmarkRegion (lcoords, genome) {
-      const dm = this.app.dataManager
-      // FIXME: picking arbitrary one...
-      const lmf = dm.getHomologs(lcoords.lfeature, lcoords.lgenome)[0]
-      const mp = (lmf.start + lmf.end) / 2
-      const s = Math.round(mp - lcoords.length / 2)
-      const e = s + lcoords.length - 1
-      const lmr = {
-        genome: lcoords.lgenome,
-        chr: lmf.chr,
-        start: s,
-        end: e
-      }
-      return {
-        genome: genome,
-        regions: this.mapRegionToGenomeNow(lmr, genome)
-      }
   }
   //--------------------------------------
   mergeUpdate (strips) {
