@@ -623,11 +623,20 @@ class RegionManager {
     }
   }
   //--------------------------------------
+  alignOnLandmark (lcoords, genomes) {
+    return this.app.dataManager.ensureFeatures(genomes).then(() => {
+        this.app.strips = genomes.map(g => { return { genome: g, regions: [] } })
+        this.app.setCurrentSelection(this.app.dataManager.getFeaturesByCid(lcoords.landmark))
+        return this.featureAlign()
+    })
+  }
+  //--------------------------------------
   featureAlign (d) {
     return this.app.gdReady.then(() => {
         // aligning on a feature(s) sets the lock mode
         this.setLockMode()
         //
+        d = d || {}
         if (d.feature) {
           d.features = Array.isArray(d.feature) ? d.feature : [ d.feature ]
         }

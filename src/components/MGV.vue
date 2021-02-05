@@ -577,7 +577,7 @@ export default MComponent({
         } else {
            lcoords.length = cxt.length || 1000000
         }
-        p = this.regionManager.alignOnLandmark([lcoords], genomes)
+        p = this.regionManager.alignOnLandmark(lcoords, genomes)
       } else if (cxt.strips) {
         // Map regions specs to specs with genome and chromosome names resolved to objects.
         const strips = cxt.strips.map(s => {
@@ -703,6 +703,10 @@ export default MComponent({
         }
     },
     addToCurrentSelection: function (f) {
+        if (Array.isArray(f)){
+            f.forEach(ff => this.addToCurrentSelection(ff))
+            return
+        }
         const cs = this.currentSelection.filter(c => !(c.cID && c.cID === f.cID))
         cs.push(f)
         this.currentSelection = cs

@@ -62,6 +62,9 @@ class DataManager {
   // Returns a promise that resolves when all features of genome g have been loaded and registered.
   // After resolution, one may access the features of chromosome c of genome g via this.cache[g.name][c.name]
   ensureFeatures (g) {
+    if (Array.isArray(g)) {
+        return Promise.all(g.map(gg => this.ensureFeatures(gg)))
+    }
     //
     if (this.pending[g.name]) return this.pending[g.name]
     if (this.cache[g.name]) return Promise.resolve(true)
