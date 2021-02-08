@@ -424,6 +424,7 @@ export default MComponent({
     },
     tickPositions: function () {
       const r = this.region
+      if (r.width < 40) return []
       const nticks = Math.floor(r.width / 30)
       const l = r.end - r.start + 1
       const bounds = u.niceBounds(r.start - l/2, r.end + l/2, nticks)

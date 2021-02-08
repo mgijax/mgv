@@ -389,22 +389,6 @@ class RegionManager {
             merged = true
             break
         }
-        /*
-        const db = gc.distanceBetween(r0, r)
-        // compute an estimated merge widow, which is the size
-        // region estimated to contain a max number of features
-        const maxIncrease = 25
-        const mergeWindow = 1000000 * (maxIncrease / g.featureDensity)
-        if (db <= mergeWindow) {
-          // merge r into r0 (a existing region in newRs)
-          r0.start = Math.min(r0.start, r.start)
-          r0.end = Math.max(r0.end, r.end)
-          r0.length = r0.end - r0.start + 1
-          r0.maxLen = Math.max(r0.maxLen, r.length)
-          merged = true
-          break
-        }
-        */
       }
       if (!merged) {
           r.maxLen = r.length
@@ -462,9 +446,10 @@ class RegionManager {
   mapRegionsToGenome (ras, gb) {
     const promises = ras.map(ra => this.mapRegionToGenome(ra, gb))
     return Promise.all(promises).then(data => {
+      const rbs = this.mergeRegions(gb, u.flatten(data))
       return {
         genome: gb,
-        regions: this.mergeRegions(gb, u.flatten(data))
+        regions: rbs
       }
     })
   }
@@ -490,8 +475,10 @@ class RegionManager {
     }, [])
     //
     if (bfeats.length === 0) {
+      // No homologs for anything in current region. Expand and try again
       const ra2 = Object.assign({}, ra)
       const w = ra.end - ra.start + 1
+      // stop at chromosome length
       if (w < ra.chr.length) {
         ra2.start -= w
         ra2.end += w
@@ -534,63 +521,7 @@ class RegionManager {
         strand: bf.strand
       }
     })
-    // Ok, we've mapped each A feature to (the possibly clipped coordinates of) its B homolog
-    // Now compute region(s) that contain them all
-    const rbs = []
-    // For each B feature, find a region that it overlaps or is within a max distance (1Mb) 
-    // and add B to it. Otherwise start a new region with that feature.
-    bfeatsClipped.forEach(fb => {
-      let found = false // have we found a place for fb?
-      if (rbs.length) {
-        for(let rbi = 0 ; rbi < rbs.length ; rbi++) {
-          const rb = rbs[rbi]
-          if (rb.chr !== fb.chr) continue
-          const rblen = rb.end - rb.start + 1
-          const s = Math.min(rb.start, fb.start)
-          const e = Math.max(rb.end, fb.end)
-          const l = e - s + 1
-          if (gc.overlaps(fb, rb) || (l - rblen - fb.length < 1000000)) {
-            rb.start = s
-            rb.end = e
-            rb.length = e - s + 1
-            found = true
-            break
-          }
-        }
-      }
-      if (!found) {
-        const delta = Math.round(fb.length / 3)
-        rbs.push(this.makeRegion({
-          genome: gb,
-          chr: fb.chr,
-          start: fb.start - delta,
-          end: fb.end + delta,
-          length: fb.end - fb.start + 1 + 2*delta
-        }))
-      }
-    })
-    if (rbs.length === 0) {
-      // Could not map the region - no homologs found.
-      // Have a flower instead...
-      const approxNgenes = 150
-      const len = 1000000 * approxNgenes / gb.featureDensity
-      rbs.push(this.makeRegion({
-        genome: gb,
-        chr: gb.chromosomes[0],
-        start: 1,
-        end: Math.min(len, gb.chromosomes[0].length)
-      }))
-    } else {
-      // One the assumption that region boundaries coincide with feature boundaries,
-      // add a little space to each end.
-      rbs.forEach(r => {
-        const len = r.end - r.start + 1
-        const margin = Math.round(len * 0.05)
-        r.start -= margin
-        r.end += margin
-      })
-    }
-    return rbs
+    return bfeatsClipped.sort(u.byChrStart)
   }
   //--------------------------------------
   makeRegionsFromFeatures (feats, g, targetLen) {
@@ -604,7 +535,7 @@ class RegionManager {
             width: 1,
             deltaX: 0
         }
-    })
+    }).sort(u.byChrStart)
     const regions = this.mergeRegions(g, ghoms).map(r => {
           let delta
           if (r.length < targetLen) {
