@@ -30,7 +30,7 @@
       <m-button
         name="infoBtn"
         title="Click for help."
-        icon="info"
+        icon="help"
         @click="openHelp"
         :color="cfg.style.color"
         hoverColor="rgb(31, 119, 180)"
