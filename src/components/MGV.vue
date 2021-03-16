@@ -416,7 +416,12 @@ export default MComponent({
         return g2missing
     },
     agIndex: function () {
-      return this.allGenomes.reduce((ix, g) => { ix[g.name] = g; return ix }, {})
+      return this.allGenomes.reduce((ix, g) => {
+          ix[g.name] = g
+          ix[g.pathname] = g
+          if (g.shortname) ix[g.shortname] = g
+          return ix
+      }, {})
     },
     zoomWidth: function () {
       return this.$refs.zoomView.$refs.main.width
