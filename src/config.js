@@ -13,7 +13,7 @@ export default {
   // Timestamp used at page load to determine whether to flush user's setting cache.
   //
   // IMPORTANT!!! You MUST update this value whenever this config file changes!!!
-  TIMESTAMP: 'Thu Mar 11 14:40:39 EST 2021',
+  TIMESTAMP: 'Thu Mar 12 14:40:39 EST 2021',
   ///////////////////////////////////////////
 
   //
@@ -46,7 +46,7 @@ export default {
       description: 'View the 8 collaborative cross founder strains'
     }, {
       label: 'B6 vs non-musculus',
-      genomes: 'C57BL/6J,CAROLI/EiJ,PAHARI/EiJ,SPRET/EiJ',
+      genomes: 'C57BL/6J,CAROLI/EiJ,PAHARI/EiJ,SPRETUS/EiJ',
       description: 'View C57BL/6J versus the non-musculus strains.'
     }, {
       label: 'Mouse, human, rat',
@@ -54,7 +54,7 @@ export default {
       description: 'View C57BL/6J versus human and rat.'
     //}, {
       //label: 'All',
-      //genomes: '129S1/SvImJ,A/J,AKR/J,BALB/cJ,C3H/HeJ,C57BL/6J,C57BL/6NJ,CAROLI/EiJ,CAST/EiJ,CBA/J,DBA/2J,FVB/NJ,LP/J,PAHARI/EiJ,NOD/ShiLtJ,NZO/HlLtJ,PWK/PhJ,SPRET/EiJ,WSB/EiJ,C57BL/6J',
+      //genomes: '129S1/SvImJ,A/J,AKR/J,BALB/cJ,C3H/HeJ,C57BL/6J,C57BL/6NJ,CAROLI/EiJ,CAST/EiJ,CBA/J,DBA/2J,FVB/NJ,LP/J,PAHARI/EiJ,NOD/ShiLtJ,NZO/HlLtJ,PWK/PhJ,SPRETUS/EiJ,WSB/EiJ,C57BL/6J',
       //description: 'View all 19 strains (WARNING: may take a while to load and will be sluggish drawing large regions.)'
     }],
     //
