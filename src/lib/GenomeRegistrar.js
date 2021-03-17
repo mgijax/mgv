@@ -111,8 +111,15 @@ class GenomeRegistrar {
     info.url = info.url || url
     info.name2chr = info.chromosomes.reduce((a,c) => { a[c.name] = c; return a }, {})
     info.chromosomes.forEach((c,i) => { c.index = i })
+    const gr = new GenomeReader(this, info)
     this.name2genome[info.name] = info
-    this.name2reader[info.name] = new GenomeReader(this, info)
+    this.name2reader[info.name] = gr
+    this.name2genome[info.pathname] = info
+    this.name2reader[info.pathname] = gr
+    if (info.shortname) {
+        this.name2genome[info.shortname] = info
+        this.name2reader[info.shortname] = gr
+    }
     return info
   }
 }
