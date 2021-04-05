@@ -39,7 +39,7 @@ export default [{
           Example: view the structure of Pax6 in C57BL/6J, M. caroli, and human.
           <ol>
           <li> Select the three genomes. <li> Type Pax6 into to the "Find" box and hit return.</ol>
-          <a href="#regions=C57BL/6J::2:105639381..105727925/1229|CAROLI/EiJ::2:99105819..99194363/1229|H.%20sapiens::11:31759221..31847765/1229&highlight=MGI:97490&lock=on&paralogs=off&style=gg:40,tg:6,fd:3,fl:1,ff:10,fh:10,tx:0,pl:1,tc:0,h:1,ho:0.05,hi:1,hc:0">See result</a>.
+          <a href="#regions=C57BL/6J%20(GRCm39)::2:105469726..105558270/1267|CAROLI/EiJ::2:99105820..99194363/1267|H.%20sapiens::11:31759222..31847765/1267&highlight=MGI:97490&lock=on&paralogs=off&style=gg:40,tg:6,fd:3,fl:1,ff:10,fh:10,tx:0,pl:1,tc:0,h:1,ho:0.05,hi:1,hc:0">See result</a>.
           Alternative: for any gene currently being displayed, option-click on it.
           `
       }, {
@@ -48,7 +48,7 @@ export default [{
           Example: view the structure of Pax2, Pax4, and Pax6 in C57BL/6J, M. caroli, and human.
           <ol>
           <li> Select the three genomes. <li> Type "Pax2 Pax4 Pax6" into to the "Find" box and hit return.</ol>
-          <a href="#regions=C57BL/6J::19:44650612..44934258/157,6:28434067..28457619/157,2:105639381..105727925/157|CAROLI/EiJ::19:41317435..41601081/157,6:23286968..23310520/157,2:99105819..99194363/157|H.%20sapiens::10:100640847..100924493/157,7:127602441..127625993/157,11:31759221..31847765/157&highlight=MGI:97486,HGNC:8616,MGI:97488,HGNC:8618,MGI:97490,HGNC:8620&lock=on&paralogs=off&style=gg:40,tg:6,fd:3,fl:1,ff:10,fh:10,tx:0,pl:1,tc:0,h:1,ho:0.05,hi:1,hc:0">See result</a>.
+          <a href="#regions=C57BL/6J%20(GRCm39)::2:105469726..105558270/419,6:28435313..28456372/419,19:44643371..44918377/419|CAROLI/EiJ::2:99107492..99192691/419,6:23288530..23308959/419,19:41335411..41583105/419|H.%20sapiens::7:127602441..127625993/419,10:100640847..100924493/419,11:31760090..31846897/419&highlight=MGI:97486,HGNC:8616,MGI:97488,HGNC:8618,MGI:97490,HGNC:8620&lock=on&paralogs=off&style=gg:40,tg:6,fd:3,fl:1,ff:10,fh:10,tx:0,pl:1,tc:0,h:1,ho:0.05,hi:1,hc:0">See result</a>.
           Alternative: shift-option-click on multiple genes
           `
       }, {
@@ -56,7 +56,7 @@ export default [{
         `,
       text: `Example: view the region 3:18511623..20827190 in C57BL/6J (this is 1.5 Mb around Trim55) and the corresponding regions in human.
         <ol><li> Select the two genomes. Be sure C57BL/6J is on top. <li> Copy/paste the coordinates into the Find box and hit return.
-        <a href="#regions=C57BL/6J::3:18511623..20827190/1229|H.%20sapiens::8:65562539..66207794/635,3:148670671..149269074/588&ref=C57BL/6J&paralogs=off&style=gg:40,tg:6,fd:3,fl:1,ff:10,fh:10,tx:0,pl:1,tc:0,h:1,ho:0.05,hi:1,hc:0">See result</a>.
+        <a href="#regions=C57BL/6J%20(GRCm39)::3:19127787..20615286/1267|H.%20sapiens::3:148697871..149222008/601,8:65602458..66178464/660&ref=C57BL/6J%20(GRCm39)&paralogs=off&style=gg:40,tg:6,fd:3,fl:1,ff:10,fh:10,tx:0,pl:1,tc:0,h:1,ho:0.05,hi:1,hc:0">See result</a>.
         </ol>
         Alternatively, you can get to approximately the same view by first typing "Trim55" into the Find box and hit return
         (as in the previous example). Then click the "R" in the left endcap of the C57BL/6J strip, and zoom out.
@@ -64,7 +64,7 @@ export default [{
       }, {
       label: `Download CDS sequences for a gene and its homologs`,
       text: `
-        Here is <a href="#regions=C3H/HeJ::X:162520208..162667468/1229|DBA/2J::X:160235347..160382607/1229|C57BL/6J::X:164093183..164240443/1229|A/J::X:161354381..161501641/1229&highlight=MGI:1917258&lock=on&paralogs=off&style=gg:40,tg:6,fd:3,fl:1,ff:10,fh:10,tx:1,pl:1,tc:0,h:1,ho:0.05,hi:1,hc:0">Foxa2</a> for several mouse genomes.
+        Here is <a href="#regions=C3H/HeJ::2:150884516..150896797/1267|DBA/2J::2:145423704..145435976/1267|A/J::2:146162540..146174821/1267|C57BL/6J%20(GRCm39)::2:147880704..147892982/1267&highlight=MGI:1347476&lock=on&paralogs=off&style=gg:40,tg:6,fd:3,fl:1,ff:10,fh:10,tx:1,pl:1,tc:0,h:1,ho:0.05,hi:1,hc:0">Foxa2</a> for several mouse genomes.
         <ol>
         <li> Right-click on Foxa2 in any of the genomes. A popup menu appears.
         <li> Mouse over "Add sequences to cart ... for this gene and all homologs" and select "All cds sequences".
@@ -75,7 +75,7 @@ export default [{
       }, {
       label: `Download arbitrary genomic regions`,
       text: `
-        Here is a region centered around the <a href="#regions=DBA/2J::X:160260853..160302497/1229|C57BL/6J::X:164119327..164160971/1229|A/J::X:161380314..161421958/1229&lock=on&paralogs=off&style=gg:40,tg:6,fd:3,fl:1,ff:10,fh:10,tx:1,pl:1,tc:0,h:1,ho:0.05,hi:1,hc:0">proximal end of Ace2</a> in three mouse genomes. We want to download the genomic region containing the first two exons from all three genomes. Note the the lock icon is ON.
+        Here is a region centered around the <a href="#regions=DBA/2J::X:160254828..160309777/1267|A/J::X:161374688..161428799/1267|C57BL/6J%20(GRCm39)::X:162896892..162950591/1267&highlight=MGI:1917258&lock=on&paralogs=off&style=gg:40,tg:6,fd:3,fl:1,ff:10,fh:10,tx:1,pl:1,tc:0,h:1,ho:0.05,hi:1,hc:0">proximal end of Ace2</a> in three mouse genomes. We want to download the genomic region containing the first two exons from all three genomes. Note the the lock icon is ON.
         <ol>
         <li> Hold down the option (or alt) key while dragging left-to-right over the desired region. Three sequences are added to the Sequence Cart.
         <li> In the Sequence Cart download area, enter a file name and click the download button.
