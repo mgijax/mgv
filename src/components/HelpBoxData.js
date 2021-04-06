@@ -163,7 +163,7 @@ export default [{
       label: `Aligning regions around a gene`,
       text: `To center all displayed genomes around a gene and its homologs (and turn on ${i('lock')}), 
           alt-click (option-click) 
-          on the gene, or select "Align on this gene" from the gene's context menu menu, or search for the gene 
+          on the gene, or select "Align on this gene" from the gene's context menu, or search for the gene 
           via the Find box. If the gene has paralogs, they are/are not included in this operation depending whether 
           the paralogs toggle ("P") is on or off, respectively.
           `
@@ -188,7 +188,7 @@ export default [{
       text: `By default, the forward strand direction is drawn left-to-right.
           When comparing regions with inversions, it can be convenient to draw some 
           left-to-right and some right-to-left, so that homologs line up vertically.
-          To reverse the orientation of a region, open it controls and click on the "F-R" toggle.
+          To reverse the orientation of a region, open its controls and click on the "F-R" toggle.
           To reverse the orientation of all the regions in a strip, click the &gt; in the left endcap.
           The icon turns into <span style="color: red;">&lt;</span>.
           Click again to revert to normal.
@@ -217,12 +217,12 @@ export default [{
       calculated on the fly. You can control whether or not inferred paralogs are used by
       clicking the <span style="color: rgb(255, 127, 14); font-weight: bold;">P</span> icon in the control area next to the Find box.
       <li>Genologs. Assertions of gene equivalence across genomes within a species
-      is accomplished by shared canonical identifiers, eg, MGI ids for the annotated inbred strains.
+      is accomplished by shared canonical identifiers, e.g., MGI IDs for the annotated inbred strains.
       </ol>
        `,
     items: [{
       label: `Connections`,
-      text: `MGV draws connections between equivalent genes in neighboring strips when you mouse over or click on them. When the strips are from different species, connections are drawn from a gene to all orthologs in the view. When the strips are from the same species (eg different mouse strains), connections are drawn from a gene to the same gene only (P off), or to the same gene and all its paralogs (P on). Note that connections are only drawn between features that are already in view. To be certain you are seeing all paralogs, you should align on that gene (see below).
+      text: `MGV draws connections between equivalent genes in neighboring strips when you mouse over or click on them. When the strips are from different species, connections are drawn from a gene to all orthologs in the view. When the strips are from the same species (e.g. different mouse strains), connections are drawn from a gene to the same gene only (P off), or to the same gene and all its paralogs (P on). Note that connections are only drawn between features that are already in view. To be certain you are seeing all paralogs, you should align on that gene (see below).
       If a genome does <u>not</u> have a homolog to a gene that is highlighted, a warning message is displayed.
       Similarly, a warning is displayed if a genome <u>does</u> have a homolog that is currently not in view.
       `
@@ -425,7 +425,7 @@ export default [{
       text: `Under Create, choose a category (e.g. "Search by phenotype or disease"), enter a term
           (e.g. "Parkinson") and click the "GO" button. Links to appropriate browsers are displayed for each category to
           assist in finding appropriate search terms/IDs. The results are shown as a new list entry.
-          If your category term retured no or unexpected results, check 
+          If your category term returned no or unexpected results, check 
           <a href="http://www.mousemine.org/" target="_blank">MouseMine</a> for term usage.
           <span style="color: red;">Note that lists created by searching MouseMine are limited to mouse only.</span>
           `
@@ -534,7 +534,7 @@ export default [{
           `
     }, {
       label: `Show protein labels`,
-      text: `When checked, the label for a displayed CDS is its protein ID. Otherwise, the transcript id.`
+      text: `When checked, the label for a displayed CDS is its protein ID. Otherwise, the transcript ID.`
     }, {
       label: `Show start/stop codons`,
       text: `When checked, marks the positions of start and stop codons with blue and red triangles, respectively.
