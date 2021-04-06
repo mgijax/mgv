@@ -36,7 +36,7 @@ export default [{
     }, {
       label: `View a gene and its homologs`,
       text: `
-          Example: view the structure of Pax6 in C57BL/6J, M. caroli, and human.
+          Example: view the structure of Pax6 in C57BL/6J (GRCm39), CAROLI/EiJ, and H.sapiens.
           <ol>
           <li> Select the three genomes. <li> Type Pax6 into to the "Find" box and hit return.</ol>
           <a href="#regions=C57BL/6J%20(GRCm39)::2:105469726..105558270/1267|CAROLI/EiJ::2:99105820..99194363/1267|H.%20sapiens::11:31759222..31847765/1267&highlight=MGI:97490&lock=on&paralogs=off&style=gg:40,tg:6,fd:3,fl:1,ff:10,fh:10,tx:0,pl:1,tc:0,h:1,ho:0.05,hi:1,hc:0">See result</a>.
@@ -45,7 +45,7 @@ export default [{
       }, {
       label: `View two or more gene and their homologs`,
       text: `
-          Example: view the structure of Pax2, Pax4, and Pax6 in C57BL/6J, M. caroli, and human.
+          Example: view the structure of Pax2, Pax4, and Pax6 in C57BL/6J (GRCm39), CAROLI/EiJ, and H.sapiens.
           <ol>
           <li> Select the three genomes. <li> Type "Pax2 Pax4 Pax6" into to the "Find" box and hit return.</ol>
           <a href="#regions=C57BL/6J%20(GRCm39)::2:105469726..105558270/419,6:28435313..28456372/419,19:44643371..44918377/419|CAROLI/EiJ::2:99107492..99192691/419,6:23288530..23308959/419,19:41335411..41583105/419|H.%20sapiens::7:127602441..127625993/419,10:100640847..100924493/419,11:31760090..31846897/419&highlight=MGI:97486,HGNC:8616,MGI:97488,HGNC:8618,MGI:97490,HGNC:8620&lock=on&paralogs=off&style=gg:40,tg:6,fd:3,fl:1,ff:10,fh:10,tx:0,pl:1,tc:0,h:1,ho:0.05,hi:1,hc:0">See result</a>.
@@ -54,7 +54,7 @@ export default [{
       }, {
       label: `View a reference region and related regions.
         `,
-      text: `Example: view the region 3:18511623..20827190 in C57BL/6J (this is 1.5 Mb around Trim55) and the corresponding regions in human.
+      text: `Example: view the region 3:18511623..20827190 in C57BL/6J (GRCm39) (this is 1.5 Mb around Trim55) and the corresponding regions in human.
         <ol><li> Select the two genomes. Be sure C57BL/6J is on top. <li> Copy/paste the coordinates into the Find box and hit return.
         <a href="#regions=C57BL/6J%20(GRCm39)::3:19127787..20615286/1267|H.%20sapiens::3:148697871..149222008/601,8:65602458..66178464/660&ref=C57BL/6J%20(GRCm39)&paralogs=off&style=gg:40,tg:6,fd:3,fl:1,ff:10,fh:10,tx:0,pl:1,tc:0,h:1,ho:0.05,hi:1,hc:0">See result</a>.
         </ol>
