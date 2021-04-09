@@ -577,6 +577,8 @@ class FeatureRegistrar {
     // each chromosome of each genome has its own registrar
     this.genome = g
     this.chr = c
+    c.minStart = c.length
+    c.maxEnd = 0
     // map feature.ID => feature
     this.id2feat = id2f
     // map feature.cID => [ features ]
@@ -593,6 +595,9 @@ class FeatureRegistrar {
     f.sotype = f.type
     f.genome = this.genome
     f.chr = this.chr
+    //
+    this.chr.minStart = Math.min(this.chr.minStart, f.start)
+    this.chr.maxEnd = Math.max(this.chr.maxEnd, f.end)
     //
     f.length = f.end - f.start + 1
     if (f.length > config.DataManager.featureSizeLimit) {

@@ -563,14 +563,22 @@ export default MComponent({
       }
       //
       let p
-      if (this.rGenome && cxt.chr) {
-        const c = this.rGenome.chromosomes.filter(chr => chr.name === cxt.chr)[0]
-        const coords = {
-          chr: c,
-          start: cxt.start,
-          end: cxt.end
-        }
-        p = this.regionManager.initMappedRegions(this.rGenome, coords, genomes)
+      if (this.rGenome) {
+        p = this.dataManager.ensureFeatures(this.rGenome).then(() => {
+            if (!cxt.chr) {
+                // if no coordinates specified, insert default. First megabase of the first chr
+                cxt.chr = this.rGenome.chromosomes[0].name
+                cxt.start = this.rGenome.chromosomes[0].minStart
+                cxt.end = cxt.start + 1000000
+            }
+            const c = this.rGenome.chromosomes.filter(chr => chr.name === cxt.chr)[0]
+            const coords = {
+              chr: c,
+              start: cxt.start,
+              end: cxt.end
+            }
+            return this.regionManager.initMappedRegions(this.rGenome, coords, genomes)
+        })
       } else if (cxt.landmark) {
         const lcoords = {
            landmark: cxt.landmark,
