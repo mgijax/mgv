@@ -406,7 +406,7 @@ class RegionManager {
         regions.forEach(r => { r.width = r.length })
         return {
           genome: g,
-          regions: regions
+          regions: this.mergeRegions(g, regions)
         }
       })
     })
@@ -464,6 +464,10 @@ class RegionManager {
   //--------------------------------------
   // Maps region ra to genome gb immediately, ie, assumes genomes have been loaded.
   mapRegionToGenomeNow (ra, gb) {
+    // quick check. If mapping to same genome as region is from, just return the region
+    if (ra.genome === gb) {
+        return [ra]
+    }
     const dm = this.app.dataManager
     // features from the A region
     const afeats = dm.getAllFeaturesNow(ra.genome, ra.chr).filter(f => gc.overlaps(f, ra))
