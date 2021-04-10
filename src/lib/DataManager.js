@@ -79,7 +79,8 @@ class DataManager {
         let prevChr = null
         let feats = []
         let allFeats = []
-        recs.forEach(r => {
+        // First make sure features are sorted properly (used to assume this)
+        recs.sort(u.byChrStart).forEach(r => {
           if (!prevChr || r[0] !== prevChr.name) {
             if (feats.length) {
               allFeats.push(this._registerChr(g, prevChr, feats))

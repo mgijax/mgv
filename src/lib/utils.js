@@ -450,9 +450,17 @@ const cols2rows = function (valueArrays, names) {
 }
 // ---------------------------------------------
 // A comparison function for sorting a list of features or regions by chromosome
-// and start position
+// and start position.
+// Works for feature objects or GFF3 records
 //
 const byChrStart = function (a, b) {
+    // Turn GFF3 records into ersatz feature objects expected by comparator
+    if (Array.isArray(a)) {
+        a = { chr: { index:a[0] }, start: a[3] }
+    }
+    if (Array.isArray(b)) {
+        b = { chr: { index:b[0] }, start: b[3] }
+    }
     if (a.chr.index < b.chr.index) {
         return -1
     } else if (a.chr.index > b.chr.index) {
