@@ -1,7 +1,7 @@
 //
 // RegionManager - central point of control for creating/updating the model data that
 // drives the main display.
-//`
+//
 import u from '@/lib/utils'
 import gc from '@/lib/GenomeCoordinates'
 import config from '@/config'
@@ -403,10 +403,11 @@ class RegionManager {
     coords.genome = ref
     const promises = genomes.map(g => {
       return this.mapRegionToGenome(coords, g).then(regions => {
+        regions = this.mergeRegions(g, regions).map(r => this.makeRegion(r))
         regions.forEach(r => { r.width = r.length })
         return {
           genome: g,
-          regions: this.mergeRegions(g, regions)
+          regions: regions
         }
       })
     })
