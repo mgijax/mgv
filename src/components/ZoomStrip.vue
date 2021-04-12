@@ -94,9 +94,9 @@
         :y="height / 4"
         text-anchor="middle"
         style="font-size: 12px; font-weight: bold;"
-        :fill="someoneIsReversed ? 'red' : endCapFontColor"
+        :fill="someoneIsReversed() ? 'red' : endCapFontColor"
         @click="reverseClicked"
-        >{{someoneIsReversed ? '&lt;' : '&gt;'}}<title>Click to reverse orientation of all regions in this strip. You can reverse an individual region from its control panel (right-click on the region background).</title></text>
+        >{{someoneIsReversed() ? '&lt;' : '&gt;'}}<title>Click to reverse orientation of all regions in this strip. You can reverse an individual region from its control panel (right-click on the region background).</title></text>
       <!-- delete button  -->
       <text name="deleteBtn"
         :x="cfg.endCapWidth / 2"
@@ -171,12 +171,12 @@ export default MComponent({
     },
     endCapFontColor: function () {
       return this.isReference ? this.cfg.refEndCapFontColor : this.cfg.endCapFontColor
-    },
-    someoneIsReversed: function () {
-      return this.regions.filter(r => r.reversed).length > 0
     }
   },
   methods: {
+    someoneIsReversed: function () {
+      return this.regions.filter(r => r.reversed).length > 0
+    },
     regionRdragstart: function () {
       this.rDragging = true
     },
@@ -253,7 +253,7 @@ export default MComponent({
       this.$root.$emit('region-change', { region: { genome: this.genome }, op: 'delete-strip' })
     },
     reverseClicked (e) {
-      const sir = this.someoneIsReversed
+      const sir = this.someoneIsReversed()
       this.regions.forEach(r => this.$root.$emit('region-change', {
         region: r,
         op: 'reverse',
