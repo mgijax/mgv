@@ -563,7 +563,7 @@ export default MComponent({
       }
       //
       let p
-      if (this.rGenome && !cxt.landmark) {
+      if (this.rGenome && !cxt.landmark && !cxt.strips) {
         p = this.dataManager.ensureFeatures(this.rGenome).then(() => {
             if (!cxt.chr) {
                 // if no coordinates specified, insert default. First megabase of the first chr
