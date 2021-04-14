@@ -57,12 +57,12 @@ class HistoryManager {
     // OK for development but need a fallback eventually.
     let prms = new URLSearchParams(qstring)
 
-    // ----- genomes ------------
+    // ----- style ------------
     cfg.style = prms.get('style') || ''
 
     // ----- genomes ------------
     let pgenomes = prms.get('genomes') || ''
-    pgenomes = pgenomes ? u.removeDups(pgenomes.trim().split(/[ ,]+/)) : []
+    pgenomes = pgenomes ? u.removeDups(pgenomes.trim().split(/,/)) : []
     pgenomes.length > 0 && (cfg.genomes = pgenomes)
 
     // ----- ref genome ------------
