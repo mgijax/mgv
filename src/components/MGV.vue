@@ -269,29 +269,8 @@ export default MComponent({
       genomeSets: [],
       // when true, all regions scroll (and zoom and select sequenc) in sync.
       scrollLock: false,
-      // Three ways to specify which regions to draw.
-      // 1. Specify the regions explicitly. Each region is a genome+chr+start+end
+      // the regions to draw for each selected genome.
       strips: [],
-      // 2. Specify regions relative to a landmark.
-      lcoords: {
-        // alignment landmark
-        landmark: null,
-        // where on the landmark the alignment point is located
-        // one of: fiveprime, threeprime, start, end, center
-        alignTo: 'fiveprime',
-        // delta in bp away from alignment point (for scrolling while aligned)
-        delta: 0,
-        // width of the region to show (in bp)
-        length: 1000000,
-        // for defining width as length(landmark) + 2*flank
-        flank: 0
-      },
-      // 3. Specify a region in the ref genome. Use mapping to find regions in other genomes.
-      coords: {
-        chr: { name: '1' },
-        start: 1,
-        end: 10000000
-      },
       // ----------------------------------------------------
       // is left drawer open
       drawerOpen: true,
@@ -587,6 +566,7 @@ export default MComponent({
         }
         if (typeof(cxt.flank) === 'number') {
           lcoords.flank = cxt.flank
+          lcoords.flankIsMultiplier = cxt.flankIsMultiplier
         } else {
            lcoords.length = cxt.length || 1000000
         }

@@ -537,9 +537,10 @@ class RegionManager {
   //    g - the genome in which you want the regions (does homology mapping)
   //    targetLen - specifies a fixed region length to use. genes are centered in the region
   //    flank - amount of to add to either side of the genes.
+  //    flankIsMultiplier - if true, flank is a multipler by gene length; else flank is absolute.
   // Note that flank and targetLen are mutually exclusive. If both are specified, flank wins.
   //    
-  makeRegionsFromFeatures (feats, g, targetLen, flank) {
+  makeRegionsFromFeatures (feats, g, targetLen, flank, flankIsMultiplier) {
     targetLen = targetLen || 0
     const ghoms = feats.map(f => {
         return {
@@ -554,7 +555,7 @@ class RegionManager {
     const regions = this.mergeRegions(g, ghoms).map(r => {
           let delta
           if (typeof(flank) === "number") {
-              delta = flank
+              delta = flankIsMultiplier ? Math.floor(flank * r.length) : flank
           } else if (r.length < targetLen) {
               delta = Math.floor((targetLen - r.length) / 2)
           } else {
@@ -577,7 +578,7 @@ class RegionManager {
         const genes = lcoords.landmark.reduce((a,v) => {
             return a.concat(this.app.dataManager.getFeaturesByCid(v))
         },[])
-        const args = { features: genes, flank: lcoords.flank }
+        const args = { features: genes, flank: lcoords.flank, flankIsMultiplier: lcoords.flankIsMultiplier }
         return this.featureAlign(args)
     })
   }
@@ -595,6 +596,7 @@ class RegionManager {
         //
         const rLength = d.region ? (d.region.end - d.region.start + 1) : 0
         const flank = typeof(d.flank) === "number" ? d.flank : undefined
+        const flankIsMultiplier = d.flankIsMultiplier
         //
         if (d.features) {
             if (d.shift) {
@@ -617,7 +619,7 @@ class RegionManager {
         }
         //
         const strips =  this.currentGenomes().map(g =>
-            this.makeRegionsFromFeatures(g2homs.get(g) || [], g, rLength, flank))
+            this.makeRegionsFromFeatures(g2homs.get(g) || [], g, rLength, flank, flankIsMultiplier))
         this.mergeUpdate(strips)
         this.layout()
     })

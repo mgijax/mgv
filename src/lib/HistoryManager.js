@@ -130,6 +130,17 @@ class HistoryManager {
     let delta = prms.get('delta')
     landmark && (cfg.landmark = landmark.split(','))
     flank && (cfg.flank = parseInt(flank))
+    if (flank) {
+        if (flank[flank.length - 1] === 'x') {
+            // multiplier
+            cfg.flank = parseFloat(flank)
+            cfg.flankIsMultiplier = true
+        } else {
+            // fixed amount
+            cfg.flank = parseInt(flank)
+            cfg.flankIsMultiplier = false
+        }
+    }
     length && (cfg.length = parseInt(length))
     delta && (cfg.delta = parseInt(delta))
     //
