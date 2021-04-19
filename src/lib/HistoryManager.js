@@ -128,7 +128,7 @@ class HistoryManager {
     let flank = prms.get('flank')
     let length = prms.get('length')
     let delta = prms.get('delta')
-    landmark && (cfg.landmark = landmark)
+    landmark && (cfg.landmark = landmark.split(','))
     flank && (cfg.flank = parseInt(flank))
     length && (cfg.length = parseInt(length))
     delta && (cfg.delta = parseInt(delta))

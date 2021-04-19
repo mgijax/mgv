@@ -529,7 +529,17 @@ class RegionManager {
     return bfeatsClipped.sort(u.byChrStart)
   }
   //--------------------------------------
-  makeRegionsFromFeatures (feats, g, targetLen) {
+  // Returns a list of regions corresponding to a list of features, optionally adjusted
+  // to meet a target length or to have a specified flank amount.
+  // Returned regions are merged if they're close enough.
+  // Args:
+  //    feats - the list of features
+  //    g - the genome in which you want the regions (does homology mapping)
+  //    targetLen - specifies a fixed region length to use. genes are centered in the region
+  //    flank - amount of to add to either side of the genes.
+  // Note that flank and targetLen are mutually exclusive. If both are specified, flank wins.
+  //    
+  makeRegionsFromFeatures (feats, g, targetLen, flank) {
     targetLen = targetLen || 0
     const ghoms = feats.map(f => {
         return {
@@ -543,7 +553,9 @@ class RegionManager {
     }).sort(u.byChrStart)
     const regions = this.mergeRegions(g, ghoms).map(r => {
           let delta
-          if (r.length < targetLen) {
+          if (typeof(flank) === "number") {
+              delta = flank
+          } else if (r.length < targetLen) {
               delta = Math.floor((targetLen - r.length) / 2)
           } else {
               delta = r.maxLen
@@ -562,8 +574,11 @@ class RegionManager {
   alignOnLandmark (lcoords, genomes) {
     return this.app.dataManager.ensureFeatures(genomes).then(() => {
         this.app.strips = genomes.map(g => { return { genome: g, regions: [] } })
-        this.app.setCurrentSelection(this.app.dataManager.getFeaturesByCid(lcoords.landmark))
-        return this.featureAlign()
+        const genes = lcoords.landmark.reduce((a,v) => {
+            return a.concat(this.app.dataManager.getFeaturesByCid(v))
+        },[])
+        const args = { features: genes, flank: lcoords.flank }
+        return this.featureAlign(args)
     })
   }
   //--------------------------------------
@@ -574,10 +589,12 @@ class RegionManager {
         //
         d = d || {}
         if (d.feature) {
+          // support "feature" argument; turn into "features" argument
           d.features = Array.isArray(d.feature) ? d.feature : [ d.feature ]
         }
         //
         const rLength = d.region ? (d.region.end - d.region.start + 1) : 0
+        const flank = typeof(d.flank) === "number" ? d.flank : undefined
         //
         if (d.features) {
             if (d.shift) {
@@ -599,7 +616,8 @@ class RegionManager {
             }
         }
         //
-        const strips =  this.currentGenomes().map(g => this.makeRegionsFromFeatures(g2homs.get(g) || [], g, rLength))
+        const strips =  this.currentGenomes().map(g =>
+            this.makeRegionsFromFeatures(g2homs.get(g) || [], g, rLength, flank))
         this.mergeUpdate(strips)
         this.layout()
     })
