@@ -119,7 +119,8 @@ export default MComponent({
     // Sets the y coordinate of each zoom strip while dragging.
     // Args:
     //  orderBy (string) One of: 'y', 'name', 'model'. Default is 'y'.
-    //    y: Preserves current y order (but may shift things)
+    //    undefined: perserves the current sort order
+    //    y: used during a drag to shift strips and make room for the dragged strip
     //    name: orders by genome name
     //    model: orders by strips array in model
     // 
@@ -127,6 +128,8 @@ export default MComponent({
       let strips = this.getYs().map(y => y.strip)
       if (orderBy === 'y') {
         // pass
+      } else if (orderBy === undefined) {
+        u.sortBy(strips, s => s.strip.order)
       } else if (orderBy === 'name') {
         u.sortBy(strips, s => s.genome.name)
       } else if (orderBy === 'model') {
@@ -151,13 +154,13 @@ export default MComponent({
     },
     zDrag (d) {
       d.data.vm.dragY = d.data.deltaY
-      this.setYs()
+      this.setYs('y')
       this.$root.$emit('strip-move', d.vm)
     },
     zDragEnd (d) {
       d.data.vm.dragY = 0
       this.dragging = null
-      this.setYs()
+      this.setYs('y')
       this.$root.$emit('context-changed')
       this.$root.$emit('strip-move', d.vm)
     },
