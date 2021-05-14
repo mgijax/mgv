@@ -919,6 +919,23 @@ export default MComponent({
         return `${x2} ${y} ${x1} ${y} ${x1 + ext / 2} ${y - h} ${x1} ${y} ${x1 + ext / 2} ${y + h}`
       }
     },
+    //
+    getSequenceDescriptor () {
+      const r = this.region
+      const desc = {
+            header: `>${r.genome.name}::${r.chr.name}:${r.start}..${r.end} (${r.reversed ? "reverse complement " : ""}dna)`,
+            genome: r.genome.name,
+            genomeUrl: r.genome.url,
+            chromosome: r.chr.name,
+            start: [r.start],
+            length: [r.end - r.start + 1],
+            type: 'dna',
+            reverseComplement: r.reversed,
+            selected: true,
+            totalLength: r.end - r.start + 1
+          }
+      return desc
+    },
     // Request features in my range, which will asynchromously cause a redraw.
     getFeatures () {
       //

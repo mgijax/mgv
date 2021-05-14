@@ -64,22 +64,27 @@
             :title="region && region.reversed ? 'Region is shown in reverse orientation. Click for default.' : 'Region is shown in default orientation. Click to reverse.'"
             @click="reverse()"
             /><span class="small-label">R</span>
-        </div>
-
-        <div>
           <!-- split region -->
           <m-button
             icon="compare"
             title="Split this region."
             @click="split()"
             />
-          <!-- make reference region
+          <!-- make reference region -->
           <m-button
             icon="room"
             title="Make this the reference region."
             @click="makeRef()"
             />
-            -->
+          <!-- add genomic sequence to cart -->
+          <m-button
+            icon="shopping_cart"
+            title="Add this region to the sequence cart."
+            @click="addToCart()"
+            />
+        </div>
+
+        <div>
           <!-- remove region -->
           <m-button
             icon="delete_forever"
@@ -146,10 +151,11 @@ export default MComponent({
     }
   },
   methods: {
-    open (region, y, x) {
+    open (vm, y, x) {
+      this.vm = vm
+      this.region = vm.region
       this.x = x
       this.y = y
-      this.region = region
       this.isOpen = true
       this.reset()
     },
@@ -175,6 +181,10 @@ export default MComponent({
     makeRef: function () {
       this.$root.$emit('region-change', { region: this.region, vm: this, op: 'make-reference' })
       this.close()
+    },
+    addToCart: function () {
+      const desc = this.vm.getSequenceDescriptor()
+      this.$root.$emit('sequence-selected', { sequences : [desc], unselectAll: true })
     },
     remove: function () {
       this.$root.$emit('region-change', { region: this.region, vm: this, op: 'remove' })

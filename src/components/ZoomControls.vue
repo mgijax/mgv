@@ -30,6 +30,11 @@
           @click="alignFeatures()"
           :title="(app.currentSelection.length === 0 ? 'Align disabled because no features are currently selected.' : 'Align the view around the currently selected feature(s).')"
           />
+        <m-button
+          icon="shopping_cart"
+          title="Add all currently displayed regions to the SequenceCart. To add a single reagion, click the cart icon in that region's control panel (right click to open)."
+          @click="addAllToCart()"
+          />
         </div>
       <!-- Search box -->
       <div class="flexrow">
@@ -211,6 +216,12 @@ export default MComponent({
     alignFeatures (fs, shift) {
         fs = fs || this.app.currentSelection
         this.$root.$emit('region-change', { op : 'feature-align', features: fs, shift: shift })
+    },
+    addAllToCart () {
+      const strips = this.$parent.$refs.main.$refs.strips
+      const regions = u.flatten(strips.map(s => s.$children))
+      const descs = regions.map(r => r.getSequenceDescriptor())
+      this.$root.$emit('sequence-selected', { sequences : descs, unselectAll: true })
     },
     findLandmark (n, shift) {
       if (!n) return

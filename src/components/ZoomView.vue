@@ -102,7 +102,7 @@ export default MComponent({
         const v = vm.variants.filter(vv => vv.ID === vid)[0]
         if (v) this.$refs.variantInfo.open( v, y, x)
       } else {
-        this.$refs.regionControls.open(vm.region, y-2, x-2)
+        this.$refs.regionControls.open(vm, y-2, x-2)
       }
     }
   }
