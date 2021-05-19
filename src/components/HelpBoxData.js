@@ -365,7 +365,7 @@ export default [{
     }]
   }, {
     name: `Sequences`,
-    description: `You can select sequences and download them in FASTA format or copy them to the clipboard.
+    description: `You can select sequences and download them in FASTA format, view them in the browser, or copy them to the clipboard.
         The ${ref('SequenceCart')} contains (descriptors of) sequences that you select plus
         controls for downloading. Actual sequences are not materialized until download
         time, so the SequenceCart itself takes little space. If you want whole chromosomes, though,
@@ -373,12 +373,15 @@ export default [{
         `,
     items: [{
       label: `Select genomic sequences`,
-      text: `Alt-drag the desired region; it is added to the ${ref('SequenceCart')}.
+      text: `You can add the genomic sequence of all currently displayed regions to the SequenceCart by clicking the ${i('shopping_cart')} icon in the main control area. You can add genomic sequence for a single region by opening that region's menu (right click on region background) and clicking the ${i('shopping_cart')} icon.
+          <br /><br />
+          You can also specify genomic sequences to download using the mouse.
+          Alt-drag over the desired range to add it to the ${ref('SequenceCart')}.
           If ${i('lock','rgb(255, 127, 14)')} is set, the selection happens in all displayed regions.
           If the drag action is right-to-left, the sequence(s) will be reverse-complemented. 
           `
       }, {
-      label: `Select gene sequences`,
+      label: `Select gene model sequences`,
       text: `Right click on a gene to open its context menu. Choose one of the 
           options under "Add sequences to cart." You can select genomic, transcript,
           composite transcript, or CDS sequences; you may select these sequences the current gene only or for that
