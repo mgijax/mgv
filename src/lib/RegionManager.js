@@ -124,6 +124,7 @@ class RegionManager {
               chr: chr,
               start: 1,
               end: Math.min(len, chr.length),
+              reversed: false,
               width: 1 // value doesn't matter here
               }]
           })
@@ -523,7 +524,8 @@ class RegionManager {
         start: bfs,
         end: bfe,
         length: bfe - bfs + 1,
-        strand: bf.strand
+        strand: bf.strand,
+        reversed: false
       }
     })
     return bfeatsClipped.sort(u.byChrStart)
@@ -564,6 +566,7 @@ class RegionManager {
           r.start -= delta
           r.end += delta
           r.length = r.end - r.start + 1
+          r.reversed = false
           return r
       })
     return {
