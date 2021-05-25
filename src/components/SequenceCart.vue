@@ -70,6 +70,7 @@
                  name="filename"
                  type="text"
                  :disabled="cartEmpty"
+                 @keypress="filenameKeypress"
                  placeholder="Enter file name." />
              </div>
              <div class="flexrow download-option">
@@ -205,6 +206,13 @@ export default MComponent({
     },
     unselectAll: function () {
       this.cart.forEach(item => {item.selected = false})
+    },
+    filenameKeypress: function (e) {
+      if (e.keyCode === 13) {
+        e.preventDefault()
+        this.downloadTo('file')
+        return false
+      }
     },
     downloadTo: function (where) {
       if (this.nothingSelected) return
