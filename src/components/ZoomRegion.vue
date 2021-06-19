@@ -279,8 +279,7 @@
           :style="{
             textAnchor: 'start',
             fontFamily: 'sans-serif',
-            fontWeight: featureMouseover(f) ? 'bold' : 'normal',
-            pointerEvents: 'none'
+            fontWeight: featureMouseover(f) ? 'bold' : 'normal'
           }"
           ><tspan
             v-if="featureInListStrict(f)"
