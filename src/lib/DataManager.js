@@ -499,7 +499,7 @@ class DataManager {
        this.getFeaturesByCid(hid).filter(hom =>
            genomes.indexOf(hom.genome) >= 0))
     const fhoms = u.flatten(homs)
-    if (fhoms.length === 0 && f.genome in genomes) return [f]
+    if (fhoms.length === 0 && genomes.indexOf(f.genome) >= 0) return [f]
     return fhoms
   }
   //
