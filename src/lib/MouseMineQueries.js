@@ -2,7 +2,7 @@ import u from '@/lib/utils'
 
 class MouseMineQueries {
   constructor () {
-    this.qUrl = 'http://www.mousemine.org/mousemine/service/query/results?'
+    this.qUrl = 'https://www.mousemine.org/mousemine/service/query/results?'
   }
   // Args:
   //   q - query in XML fomat

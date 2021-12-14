@@ -429,7 +429,7 @@ export default [{
           (e.g. "Parkinson") and click the "GO" button. Links to appropriate browsers are displayed for each category to
           assist in finding appropriate search terms/IDs. The results are shown as a new list entry.
           If your category term returned no or unexpected results, check 
-          <a href="http://www.mousemine.org/" target="_blank">MouseMine</a> for term usage.
+          <a href="https://www.mousemine.org/" target="_blank">MouseMine</a> for term usage.
           <span style="color: red;">Note that lists created by searching MouseMine are limited to mouse only.</span>
           `
       }, {
