@@ -227,7 +227,9 @@ function fetch (url, type, postData) {
   }
   //
   function parseTsv (s) {
-    return s.split(/\n/).map(l => l.trim().split())
+    const tbl = s.split(/\n/).map(l => l.split(/\t/))
+    tbl.pop()
+    return tbl
   }
   //
   let opts = undefined
