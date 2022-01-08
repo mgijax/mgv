@@ -72,45 +72,22 @@ class GenomeRegistrar {
   register (url) {
     let p = this.url2promise[url]
     if (p) return p
-    this.url2promise[url] = p = u.fetch(this._adjust(url), 'json')
-      .then(data => this._register(url, data))
+    const url2 = url + '/fetch.cgi?datatype=metadata'
+    this.url2promise[url] = p = u.fetch(url2, 'json')
+      .then(data => data.map(g => this.registerGenome(url,g)).filter(x=>x))
     return p
-  }
-  _adjust (url) {
-    if (url.endsWith('/')) return url + this.indexName
-    return url
-  }
-  _combineUrl(url, ext) {
-    if (ext.startsWith('http://')) {
-      return ext
-    } else if (ext.startsWith('/')) {
-      // relative URL starting with '/'
-      return url.slice(0,url.indexOf('/',7)) + ext
-    } else {
-      // relative URL not starting with '/'
-      return url.slice(0,url.lastIndexOf('/')+1) + ext
-    }
-  }
-  _register (url, data) {
-    if (Array.isArray(data)) {
-      // array. process each element and return a promise for the concatenated results.
-      return Promise.all(data.map(d => this._register(url, d))).then(u.concatAll)
-    } else if (typeof(data) === 'string') {
-      // string. ie, a URL.
-      return this.register(this._combineUrl(url, data))
-    } else {
-      // object, ie, a genome descriptor. Register the genome and return
-      // it, wrapped in a promise
-      return Promise.resolve(this.registerGenome(url, data))
-    }
   }
   lookupGenome (n) {
     return this.name2genome[n]
   }
   registerGenome (url, info) {
+    if (info.type !== "genome") return null
     info.url = info.url || url
     info.name2chr = info.chromosomes.reduce((a,c) => { a[c.name] = c; return a }, {})
     info.chromosomes.forEach((c,i) => { c.index = i })
+    info.metadata = {
+      name: info.name
+    }
     const gr = new GenomeReader(this, info)
     this.name2genome[info.name] = info
     this.name2reader[info.name] = gr

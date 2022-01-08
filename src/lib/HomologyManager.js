@@ -25,7 +25,7 @@ class HomologyManager {
       return this.taxonid2promise[taxonid]
     }
     this.app.$root.$emit('message', { message: `Fetching orthology data for taxon ${taxonid}...` })
-    const p = u.fetch(`${this.url}/homologies/orthology/${taxonid}.json`, 'json').then(data => {
+    const p = u.fetch(`${this.url}/fetch.cgi?datatype=homology&taxonid=${taxonid}`, 'tsv').then(data => {
       this.registerData(data)
       return true
     })

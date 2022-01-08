@@ -409,7 +409,7 @@ export default MComponent({
       return this.strips.map(s => s.genome)
     },
     vTaxons: function () {
-      return Array.from(new Set(this.vGenomes.map(g => this.dataManager.fixTaxonId(g.metadata.taxonid))))
+      return Array.from(new Set(this.vGenomes.map(g => this.dataManager.fixTaxonId(g.taxonid))))
     },
     activeFacetsText: function () {
       return this.activeFacets.map(f => {

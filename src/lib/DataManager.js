@@ -69,7 +69,7 @@ class DataManager {
     if (this.pending[g.name]) return this.pending[g.name]
     if (this.cache[g.name]) return Promise.resolve(true)
     //
-    const txid = this.fixTaxonId(g.metadata.taxonid)
+    const txid = this.fixTaxonId(g.taxonid)
     const hp = this.homologyManager.loadHomologiesForTaxon(txid)
     //
     this.cache[g.name] = {}
@@ -468,7 +468,7 @@ class DataManager {
   getHomologCids (f, genomes) {
     if (!f.cID) return [f.ID]
     genomes = genomes || this.app.vGenomes
-    const taxons = Array.from(new Set(genomes.map(g => this.fixTaxonId(g.metadata.taxonid))))
+    const taxons = Array.from(new Set(genomes.map(g => this.fixTaxonId(g.taxonid))))
     const hm = this.homologyManager
     const txA = this.getTaxonId(f)
     if (this.app.includeParalogs) {
@@ -536,7 +536,7 @@ class DataManager {
   }
   //
   getTaxonId (f) {
-    const t = f.genome.metadata.taxonid
+    const t = f.genome.taxonid
     return this.fixTaxonId(t)
   }
   //
