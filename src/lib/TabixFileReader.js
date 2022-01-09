@@ -1,23 +1,23 @@
 import u from '@/lib/utils'
 
 // ---------------------------------------------------------------------
-class ChunkedFileReader {
-  constructor (type, fetcher, name, chunkSize, genome, url) {
+class TabixFileReader {
+  constructor (fetcher, track, genome, url) {
     this.fetcher = fetcher
-    this.name = name
-    this.chunkSize = chunkSize
+    this.track = track
     this.genome = genome
     this.url = url
-    this.type = type
-    this.holes = {} // chromosome -> set of block numbers
   }
   readAll () {
-    if (this.chunkSize === 0) {
-      return this.fetcher.fetch(`${this.url}/${this.name}/0.${this.type}`, this.type)
-    } else {
-      const ps = this.genome.chromosomes.map(c => this.readChromosome(c))
-      return Promise.all(ps).then(u.concatAll)
-    }
+    const arg = this.genome.chromosomes.map(c => c.name).join(' ')
+    const desc = [{
+        "genome" : this.genome.path,
+        "track" : this.track,
+        "regions" : arg
+    }]
+    const qstring = encodeURI(JSON.stringify(desc))
+    const url = `${this.url}/fetch.cgi?datatype=gff&descriptors=${qstring}`
+    return this.fetcher.fetch(url, 'gff')
   }
   readChromosome (c) {
     return this.readRange(c, 1, c.length)
@@ -72,44 +72,6 @@ class ChunkedFileReader {
     return this.readChunks(c, s, e).then(data => data.filter(f => this.getStart(f) <= e && this.getEnd(f) >= s))
   }
 }
-
-class ChunkedGff3FileReader extends ChunkedFileReader {
-  constructor (fetcher, name, chunkSize, genome, url) {
-     super('gff3', fetcher, name, chunkSize, genome, url) 
-  }
-  getID (rec) {
-     return rec[8]['ID']
-  }
-  getChr (rec) {
-      return rec[0]
-  }
-  getStart (rec) {
-      return rec[3]
-  }
-  getEnd (rec) {
-      return rec[4]
-  }
-}
-
-class ChunkedVcfFileReader extends ChunkedFileReader {
-  constructor (fetcher, name, chunkSize, genome, url) {
-     super('vcf', fetcher, name, chunkSize, genome, url) 
-  }
-  getID (rec) {
-     return rec[2]
-  }
-  getChr (rec) {
-      return rec[0]
-  }
-  getStart (rec) {
-      return rec[1]
-  }
-  getEnd (rec) {
-      return rec[1] + rec[3].length - 1
-  }
-}
-
 export {
-    ChunkedGff3FileReader,
-    ChunkedVcfFileReader
+    TabixFileReader
 }
