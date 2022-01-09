@@ -3,7 +3,7 @@ import u from '@/lib/utils'
 import config from '@/config'
 import KeyStore from '@/lib/KeyStore'
 import CachingFetcher from '@/lib/CachingFetcher'
-import { ChunkedGff3FileReader, ChunkedVcfFileReader } from '@/lib/ChunkedFileReader'
+import { TabixFileReader } from '@/lib/TabixFileReader'
 //
 // -------------------------------------------------------------------------------
 // Container for track readers for a genome
@@ -12,14 +12,12 @@ class GenomeReader {
     this.registrar = registrar
     this.info = info
     const n = config.CachingFetcher.dbName
-    this.fetcher = new CachingFetcher(n, info.name)
+    this.fetcher = new CachingFetcher(n, info.path)
     this.kstore = new KeyStore(n)
     this.readers = this.info.tracks.reduce((a,t) => {
-      if (t.type === 'ChunkedGff3') {
-        a[t.name] = new ChunkedGff3FileReader(this.fetcher, t.name, t.chunkSize, info, info.url + "models/")
-      }
-      else if (t.type === "ChunkedVcf") {
-        a[t.name] = new ChunkedVcfFileReader(this.fetcher, t.name, t.chunkSize, info, info.url )
+      if (t.filetype === 'gff') {
+        a[t.track] = new TabixFileReader(this.fetcher, t.track, info, info.url)
+        a[t.track+'.genes'] = new TabixFileReader(this.fetcher, t.track+'.genes', info, info.url)
       }
       return a
     }, {})
@@ -31,7 +29,7 @@ class GenomeReader {
   // then save the new info.
   // Returns a promise that resolves when all that is done.
   checkTimestamp () {
-    return this.kstore.get(this.info.name + '::INFO').then(cinfo => {
+    return this.kstore.get(this.info.path + '::INFO').then(cinfo => {
       if (!cinfo || cinfo.timestamp != this.info.timestamp) {
         return this.fetcher.clearNamespace().then(() => {
           return this.kstore.set(this.info.name+'::INFO', this.info)
@@ -91,8 +89,8 @@ class GenomeRegistrar {
     const gr = new GenomeReader(this, info)
     this.name2genome[info.name] = info
     this.name2reader[info.name] = gr
-    this.name2genome[info.pathname] = info
-    this.name2reader[info.pathname] = gr
+    this.name2genome[info.path] = info
+    this.name2reader[info.path] = gr
     if (info.shortname) {
         this.name2genome[info.shortname] = info
         this.name2reader[info.shortname] = gr

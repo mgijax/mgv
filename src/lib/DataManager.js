@@ -24,7 +24,7 @@ class DataManager {
     this.cache = {} // { genome.name -> { chr.name -> [features] } }
     this.pending = {} // genome.name -> pending promise
     this.id2feat = {} // ID -> feature
-    this.cid2feats = {} // cID -> [ features ]
+    this.cid2feats = {} // curie -> [ features ]
     this.symbol2feats = {} // symbol -> [ features ]
     this.greg = new GenomeRegistrar()
     this.genomes = this.greg.register(this.url)
@@ -73,13 +73,14 @@ class DataManager {
     const hp = this.homologyManager.loadHomologiesForTaxon(txid)
     //
     this.cache[g.name] = {}
-    this.pending[g.name] = this.greg.getReader(g, 'genes').then(reader => {
+    this.pending[g.name] = this.greg.getReader(g, 'models.genes').then(reader => {
       this.app.$root.$emit('message', { message: 'Loading ' + g.name + '...' })
       return reader.readAll().then(recs => {
         let prevChr = null
         let feats = []
         let allFeats = []
         // First make sure features are sorted properly (used to assume this)
+        recs = recs.filter(r => Array.isArray(r))
         recs.sort(u.byChrStart).forEach(r => {
           if (!prevChr || r[0] !== prevChr.name) {
             if (feats.length) {
@@ -466,16 +467,16 @@ class DataManager {
   }
   // Returns canonical ids of all homologs of f
   getHomologCids (f, genomes) {
-    if (!f.cID) return [f.ID]
+    if (!f.curie) return [f.ID]
     genomes = genomes || this.app.vGenomes
     const taxons = Array.from(new Set(genomes.map(g => this.fixTaxonId(g.taxonid))))
     const hm = this.homologyManager
     const txA = this.getTaxonId(f)
     if (this.app.includeParalogs) {
-      return hm.getHomologIdsExt(f.cID, txA, taxons)
+      return hm.getHomologIdsExt(f.curie, txA, taxons)
     } else {
-      const homs = hm.getOrthologIds(f.cID, txA, taxons)
-      homs.push(f.cID)
+      const homs = hm.getOrthologIds(f.curie, txA, taxons)
+      homs.push(f.curie)
       return homs
     }
   }
@@ -506,16 +507,16 @@ class DataManager {
   equivalent (fA, fB) {
     // same feature?
     if (fA === fB || fA.ID === fB.ID) return true
-    // else if no cID, can't be homologs
-    if (!fA.cID) return false
-    // same cID?
-    if (fA.cID === fB.cID) return true
+    // else if no curie, can't be homologs
+    if (!fA.curie) return false
+    // same curie?
+    if (fA.curie === fB.curie) return true
     // fB is a homolog?
     const txA = this.getTaxonId(fA)
     const txB = this.getTaxonId(fB)
     if (txA === txB && !this.app.includeParalogs) return false
-    const idBs = this.homologyManager.getHomologIds(fA.cID, txA, [txB])
-    if (idBs.indexOf(fB.cID) >= 0) return true
+    const idBs = this.homologyManager.getHomologIds(fA.curie, txA, [txB])
+    if (idBs.indexOf(fB.curie) >= 0) return true
     //
     return false
   }
@@ -553,11 +554,11 @@ class DataManager {
          const cfeats = gcache[cn]
          cfeats.forEach(f => {
            delete this.id2feat[f.ID]
-           const cidFeats = this.cid2feats[f.cID]
+           const cidFeats = this.cid2feats[f.curie]
            if (cidFeats) {
-             this.cid2feats[f.cID] = cidFeats.filter(ff => ff !== f)
-             if (this.cid2feats[f.cID].length === 0) {
-                delete this.cid2feats[f.cID]
+             this.cid2feats[f.curie] = cidFeats.filter(ff => ff !== f)
+             if (this.cid2feats[f.curie].length === 0) {
+                delete this.cid2feats[f.curie]
              }
            }
            if (f.symbol) {
@@ -582,7 +583,7 @@ class FeatureRegistrar {
     c.maxEnd = 0
     // map feature.ID => feature
     this.id2feat = id2f
-    // map feature.cID => [ features ]
+    // map feature.curie => [ features ]
     this.cid2feats = cid2f
     // map feature.symbol => [ features ]
     this.symbol2feats = sym2f
@@ -607,12 +608,12 @@ class FeatureRegistrar {
     }
     //
     this.id2feat[f.ID] = f
-    if (f.cID) {
-      let d = this.cid2feats[f.cID]
-      if (!d) d = this.cid2feats[f.cID] = []
+    if (f.curie) {
+      let d = this.cid2feats[f.curie]
+      if (!d) d = this.cid2feats[f.curie] = []
       d.push(f)
     } else {
-      f.cID = null // make sure it's not undefined
+      f.curie = null // make sure it's not undefined
     }
     //
     f.symbol = f.symbol || f.Name || f.gene_id
@@ -624,7 +625,7 @@ class FeatureRegistrar {
       d.push(f)
     }
     // For convenience...
-    f.id = f.cID || f.ID
+    f.id = f.curie || f.ID
     f.label = f.symbol || f.id
     //
     f.layout = {

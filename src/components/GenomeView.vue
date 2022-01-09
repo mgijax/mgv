@@ -279,7 +279,7 @@ export default MComponent({
                 return this.getFacets().test(x)
               })
           const ss = this.context.currentListSetStrict
-          this.currentListCount = this.currentListHomologs.map(h => (ss.has(h.cID) || ss.has(h.ID) ? 1 : 0)).reduce((a,v) => a+v, 0)
+          this.currentListCount = this.currentListHomologs.map(h => (ss.has(h.curie) || ss.has(h.ID) ? 1 : 0)).reduce((a,v) => a+v, 0)
           this.currentListHomologsByChr = this.currentListHomologs.slice(0, this.maxListLegth).reduce((a,g) => {
             const n = g.chr.name
             if (!a[n]) a[n] = []

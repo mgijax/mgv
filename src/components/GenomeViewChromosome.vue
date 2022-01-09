@@ -185,7 +185,7 @@ export default MComponent({
       const gs = this.myList.map(f => {
         return {
           f: f,
-          inList: this.currentListIds.has(f.cID) || this.currentListIds.has(f.ID),
+          inList: this.currentListIds.has(f.curie) || this.currentListIds.has(f.ID),
           gPoint: [this.glyphX(f), this.glyphY(f)], // where glyph is centered
           aPoint: [0, this.glyphY(f)] // where connector line attaches to axis
         }

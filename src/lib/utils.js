@@ -214,7 +214,7 @@ function deepCopy (obj) {
 //  type: expected type of the response (text, json, or gff3)
 //  postData: if provided, a URL-encoded string, eg, "name=Joel&age=60"
 function fetch (url, type, postData) {
-  const types = ['text', 'json', 'gff3','tsv','vcf']
+  const types = ['text', 'json', 'gff3','gff','tsv','vcf']
   if (!type) type = 'text'
   if (types.indexOf(type) === -1) return Promise.reject('Unknown type: ' + type)
   //
@@ -249,6 +249,7 @@ function fetch (url, type, postData) {
     case 'json':
       return r.json()
     case 'gff3':
+    case 'gff':
       return r.text().then(t => gff.parseFile(t))
     case 'vcf':
       return r.text().then(t => vcf.parseFile(t))

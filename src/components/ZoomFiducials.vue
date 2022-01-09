@@ -182,9 +182,9 @@ export default MComponent({
             vhfs.add(f)
             //
             this.dataManager().getHomologs(f).forEach(h => {
-                if (this.app.currentSelectionSet.has(h.cID)
-                || this.app.currentMouseoverSet.has(h.cID)
-                || this.app.currentListSet && this.app.currentListSet.has(h.cID)) allHoms.add(h)
+                if (this.app.currentSelectionSet.has(h.curie)
+                || this.app.currentMouseoverSet.has(h.curie)
+                || this.app.currentListSet && this.app.currentListSet.has(h.curie)) allHoms.add(h)
             })
             // Keep track of which specific features to draw a box around (the ones actually clicked)
             if (fel.classList.contains('selected')) {
@@ -231,14 +231,14 @@ export default MComponent({
       // generate list of descriptors for drawing the warning messages.
       this.messages = sboxes.map(sb => {
         const invisHomologs =  Array.from(invisGrouped[sb.genome.name] || [])
-        const invisHomologString = invisHomologs.map(f => f.symbol || f.cID || f.ID).sort().join(", ")
+        const invisHomologString = invisHomologs.map(f => f.symbol || f.curie || f.ID).sort().join(", ")
         const gmissing = Array.from(this.app.missingByGenome.get(sb.genome) || []).filter(f => {
             for (let hf of this.dataManager().getHomologs(f)) {
                 if (vhfs.has(hf)) return true
             }
             return false
         })
-        const missingString = Array.from(new Set(gmissing.map(f => f.symbol || f.cID || f.ID))).sort().join(", ")
+        const missingString = Array.from(new Set(gmissing.map(f => f.symbol || f.curie || f.ID))).sort().join(", ")
         //
         return {
           x: sb.rect.x + sb.rect.width + 16,

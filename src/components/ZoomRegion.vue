@@ -782,7 +782,7 @@ export default MComponent({
       return this.featureMouseover(f) || this.featureSelected(f) || this.featureInList(f)
     },
     featureMouseover: function (f) {
-      return this.app.currentMouseover === f || this.app.currentMouseoverSet.has(f.cID)
+      return this.app.currentMouseover === f || this.app.currentMouseoverSet.has(f.curie)
     },
     transcriptHighlighted: function (t) {
       return t === this.context.currentMouseoverT
@@ -793,7 +793,7 @@ export default MComponent({
     },
     // Returns true if feature is selected or is a homolog 
     featureSelected: function (f) {
-      return this.selectedSet.has(f.cID ? f.cID : f.ID)
+      return this.selectedSet.has(f.curie ? f.curie : f.ID)
     },
     // Returns true if feature label should be shown
     featureShowLabel: function (f) {
@@ -807,13 +807,13 @@ export default MComponent({
     featureInList: function (f) {
       if (!this.context.currentList) return false
       const s = this.context.currentListSet
-      return s && (s.has(f.cID) || s.has(f.ID))
+      return s && (s.has(f.curie) || s.has(f.ID))
     },
-    // Returns true iff f's ID or cID is a member of the currently displayed list.
+    // Returns true iff f's ID or curie is a member of the currently displayed list.
     featureInListStrict: function (f) {
       if (!this.context.currentList) return false
       const s = this.context.currentListSetStrict
-      return s && (s.has(f.cID) || s.has(f.ID))
+      return s && (s.has(f.curie) || s.has(f.ID))
     },
     // Returns true iff the feature is currently visible, ie, it overlaps the coordinate range of this region
     // (takes scrolling into account)

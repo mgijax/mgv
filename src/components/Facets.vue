@@ -99,7 +99,7 @@ export default MComponent({
         mapper: function (f) {
           if (this.selectedSet.has('dont care')) return 'dont care'
           if (!this.app.currentList || this.app.currentList.length === 0) return Array.from(this.selectedSet)[0]
-          return this.app.currentListSet.has(f.cID) || this.app.currentListSet.has(f.ID)
+          return this.app.currentListSet.has(f.curie) || this.app.currentListSet.has(f.ID)
         },
         message: ""
       }, {

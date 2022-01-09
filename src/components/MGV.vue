@@ -350,12 +350,12 @@ export default MComponent({
     // FIXME: refactor the existing calls
     //
     currentSelectionToList: function () {
-      const s = new Set(this.currentSelection.map(f => f.cID || f.ID))
+      const s = new Set(this.currentSelection.map(f => f.curie || f.ID))
       return Array.from(s)
     },
     currentSelectionToListWithHoms: function () {
       const cHoms = this.currentSelection.map(f => this.dataManager.getHomologs(f, this.vGenomes))
-      const cHomIds = new Set(u.flatten(cHoms).map(f => f.cID || f.ID))
+      const cHomIds = new Set(u.flatten(cHoms).map(f => f.curie || f.ID))
       return Array.from(cHomIds)
     },
     // Returns the set of canonical IDs homologous to anything in the current selection
@@ -364,7 +364,7 @@ export default MComponent({
       return new Set(sids)
     },
     currentSelectionLabel: function () {
-      const ids = Array.from(new Set(this.currentSelection.map(f => f.symbol||f.cID||f.ID)))
+      const ids = Array.from(new Set(this.currentSelection.map(f => f.symbol||f.curie||f.ID)))
       ids.sort()
       return ids.join(", ")
     },
@@ -397,7 +397,7 @@ export default MComponent({
     agIndex: function () {
       return this.allGenomes.reduce((ix, g) => {
           ix[g.name] = g
-          ix[g.pathname] = g
+          ix[g.path] = g
           if (g.shortname) ix[g.shortname] = g
           return ix
       }, {})
@@ -602,7 +602,7 @@ export default MComponent({
           return this.dataManager.ensureFeatures(g).then(() => {
             (cxt.currentSelection || []).forEach(ident => {
               this.dataManager.getFeaturesBy(ident).filter(f => f.genome === g).forEach(f => {
-                if (!f.cID || !this.currentSelectionSet.has(f.cID)) {
+                if (!f.curie || !this.currentSelectionSet.has(f.curie)) {
                   this.addToCurrentSelection(f)
                 }
               })
@@ -623,7 +623,7 @@ export default MComponent({
     getContextString: function () {
       let cs = this.regionManager.getParameterString()
       if (this.currentSelection && this.currentSelection.length) {
-        const ids = Array.from(new Set(this.currentSelection.map(f => f.cID || f.ID)))
+        const ids = Array.from(new Set(this.currentSelection.map(f => f.curie || f.ID)))
         cs += `&highlight=${ids}`
       }
 
@@ -658,7 +658,7 @@ export default MComponent({
     featureClick: function (f, t, e) {
       this.detailFeatures = this.dataManager.getHomologs(f, this.vGenomes)
       if (e.shiftKey) {
-        const cs = this.currentSelection.filter(ff => !(ff.cID && ff.cID === f.cID))
+        const cs = this.currentSelection.filter(ff => !(ff.curie && ff.curie === f.curie))
         if (cs.length !== this.currentSelection.length) {
           this.setCurrentSelection(cs)
           this.currentMouseover = null
@@ -700,7 +700,7 @@ export default MComponent({
             f.forEach(ff => this.addToCurrentSelection(ff))
             return
         }
-        const cs = this.currentSelection.filter(c => !(c.cID && c.cID === f.cID))
+        const cs = this.currentSelection.filter(c => !(c.curie && c.curie === f.curie))
         cs.push(f)
         this.currentSelection = cs
     },
@@ -710,7 +710,7 @@ export default MComponent({
     setCurrentList: function (lst) {
       this.currentList = lst
       const listFeats = u.flatten(lst.items.map(id => this.dataManager.getHomologs(id)))
-      const idents = listFeats.map(f => f.cID || f.ID)
+      const idents = listFeats.map(f => f.curie || f.ID)
       // this list includes homologs
       this.currentListSet = new Set(idents)
       // this one doesn't
