@@ -291,7 +291,7 @@ class DataManager {
               const nts = m.children.map(t => {
                   const exons = this._condenseExons(t)
                   const tlen = t[4] - t[3] + 1
-                  const cds = this._condenseCds(t)
+                  const cds = this._condenseCds(t, exons)
                   const attrs = t[8]
                   const tt= {
                     gID: attrs['Parent'],
@@ -309,7 +309,9 @@ class DataManager {
               })
               return ts.concat(nts)
           }, [])
-          return transcripts
+          return transcripts.sort((a,b) => {
+              return a.label < b.label ? -1 : a.label > b.label ? 1 : 0
+          })
       })
     })
   }
@@ -318,7 +320,7 @@ class DataManager {
     return exons.map(e => { return { start: e[3], end: e[4] } })
   }
 
-  _condenseCds (t) {
+  _condenseCds (t, exons) {
     const cdss = (t.children || []).filter(f => f[2] === "CDS").sort(u.byChrStart)
     if (cdss.length === 0) return null
     const attrs = cdss[0][8]
@@ -329,67 +331,8 @@ class DataManager {
     const end = parseInt(cdss[cdss.length-1][4])
     const length = cdss.reduce((tot, c) => tot + c[4] - c[3] + 1, 0)
     const c = { ID, protein_id, label, start, end, length }
-    return c
-  }
-  // Returns a promise for the transcripts of features that overlap the 
-  // specified range of the specified genome. Each transcript includes
-  // its exons. Coding transcripts also contain the coordinates of the
-  // start and stop codons.
-  xetModels (g, c, s, e) {
-    return this.greg.getReader(g, 'models').then(reader => {
-      return reader.readRange(c, s, e).then(ts => {
-        const val = ts.map(t => {
-          const exons = [] // this._unpackExons(t)
-          const tlen = exons.reduce((l,x) => l + x.end - x.start + 1, 0)
-          const cds = [] // this._unpackCds(t[8]['cds'], tlen, exons, t.strand)
-          const attrs = t[8]
-          const tt= {
-            gID: attrs['Parent'],
-            ID: attrs['ID'],
-            label: this.stripPrefix(attrs['Name'] || attrs['transcript_id'] || attrs['ID']),
-            transcript_id: attrs['transcript_id'],
-            exons: exons,
-            start: t[3], // Math.min.apply(null,exons.map(e => e.start)),
-            end: t[4], // Math.max.apply(null,exons.map(e => e.end)),
-            strand: t[6],
-            length: tlen,
-            cds: cds
-          }
-          return tt
-        }).sort((a,b) => {
-          return a.label < b.label ? -1 : a.label > b.label ? 1 : 0
-        })
-        return val
-      })
-    })
-  }
-  // Exons of a transcript are encoded as a string such as "0_110,2100_344,..."
-  // where for each N_M item, N is the offset of the exon from the start of the transcript
-  // and M is the exon's length.
-  // Here we parse the string and produce a list of exons each with full start and end coordinates.
-  _unpackExons (t) {
-    const exonsAttr = t[8]['exons']
-    if (!exonsAttr) {
-      return [{start: t[3], end: t[4]}]
-    }
-    const ecoords = exonsAttr.split(',').map(s => s.split('_').map(s => parseInt(s)))
-    return ecoords.map(ec => { return { start: t[3] + ec[0], end: t[3] + ec[0] + ec[1] - 1 } })
-  }
-  // CDSs of a transcript are encoded as "ID|start|end", where ID is the CDSs ID and start and end are
-  // the positions of the start and stop codons. (Reminder: Coordinates are always forward strand. To know
-  // which is the start codon and which is the stop codon, you have to look at the strand of the gene.)
-  _xnpackCds (cdsAttr, tlen, exons, strand) {
-    if (!cdsAttr) return null
-    const parts = cdsAttr.split('|')
-    const c = {
-      ID: parts[0],
-      protein_id: parts[1],
-      label: this.stripPrefix(parts[1] || parts[0]),
-      start: parseInt(parts[2]),
-      end: parseInt(parts[3])
-    }
-    // compute the length of the CDS by adding up the included exons (taking care not to
-    // include UTRs)
+    //
+    const strand = t[6]
     const PUTR = strand === "+" ? '5_prime_utr' : '3_prime_utr'
     const DUTR = strand === "+" ? '3_prime_utr' : '5_prime_utr'
     const CDS = 'cds'
@@ -411,7 +354,6 @@ class DataManager {
       }
       return a
     }, [])
-    c.length = c.pieces.reduce((a,x) => a + (x.type==='cds' ? x.end - x.start + 1 : 0), 0)
     return c
   }
   // Given transcripts for a gene, returns an object containing (1) the "distinct" exons, and 
