@@ -66,8 +66,41 @@ function parseLine (s, returnObjects) {
   return returnObjects ? record2object(r) : r
 }
 // Parses the contents of a GFF3 file
-function parseFile (s, returnObjects) {
-  return s.split(NL).filter(l => l).map(l => parseLine(l, returnObjects))
+// Args:
+//   s - the file contents to parse
+//   returnObjects - boolean. If false, each feature is returned as an array of 9 elements.
+//              If true, each feature is returned as an object, using the gff3 standard field names
+//   returnHeaderLines - boolean. If true, lines beginning with "#" are filtered out.
+//   returnModels - boolean. If false, features are returned individually. If true, features are
+//              structured into a hierarchy based on Parent attributes (does not handle multiple parants).
+function parseFile (s, returnObjects, returnHeaderLines, returnModels) {
+  const notNullFilter = (x => x)
+  const notHeaderFilter = (x => x && x[0] !== "#")
+  const filterFcn = returnHeaderLines ? notNullFilter : notHeaderFilter
+  const parsed = s.split(NL).filter(filterFcn).map(l => parseLine(l, returnObjects))
+  if (!returnModels) {
+      return parsed
+  }
+  // build an index from Parent ids to the features that list those parents
+  const pid2kids = parsed.reduce((ix, f) => {
+          const pid = f[8]['Parent']
+          if (pid) {
+              if (!ix[pid]) ix[pid] = []
+              ix[pid].push(f)
+          }
+          return ix
+      }, {})
+  
+  // Attach child features to their parents. Return the top level features
+  const models = parsed.reduce((ms, f) => {
+          const kids = pid2kids[f[8]['ID']]
+          if (kids) f.children = kids
+          if (!f[8]['Parent']) ms.push(f)
+          return ms
+      }, [])
+
+  return models
+
 }
 export default {
   parseFile,

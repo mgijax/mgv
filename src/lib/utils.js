@@ -250,7 +250,8 @@ function fetch (url, type, postData) {
       return r.json()
     case 'gff3':
     case 'gff':
-      return r.text().then(t => gff.parseFile(t))
+      // parse the gff. return models
+      return r.text().then(t => gff.parseFile(t,false,false,true))
     case 'vcf':
       return r.text().then(t => vcf.parseFile(t))
     case 'tsv':

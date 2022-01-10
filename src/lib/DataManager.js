@@ -284,12 +284,64 @@ class DataManager {
   // its exons. Coding transcripts also contain the coordinates of the
   // start and stop codons.
   getModels (g, c, s, e) {
-    return this.greg.getReader(g, 'transcripts').then(reader => {
+    return this.greg.getReader(g, 'models').then(reader => {
+      return reader.readRange(c, s, e).then(models => {
+          const transcripts = models.reduce((ts, m) => {
+              if (!m.children) return ts
+              const nts = m.children.map(t => {
+                  const exons = this._condenseExons(t)
+                  const tlen = t[4] - t[3] + 1
+                  const cds = this._condenseCds(t)
+                  const attrs = t[8]
+                  const tt= {
+                    gID: attrs['Parent'],
+                    ID: attrs['ID'],
+                    label: this.stripPrefix(attrs['Name'] || attrs['transcript_id'] || attrs['ID']),
+                    transcript_id: attrs['transcript_id'],
+                    exons: exons,
+                    start: t[3],
+                    end: t[4],
+                    strand: t[6],
+                    length: tlen,
+                    cds: cds
+                  }
+                  return tt
+              })
+              return ts.concat(nts)
+          }, [])
+          return transcripts
+      })
+    })
+  }
+  _condenseExons (t) {
+    const exons = (t.children || []).filter(f => f[2] !== "CDS").sort(u.byChrStart)
+    return exons.map(e => { return { start: e[3], end: e[4] } })
+  }
+
+  _condenseCds (t) {
+    const cdss = (t.children || []).filter(f => f[2] === "CDS").sort(u.byChrStart)
+    if (cdss.length === 0) return null
+    const attrs = cdss[0][8]
+    const ID = attrs['ID']
+    const protein_id = attrs['protein_id']
+    const label = this.stripPrefix(protein_id || ID)
+    const start = parseInt(cdss[0][3])
+    const end = parseInt(cdss[cdss.length-1][4])
+    const length = cdss.reduce((tot, c) => tot + c[4] - c[3] + 1, 0)
+    const c = { ID, protein_id, label, start, end, length }
+    return c
+  }
+  // Returns a promise for the transcripts of features that overlap the 
+  // specified range of the specified genome. Each transcript includes
+  // its exons. Coding transcripts also contain the coordinates of the
+  // start and stop codons.
+  xetModels (g, c, s, e) {
+    return this.greg.getReader(g, 'models').then(reader => {
       return reader.readRange(c, s, e).then(ts => {
         const val = ts.map(t => {
-          const exons = this._unpackExons(t)
+          const exons = [] // this._unpackExons(t)
           const tlen = exons.reduce((l,x) => l + x.end - x.start + 1, 0)
-          const cds = this._unpackCds(t[8]['cds'], tlen, exons, t.strand)
+          const cds = [] // this._unpackCds(t[8]['cds'], tlen, exons, t.strand)
           const attrs = t[8]
           const tt= {
             gID: attrs['Parent'],
@@ -297,8 +349,8 @@ class DataManager {
             label: this.stripPrefix(attrs['Name'] || attrs['transcript_id'] || attrs['ID']),
             transcript_id: attrs['transcript_id'],
             exons: exons,
-            start: Math.min.apply(null,exons.map(e => e.start)),
-            end: Math.max.apply(null,exons.map(e => e.end)),
+            start: t[3], // Math.min.apply(null,exons.map(e => e.start)),
+            end: t[4], // Math.max.apply(null,exons.map(e => e.end)),
             strand: t[6],
             length: tlen,
             cds: cds
@@ -326,7 +378,7 @@ class DataManager {
   // CDSs of a transcript are encoded as "ID|start|end", where ID is the CDSs ID and start and end are
   // the positions of the start and stop codons. (Reminder: Coordinates are always forward strand. To know
   // which is the start codon and which is the stop codon, you have to look at the strand of the gene.)
-  _unpackCds (cdsAttr, tlen, exons, strand) {
+  _xnpackCds (cdsAttr, tlen, exons, strand) {
     if (!cdsAttr) return null
     const parts = cdsAttr.split('|')
     const c = {
