@@ -47,6 +47,9 @@ export default MComponent({
   name: 'RangeBoxes',
   props: [
   ],
+  inject: [
+    "dataManager"
+  ],
   data: function () {
     return {
       fontSize: 10,
@@ -216,8 +219,10 @@ export default MComponent({
           const L = r.end - r.start + 1
           const start = Math.floor(r.start + d.startp * L)
           const end = Math.floor(start + d.widthp * L - 1)
-          const reverse =
-            d.deltaX > 0 && r.reversed || d.deltaX < 0 && !r.reversed
+          const reverse = d.deltaX > 0 && r.reversed || d.deltaX < 0 && !r.reversed
+          // const desc = this.dataManager().getSequenceDescriptorForRegion(r)
+          // desc.reverse = reverse
+          // return desc
           return {
             genome: r.genome.path,
             track: "assembly",

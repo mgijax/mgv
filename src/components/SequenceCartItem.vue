@@ -11,6 +11,7 @@
     <!-- Sequence header -->
     <div class="flexcolumn seqheader" style="align-items: flex-start;">
       <div
+        style="text-align:left;"
         v-for="(v,i) in headerLines"
         :key="i"
         >{{v.replace('::', ' ')}}</div>
@@ -93,14 +94,16 @@ export default MComponent({
   },
   computed: {
     headerLines: function () {
+      const trim = (s,n) => s.length > n ? s.substring(0,n) + "..." : s 
       const i = this.item
       if (i.header) {
         return i.header.split('\n')
       } else {
-        return [
-          `${i.genome} (${i.type || 'dna'})`,
-          `${i.ID || ''}` || `${i.chromosome}:${i.start[0]}..${i.start[0] + i.length[0] - 1}`
-        ]
+        const lines = []
+        if (i.ID) lines.push(i.ID)
+        lines.push(`${i.genome} (${i.type || 'dna'})`)
+        lines.push(trim(i.regions,30))
+        return lines
       }
     }
   },

@@ -920,17 +920,8 @@ export default MComponent({
     },
     //
     getSequenceDescriptor () {
-      const r = this.region
-      const desc = {
-            genome: r.genome.path,
-            track: "assembly",
-            regions: `${r.chr.name}:${r.start}-${r.end}`,
-            type: 'dna',
-            reverse: r.reversed,
-            selected: true,
-            totalLength: r.end - r.start + 1
-          }
-      return desc
+      const r = this.dataManager.getSequenceDescriptorForRegion(this.region)
+      return r
     },
     // Request features in my range, which will asynchromously cause a redraw.
     getFeatures () {

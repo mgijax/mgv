@@ -420,28 +420,22 @@ class DataManager {
   // A sequence descriptor specifies arbitrary slice(s) of a chromosome,
   // and whether to reverse complement and/or translate the sequence.
   // The descriptor is an object with these fields:
-  // - header (string) The header line for the sequence.
-  // - genome (string) name of the genome
-  // - chromosome (string) the chromosome
-  // - start (int) start coordinate(s)
-  // - length (int) length(s) of the region(s)
+  // - header (string) The header line for the sequence. Optional. If none provided, a default will be created.
+  // - genome (string) Path name of the genome, e.g., mus_musculus_aj
+  // - regions (string) Argument to pass to faidx, space separated list of chr:start-end.
   // - type (string) one of: 'dna', 'composite transcript', 'transcript', 'cds'
   // - reverse (boolean) True iff the sequence should be reverse complemented 
   // - translate (boolean) True iff the sequence should be translated to protein
   // - selected (boolean) True iff the sequence is in the selected state
   //
   makeSequenceDescriptor (stype, f, t) {
-    const target = stype === 'dna' ? f : stype === 'composite transcript' ? f : stype === 'transcript' ? t : t.cds
-    const id = target.label || target.ID
+    const target = stype === 'dna' ? f : stype === 'composite transcript' ? t : stype === 'transcript' ? t : t.cds
     const len = target.length
-    //const sym = f.symbol || ''
-    //const gn = f.genome.name
     const parts = target.pieces ? (target.pieces.filter(p => p.type==='cds')) : (target.exons || [f])
     const regions = parts.map(p => `${f.chr.name}:${p.start}-${p.end}`).join(" ")
+    const label = target === f ? f.label : `${t.ID} (${f.label})`
     const d = {
-      //header: `${gn}::${id} ${sym} (${stype})`,
-      ID: id,
-      // seqId: stype === 'transcript' ? t.transcript_id : stype === 'cds' ? t.cds.protein_id : null,
+      ID: label,
       genome: f.genome.path,
       track: "assembly",
       regions: regions,
@@ -452,6 +446,21 @@ class DataManager {
       translate: stype === 'cds'
     }
     return d
+  }
+  //
+  makeSequenceDescriptorForRegion (r, hdr) {
+      const desc = {
+            genome: r.genome.path,
+            track: "assembly",
+            regions: `${r.chr.name}:${r.start}-${r.end}`,
+            type: 'dna',
+            reverse: r.reversed,
+            translate: false,
+            selected: true,
+            totalLength: r.end - r.start + 1
+          }
+      if (hdr) desc.header = hdr
+      return desc
   }
   // Returns canonical ids of all homologs of f
   getHomologCids (f, genomes) {
