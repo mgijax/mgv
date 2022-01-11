@@ -922,14 +922,11 @@ export default MComponent({
     getSequenceDescriptor () {
       const r = this.region
       const desc = {
-            header: `>${r.genome.name}::${r.chr.name}:${r.start}..${r.end} (${r.reversed ? "reverse complement " : ""}dna)`,
-            genome: r.genome.name,
-            genomeUrl: r.genome.url,
-            chromosome: r.chr.name,
-            start: [r.start],
-            length: [r.end - r.start + 1],
+            genome: r.genome.path,
+            track: "assembly",
+            regions: `${r.chr.name}:${r.start}-${r.end}`,
             type: 'dna',
-            reverseComplement: r.reversed,
+            reverse: r.reversed,
             selected: true,
             totalLength: r.end - r.start + 1
           }

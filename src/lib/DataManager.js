@@ -20,7 +20,7 @@ class DataManager {
   constructor (app) {
     this.app = app
     this.url = this.app.runtimeConfig.dataUrl
-    this.fetchUrl = this.url + "fetch.cgi"
+    this.fetchUrl = this.url + "/fetch.cgi"
     this.cache = {} // { genome.name -> { chr.name -> [features] } }
     this.pending = {} // genome.name -> pending promise
     this.id2feat = {} // ID -> feature
@@ -388,8 +388,8 @@ class DataManager {
   // 
   getSequences (descrs, filename) {
     const fparam = filename ? `&filename=${filename}` : ''
-    const params = `descriptors=${JSON.stringify(descrs)}${fparam}`
-    return u.fetch(this.fetchUrl, 'text', params)
+    const params = `datatype=fasta&descriptors=${encodeURI(JSON.stringify(descrs))}${fparam}`
+    return u.fetch(this.fetchUrl + '?' + params, 'text')
   }
   getAlignments (descrs) {
     const params = `descriptors=${JSON.stringify(descrs)}&return=alignments`
@@ -404,13 +404,10 @@ class DataManager {
   getSequence (g, c, s, e, doRC) {
     const descr = {
       header: `>${g.name}::${c.name}:${s}..${e}`,
-      genome: g.name,
-      genomeUrl: g.url,
-      chromosome: c.name,
-      start: s,
-      length: e - s + 1,
-      reverseComplement: Boolean(doRC),
-      type: "dna"
+      track: 'assembly',
+      genome: g.path,
+      regions: `${c.name}:${s}-${e}`,
+      reverse: Boolean(doRC)
     }
     const p = this.getSequences([descr]).then(txt => {
       txt = txt.split('\n')
@@ -429,7 +426,7 @@ class DataManager {
   // - start (int) start coordinate(s)
   // - length (int) length(s) of the region(s)
   // - type (string) one of: 'dna', 'composite transcript', 'transcript', 'cds'
-  // - reverseComplement (boolean) True iff the sequence should be reverse complemented 
+  // - reverse (boolean) True iff the sequence should be reverse complemented 
   // - translate (boolean) True iff the sequence should be translated to protein
   // - selected (boolean) True iff the sequence is in the selected state
   //
@@ -437,24 +434,21 @@ class DataManager {
     const target = stype === 'dna' ? f : stype === 'composite transcript' ? f : stype === 'transcript' ? t : t.cds
     const id = target.label || target.ID
     const len = target.length
-    const sym = f.symbol || ''
-    const gn = f.genome.name
+    //const sym = f.symbol || ''
+    //const gn = f.genome.name
     const parts = target.pieces ? (target.pieces.filter(p => p.type==='cds')) : (target.exons || [f])
-    const starts = parts.map(p => p.start)
-    const lengths = parts.map(p => p.end - p.start + 1)
+    const regions = parts.map(p => `${f.chr.name}:${p.start}-${p.end}`).join(" ")
     const d = {
-      header: `${gn}::${id} ${sym} (${stype})`,
+      //header: `${gn}::${id} ${sym} (${stype})`,
       ID: id,
       // seqId: stype === 'transcript' ? t.transcript_id : stype === 'cds' ? t.cds.protein_id : null,
-      genome: f.genome.name,
-      genomeUrl: f.genome.url,
+      genome: f.genome.path,
+      track: "assembly",
+      regions: regions,
       type: stype,
-      chromosome: f.chr.name,
-      start: starts,
-      length: lengths,
       totalLength: len,
       selected: true,
-      reverseComplement: f.strand === '-',
+      reverse: f.strand === '-',
       translate: stype === 'cds'
     }
     return d

@@ -181,7 +181,7 @@ export default MComponent({
     add (r) {
       // standardize these fields
       r.selected = r.selected || false
-      r.reverseComplement = r.reverseComplement || false
+      r.reverse = r.reverse || false
       r.translate = r.translate || false
       this.cart.push(r)
       this.save()

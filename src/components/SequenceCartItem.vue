@@ -19,9 +19,9 @@
     <!-- Reverse-complement button (for genomic sequence only) -->
     <m-button
       v-if="item.type==='dna' && !item.ID"
-      :icon="item.reverseComplement ? 'AG' : 'CT'"
-      :style="{ transform: `rotate(${item.reverseComplement ? 180 : 0}deg)` }"
-      :title="`Reverse complement is ${item.reverseComplement ? 'ON' : 'OFF'}. Click to turn ${item.reverseComplement ? 'OFF' : 'ON'}.`"
+      :icon="item.reverse ? 'AG' : 'CT'"
+      :style="{ transform: `rotate(${item.reverse ? 180 : 0}deg)` }"
+      :title="`Reverse complement is ${item.reverse ? 'ON' : 'OFF'}. Click to turn ${item.reverse ? 'OFF' : 'ON'}.`"
       @click.stop="toggleReverseComplement"
       />
     <!-- Translate button (for CDS sequence only) -->
@@ -78,10 +78,10 @@ export default MComponent({
     },
     toggleReverseComplement: function () {
       const i = this.item
-      i.reverseComplement = !i.reverseComplement
+      i.reverse = !i.reverse
       const h1 = '(dna)'
       const h2 = '(reverse complement dna)'
-      i.header = i.reverseComplement ? i.header.replace(h1,h2) : i.header.replace(h2,h1)
+      i.header = i.reverse ? i.header.replace(h1,h2) : i.header.replace(h2,h1)
     },
     prettyPrint (len) {
       if (this.item.translate) {

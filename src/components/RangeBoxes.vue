@@ -216,20 +216,14 @@ export default MComponent({
           const L = r.end - r.start + 1
           const start = Math.floor(r.start + d.startp * L)
           const end = Math.floor(start + d.widthp * L - 1)
-          const gname = r.genome.name
-          const cname = r.chr.name
-          const reverseComplement =
+          const reverse =
             d.deltaX > 0 && r.reversed || d.deltaX < 0 && !r.reversed
-          const rc = reverseComplement ? 'reverse complement ' : ''
           return {
-            header: `>${gname}::${cname}:${start}..${end} (${rc}dna)`,
-            genome: r.genome.name,
-            genomeUrl: r.genome.url,
-            chromosome: r.chr.name,
-            start: [start],
-            length: [end - start + 1],
+            genome: r.genome.path,
+            track: "assembly",
+            regions: `${r.chr.name}:${start}-${end}`,
             type: 'dna',
-            reverseComplement: reverseComplement,
+            reverse: reverse,
             selected: true,
             totalLength: end - start + 1
           }
