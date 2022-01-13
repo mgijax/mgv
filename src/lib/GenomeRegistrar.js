@@ -3,7 +3,8 @@ import u from '@/lib/utils'
 import config from '@/config'
 import KeyStore from '@/lib/KeyStore'
 import CachingFetcher from '@/lib/CachingFetcher'
-import { TabixFileReader } from '@/lib/TabixFileReader'
+import { GffReader } from '@/lib/GffReader'
+import { FastaReader } from '@/lib/FastaReader'
 //
 // -------------------------------------------------------------------------------
 // Container for track readers for a genome
@@ -16,8 +17,12 @@ class GenomeReader {
     this.kstore = new KeyStore(n)
     this.readers = this.info.tracks.reduce((a,t) => {
       if (t.filetype === 'gff') {
-        a[t.track] = new TabixFileReader(this.fetcher, t.track, info, info.url)
-        a[t.track+'.genes'] = new TabixFileReader(this.fetcher, t.track+'.genes', info, info.url)
+        a[t.track] = new GffReader(this.fetcher, t.track, info, info.url)
+        if (t.track === "models") {
+          a[t.track+'.genes'] = new GffReader(this.fetcher, 'models.genes', info, info.url)
+        }  
+      } else if (t.filetype === 'fasta') {
+        a[t.track] = new FastaReader(this.fetcher, t.track, info, info.url)
       }
       return a
     }, {})
