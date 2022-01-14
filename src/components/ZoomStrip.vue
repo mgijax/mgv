@@ -153,7 +153,7 @@ export default MComponent({
       zoomY: -1, // causes new strips to add to the top of the view
       allMinY: 0,
       allMaxY: 0,
-      allBelowThreshold: true,
+      allBelowThreshold: false,
       dragging: false,
       rDragging: false,
       featureHeight: 14,
@@ -240,7 +240,7 @@ export default MComponent({
           this.allMinY = 0
           this.allMaxY = 60
           this.height = 60
-          this.allBelowThreshold = true
+          this.allBelowThreshold = false
       } else {
           this.allMinY = Math.min(0, Math.min.apply(null, this.$children.map(r => r.minY))) - 10
           this.allMaxY = Math.max(0, Math.max.apply(null, this.$children.map(r => r.maxY))) + 10

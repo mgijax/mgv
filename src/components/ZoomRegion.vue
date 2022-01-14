@@ -467,7 +467,7 @@ export default MComponent({
       return (this.region.end - this.region.start + 1) < this.detailThreshold
     },
     showDetails: function () {
-      return this.allBelowThreshold
+      return this.belowThreshold && this.allBelowThreshold
     },
     showSequence: function () {
       return this.ppb >= 1
