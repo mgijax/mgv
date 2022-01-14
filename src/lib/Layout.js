@@ -2,7 +2,7 @@
  * Layout.js
  *
  * Several algorithms that deal with arranging features for display.
- * Usage pattern is the same in all cases (except SpreadText - see below): you create
+ * Usage pattern is the same in all cases: you create
  * an assigner instance and then feed it coordinates, one feature at a time.
  * Each call returns the layout value (eg a swim lane)
  * Features MUST be sorted by start position (this is not checked).

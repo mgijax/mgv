@@ -99,8 +99,61 @@ function pan (c, amount) {
   }
 }
 
+// Returns true iff the two regions overlap. If chromosomes are specified in the region, they must match.
 function overlaps (f, g) {
-  return (f.chr.name || f.chr) === (g.chr.name || g.chr) && f.start <= g.end && f.end >= g.start
+  const chrSame = !f.chr || !g.chr || (f.chr.name || f.chr) === (g.chr.name || g.chr)
+  const coordsOverlap =  f.start <= g.end && f.end >= g.start
+  return chrSame && coordsOverlap
+}
+
+// Merges the two regions
+function merge (r1, r2) {
+  return { start: Math.min(r1.start, r2.start), end: Math.max(r1.end, r2.end) }
+}
+
+// Returns the difference between a region r1, and a list of regions r2s.
+// The regions in r2s must be sorted by start position and be non-overlapping.
+// Returns a list of regions that represents the removal of regions in r2s from r1.
+function subtract (r1, r2s) {
+    if (!Array.isArray(r2s)) r2s = [ r2s ]
+    const breakpoints = r2s.map(r2 => [r2.start, "start2"]).concat(r2s.map(r2 => [r2.end, "end2"]))
+    breakpoints.push([r1.start, "start1"])
+    breakpoints.push([r1.end, "end1"])
+    breakpoints.sort((a,b) => a[0] - b[0])
+    let in1 = false
+    let in2 = false
+    let inGap = false
+    let gapStart = NaN
+    const gaps = []
+    breakpoints.forEach(bp => {
+        const coord = bp[0]
+        const btype = bp[1]
+        if (btype === "start1") {
+            in1 = true
+            if (!in2) {
+                inGap = true
+                gapStart = coord
+            }
+        } else if (btype === "end1") {
+            in1 = false
+            if (inGap) {
+                gaps.push({start: gapStart, end: coord})
+                inGap = false
+            }
+        } else if (btype === "start2") {
+            in2 = true
+            if (inGap) {
+                gaps.push({start: gapStart, end: coord-1})
+                inGap = false
+            }
+            inGap = false
+        } else if (btype === "end2") {
+            in2 = false
+            gapStart = coord + 1
+            inGap = in1
+        }
+    })
+    return gaps.filter(g => g.start <= g.end)
 }
 
 function overlapAmount (f, g) {
@@ -109,7 +162,7 @@ function overlapAmount (f, g) {
     const e = Math.min(f.end, g.end)
     return e - s + 1
   } else {
-    return -Infinity
+    return NaN
   }
 }
 
@@ -122,5 +175,5 @@ function length (f) {
 }
 
 export default {
-  fail, validate, parse, setWidth, pan, zoom, overlaps, length, overlapAmount, distanceBetween
+  fail, validate, parse, setWidth, pan, zoom, overlaps, length, overlapAmount, distanceBetween, merge, subtract
 }

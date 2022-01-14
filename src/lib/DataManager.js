@@ -10,6 +10,7 @@
  * or getPfFoo (get promise for foo)
  */
 import gc from '@/lib/GenomeCoordinates'
+import { GenomePainter } from '@/lib/GenomePainter'
 import u from '@/lib/utils'
 import config from '@/config'
 import { GenomeRegistrar } from '@/lib/GenomeRegistrar'
@@ -29,6 +30,7 @@ class DataManager {
     this.greg = new GenomeRegistrar()
     this.genomes = this.greg.register(this.url)
     this.homologyManager = new HomologyManager(this, this.url)
+    this.genomePainter = new GenomePainter()
   }
   getGenomeByName (n) {
     return this.greg.lookupGenome(n)
@@ -110,76 +112,386 @@ class DataManager {
   }
   //
 
-  //
-  _registerChr (g, c, feats) {
-    let freg = new FeatureRegistrar(g, c, this.id2feat, this.cid2feats, this.symbol2feats)
-    let cfeats = feats.map(f => freg.register(f)).filter(x => x)
-    this.cache[g.name][c.name] = cfeats.sort((a,b) => a.start - b.start)
-    return cfeats
-  }
-  // Returns a promise for all the feature of the specified genome, as a list, sorted by
-  // chr and start position.
-  getAllFeatures (g, c) {
-    return this.ensureFeatures(g).then(() => this.getAllFeaturesNow(g, c))
-  }
-  // Immediate version of getAllFeatures. Returns whatever is in the cache
-  getAllFeaturesNow (g, c) {
-    return u.concatAll(g.chromosomes.filter(
-           cc => (!c || c === cc) ? cc : null).map(
-           cc => this.cache[g.name][cc.name]))
-  }
-  // Returns a promise for the features in the specified range of the specified genome
-  getGenes (g, c, s, e, includeTranscripts) {
-    return this.ensureFeatures(g).then(() => {
-      let feats = this.cache[g.name][c.name]
-      feats = feats.filter(f => gc.overlaps(f, { chr: c, start: s, end: e }))
-      if (includeTranscripts) {
-        return this.getModels(g, c, s, e).then(tps => {
-          // The getModels call returns all transcripts in the region.
-          // Here we attach them to their genes.
-          // Index the transcripts by gene ID.
-          const gid2tps = u.index(tps, t => t.gID, false)
-          feats.forEach(f => {
-            // if we've already got the transcripts for this gene, skip
-            if (f.transcripts.length) return
-            const ftps = gid2tps[f.ID] || []
-            // add each transcript to it's gene's list
-            ftps.forEach(t => f.transcripts.push(t))
-            // Build the composite transcript for the gene from the real transcripts.
-            // If none, build a "fake" composite of a single exon covering the gene.
-            const c = this._computedExons(f.transcripts)
-            const cT = c.composite.length ? {
-              gID: f.ID,
-              ID: f.ID + "_composite",
-              exons: c.composite,
-              dExons: c.distinct,
-              start: c.composite[0].start,
-              end: c.composite[c.composite.length - 1].end,
-              length: c.composite.reduce((l,x) => l + x.end - x.start + 1, 0),
-              cds: null
-            } : {
-              gID: f.ID,
-              ID: f.ID + "_composite",
-              exons: [{start: f.start, end: f.end}],
-              dExons: [{start: f.start, end: f.end}],
-              start: f.start,
-              end: f.end,
-              length: f.end - f.start + 1,
-              cds: null
-            }
-            Object.assign(f.composite, cT)
-            //f.transcripts.push(cT)
+    //
+    _registerChr (g, c, feats) {
+        let freg = new FeatureRegistrar(g, c, this.id2feat, this.cid2feats, this.symbol2feats)
+        let cfeats = feats.map(f => freg.register(f)).filter(x => x)
+        this.cache[g.name][c.name] = cfeats.sort((a,b) => a.start - b.start)
+        return cfeats
+    }
+    // Returns a promise for all the feature of the specified genome, as a list, sorted by
+    // chr and start position.
+    getAllFeatures (g, c) {
+        return this.ensureFeatures(g).then(() => this.getAllFeaturesNow(g, c))
+    }
+    // Immediate version of getAllFeatures. Returns whatever is in the cache
+    getAllFeaturesNow (g, c) {
+        return u.concatAll(g.chromosomes.filter(
+            cc => (!c || c === cc) ? cc : null).map(
+            cc => this.cache[g.name][cc.name]))
+    }
+    // Returns a promise for the features in the specified range of the specified genome
+    getGenes (g, c, s, e, includeTranscripts) {
+        return this.ensureFeatures(g).then(() => {
+            let feats = this.cache[g.name][c.name]
+            feats = feats.filter(f => gc.overlaps(f, { chr: c, start: s, end: e }))
+            return includeTranscripts ? this.ensureModels(g, c, s, e, feats).then(() => feats) : feats
+       })
+    }
+    // Returns a promise the resolves when all the genes that overlap the specified region
+    // have their transcripts attached
+    ensureModels (g, c, s, e, feats) {
+        const gaps = this.genomePainter.paint(g, c, s, e)
+        u.debug("Ensure models nominal range:", g.name, c.name, s, e)
+        u.debug('Gaps=', gaps.map(r => `(${r.start},${r.end})`).join(' '))
+        const ps = gaps.map(r => this._ensureModels(g, c, r.start, r.end, feats.filter(f => gc.overlaps(f, r))))
+        return Promise.all(ps)
+    }
+    // 
+    _ensureModels (g, c, s, e, feats) {
+        if (feats.length === 0) {
+            return Promise.resolve(true)
+        }
+        // Expand the nominal range. Include the outer limits of overlapped genes
+        const s_exp = Math.min.apply(null, feats.map(f => f.start))
+        const e_exp = Math.max.apply(null, feats.map(f => f.end))
+        // Get models in the expanded region. Note that this will also return (potentially) partial models
+        // that overlap the ends of the extended range, but do not overlap the nominal range. 
+        // So we create an index of the genes in the nominal region, and only process transcripts for those.
+        const findex = feats.reduce((x,f) => { x[ f.ID ] = f; return x }, {})
+        const mp = this.fetchModels(g, c, s_exp, e_exp).then(mods => {
+          mods.forEach(m => {
+              // unpack
+              const id = m[0]
+              const trs = m[1]
+              // Lookup the gene. Only consider genes that overlap the nominal range.
+              const f = findex[id]
+              if (!f) return
+              // If there are any transcripts for this gene, then we have all transcripts for the gene.
+              // Can skip th rest.
+              if (f.transcripts.length) return
+              //
+              u.debug("Filling in transcripts for:", f.symbol)
+              // Ok, transfer the transcripts to the gene. Remember f is a frozen object, so we can't just assign f.transcripts = trs.
+              // We have push transcripts into the existing array.
+              trs.forEach(t => f.transcripts.push(t))
+              // Now merge exons to create a composite transcript.
+              const c = this._computedExons(f.transcripts)
+              const cT = c.composite.length ? {
+                  gID: f.ID,
+                  ID: f.ID + "_composite",
+                  exons: c.composite,
+                  dExons: c.distinct,
+                  start: c.composite[0].start,
+                  end: c.composite[c.composite.length - 1].end,
+                  length: c.composite.reduce((l,x) => l + x.end - x.start + 1, 0),
+                  cds: null
+              } : {
+                  gID: f.ID,
+                  ID: f.ID + "_composite",
+                  exons: [{start: f.start, end: f.end}],
+                  dExons: [{start: f.start, end: f.end}],
+                  start: f.start,
+                  end: f.end,
+                  length: f.end - f.start + 1,
+                  cds: null
+              }
+              // Transfer the composite. Similar to transcripts, we have to copy in the contents rather than assign to f.composite
+              Object.assign(f.composite, cT)
           })
-          return feats
         })
-      }
-      return feats
+        return mp
+    }
+
+  // Returns a promise for the transcripts of features that overlap the 
+  // specified range of the specified genome. Each transcript includes
+  // its exons. Coding transcripts also contain the coordinates of the
+  // start and stop codons.
+  fetchModels (g, c, s, e) {
+    u.debug("Fetching models:", g.name, c.name, s, e)
+    return this.greg.getReader(g, 'models').then(reader => {
+      return reader.readRange(c, s, e).then(models => {
+          const models2 = models.reduce((ms, m) => {
+              if (!m.children) return ms
+              const nts = m.children.map(t => {
+                  const exons = this._condenseExons(t)
+                  const tlen = t[4] - t[3] + 1
+                  const cds = this._condenseCds(t, exons)
+                  const attrs = t[8]
+                  const tt= {
+                    gID: attrs['Parent'],
+                    ID: attrs['ID'],
+                    label: this.stripPrefix(attrs['Name'] || attrs['transcript_id'] || attrs['ID']),
+                    transcript_id: attrs['transcript_id'],
+                    exons: exons,
+                    start: t[3],
+                    end: t[4],
+                    strand: t[6],
+                    length: tlen,
+                    cds: cds
+                  }
+                  return tt
+              })
+              nts.sort((a,b) => {
+                  return a.label < b.label ? -1 : a.label > b.label ? 1 : 0
+              })
+              ms.push([m[8]['ID'], nts])
+              return ms
+          }, [])
+          return models2
+      })
     })
+  }
+  _condenseExons (t) {
+    const exons = (t.children || []).filter(f => f[2] !== "CDS").sort(u.byChrStart)
+    return exons.map(e => { return { start: e[3], end: e[4] } })
+  }
+
+  _condenseCds (t, exons) {
+    const cdss = (t.children || []).filter(f => f[2] === "CDS").sort(u.byChrStart)
+    if (cdss.length === 0) return null
+    const attrs = cdss[0][8]
+    const ID = attrs['ID']
+    const protein_id = attrs['protein_id']
+    const label = this.stripPrefix(protein_id || ID)
+    const start = parseInt(cdss[0][3])
+    const end = parseInt(cdss[cdss.length-1][4])
+    const length = cdss.reduce((tot, c) => tot + c[4] - c[3] + 1, 0)
+    const c = { ID, protein_id, label, start, end, length }
+    //
+    const strand = t[6]
+    const PUTR = strand === "+" ? '5_prime_utr' : '3_prime_utr'
+    const DUTR = strand === "+" ? '3_prime_utr' : '5_prime_utr'
+    const CDS = 'cds'
+    c.pieces = exons.reduce((a,r) => {
+      // make a copy so we don't munge the exon object
+      const x = { start: r.start, end: r.end }
+      if (x.end < c.start) {
+          a.push({ start: x.start, end: x.end, type: PUTR })
+      }
+      else if (x.start > c.end) {
+          a.push({ start: x.start, end: x.end, type: DUTR })
+      } else {
+          const pUTR = { start: x.start, end: Math.min(c.start - 1, x.end), type: PUTR }
+          if (pUTR.start <= pUTR.end) a.push(pUTR)
+          const cds = { start: Math.max(c.start, x.start), end: Math.min(c.end, x.end), type: CDS }
+          a.push(cds)
+          const dUTR = { start: Math.max(c.end + 1, x.start), end: x.end, type: DUTR }
+          if (dUTR.start <= dUTR.end) a.push(dUTR)
+      }
+      return a
+    }, [])
+    return c
+  }
+  // Given transcripts for a gene, returns an object containing (1) the "distinct" exons, and 
+  // (2) the "composite" exons
+  _computedExons (tps) {
+    const cExons = [] // composite exons
+    const dExons = new Set() // distinct exons
+    const allExons = tps.reduce((a,t) => a.concat(t.exons), [])
+    allExons.sort((e1, e2) => e1.start - e2.start)
+    allExons.forEach(e => {
+      // composite
+      const lastE = cExons[cExons.length - 1]
+      if (!lastE || lastE.end < e.start) {
+        cExons.push({start: e.start, end: e.end, length: e.end - e.start + 1})
+      } else {
+        lastE.end = Math.max(lastE.end, e.end)
+      }
+      // distinct
+      dExons.add(`${e.start}_${e.end}`)
+    })
+    return {
+      distinct: Array.from(dExons).map(de => {
+          const bits = de.split('_')
+          const start = parseInt(bits[0])
+          const end = parseInt(bits[1])
+          const length = end - start + 1
+          return { start, end, length };
+      }).sort((a,b) => a.start - b.start),
+      composite: cExons
+    }
+  }
+  // Returns a promise for the results of calling fetch with the given parameters.
+  getSequences (descrs, filename) {
+    const fparam = filename ? `&filename=${filename}` : ''
+    const params = `datatype=fasta&descriptors=${encodeURI(JSON.stringify(descrs))}${fparam}`
+    return u.fetch(this.fetchUrl + '?' + params, 'text')
+  }
+  // 
+  // Returns a promise for the genomic sequence of the specified range for the specified genome
+  getSequence (g, c, s, e, doRC) {
+    const descr = {
+      genome: g.path,
+      track: 'assembly',
+      regions: `${c.name}:${s}-${e}`,
+      reverse: Boolean(doRC)
+    }
+    const p = this.getSequences([descr]).then(txt => {
+      txt = txt.split('\n')
+      txt.shift()
+      return txt.join('')
+    })
+    return p
+  }
+  //
+  // A sequence descriptor specifies arbitrary slice(s) of a chromosome,
+  // and whether to reverse complement and/or translate the sequence.
+  // The descriptor is an object with these fields:
+  // - header (string) The header line for the sequence. Optional. If none provided, a default will be created.
+  // - genome (string) Path name of the genome, e.g., mus_musculus_aj
+  // - regions (string) Argument to pass to faidx, space separated list of chr:start-end.
+  // - type (string) one of: 'dna', 'composite transcript', 'transcript', 'cds'
+  // - reverse (boolean) True iff the sequence should be reverse complemented 
+  // - translate (boolean) True iff the sequence should be translated to protein
+  // - selected (boolean) True iff the sequence is in the selected state
+  //
+  makeSequenceDescriptor (stype, f, t) {
+    const target = stype === 'dna' ? f : stype === 'composite transcript' ? t : stype === 'transcript' ? t : t.cds
+    const len = target.length
+    const parts = target.pieces ? (target.pieces.filter(p => p.type==='cds')) : (target.exons || [f])
+    const regions = parts.map(p => `${f.chr.name}:${p.start}-${p.end}`).join(" ")
+    const label = target === f ? f.label : `${t.ID} (${f.label})`
+    const d = {
+      ID: label,
+      genome: f.genome.path,
+      track: "assembly",
+      regions: regions,
+      type: stype,
+      totalLength: len,
+      selected: true,
+      reverse: f.strand === '-',
+      translate: stype === 'cds'
+    }
+    return d
+  }
+  //
+  makeSequenceDescriptorForRegion (r, hdr) {
+      const desc = {
+            genome: r.genome.path,
+            track: "assembly",
+            regions: `${r.chr.name}:${r.start}-${r.end}`,
+            type: 'dna',
+            reverse: r.reversed,
+            translate: false,
+            selected: true,
+            totalLength: r.end - r.start + 1
+          }
+      if (hdr) desc.header = hdr
+      return desc
+  }
+  // Returns canonical ids of all homologs of f
+  getHomologCids (f, genomes) {
+    if (!f.curie) return [f.ID]
+    genomes = genomes || this.app.vGenomes
+    const taxons = Array.from(new Set(genomes.map(g => this.fixTaxonId(g.taxonid))))
+    const hm = this.homologyManager
+    const txA = this.getTaxonId(f)
+    if (this.app.includeParalogs) {
+      return hm.getHomologIdsExt(f.curie, txA, taxons)
+    } else {
+      const homs = hm.getOrthologIds(f.curie, txA, taxons)
+      homs.push(f.curie)
+      return homs
+    }
+  }
+  // Returns homologs of a feature from the given genome(s).
+  // Args:
+  //    f : a Feature
+  //    genomes : genomes to get homologs for. If not specified,
+  //            gets homologs for all currently selected genomes.
+  // Returns:
+  //    List of features from the specified genome(s) that are homologous to f
+  //
+  getHomologs (f, genomes) {
+    genomes = this.fixGenomesArg(genomes)
+    if (typeof(f) === 'string') {
+      // FIXME picking an arbitrary one. Should use them all.
+      f = (this.getFeaturesBy(f) || [])[0]
+      if (!f) return []
+    }
+    const homIds = this.getHomologCids(f, genomes)
+    const homs = homIds.map(hid =>
+       this.getFeaturesByCid(hid).filter(hom =>
+           genomes.indexOf(hom.genome) >= 0))
+    const fhoms = u.flatten(homs)
+    if (fhoms.length === 0 && genomes.indexOf(f.genome) >= 0) return [f]
+    return fhoms
   }
   // Utility function for stripping the prefix from a curie style identifier
   stripPrefix (s) {
         return s.substr(s.indexOf(':')+1)
   }
+  //
+  equivalent (fA, fB) {
+    // same feature?
+    if (fA === fB || fA.ID === fB.ID) return true
+    // else if no curie, can't be homologs
+    if (!fA.curie) return false
+    // same curie?
+    if (fA.curie === fB.curie) return true
+    // fB is a homolog?
+    const txA = this.getTaxonId(fA)
+    const txB = this.getTaxonId(fB)
+    if (txA === txB && !this.app.includeParalogs) return false
+    const idBs = this.homologyManager.getHomologIds(fA.curie, txA, [txB])
+    if (idBs.indexOf(fB.curie) >= 0) return true
+    //
+    return false
+  }
+  //
+  fixGenomesArg (genomes) {
+    if (!genomes) {
+      return this.app.vGenomes
+    } else if (!Array.isArray(genomes)) {
+      return [genomes]
+    } else {
+      return genomes
+    }
+  }
+  // Hacky function so that all mouse species are considered the same
+  fixTaxonId (taxonid) {
+    if (taxonid.startsWith("100")) taxonid = "10090"
+    return taxonid
+  }
+  //
+  getTaxonId (f) {
+    const t = f.genome.taxonid
+    return this.fixTaxonId(t)
+  }
+  //
+  flushAllGenomeData () {
+    this.app.allGenomes.forEach(g => this.flushGenome(g))
+  }
+  //
+  flushGenome (g) {
+     const gn = g.name || g
+     const gcache = this.cache[gn]
+     if (gcache) {
+       delete this.cache[gn]
+       for (let cn in gcache) {
+         const cfeats = gcache[cn]
+         cfeats.forEach(f => {
+           delete this.id2feat[f.ID]
+           const cidFeats = this.cid2feats[f.curie]
+           if (cidFeats) {
+             this.cid2feats[f.curie] = cidFeats.filter(ff => ff !== f)
+             if (this.cid2feats[f.curie].length === 0) {
+                delete this.cid2feats[f.curie]
+             }
+           }
+           if (f.symbol) {
+             const fs = f.symbol.toLowerCase()
+             this.symbol2feats[fs] = this.symbol2feats[fs].filter(ff => ff !== f)
+             if (this.symbol2feats[fs].length === 0) {
+               delete this.symbol2feats[fs]
+             }
+           }
+         }, this)
+       }
+     }
+  }
+
   // Returns a promise for the variants in the specified range
   getVariants (g, c, s, e) {
     /*
@@ -278,296 +590,6 @@ class DataManager {
           })
       })
     })
-  }
-  // Returns a promise for the transcripts of features that overlap the 
-  // specified range of the specified genome. Each transcript includes
-  // its exons. Coding transcripts also contain the coordinates of the
-  // start and stop codons.
-  getModels (g, c, s, e) {
-    return this.greg.getReader(g, 'models').then(reader => {
-      return reader.readRange(c, s, e).then(models => {
-          const transcripts = models.reduce((ts, m) => {
-              if (!m.children) return ts
-              const nts = m.children.map(t => {
-                  const exons = this._condenseExons(t)
-                  const tlen = t[4] - t[3] + 1
-                  const cds = this._condenseCds(t, exons)
-                  const attrs = t[8]
-                  const tt= {
-                    gID: attrs['Parent'],
-                    ID: attrs['ID'],
-                    label: this.stripPrefix(attrs['Name'] || attrs['transcript_id'] || attrs['ID']),
-                    transcript_id: attrs['transcript_id'],
-                    exons: exons,
-                    start: t[3],
-                    end: t[4],
-                    strand: t[6],
-                    length: tlen,
-                    cds: cds
-                  }
-                  return tt
-              })
-              return ts.concat(nts)
-          }, [])
-          return transcripts.sort((a,b) => {
-              return a.label < b.label ? -1 : a.label > b.label ? 1 : 0
-          })
-      })
-    })
-  }
-  _condenseExons (t) {
-    const exons = (t.children || []).filter(f => f[2] !== "CDS").sort(u.byChrStart)
-    return exons.map(e => { return { start: e[3], end: e[4] } })
-  }
-
-  _condenseCds (t, exons) {
-    const cdss = (t.children || []).filter(f => f[2] === "CDS").sort(u.byChrStart)
-    if (cdss.length === 0) return null
-    const attrs = cdss[0][8]
-    const ID = attrs['ID']
-    const protein_id = attrs['protein_id']
-    const label = this.stripPrefix(protein_id || ID)
-    const start = parseInt(cdss[0][3])
-    const end = parseInt(cdss[cdss.length-1][4])
-    const length = cdss.reduce((tot, c) => tot + c[4] - c[3] + 1, 0)
-    const c = { ID, protein_id, label, start, end, length }
-    //
-    const strand = t[6]
-    const PUTR = strand === "+" ? '5_prime_utr' : '3_prime_utr'
-    const DUTR = strand === "+" ? '3_prime_utr' : '5_prime_utr'
-    const CDS = 'cds'
-    c.pieces = exons.reduce((a,r) => {
-      // make a copy so we don't munge the exon object
-      const x = { start: r.start, end: r.end }
-      if (x.end < c.start) {
-          a.push({ start: x.start, end: x.end, type: PUTR })
-      }
-      else if (x.start > c.end) {
-          a.push({ start: x.start, end: x.end, type: DUTR })
-      } else {
-          const pUTR = { start: x.start, end: Math.min(c.start - 1, x.end), type: PUTR }
-          if (pUTR.start <= pUTR.end) a.push(pUTR)
-          const cds = { start: Math.max(c.start, x.start), end: Math.min(c.end, x.end), type: CDS }
-          a.push(cds)
-          const dUTR = { start: Math.max(c.end + 1, x.start), end: x.end, type: DUTR }
-          if (dUTR.start <= dUTR.end) a.push(dUTR)
-      }
-      return a
-    }, [])
-    return c
-  }
-  // Given transcripts for a gene, returns an object containing (1) the "distinct" exons, and 
-  // (2) the "composite" exons
-  _computedExons (tps) {
-    const cExons = [] // composite exons
-    const dExons = new Set() // distinct exons
-    const allExons = tps.reduce((a,t) => a.concat(t.exons), [])
-    allExons.sort((e1, e2) => e1.start - e2.start)
-    allExons.forEach(e => {
-      // composite
-      const lastE = cExons[cExons.length - 1]
-      if (!lastE || lastE.end < e.start) {
-        cExons.push({start: e.start, end: e.end, length: e.end - e.start + 1})
-      } else {
-        lastE.end = Math.max(lastE.end, e.end)
-      }
-      // distinct
-      dExons.add(`${e.start}_${e.end}`)
-    })
-    return {
-      distinct: Array.from(dExons).map(de => {
-          const bits = de.split('_')
-          const start = parseInt(bits[0])
-          const end = parseInt(bits[1])
-          const length = end - start + 1
-          return { start, end, length };
-      }).sort((a,b) => a.start - b.start),
-      composite: cExons
-    }
-  }
-  // 
-  getSequences (descrs, filename) {
-    const fparam = filename ? `&filename=${filename}` : ''
-    const params = `datatype=fasta&descriptors=${encodeURI(JSON.stringify(descrs))}${fparam}`
-    return u.fetch(this.fetchUrl + '?' + params, 'text')
-  }
-  getAlignments (descrs) {
-    const params = `descriptors=${JSON.stringify(descrs)}&return=alignments`
-    return u.fetch(this.fetchUrl, 'json', params)
-  }
-  getExonAlignmentScores (descrs) {
-    const params = `descriptors=${JSON.stringify(descrs)}&return=exonscores`
-    return u.fetch(this.fetchUrl, 'json', params)
-  }
-  // 
-  // Returns a promise for the genomic sequence of the specified range for the specified genome
-  getSequence (g, c, s, e, doRC) {
-    const descr = {
-      header: `>${g.name}::${c.name}:${s}..${e}`,
-      track: 'assembly',
-      genome: g.path,
-      regions: `${c.name}:${s}-${e}`,
-      reverse: Boolean(doRC)
-    }
-    const p = this.getSequences([descr]).then(txt => {
-      txt = txt.split('\n')
-      txt.shift()
-      return txt.join('')
-    })
-    return p
-  }
-  //
-  // A sequence descriptor specifies arbitrary slice(s) of a chromosome,
-  // and whether to reverse complement and/or translate the sequence.
-  // The descriptor is an object with these fields:
-  // - header (string) The header line for the sequence. Optional. If none provided, a default will be created.
-  // - genome (string) Path name of the genome, e.g., mus_musculus_aj
-  // - regions (string) Argument to pass to faidx, space separated list of chr:start-end.
-  // - type (string) one of: 'dna', 'composite transcript', 'transcript', 'cds'
-  // - reverse (boolean) True iff the sequence should be reverse complemented 
-  // - translate (boolean) True iff the sequence should be translated to protein
-  // - selected (boolean) True iff the sequence is in the selected state
-  //
-  makeSequenceDescriptor (stype, f, t) {
-    const target = stype === 'dna' ? f : stype === 'composite transcript' ? t : stype === 'transcript' ? t : t.cds
-    const len = target.length
-    const parts = target.pieces ? (target.pieces.filter(p => p.type==='cds')) : (target.exons || [f])
-    const regions = parts.map(p => `${f.chr.name}:${p.start}-${p.end}`).join(" ")
-    const label = target === f ? f.label : `${t.ID} (${f.label})`
-    const d = {
-      ID: label,
-      genome: f.genome.path,
-      track: "assembly",
-      regions: regions,
-      type: stype,
-      totalLength: len,
-      selected: true,
-      reverse: f.strand === '-',
-      translate: stype === 'cds'
-    }
-    return d
-  }
-  //
-  makeSequenceDescriptorForRegion (r, hdr) {
-      const desc = {
-            genome: r.genome.path,
-            track: "assembly",
-            regions: `${r.chr.name}:${r.start}-${r.end}`,
-            type: 'dna',
-            reverse: r.reversed,
-            translate: false,
-            selected: true,
-            totalLength: r.end - r.start + 1
-          }
-      if (hdr) desc.header = hdr
-      return desc
-  }
-  // Returns canonical ids of all homologs of f
-  getHomologCids (f, genomes) {
-    if (!f.curie) return [f.ID]
-    genomes = genomes || this.app.vGenomes
-    const taxons = Array.from(new Set(genomes.map(g => this.fixTaxonId(g.taxonid))))
-    const hm = this.homologyManager
-    const txA = this.getTaxonId(f)
-    if (this.app.includeParalogs) {
-      return hm.getHomologIdsExt(f.curie, txA, taxons)
-    } else {
-      const homs = hm.getOrthologIds(f.curie, txA, taxons)
-      homs.push(f.curie)
-      return homs
-    }
-  }
-  // Returns homologs of a feature from the given genome(s).
-  // Args:
-  //    f : a Feature
-  //    genomes : genomes to get homologs for. If not specified,
-  //            gets homologs for all currently selected genomes.
-  // Returns:
-  //    List of features from the specified genome(s) that are homologous to f
-  //
-  getHomologs (f, genomes) {
-    genomes = this.fixGenomesArg(genomes)
-    if (typeof(f) === 'string') {
-      // FIXME picking an arbitrary one. Should use them all.
-      f = (this.getFeaturesBy(f) || [])[0]
-      if (!f) return []
-    }
-    const homIds = this.getHomologCids(f, genomes)
-    const homs = homIds.map(hid =>
-       this.getFeaturesByCid(hid).filter(hom =>
-           genomes.indexOf(hom.genome) >= 0))
-    const fhoms = u.flatten(homs)
-    if (fhoms.length === 0 && genomes.indexOf(f.genome) >= 0) return [f]
-    return fhoms
-  }
-  //
-  equivalent (fA, fB) {
-    // same feature?
-    if (fA === fB || fA.ID === fB.ID) return true
-    // else if no curie, can't be homologs
-    if (!fA.curie) return false
-    // same curie?
-    if (fA.curie === fB.curie) return true
-    // fB is a homolog?
-    const txA = this.getTaxonId(fA)
-    const txB = this.getTaxonId(fB)
-    if (txA === txB && !this.app.includeParalogs) return false
-    const idBs = this.homologyManager.getHomologIds(fA.curie, txA, [txB])
-    if (idBs.indexOf(fB.curie) >= 0) return true
-    //
-    return false
-  }
-  //
-  fixGenomesArg (genomes) {
-    if (!genomes) {
-      return this.app.vGenomes
-    } else if (!Array.isArray(genomes)) {
-      return [genomes]
-    } else {
-      return genomes
-    }
-  }
-  // Hacky function so that all mouse species are considered the same
-  fixTaxonId (taxonid) {
-    if (taxonid.startsWith("100")) taxonid = "10090"
-    return taxonid
-  }
-  //
-  getTaxonId (f) {
-    const t = f.genome.taxonid
-    return this.fixTaxonId(t)
-  }
-  //
-  flushAllGenomeData () {
-    this.app.allGenomes.forEach(g => this.flushGenome(g))
-  }
-  //
-  flushGenome (g) {
-     const gn = g.name || g
-     const gcache = this.cache[gn]
-     if (gcache) {
-       delete this.cache[gn]
-       for (let cn in gcache) {
-         const cfeats = gcache[cn]
-         cfeats.forEach(f => {
-           delete this.id2feat[f.ID]
-           const cidFeats = this.cid2feats[f.curie]
-           if (cidFeats) {
-             this.cid2feats[f.curie] = cidFeats.filter(ff => ff !== f)
-             if (this.cid2feats[f.curie].length === 0) {
-                delete this.cid2feats[f.curie]
-             }
-           }
-           if (f.symbol) {
-             const fs = f.symbol.toLowerCase()
-             this.symbol2feats[fs] = this.symbol2feats[fs].filter(ff => ff !== f)
-             if (this.symbol2feats[fs].length === 0) {
-               delete this.symbol2feats[fs]
-             }
-           }
-         }, this)
-       }
-     }
   }
 }
 // Registers features for one chromsome of a genome
