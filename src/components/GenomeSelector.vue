@@ -54,9 +54,20 @@ export default MComponent({
   },
   methods: {
     genomeTitleText: function (g) {
-      const entries = Object.entries(g.metadata)
-      entries.sort((a,b) => a[0] < b[0] ? -1 : a[0] > b[0] ? 1 : 0)
-      return entries.map(e => `${e[0]}: ${e[1]}`).join('\n')
+      // If genome has a configured display, just return that.
+      if (g.display) return g.display
+      // Otherwise, return default display.
+      const lines = [
+        ["name", g.name],
+        ["build", g.build],
+        ["taxonid", g.taxonid],
+      ]
+      g.tracks.forEach(t => {
+        lines.push([t.track+" source", t.source])
+        lines.push([t.track+" release", t.release])
+      })
+      //
+      return lines.map(e => `${e[0]}: ${e[1]}`).join('\n')
     },
     reset: function () {
       this.rG = this.rGenome ? this.rGenome.name : null
