@@ -53,10 +53,23 @@
     <text
       name="label"
       :x="cfg.endCapWidth + 2"
-      :y="-1"
+      :y="-3"
       stroke="none"
       font-family= "sans-serif"
       fill="black">{{ genome.name }}</text>
+    <!-- busy indicator -->
+    <text
+      v-show="busyCount > 0"
+      @click="busyCount = 0"
+      :x="width"
+      :y="-3"
+      text-anchor="end"
+      fill="rgb(255 127 14)"
+      stroke="none"
+      font-family="sans-serif"
+      font-size="12"
+      font-weight="bold"
+      >{{busyMessage}}</text>
     <!-- end cap -->
     <g>
       <rect name="endcap"
@@ -107,24 +120,6 @@
         :fill="endCapFontColor"
         @click="deleteClicked"
         >X<title>Click to remove this strip.</title></text>
-    </g>
-    <!-- busy indicator -->
-    <g
-      v-show="busyCount > 0"
-      @click="busyCount = 0"
-      >
-      <rect 
-        x=0
-        y=0
-        :height="height"
-        :width="width"
-        :style="{ fillOpacity: 0.3 }"
-        />
-      <text
-        :x="width / 2"
-        :y="height / 2"
-        fill="white"
-        >{{busyMessage}}</text>
     </g>
   </g>
 </template>
