@@ -171,7 +171,7 @@ class DataManager {
               // Can skip th rest.
               if (f.transcripts.length) return
               //
-              u.debug("Filling in transcripts for:", f.symbol)
+              //u.debug("Filling in transcripts for:", f.symbol)
               // Ok, transfer the transcripts to the gene. Remember f is a frozen object, so we can't just assign f.transcripts = trs.
               // We have push transcripts into the existing array.
               trs.forEach(t => f.transcripts.push(t))
@@ -622,7 +622,7 @@ class FeatureRegistrar {
     //
     f.length = f.end - f.start + 1
     if (f.length > config.DataManager.featureSizeLimit) {
-      // console.log('Feature too big. Skipping: ', f)
+      u.debug('Feature too big. Skipping: ', f)
       return null
     }
     //
@@ -635,7 +635,7 @@ class FeatureRegistrar {
       f.curie = null // make sure it's not undefined
     }
     //
-    f.symbol = f.symbol || f.Name || f.gene_id
+    f.symbol = f.symbol || f.Name
     //
     if (f.symbol) {
       let lc = f.symbol.toLowerCase()
