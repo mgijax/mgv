@@ -24,7 +24,7 @@ class DataManager {
     this.fetchUrl = this.url + "/fetch.cgi"
     this.cache = {} // { genome.name -> { chr.name -> [features] } }
     this.pending = {} // genome.name -> pending promise
-    this.id2feat = {} // ID -> feature
+    this.id2feat = {} // genome -> ID -> feature
     this.cid2feats = {} // curie -> [ features ]
     this.symbol2feats = {} // symbol -> [ features ]
     this.greg = new GenomeRegistrar()
@@ -35,8 +35,9 @@ class DataManager {
   getGenomeByName (n) {
     return this.greg.lookupGenome(n)
   }
-  getFeatureById (id) {
-    return this.id2feat[id]
+  getFeatureById (g, id) {
+    const gids = this.id2feat[g.name]
+    return gids ? gids[id] : undefined
   }
   getFeaturesByCid (cid) {
     return this.cid2feats[cid] || []
@@ -45,12 +46,16 @@ class DataManager {
     return this.symbol2feats[symbol.toLowerCase()] || []
   }
   getFeaturesBy (val) {
-    let f = this.getFeatureById(val)
-    if (f) return [f]
-    let fs = this.getFeaturesByCid(val)
+    // 
+    let fs = Object.entries(this.id2feat).reduce((v,e) => v.concat(e[1][val]), []).filter(x=>x)
     if (fs.length > 0) return fs
+    //
+    fs = this.getFeaturesByCid(val)
+    if (fs.length > 0) return fs
+    //
     fs = this.getFeaturesBySymbol(val)
     if (fs.length > 0) return fs
+    //
     return []
   }
   //
@@ -425,7 +430,7 @@ class DataManager {
   //
   equivalent (fA, fB) {
     // same feature?
-    if (fA === fB || fA.ID === fB.ID) return true
+    if (fA === fB || (fA.genome === fB.genome && fA.ID === fB.ID)) return true
     // else if no curie, can't be homologs
     if (!fA.curie) return false
     // same curie?
@@ -469,10 +474,10 @@ class DataManager {
      const gcache = this.cache[gn]
      if (gcache) {
        delete this.cache[gn]
+       delete this.id2feat[gn]
        for (let cn in gcache) {
          const cfeats = gcache[cn]
          cfeats.forEach(f => {
-           delete this.id2feat[f.ID]
            const cidFeats = this.cid2feats[f.curie]
            if (cidFeats) {
              this.cid2feats[f.curie] = cidFeats.filter(ff => ff !== f)
@@ -625,8 +630,10 @@ class FeatureRegistrar {
       u.debug('Feature too big. Skipping: ', f)
       return null
     }
-    //
-    this.id2feat[f.ID] = f
+
+    if (!this.id2feat[f.genome.name]) this.id2feat[f.genome.name] = {}
+    this.id2feat[f.genome.name][f.ID] = f
+
     if (f.curie) {
       let d = this.cid2feats[f.curie]
       if (!d) d = this.cid2feats[f.curie] = []

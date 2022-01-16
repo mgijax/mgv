@@ -178,7 +178,8 @@ export default MComponent({
           feats.forEach(fel => {
             // get the feature model object and add to vhf set
             const fid = fel.getAttribute('name')
-            const f = this.dataManager().getFeatureById(fid)
+            const genome = fel.getAttribute('genome')
+            const f = this.dataManager().getFeatureById({name:genome},fid)
             vhfs.add(f)
             //
             this.dataManager().getHomologs(f).forEach(h => {

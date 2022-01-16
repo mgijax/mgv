@@ -169,6 +169,7 @@
          v-for="f in features"
         :key="f.ID"
         :name="f.ID"
+        :genome="f.genome.name"
 	:strand="f.strand"
         class="feature"
         :class="{

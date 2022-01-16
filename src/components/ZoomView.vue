@@ -85,7 +85,7 @@ export default MComponent({
         // Before showing f's context menu, be sure its model has been read into the cache.
         // Also be sure same is true of all visible homologs of f
         const dm = this.dataManager()
-        const f = dm.getFeatureById(fnode.getAttribute('name'))
+        const f = dm.getFeatureById({name:fnode.getAttribute('genome')}, fnode.getAttribute('name'))
         const fhoms = dm.getHomologs(f)
         const fhomPs = fhoms.map(h => dm.getGenes(h.genome, h.chr, h.start, h.end, true))
         Promise.all(fhomPs).then(() => {
