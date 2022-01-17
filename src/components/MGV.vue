@@ -350,12 +350,12 @@ export default MComponent({
     // FIXME: refactor the existing calls
     //
     currentSelectionToList: function () {
-      const s = new Set(this.currentSelection.map(f => f.curie || f.ID))
+      const s = new Set(this.currentSelection.map(f => f.curie).filter(x=>x))
       return Array.from(s)
     },
     currentSelectionToListWithHoms: function () {
       const cHoms = this.currentSelection.map(f => this.dataManager.getHomologs(f, this.vGenomes))
-      const cHomIds = new Set(u.flatten(cHoms).map(f => f.curie || f.ID))
+      const cHomIds = new Set(u.flatten(cHoms).map(f => f.curie).filter(x=>x))
       return Array.from(cHomIds)
     },
     // Returns the set of canonical IDs homologous to anything in the current selection
@@ -710,7 +710,7 @@ export default MComponent({
     setCurrentList: function (lst) {
       this.currentList = lst
       const listFeats = u.flatten(lst.items.map(id => this.dataManager.getHomologs(id)))
-      const idents = listFeats.map(f => f.curie || f.ID)
+      const idents = listFeats.map(f => f.curie).filter(x=>x)
       // this list includes homologs
       this.currentListSet = new Set(idents)
       // this one doesn't
