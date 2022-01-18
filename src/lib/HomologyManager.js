@@ -2,12 +2,12 @@ import u from '@/lib/utils'
 //
 class HomologyManager {
   //
-  constructor (dataManager, url) {
+  constructor (dataManager, fetchUrl) {
     this.dataManager = dataManager
     this.app = this.dataManager.app
     //  Organize pairwise assertions into multilevel mapping:
     //          taxonA -> taxonB -> idA -> [idB]
-    this.url = url
+    this.fetchUrl = fetchUrl
     this.index = {}
     this.taxonid2promise = {}
     this.promises = []
@@ -25,7 +25,7 @@ class HomologyManager {
       return this.taxonid2promise[taxonid]
     }
     this.app.$root.$emit('message', { message: `Fetching orthology data for taxon ${taxonid}...` })
-    const p = u.fetch(`${this.url}/fetch.cgi?datatype=homology&taxonid=${taxonid}`, 'tsv').then(data => {
+    const p = u.fetch(`${this.fetchUrl}?datatype=homology&taxonid=${taxonid}`, 'tsv').then(data => {
       this.registerData(data)
       return true
     })

@@ -2,11 +2,11 @@
 // Reader for a gff track for a genome
 //
 class GffReader {
-  constructor (fetcher, track, genome, url) {
+  constructor (fetcher, track, genome, fetchUrl) {
     this.fetcher = fetcher
     this.track = track
     this.genome = genome
-    this.url = url
+    this.fetchUrl = fetchUrl
   }
   read (regions) {
     const desc = [{
@@ -15,7 +15,7 @@ class GffReader {
         "regions" : regions
     }]
     const qstring = encodeURI(JSON.stringify(desc))
-    const url = `${this.url}/fetch.cgi?datatype=gff&descriptors=${qstring}`
+    const url = `${this.fetchUrl}?datatype=gff&descriptors=${qstring}`
     return this.fetcher.fetch(url, 'gff')
   }
   readAll () {

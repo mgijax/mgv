@@ -2,29 +2,34 @@
 // Reader for a fasta track for a genome
 //
 class FastaReader {
-  constructor (fetcher, track, genome, url) {
+  constructor (fetcher, track, genome, fetchUrl) {
     this.fetcher = fetcher
-    this.track = track
     this.genome = genome
-    this.url = url
+    this.track = track
+    this.fetchUrl = fetchUrl
   }
-  read (regions,filename) {
-    const desc = [{
-        "genome" : this.genome.path,
-        "track" : this.track,
-        "regions" : regions
-    }]
-    const qstring = encodeURI(JSON.stringify(desc))
-    const fnameArg = filename ? "&filename="+filename : ""
-    const url = `${this.url}/fetch.cgi?datatype=fasta&descriptors=${qstring}${fnameArg}`
-    return this.fetcher.fetch(url, 'gff')
+  read (descrs, filename) {
+    const fparam = filename ? `&filename=${filename}` : ''
+    const params = `datatype=fasta&descriptors=${encodeURI(JSON.stringify(descrs))}${fparam}`
+    return this.fetcher.fetch(this.fetchUrl + '?' + params, 'text')
   }
   readAll () {
     throw "Not implemented. FastaReader cannot readAll()."
   }
-  readRange (c, s, e, filename) {
-    const region = `${c['name']}:${s}-${e}`
-    return this.read(region, filename)
+  readRange (c, s, e, reverse) {
+    if (!this.genome) throw "Method readRange not implemented by non-specific reader."
+    const descr = {
+      genome: this.genome.path,
+      track: this.track,
+      regions: `${c.name}:${s}-${e}`,
+      reverse: Boolean(reverse)
+    }
+    const p = this.read([descr]).then(txt => {
+      txt = txt.split('\n')
+      txt.shift()
+      return txt.join('')
+    })
+    return p
   }
 }
 export {

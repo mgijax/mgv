@@ -15,14 +15,15 @@ class GenomeReader {
     const n = config.CachingFetcher.dbName
     this.fetcher = new CachingFetcher(n, info.path)
     this.kstore = new KeyStore(n)
+    const fetchUrl = this.registrar.fetchUrl
     this.readers = this.info.tracks.reduce((a,t) => {
       if (t.filetype === 'gff') {
-        a[t.track] = new GffReader(this.fetcher, t.track, info, info.url)
+        a[t.track] = new GffReader({fetch: u.fetch}, t.track, info, fetchUrl)
         if (t.track === "models") {
-          a[t.track+'.genes'] = new GffReader(this.fetcher, 'models.genes', info, info.url)
+          a[t.track+'.genes'] = new GffReader(this.fetcher, 'models.genes', info, fetchUrl)
         }  
       } else if (t.filetype === 'fasta') {
-        a[t.track] = new FastaReader(this.fetcher, t.track, info, info.url)
+        a[t.track] = new FastaReader({fetch: u.fetch}, t.track, info, fetchUrl)
       }
       return a
     }, {})
@@ -37,7 +38,7 @@ class GenomeReader {
     return this.kstore.get(this.info.path + '::INFO').then(cinfo => {
       if (!cinfo || cinfo.timestamp != this.info.timestamp) {
         return this.fetcher.clearNamespace().then(() => {
-          return this.kstore.set(this.info.name+'::INFO', this.info)
+          return this.kstore.set(this.info.path+'::INFO', this.info)
         })
       }
     })
@@ -60,32 +61,35 @@ class GenomeReader {
 // Forwarding loop are tolerated
 //
 class GenomeRegistrar {
-  constructor () {
+  constructor (fetchUrl) {
+    this.fetchUrl = fetchUrl
     this.url2promise = {}
     this.name2genome = {}
     this.name2reader = {}
     this.indexName = 'index.json'
   }
-  // Returns a TrackReader for track n of genome g
+  // Returns a promise for a reader for the specified track for the specified genome.
   getReader (g, n) {
     const gr = this.name2reader[g.name]
     return gr.ready().then( () => gr.readers[n] )
   }
   // Register
-  register (url) {
-    let p = this.url2promise[url]
+  register () {
+    let p = this.url2promise[this.fetchUrl]
     if (p) return p
-    const url2 = url + '/fetch.cgi?datatype=metadata'
-    this.url2promise[url] = p = u.fetch(url2, 'json')
-      .then(data => data.map(g => this.registerGenome(url,g)).filter(x=>x))
+    const url2 = this.fetchUrl + '?datatype=metadata'
+    this.url2promise[this.fetchUrl] = p = u.fetch(url2, 'json')
+      .then(data => data.map(g => this.registerGenome(g)).filter(x=>x))
     return p
   }
+  //
   lookupGenome (n) {
     return this.name2genome[n]
   }
-  registerGenome (url, info) {
+  //
+  registerGenome (info) {
     if (info.type !== "genome") return null
-    info.url = info.url || url
+    info.url = info.url || this.fetchUrl
     info.name2chr = info.chromosomes.reduce((a,c) => { a[c.name] = c; return a }, {})
     info.chromosomes.forEach((c,i) => { c.index = i })
     info.metadata = {

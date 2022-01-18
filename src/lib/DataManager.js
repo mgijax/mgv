@@ -14,6 +14,7 @@ import { GenomePainter } from '@/lib/GenomePainter'
 import u from '@/lib/utils'
 import config from '@/config'
 import { GenomeRegistrar } from '@/lib/GenomeRegistrar'
+import { FastaReader } from '@/lib/FastaReader'
 import HomologyManager from '@/lib/HomologyManager'
 import gff3 from '@/lib/gff3lite'
 
@@ -27,9 +28,9 @@ class DataManager {
     this.id2feat = {} // genome -> ID -> feature
     this.cid2feats = {} // curie -> [ features ]
     this.symbol2feats = {} // symbol -> [ features ]
-    this.greg = new GenomeRegistrar()
-    this.genomes = this.greg.register(this.url)
-    this.homologyManager = new HomologyManager(this, this.url)
+    this.greg = new GenomeRegistrar(this.fetchUrl)
+    this.genomes = this.greg.register()
+    this.homologyManager = new HomologyManager(this, this.fetchUrl)
     this.genomePainter = new GenomePainter()
   }
   getGenomeByName (n) {
@@ -317,27 +318,17 @@ class DataManager {
       composite: cExons
     }
   }
-  // Returns a promise for the results of calling fetch with the given parameters.
+  // Returns a promise for an arbitrary set of sequences.
   getSequences (descrs, filename) {
-    const fparam = filename ? `&filename=${filename}` : ''
-    const params = `datatype=fasta&descriptors=${encodeURI(JSON.stringify(descrs))}${fparam}`
-    return u.fetch(this.fetchUrl + '?' + params, 'text')
+    const reader = new FastaReader({fetch: u.fetch}, 'assembly', null, this.fetchUrl)
+    return reader.read(descrs, filename)
   }
   // 
   // Returns a promise for the genomic sequence of the specified range for the specified genome
   getSequence (g, c, s, e, doRC) {
-    const descr = {
-      genome: g.path,
-      track: 'assembly',
-      regions: `${c.name}:${s}-${e}`,
-      reverse: Boolean(doRC)
-    }
-    const p = this.getSequences([descr]).then(txt => {
-      txt = txt.split('\n')
-      txt.shift()
-      return txt.join('')
+    return this.greg.getReader(g, 'assembly').then(reader => {
+        return reader.readRange(c, s, e, doRC)
     })
-    return p
   }
   //
   // A sequence descriptor specifies arbitrary slice(s) of a chromosome,
