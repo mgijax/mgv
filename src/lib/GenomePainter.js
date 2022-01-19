@@ -30,7 +30,8 @@ class GenomePainter {
     // Paint chromosome c of genome g from s to e.
     // Returns list of gaps that were painted over.
     paint (g, c, s, e) {
-        const region = {start:s, end:e}
+        const region = {start: Math.max(1,s), end: Math.min(c.length, e)}
+        if (region.start > region.end) return []
         const cregions = this.getPaintedRegions(g, c)
         const gaps = gc.subtract(region, cregions)
         // Compute the merge of the new region with overlapping painted regions.
