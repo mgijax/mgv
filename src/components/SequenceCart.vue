@@ -54,6 +54,7 @@
          target="_blank"
          method="POST"
          download>
+         <input type="hidden" name="datatype" value="fasta" />
          <input type="hidden" name="descriptors" v-model="descriptors" />
          <div class="flexcolumn" style="padding-right: 12px;">
              <div class="flexrow download-option">
@@ -174,7 +175,7 @@ export default MComponent({
       return ! this.filename
     },
     fetchUrl () {
-      return this.app.runtimeConfig.dataUrl + "fetch.cgi"
+      return this.app.dataManager.fetchUrl
     }
   },
   methods: {

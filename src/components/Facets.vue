@@ -54,7 +54,7 @@ export default MComponent({
         multi: true,
         initiallyOpen: true,
         mapper: function (f) {
-          return this.featureColorMap.getMungedType(f.sotype)
+          return this.featureColorMap.getMungedType(f.type)
         }.bind(this),
         message: ""
       }, {

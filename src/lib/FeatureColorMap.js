@@ -33,9 +33,9 @@ class FeatureColorMap {
       return 'other_feature_type'
     }
   }
-  // get color for so type or a feature with a sotype
+  // get color for so type or a feature with a so type
   getColor (feat) {
-    let sotype = typeof feat === 'string' ? feat : feat.sotype
+    let sotype = typeof feat === 'string' ? feat : feat.type
     let mt = this.getMungedType(sotype)
     return this.cmap[mt]
   }

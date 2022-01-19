@@ -607,24 +607,48 @@ class FeatureRegistrar {
   //   r - a parsed GFF3(-like) record
   register (r) {
     const f = gff3.record2object(r)
-    f.transcripts = []
-    f.composite = {}
-    f.sotype = f.type
+    // copy attributes to top level obj for easy asscess
+    f.ID = f.attributes.ID
+    f.curie = f.attributes.curie
+    f.symbol = f.attributes.symbol || f.attributes.Name
+
+    // Some short string usable in any printing context. Should always be defined.
+    f.label = f.symbol || f.curie || f.ID || ""
+
+    // Attach genome and chromosome objects
     f.genome = this.genome
     f.chr = this.chr
-    //
-    this.chr.minStart = Math.min(this.chr.minStart, f.start)
-    this.chr.maxEnd = Math.max(this.chr.maxEnd, f.end)
-    //
+
+    // Compute and store length. Do length check.
     f.length = f.end - f.start + 1
     if (f.length > config.DataManager.featureSizeLimit) {
       u.debug('Feature too big. Skipping: ', f)
       return null
     }
 
-    if (!this.id2feat[f.genome.name]) this.id2feat[f.genome.name] = {}
-    this.id2feat[f.genome.name][f.ID] = f
+    // to be filled in
+    f.transcripts = []
+    f.composite = {}
+    //
+    f.layout = {
+        lane: 0,
+        y: 0,
+        height : 0
+    }
 
+    // Update observed limits for my chromosome
+    this.chr.minStart = Math.min(this.chr.minStart, f.start)
+    this.chr.maxEnd = Math.max(this.chr.maxEnd, f.end)
+
+    // Index feature by ID. ID should be unique within a genome.
+    if (!this.id2feat[f.genome.name]) this.id2feat[f.genome.name] = {}
+    if (f.ID) {
+        if (this.id2feat[f.genome.name][f.ID]) throw `Non unique feature ID detected. ${f.ID}`
+        this.id2feat[f.genome.name][f.ID] = f
+    }
+
+    // Index by curie ID if there is one. Curies should be unique within one genome, but may be shared across genomes
+    // within the same species.
     if (f.curie) {
       let d = this.cid2feats[f.curie]
       if (!d) d = this.cid2feats[f.curie] = []
@@ -632,27 +656,21 @@ class FeatureRegistrar {
     } else {
       f.curie = null // make sure it's not undefined
     }
-    //
-    f.symbol = f.symbol || f.Name
-    //
+    // Index by symbol, if there is one. Symbols should be unique within a genome.
     if (f.symbol) {
       let lc = f.symbol.toLowerCase()
       let d = this.symbol2feats[lc]
       if (!d) d = this.symbol2feats[lc] = []
       d.push(f)
     }
-    // For convenience...
-    f.id = f.curie || f.ID
-    f.label = f.symbol || f.id
-    //
-    f.layout = {
-        lane: 0,
-        y: 0,
-        height : 0
-    }
+
     // For performance. Don't want to observe 10,000s of objects.
     // Vue is not reactive to frozen objects.
+    // Also note that freezing f does _not_ freeze objects that f points to,
+    // in particular, f.layout, f.transcripts, f.composite. The contants of
+    // these can and do change. Like f, though, they are non-reactive.
     Object.freeze(f)
+
     //
     return f
   }

@@ -76,7 +76,7 @@
             :stroke-opacity="g.inList ? 1 : 0"
             :fill-opacity="g.inList ? 1 : 0"
             >
-          <title>{{ g.f.symbol || g.f.ID }}</title>
+          <title>{{ g.f.label }}</title>
           </circle>
           <text
             class="noevents"
@@ -84,7 +84,7 @@
             :x="g.gPoint[0]"
             :y="g.gPoint[1] - glyphRadius"
             style="font-size: 10px; fill: black; text-anchor: middle;"
-            >{{g.f.symbol || g.f.ID}}</text>
+            >{{g.f.label}}</text>
         </g>
       </g>
       <g v-else>
@@ -98,7 +98,7 @@
           :x2="g.aPoint[0]"
           :y2="g.aPoint[1]"
           :stroke="currentListColor"
-          ><title>{{ g.f.symbol || g.f.ID }}</title></line>
+          ><title>{{ g.f.label }}</title></line>
       </g>
 
       <m-brush

@@ -232,14 +232,14 @@ export default MComponent({
       // generate list of descriptors for drawing the warning messages.
       this.messages = sboxes.map(sb => {
         const invisHomologs =  Array.from(invisGrouped[sb.genome.name] || [])
-        const invisHomologString = invisHomologs.map(f => f.symbol || f.curie || f.ID).sort().join(", ")
+        const invisHomologString = invisHomologs.map(f => f.label).sort().join(", ")
         const gmissing = Array.from(this.app.missingByGenome.get(sb.genome) || []).filter(f => {
             for (let hf of this.dataManager().getHomologs(f)) {
                 if (vhfs.has(hf)) return true
             }
             return false
         })
-        const missingString = Array.from(new Set(gmissing.map(f => f.symbol || f.curie || f.ID))).sort().join(", ")
+        const missingString = Array.from(new Set(gmissing.map(f => f.label))).sort().join(", ")
         //
         return {
           x: sb.rect.x + sb.rect.width + 16,

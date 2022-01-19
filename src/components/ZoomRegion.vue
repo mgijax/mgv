@@ -290,7 +290,7 @@
             :dy="0.3 * featureFontSize"
             >•</tspan><tspan
             :dy="featureInList(f) ? -0.3 * featureFontSize : 0"
-            >{{f.symbol || f.ID}}</tspan></text>
+            >{{f.label}}</tspan></text>
       </g> <!-- feature -->
     <!-- Region delete button -->
     <g
@@ -611,7 +611,7 @@ export default MComponent({
           let fEnd = f.end
           const showTs = this.showTranscripts(f)
           if (showTs || this.showFeatureLabels || this.featureHighlighted(f)) {
-            const fLabelEnd = f.start + sBpLength(f.symbol || f.ID)
+            const fLabelEnd = f.start + sBpLength(f.label)
             const fTranscriptEnd = f.transcripts.reduce((a,t) => {
               const tlabel = t.cds && this.showProteinLabels ? t.cds.label : t.label
               const tend = Math.max(t.end, t.start + sBpLength(tlabel))

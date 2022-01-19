@@ -19,7 +19,7 @@
         <td>{{f && f.symbol || '.'}}</td>
         <td>{{f && f.genome.name || '.'}}</td>
         <td>{{f && f.ID || '.'}}</td>
-        <td>{{f && f.sotype || '.'}}</td>
+        <td>{{f && f.type || '.'}}</td>
         <td>{{f && `${f.chr.name}:${f.start}..${f.end} (${f.strand})` || '.'}}</td>
         <td>{{f && f.length || '.'}}</td>
       </tr>

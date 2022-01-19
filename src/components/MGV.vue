@@ -364,7 +364,7 @@ export default MComponent({
       return new Set(sids)
     },
     currentSelectionLabel: function () {
-      const ids = Array.from(new Set(this.currentSelection.map(f => f.symbol||f.curie||f.ID)))
+      const ids = Array.from(new Set(this.currentSelection.map(f => f.label)))
       ids.sort()
       return ids.join(", ")
     },

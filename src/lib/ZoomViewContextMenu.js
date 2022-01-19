@@ -88,7 +88,7 @@ function getMenus(thisObj) {
         return (
           (whichGene === 'target' && type === 'transcript' && !t && !allT) ||
           (whichGene === 'target' && type === 'cds' && !c && !allT) ||
-          (f.sotype !== 'protein_coding_gene' && type === 'cds'))
+          (f.type !== 'protein_coding_gene' && type === 'cds'))
       },
       extraArgs: [type],
       handler: (function (cxt, seqtype) {

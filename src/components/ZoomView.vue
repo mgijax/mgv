@@ -56,7 +56,7 @@ export default MComponent({
         return [
           cxt.feature.label,
           cxt.feature.long_name || '',
-          cxt.feature.biotype || cxt.feature.sotype || '',
+          cxt.feature.type || '',
           cxt.feature.curie || cxt.feature.ID, 
           cxt.transcript ? cxt.transcript.label : '',
           cxt.transcript && cxt.transcript.cds ? cxt.transcript.cds.label : ''

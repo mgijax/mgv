@@ -26,7 +26,7 @@ const attributes = 8
 // an object where:
 //    - columns 1-8 are assigned to named fields
 //    - all the attributes in column 9 are attributes of the returned object
-function record2object (r) {
+function record2object (r, flattenAttributes) {
   const o = {}
   o.seqid = r[seqid]
   o.source = r[source]
@@ -36,7 +36,11 @@ function record2object (r) {
   o.score = r[score]
   o.strand = r[strand]
   o.phase = r[phase]
-  Object.assign(o, r[attributes])
+  if (flattenAttributes) {
+      Object.assign(o, r[attributes])
+  } else {
+      o.attributes = r[attributes]
+  }
   return o
 }
 // Parses column 9 into an object with attributes.
