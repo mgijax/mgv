@@ -3,15 +3,16 @@ let fail = function (message) {
 }
 
 // Parses a string containing coordinates specified like 4:12345678..12387654
+// (alternatively, 4:12345678-12387654)
 // Returns an object of the form { chr, start, end }.
 // Returns null if the string fails to parse.
 function parse (s) {
-  let m = s.match(/^([^:]+):(\d+)\.\.(\d+)/)
+  let m = s.match(/^([^:]+):(\d+)(\.\.|-)(\d+)/)
   if (!m) return null
   let c = {
     chr: m[1],
     start: parseInt(m[2]),
-    end: parseInt(m[3])
+    end: parseInt(m[4])
   }
   if (c.chr.length > 0 && c.start > 0 && c.start <= c.end) return c
   return null
