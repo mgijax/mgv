@@ -40,7 +40,7 @@
       class="material-icons message"
       :title="message"
       @click.stop="messageClickHandler ? messageClickHandler() : null"
-      >warning</i>
+      >{{ messageIcon || 'warning'}}</i>
   </div>
   <div name="content" v-show="isOpen">
     <slot></slot>
@@ -67,6 +67,7 @@ export default MComponent({
     label: String,
     message: String,
     messageClickHandler: Function,
+    messageIcon: String,
     floating: Boolean,
     initialX: {
       type: Number,

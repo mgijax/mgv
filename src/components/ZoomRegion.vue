@@ -80,7 +80,7 @@
         width="100%"
         :height="Math.max(height, 20)"
         fill="white"
-        fill-opacity="0"
+        fill-opacity="0.3"
         :stroke="region.reversed ? 'red' : 'black'"
         :stroke-width="region.reversed ? 3 : 1"
         stroke-opacity="0.5"

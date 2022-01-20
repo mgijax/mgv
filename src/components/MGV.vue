@@ -46,8 +46,6 @@
         ============ Facets (aka Filters) ==============
         -->
         <page-box
-          :message="activeFacets.length ? 'There are active filters. Click to clear.' : ''"
-          :messageClickHandler="clearFacets"
           label="Filters"
           icon="filter_list"
           >
@@ -92,8 +90,6 @@
         ============== Zoom View ==============
         -->
         <page-box
-          :message="activeFacets.length ? `Active filters (click to remove):\n${activeFacetsText}` : ''"
-          :messageClickHandler="clearFacets"
           label="Zoom View"
           icon="view_agenda"
           >
@@ -411,11 +407,6 @@ export default MComponent({
     vTaxons: function () {
       return Array.from(new Set(this.vGenomes.map(g => this.dataManager.fixTaxonId(g.taxonid))))
     },
-    activeFacetsText: function () {
-      return this.activeFacets.map(f => {
-        return `${f.facet} [${f.values.join(", ")}]`
-      }).join("\n")
-    },
     rStrip: function () {
       return this.strips.filter(s => s.genome === this.rGenome)[0]
     },
@@ -470,9 +461,6 @@ export default MComponent({
       this.includeParalogs = !this.includeParalogs
       this.currentList && this.setCurrentList(this.currentList)
       this.$root.$emit('context-changed')
-    },
-    clearFacets: function () {
-      this.$refs.facets.resetAll()
     },
     resize: function () {
       const sz = {width: u.wWidth(), height: u.wHeight()}

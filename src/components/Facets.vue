@@ -12,6 +12,7 @@
        :draggable="false"
        :message="fd.message"
        :messageClickHandler="() => facetOff(i)"
+       messageIcon="filter_alt"
        >
        <facet
          :name="fd.name"
@@ -233,6 +234,9 @@ export default MComponent({
     }
   },
   created: function () {
+    this.$root.$on('clear-facets', () => {
+        this.resetAll()
+    })
     this.$root.$on('selection-state-changed', () => {
       const icsi = this.facetData.map(fd => fd.name).indexOf('Feature is selected')
       const ics = this.$refs.facets[icsi]

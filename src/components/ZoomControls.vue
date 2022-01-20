@@ -8,6 +8,12 @@
       <!-- scroll lock button -->
       <div class="flexrow">
         <m-button
+          :icon="context.activeFacets.length ? 'filter_alt' : 'filter_alt_off'"
+          @click="clearFacets"
+          :title="activeFacetsText"
+          :style="{ color: context.activeFacets.length ? 'rgb(255, 127, 14)' : 'black' }"
+          />
+        <m-button
           :icon="context.scrollLock ? 'lock' : 'lock_open'"
           @click="lockClicked"
           :title="context.scrollLock ? 'Scroll lock is ON. Click to turn OFF.' : 'Scroll lock is OFF. Click to turn ON'"
@@ -178,6 +184,12 @@ export default MComponent({
       const lim = cglen > this.maxListLength ? ` ${this.maxListLength} shown` : ''
       return `${clist.name} (${sz}${lim})`
     },
+    activeFacetsText: function () {
+      if (this.context.activeFacets.length === 0) return "No active filters."
+      return "Active filters (click to remove):\n" + this.context.activeFacets.map(f => {
+        return `${f.facet} [${f.values.join(", ")}]`
+      }).join("\n")
+    },
     paralogsEnabled: function () {
       return this.app.vTaxons.length > 1
     },
@@ -200,6 +212,9 @@ export default MComponent({
     },
     selectOnFocus (e) {
       e.target.select()
+    },
+    clearFacets: function () {
+      this.$root.$emit('clear-facets')
     },
     submitOnEnter (e) {
       if (e.keyCode === 13) this.findLandmark(e.target.value, e.shiftKey)
