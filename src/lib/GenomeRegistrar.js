@@ -20,6 +20,7 @@ class GenomeReader {
       if (t.filetype === 'gff') {
         a[t.track] = new GffReader({fetch: u.fetch}, t.track, info, fetchUrl)
         if (t.track === "models") {
+          this.info.linkouts = t.linkouts
           a[t.track+'.genes'] = new GffReader(this.fetcher, 'models.genes', info, fetchUrl)
         }  
       } else if (t.filetype === 'fasta') {
