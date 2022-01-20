@@ -1,4 +1,6 @@
 import u from '@/lib/utils'
+import config from '@/config'
+import CachingFetcher from '@/lib/CachingFetcher'
 //
 class HomologyManager {
   //
@@ -7,6 +9,9 @@ class HomologyManager {
     this.app = this.dataManager.app
     //  Organize pairwise assertions into multilevel mapping:
     //          taxonA -> taxonB -> idA -> [idB]
+    const n = config.CachingFetcher.dbName
+    this.fetcher = new CachingFetcher(n, "homology")
+    //
     this.fetchUrl = fetchUrl
     this.index = {}
     this.taxonid2promise = {}
@@ -25,7 +30,7 @@ class HomologyManager {
       return this.taxonid2promise[taxonid]
     }
     this.app.$root.$emit('message', { message: `Fetching orthology data for taxon ${taxonid}...` })
-    const p = u.fetch(`${this.fetchUrl}?datatype=homology&taxonid=${taxonid}`, 'tsv').then(data => {
+    const p = this.fetcher.fetch(`${this.fetchUrl}?datatype=homology&taxonid=${taxonid}`, 'tsv').then(data => {
       this.registerData(data)
       return true
     })
