@@ -72,7 +72,7 @@
             :cy="g.gPoint[1]"
             :r="glyphRadius"
             stroke="black"
-            :fill="currentListColor"
+            :fill="g.color"
             :stroke-opacity="g.inList ? 1 : 0"
             :fill-opacity="g.inList ? 1 : 0"
             >
@@ -97,7 +97,7 @@
           :y1="g.aPoint[1]"
           :x2="g.aPoint[0]"
           :y2="g.aPoint[1]"
-          :stroke="currentListColor"
+          :stroke="g.color"
           ><title>{{ g.f.label }}</title></line>
       </g>
 
@@ -140,6 +140,8 @@ export default MComponent({
     'font-family',
     'font-color',
     'width',
+    'currentSelection',
+    'currentSelectionColor',
     'currentList',
     'currentListIds',
     'currentListColor',
@@ -178,14 +180,25 @@ export default MComponent({
       return `rotate(90)translate(-10,8)`
     },
     myList: function () {
-      return this.currentList
+      const csel = this.currentSelection.
+              filter(f => f.chr === this.chromosome).
+              map(f => [f, this.currentSelectionColor, true])
+      const csIdSet = new Set(csel.map(fc => fc[0].curie || fc[0].ID))
+      const clst = this.currentList.
+              filter(f => ! csIdSet.has(f.curie || f.ID)).
+              map(f => [f, this.currentListColor, true])
+      return csel.concat(clst)
     },
     myGlyphs: function () {
       // glyphs. Each glyph == a feature + a center point for the glyph (circle) + an attachment point
-      const gs = this.myList.map(f => {
+      const gs = this.myList.map(fc => {
+        const f = fc[0]
+        const color = fc[1]
+        const drawCirc = fc[2]
         return {
           f: f,
-          inList: this.currentListIds.has(f.curie) || this.currentListIds.has(f.ID),
+          color: color,
+          inList: drawCirc,
           gPoint: [this.glyphX(f), this.glyphY(f)], // where glyph is centered
           aPoint: [0, this.glyphY(f)] // where connector line attaches to axis
         }

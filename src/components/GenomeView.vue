@@ -101,6 +101,8 @@
           :height="chrLen(c)"
           :width="chrWidth"
           :glyphStyle="currentListHomologs.length >= 500 ? 'bigList' : 'smallList'"
+          :currentSelection="app.csListH || []"
+          currentSelectionColor="#ff0000"
           :currentList="currentListHomologsByChr[c.name] || []"
           :currentListIds="context.currentListSetStrict"
           :currentListColor="context.currentList ? context.currentList.color : 'gray'"
