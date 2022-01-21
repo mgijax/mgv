@@ -135,7 +135,7 @@
           >
           <feature-details
             ref="featureDetails"
-            title="Shows details of a feature you click on. When open, shows details for homologs in all currently displayed genomes. When closed, shows only the feature in the genome that was clicked."
+            title="Shows details of current selected features and their homologs."
             :features="csListH"
             :currentMouseover="currentMouseover"
             />

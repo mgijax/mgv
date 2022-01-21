@@ -1,7 +1,9 @@
 <template>
   <div class="feature-details">
-    <table class="feature-table" style="table-layout:fixed; width:100%;">
+    <table class="feature-table">
       <tr>
+        <th>Genome</th>
+        <th>Symbol</th>
         <th>Seqid</th>
         <th>Source</th>
         <th>Type</th>
@@ -22,24 +24,26 @@
         class="featureRow"
         :class="{ current: isCurrent(f) }"
         >
+        <td>{{f && f.genome.name || '.'}}</td>
+        <td>{{f && f.label || '.'}}</td>
         <td>{{f && f.chr.name || '.'}}</td>
         <td>{{f && f.source || '.'}}</td>
         <td>{{f && f.type || '.'}}</td>
         <td>{{f && f.start || '.'}}</td>
         <td>{{f && f.end || '.'}}</td>
-        <td>{{f && f.score || '.'}}</td>
-        <td style="font-size: large;">{{f && f.strand || '.'}}</td>
-        <td>{{f && f.phase || '.'}}</td>
+        <td style="text-align:center;">{{f && f.score || '.'}}</td>
+        <td style="text-align:center;">{{f && f.strand || '.'}}</td>
+        <td style="text-align:center;">{{f && f.phase || '.'}}</td>
         <td class="attributes closed">
             <!-- when closed, shows this -->
-            <span>{{ attributesClosedText(f) }}</span>
+            <span class="closed-text">{{ attributesClosedText(f) }}</span>
             <!-- when opened, list attributes one per line -->
             <table>
                 <tr v-for="(av,j) in attributesAsList(f)"
                   :key= "`f${i}a${j}`"
                   >
                   <td>{{av[0]}}</td>
-                  <td>{{av[1]}}</td>
+                  <td><span class="crawling-text" @mouseover="startcrawl" @mouseout="stopcrawl" >{{av[1]}}</span></td>
                 </tr>
             </table>
             <i @click="clicked" class="material-icons open">add_circle</i>
@@ -111,7 +115,7 @@ export default MComponent({
         this.$el.querySelectorAll('td.attributes').forEach(t => this.closeAttributes(t))
     },
     attributesClosedText (f) {
-        return `${f.curie || f.ID} ${f.symbol}`
+        return `${f.curie || f.ID}`
     },
     attributesAsList (f) {
         const preferredOrder = ['ID','curie','Name']
@@ -135,6 +139,26 @@ export default MComponent({
             }
         entries.sort(comparator)
         return entries
+    },
+    startcrawl: function (e) {
+       const elt = e.target
+       const container = elt.closest('.feature-details')
+       const rightEdge = container.getBoundingClientRect().right
+       this.interval = window.setInterval(() => {
+           const ebb = elt.getBoundingClientRect()
+           if (ebb.right < rightEdge) {
+               elt.style.left = "0px"
+           } else {
+               const left = elt.style.left || "0px"
+               const ileft = parseInt(left.replace("px","")) - 1
+               elt.style.left = ileft + "px"
+           }
+       }, 25)
+    },
+    stopcrawl: function (e) {
+       if (this.interval) window.clearInterval(this.interval)
+       this.interval = null
+       e.target.style.left = "0px"
     }
   }
 })
@@ -142,7 +166,6 @@ export default MComponent({
 
 <style scoped>
 table {
-  width: 100%;
   font-size: 12px;
   white-space: nowrap;
   border-spacing: 0px;
@@ -187,5 +210,8 @@ td.attributes.closed:hover i.material-icons.open {
 /* zebra striping */
 table.feature-table > tr:nth-child(2n) {
     background-color: #ccc;
+}
+.crawling-text {
+    position: relative;
 }
 </style>
