@@ -136,7 +136,7 @@
           <feature-details
             ref="featureDetails"
             title="Shows details of a feature you click on. When open, shows details for homologs in all currently displayed genomes. When closed, shows only the feature in the genome that was clicked."
-            :features="detailFeatures"
+            :features="csListH"
             :currentMouseover="currentMouseover"
             />
         </page-box>
@@ -274,8 +274,6 @@ export default MComponent({
       currentMouseover: null,
       // while mouse is over a transcript, its ID. Otherwise null.
       currentMouseoverT: null,
-      // features to draw in the FeatureDetail section
-      detailFeatures: [],
       // user lists
       lists: [],
       // currently selected features
@@ -320,6 +318,10 @@ export default MComponent({
     csSetH: function () {
         const csHomologs = this.currentSelection.map(f => this.dataManager.getHomologs(f))
         return new Set(u.flatten(csHomologs))
+    },
+    //
+    csListH: function () {
+        return Array.from(this.csSetH)
     },
     // Returns current list as a set of features
     clSet : function () {
@@ -644,7 +646,6 @@ export default MComponent({
       this.currentMouseoverT = null
     },
     featureClick: function (f, t, e) {
-      this.detailFeatures = this.dataManager.getHomologs(f, this.vGenomes)
       if (e.shiftKey) {
         const cs = this.currentSelection.filter(ff => !(ff.curie && ff.curie === f.curie))
         if (cs.length !== this.currentSelection.length) {

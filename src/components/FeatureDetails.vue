@@ -1,31 +1,5 @@
 <template>
   <div class="feature-details">
-    <!--
-    <table>
-      <tr>
-        <th>Canonical ID</th>
-        <th>Symbol</th>
-        <th>Genome</th>
-        <th>ID</th>
-        <th>Type</th>
-        <th>Coordinates</th>
-        <th>Length</th>
-      </tr>
-      <tr
-        v-for="(f,i) in features"
-        :key="i"
-        :class="{ current: isCurrent(f) }"
-        >
-        <td v-html="makeLink(f)"></td>
-        <td>{{f && f.symbol || '.'}}</td>
-        <td>{{f && f.genome.name || '.'}}</td>
-        <td>{{f && f.ID || '.'}}</td>
-        <td>{{f && f.type || '.'}}</td>
-        <td>{{f && `${f.chr.name}:${f.start}..${f.end} (${f.strand})` || '.'}}</td>
-        <td>{{f && f.length || '.'}}</td>
-      </tr>
-    </table>
-    -->
     <table class="feature-table" style="table-layout:fixed; width:100%;">
       <tr>
         <th>Seqid</th>
@@ -33,9 +7,9 @@
         <th>Type</th>
         <th>Start</th>
         <th>End</th>
-        <th>Score</th>
-        <th>Strand</th>
-        <th>Phase</th>
+        <th style="width:40px;">Score</th>
+        <th style="width:40px;">Strand</th>
+        <th style="width:40px;">Phase</th>
         <th style="width:50%;padding-left:16px;">
             Attributes
             <i title="Open all." @click="openAllAttributes" class="material-icons">add_circle</i>
@@ -89,6 +63,21 @@ export default MComponent({
   data: function () {
       return {
       }
+  },
+  computed: {
+    sortedFeatures: function () {
+        const sfeats = this.features.concat([])
+        sfeats.sort((a,b) => {
+            const ag = a.genome.name
+            const bg = b.genome.name
+            const ac = a.chr.name
+            const bc = b.chr.name
+            if (ag !== bg) return ag < bg ? -1 : ag > bg ? 1 : 0
+            if (ac !== bc) return ac < bc ? -1 : ac > bc ? 1 : 0
+            return a.start - b.start
+        })
+        return sfeats
+    }
   },
   methods: {
     isCurrent: function (f) {
@@ -156,14 +145,12 @@ table {
   width: 100%;
   font-size: 12px;
   white-space: nowrap;
+  border-spacing: 0px;
 }
 table * {
   vertical-align: top;
   text-align: left;
   overflow: hidden;
-}
-table tr.current {
-  background-color: #eee;
 }
 td.attributes.closed tr:nth-child(1) {
   display: inherit;
@@ -198,11 +185,7 @@ td.attributes.closed:hover i.material-icons.open {
   display: inherit;
 }
 /* zebra striping */
-table.feature-table tr:nth-child(2n) {
+table.feature-table > tr:nth-child(2n) {
     background-color: #ccc;
-}
-/* zebra striping, inner table */
-table.feature-table tr:nth-child(2n) table tr:nth-child(2n) {
-    background-color: #e1e1e1;
 }
 </style>
