@@ -921,7 +921,7 @@ export default MComponent({
     },
     //
     getSequenceDescriptor () {
-      const r = this.dataManager.getSequenceDescriptorForRegion(this.region)
+      const r = this.dataManager().makeSequenceDescriptorForRegion(this.region)
       return r
     },
     // Request features in my range, which will asynchromously cause a redraw.

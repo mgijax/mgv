@@ -28,6 +28,7 @@ export default MComponent({
   },
   computed: {
     usageString: function () {
+        // window.performance.memory only implemented on Chrome
         const wpm = window.performance.memory
         const mem = wpm ? '/ ' + (wpm.usedJSHeapSize/1000000).toFixed(1) + ' MB' : ''
         const obj = this.app.objectsInMemory + ' objects'
