@@ -257,6 +257,8 @@ export default MComponent({
     return {
       // all genomes (order not important)
       allGenomes: [],
+      // grand total of objects in memory (see DataManager.js)
+      objectsInMemory : 0,
       // current reference genome
       rGenome: { name: '' },
       // current region = most recently clicked
@@ -293,7 +295,9 @@ export default MComponent({
       // visible Height minus header and footer
       visHeight: 350,
       //
-      config: config
+      config: config,
+      //
+      debug: false
     }
   },
   computed: {
@@ -319,7 +323,7 @@ export default MComponent({
         const csHomologs = this.currentSelection.map(f => this.dataManager.getHomologs(f))
         return new Set(u.flatten(csHomologs))
     },
-    //
+    // returns current selection and all their homologs (for currently visible genomes) as a list of features
     csListH: function () {
         return Array.from(this.csSetH)
     },

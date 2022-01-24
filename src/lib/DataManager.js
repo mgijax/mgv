@@ -47,7 +47,7 @@ class DataManager {
     return this.symbol2feats[symbol.toLowerCase()] || []
   }
   getFeaturesBy (val) {
-    // 
+    //
     let fs = Object.entries(this.id2feat).reduce((v,e) => v.concat(e[1][val]), []).filter(x=>x)
     if (fs.length > 0) return fs
     //
@@ -105,9 +105,11 @@ class DataManager {
         if (feats.length) allFeats.push(this._registerChr(g, prevChr, feats))
         delete this.pending[g.name]
         // calculate feature density (features per Mb) for each genome
-        const totalFeats = allFeats.reduce((v,a) => v + a.length, 0)
-        const totalGenomeLength = g.chromosomes.reduce((v,c) => v + c.length, 0)
-        g.featureDensity = totalFeats / totalGenomeLength * 1000000
+        g.stats.totalFeats = allFeats.reduce((v,a) => v + a.length, 0)
+        g.stats.totalGenomeLength = g.chromosomes.reduce((v,c) => v + c.length, 0)
+        g.stats.featureDensity = (g.stats.totalFeats / g.stats.totalGenomeLength) * 1000000
+        g.stats.objectsInMemory = g.stats.totalFeats
+        this.app.objectsInMemory += g.stats.objectsInMemory
         return allFeats
       })
     })
@@ -147,25 +149,32 @@ class DataManager {
     // Returns a promise the resolves when all the genes that overlap the specified region
     // have their transcripts attached
     ensureModels (g, c, s, e, feats) {
+        u.debug("Ensure models: nominal range:", g.name, c.name, s, e)
         const gaps = this.genomePainter.paint(g, c, s, e)
-        u.debug("Ensure models nominal range:", g.name, c.name, s, e)
-        u.debug('Gaps=', gaps.map(r => `(${r.start},${r.end})`).join(' '))
-        const ps = gaps.map(r => this._ensureModels(g, c, r.start, r.end, feats.filter(f => gc.overlaps(f, r))))
-        return Promise.all(ps)
+        const ps = gaps.map(r => this.fillGap(g, c, r.start, r.end, feats.filter(f => gc.overlaps(f, r))))
+        return Promise.all(ps).then(p => {
+            const prs = this.genomePainter.getPaintedRegions(g,c)
+            const prss = prs.map(pr => `(${pr.start} ${pr.end})`).join(' ')
+            u.debug(`After: painted regions ${g.name}::${c.name}: ${prss}`)
+            return p
+        })
     }
-    // 
-    _ensureModels (g, c, s, e, feats) {
+    //
+    fillGap (g, c, s, e, feats) {
         if (feats.length === 0) {
             return Promise.resolve(true)
         }
-        // Expand the nominal range. Include the outer limits of overlapped genes
-        const s_exp = Math.min.apply(null, feats.map(f => f.start))
-        const e_exp = Math.max.apply(null, feats.map(f => f.end))
+        u.debug("Ensure models: gap fill range:", g.name, c.name, s, e)
+        // Expand the range to include the outer limits of overlapped genes
+        const s_exp = Math.min.apply(null, feats.map(f => f.start).concat([s]))
+        const e_exp = Math.max.apply(null, feats.map(f => f.end).concat([e]))
         // Get models in the expanded region. Note that this will also return (potentially) partial models
-        // that overlap the ends of the extended range, but do not overlap the nominal range. 
+        // that overlap the ends of the extended range, but do not overlap the nominal range.
         // So we create an index of the genes in the nominal region, and only process transcripts for those.
         const findex = feats.reduce((x,f) => { x[ f.ID ] = f; return x }, {})
         const mp = this.fetchModels(g, c, s_exp, e_exp).then(mods => {
+          let ngenes = 0
+          let nadded = 0
           mods.forEach(m => {
               // unpack
               const id = m[0]
@@ -178,9 +187,11 @@ class DataManager {
               if (f.transcripts.length) return
               //
               //u.debug("Filling in transcripts for:", f.symbol)
-              // Ok, transfer the transcripts to the gene. Remember f is a frozen object, so we can't just assign f.transcripts = trs.
-              // We have push transcripts into the existing array.
+              // Ok, transfer the transcripts to the gene. Remember f is a frozen object, so we can't
+              // just assign f.transcripts = trs.  We have push transcripts into the existing array.
+              if (trs.length) ngenes += 1
               trs.forEach(t => f.transcripts.push(t))
+              nadded += f.transcripts.length
               // Now merge exons to create a composite transcript.
               const c = this._computedExons(f.transcripts)
               const cT = c.composite.length ? {
@@ -204,12 +215,16 @@ class DataManager {
               }
               // Transfer the composite. Similar to transcripts, we have to copy in the contents rather than assign to f.composite
               Object.assign(f.composite, cT)
+
           })
+          u.debug(`${g.name}:${c.name}:: ${nadded} transcripts added to ${ngenes} genes`)
+          g.stats.objectsInMemory += nadded
+          this.app.objectsInMemory += nadded // app object maintains a grand total
         })
         return mp
     }
 
-  // Returns a promise for the transcripts of features that overlap the 
+  // Returns a promise for the transcripts of features that overlap the
   // specified range of the specified genome. Each transcript includes
   // its exons. Coding transcripts also contain the coordinates of the
   // start and stop codons.
@@ -289,7 +304,7 @@ class DataManager {
     }, [])
     return c
   }
-  // Given transcripts for a gene, returns an object containing (1) the "distinct" exons, and 
+  // Given transcripts for a gene, returns an object containing (1) the "distinct" exons, and
   // (2) the "composite" exons
   _computedExons (tps) {
     const cExons = [] // composite exons
@@ -323,7 +338,7 @@ class DataManager {
     const reader = new FastaReader({fetch: u.fetch}, 'assembly', null, this.fetchUrl)
     return reader.read(descrs, filename)
   }
-  // 
+  //
   // Returns a promise for the genomic sequence of the specified range for the specified genome
   getSequence (g, c, s, e, doRC) {
     return this.greg.getReader(g, 'assembly').then(reader => {
@@ -338,7 +353,7 @@ class DataManager {
   // - genome (string) Path name of the genome, e.g., mus_musculus_aj
   // - regions (string) Argument to pass to faidx, space separated list of chr:start-end.
   // - type (string) one of: 'dna', 'composite transcript', 'transcript', 'cds'
-  // - reverse (boolean) True iff the sequence should be reverse complemented 
+  // - reverse (boolean) True iff the sequence should be reverse complemented
   // - translate (boolean) True iff the sequence should be translated to protein
   // - selected (boolean) True iff the sequence is in the selected state
   //
@@ -455,38 +470,77 @@ class DataManager {
     const t = f.genome.taxonid
     return this.fixTaxonId(t)
   }
-  //
-  flushAllGenomeData () {
-    this.app.allGenomes.forEach(g => this.flushGenome(g))
-  }
-  //
-  flushGenome (g) {
-     const gn = g.name || g
-     const gcache = this.cache[gn]
-     if (gcache) {
-       delete this.cache[gn]
-       delete this.id2feat[gn]
-       for (let cn in gcache) {
-         const cfeats = gcache[cn]
-         cfeats.forEach(f => {
-           const cidFeats = this.cid2feats[f.curie]
-           if (cidFeats) {
-             this.cid2feats[f.curie] = cidFeats.filter(ff => ff !== f)
-             if (this.cid2feats[f.curie].length === 0) {
-                delete this.cid2feats[f.curie]
-             }
-           }
-           if (f.symbol) {
-             const fs = f.symbol.toLowerCase()
-             this.symbol2feats[fs] = this.symbol2feats[fs].filter(ff => ff !== f)
-             if (this.symbol2feats[fs].length === 0) {
-               delete this.symbol2feats[fs]
-             }
-           }
-         }, this)
-       }
-     }
-  }
+    // Opposite of ensureModels. Deletes the transcripts/exons/CDSs for the genes in the specified region.
+    // Only gene completely contained in the region are affected.
+    unloadModels (g, c, s, e) {
+        if (!g) {
+            this.app.allGenomes.forEach(g => this.unloadModels(g))
+            return
+        }
+        if (!c) {
+            g.chromosomes.forEach(c2 => this.unloadModels(g, c2, 1, c2.length))
+            return
+        }
+        if (!s) s = 1
+        if (!e) e = c.length
+
+        if (!g.stats.objectsInMemory) {
+            // genome hasn't been loaded, so skip the rest
+            return
+        }
+
+        const genes = this.cache[g.name][c.name] || []
+        let nfreed = 0
+        let ngenes = 0
+        genes.forEach(f => {
+            // only clear models of genes completely contained with the region
+            if (f.start >= s && f.end <= e && f.transcripts.length) {
+                ngenes += 1
+                nfreed += f.transcripts.length
+                f.transcripts.splice(0, f.transcripts.length)
+                Object.entries(f.composite).forEach(e => delete f.composite[e[0]])
+            }
+        })
+        this.genomePainter.erase(g, c, s, e)
+        if (ngenes) u.debug(`${g.name}:${c.name}:: ${nfreed} transcripts freed from ${ngenes} genes.`)
+        g.stats.objectsInMemory -= nfreed
+        this.app.objectsInMemory -= nfreed // app object maintains a grand total
+    }
+    //
+    flushAllGenomeData () {
+        this.app.allGenomes.forEach(g => this.flushGenome(g))
+    }
+    //
+    flushGenome (g) {
+        const gn = g.name || g
+        const gcache = this.cache[gn]
+        if (gcache) {
+            this.unloadModels(g)
+            delete this.pending[gn]
+            delete this.cache[gn]
+            delete this.id2feat[gn]
+            for (let cn in gcache) {
+                const cfeats = gcache[cn]
+                this.app.objectsInMemory -= cfeats.length
+                cfeats.forEach(f => {
+                    const cidFeats = this.cid2feats[f.curie]
+                    if (cidFeats) {
+                        this.cid2feats[f.curie] = cidFeats.filter(ff => ff !== f)
+                        if (this.cid2feats[f.curie].length === 0) {
+                            delete this.cid2feats[f.curie]
+                        }
+                    }
+                    if (f.symbol) {
+                        const fs = f.symbol.toLowerCase()
+                        this.symbol2feats[fs] = this.symbol2feats[fs].filter(ff => ff !== f)
+                        if (this.symbol2feats[fs].length === 0) {
+                            delete this.symbol2feats[fs]
+                        }
+                    }
+                }, this)
+            }
+        }
+    }
 
   // Returns a promise for the variants in the specified range
   getVariants (g, c, s, e) {
@@ -622,6 +676,7 @@ class FeatureRegistrar {
     // Compute and store length. Do length check.
     f.length = f.end - f.start + 1
     if (f.length > config.DataManager.featureSizeLimit) {
+      // FIXME: is this check really necessary?
       u.debug('Feature too big. Skipping: ', f)
       return null
     }

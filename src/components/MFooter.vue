@@ -9,6 +9,7 @@
     <a href="https://vuejs.org/" target="_blank">Vue.js</a>,
     <a href="https://material.io/tools/icons/" target="_blank">Material Icons</a>
     </span>
+    <span v-if="app.debug">{{usageString}}</span>
     <span><a tabindex="-1" target="_blank" href="https://github.com/mgijax/mgv">MGV@GitHub</a></span>
   </div>
 
@@ -23,6 +24,14 @@ export default MComponent({
   data: function () {
     return {
       style: config.MHeader.style
+    }
+  },
+  computed: {
+    usageString: function () {
+        const wpm = window.performance.memory
+        const mem = wpm ? '/ ' + (wpm.usedJSHeapSize/1000000).toFixed(1) + ' MB' : ''
+        const obj = this.app.objectsInMemory + ' objects'
+        return `${obj} ${mem}`
     }
   }
 })

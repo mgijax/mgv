@@ -50,16 +50,6 @@ class GenomeReader {
   }
 }
 // -------------------------------------------------------------------------------
-// Fetches genome descriptors from specified URLs and returns a promise for those descriptors.
-// Also allows for indirection, ie, the specified URL may point to file containing further URLs to follow.
-// As well, URLs may be absolute (begin with 'http://') or relative to the URL of the indirecting file.
-// Protocol details:
-//   User specifies a URL that points to a directory containing a file named 'index.json'
-//   File may contain:
-//      Genome descriptor. (object)
-//      A forwarding URL. (string)
-//      An array of descriptors and/or URLs. (list of strings and/or objects)
-// Forwarding loop are tolerated
 //
 class GenomeRegistrar {
   constructor (fetchUrl) {
@@ -93,9 +83,7 @@ class GenomeRegistrar {
     info.url = info.url || this.fetchUrl
     info.name2chr = info.chromosomes.reduce((a,c) => { a[c.name] = c; return a }, {})
     info.chromosomes.forEach((c,i) => { c.index = i })
-    info.metadata = {
-      name: info.name
-    }
+    info.stats = {}
     const gr = new GenomeReader(this, info)
     this.name2genome[info.name] = info
     this.name2reader[info.name] = gr

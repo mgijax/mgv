@@ -106,17 +106,20 @@ class RegionManager {
             const homs = this.app.dataManager.getHomologs(f, g)
             return a.concat(homs)
         }, [])
-        if (ghoms.length) {
+        if (this.app.rGenome && this.app.rStrip) {
+          // If there's a reference genome, view mapped regions
+          p = this.mapRegionsToGenome(this.app.rStrip.regions, g)
+        } else if (ghoms.length) {
+          // If there's a current selection, view regions around  homologs in this genome.
           const rs = this.makeRegionsFromFeatures(ghoms, g)
           p = Promise.resolve(rs)
-        } else if (this.app.rGenome && this.app.rStrip) {
-          p = this.mapRegionsToGenome(this.app.rStrip.regions, g)
         } else if (this.app.strips.length) {
+          // If there are any genomes being displayed
           p = this.mapRegionsToGenome(this.app.strips[0].regions, g)
         } else {
           const chr = g.chromosomes[0]
           const approxNgenes = 150
-          const len = Math.round(1000000 * approxNgenes / g.featureDensity)
+          const len = Math.round(1000000 * approxNgenes / g.stats.featureDensity)
           p = Promise.resolve({
             genome: g,
             regions: [{
@@ -147,7 +150,7 @@ class RegionManager {
         this.clearRefGenome()
       }
       this.app.strips.splice(i, 1)
-      // this.app.dataManager.flushGenome(g)
+      this.app.dataManager.flushGenome(g)
     }
   }
   //--------------------------------------
