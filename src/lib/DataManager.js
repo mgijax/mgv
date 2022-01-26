@@ -304,32 +304,56 @@ class DataManager {
     }, [])
     return c
   }
-  // Given transcripts for a gene, returns an object containing (1) the "distinct" exons, and
-  // (2) the "composite" exons
+  // When an exon is shared by multiple transcripts, each transcript has its own copy.
+  // One thing this routine does is create a list of "distinct" exons.
+  // Additionally, different distinct exons may overlap. The other thing this routine does
+  // is compute the list of "composite" exons. By definition, no two composited exons overlap.
+  // Finally, exons, distinct exons, and composite exons are tied together so it's easy to
+  // traverse between them (e.g., what composite exon does a transcript exon map to? or, what
+  // distinct exons map to a given composite?)
   _computedExons (tps) {
     const cExons = [] // composite exons
-    const dExons = new Set() // distinct exons
+    const dExons = {} // distinct exons
     const allExons = tps.reduce((a,t) => a.concat(t.exons), [])
     allExons.sort((e1, e2) => e1.start - e2.start)
     allExons.forEach(e => {
-      // composite
-      const lastE = cExons[cExons.length - 1]
-      if (!lastE || lastE.end < e.start) {
-        cExons.push({start: e.start, end: e.end, length: e.end - e.start + 1})
-      } else {
-        lastE.end = Math.max(lastE.end, e.end)
-      }
       // distinct
-      dExons.add(`${e.start}_${e.end}`)
+      const key = `${e.start}_${e.end}`
+      if (!dExons[key]) {
+          dExons[key] = {
+              start: e.start,
+              end: e.end,
+              length: e.end - e.start + 1,
+              tExons: []
+          }
+      }
+      e.de = dExons[key]
+      e.de.tExons.push(e)
+    })
+    // Turn map into sorted list
+    const dExonsList = Object.values(dExons).sort((a,b) => a.start - b.start)
+    // From overlapping distinct exons, compute composite exons
+    dExonsList.forEach((de, i) => {
+      de.dIndex = i
+      //
+      const lastE = cExons[cExons.length - 1]
+      if (!lastE || lastE.end < de.start) {
+        cExons.push({
+            cIndex:cExons.length,
+            start: de.start,
+            end: de.end,
+            length: de.end - de.start + 1,
+            dExons: []
+        })
+      } else {
+        lastE.end = Math.max(lastE.end, de.end)
+      }
+      const cE = cExons[cExons.length - 1]
+      cE.dExons.push(de)
+      de.composite = cE
     })
     return {
-      distinct: Array.from(dExons).map(de => {
-          const bits = de.split('_')
-          const start = parseInt(bits[0])
-          const end = parseInt(bits[1])
-          const length = end - start + 1
-          return { start, end, length };
-      }).sort((a,b) => a.start - b.start),
+      distinct: dExonsList,
       composite: cExons
     }
   }

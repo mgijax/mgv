@@ -101,18 +101,17 @@
         </page-box>
         <!--
         ============== Gene View ==============
+        -->
         <page-box
           label="Gene View"
           icon="view_agenda"
           >
           <gene-view
-            :genes="detailFeatures"
-            :showAllTranscripts="false"
+            :genes="csListH"
             ref="geneView"
             title="GeneView shows the details of a single gene."
             />
         </page-box>
-        -->
         <!--
         ============ Genome View ==============
         -->

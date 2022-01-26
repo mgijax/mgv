@@ -39,7 +39,7 @@ class FeaturePacker {
         this.maxY = 0
     }
     add (fId, fStart, fEnd, fHeight) {
-        if (this.id2feat.has(fId)) {
+        if (fId && this.id2feat.has(fId)) {
             return this.id2feat.get(fId).y
         }
         const f = {
@@ -49,7 +49,7 @@ class FeaturePacker {
             height: fHeight,
             y: undefined
         }
-        this.id2feat.set(fId, f)
+        fId && this.id2feat.set(fId, f)
         // First, find everything in the current layout that overlaps the new feature in the x dimension.
         // Along the way, find the insertion point for the new feature.
         const xOver = []
