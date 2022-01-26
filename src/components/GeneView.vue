@@ -19,6 +19,15 @@
               />
             <span class="small-label">Proportional</span>
         </div>
+        <div>
+            Exon thickness: <input type="range" min="1" max="24" v-model="exonHeightM" />
+        </div>
+        <div>
+            Intron gap: <input type="range" min="1" max="100" v-model="intronGapM" />
+        </div>
+        <div>
+            Vertical space: <input type="range" min="1" max="32" v-model="vertGapM" />
+        </div>
     </div>
     <!-- Genes display area -->
     <div
@@ -71,7 +80,7 @@
           v-for="(t,j) in g.transcripts"
           :key="i + '.' + j"
           class="transcript"
-          :style="{ height: 2 * exonHeight + 'px' }"
+          :style="{ height: (exonHeight + vertGap) + 'px' }"
           >
           <!-- exons -->
           <div
@@ -99,8 +108,6 @@ export default MComponent({
   data: function () {
     return {
       myGenes: [].concat(this.genes),
-      // intronGap (int) amount in px between exons
-      intronGap: 40,
       // width (in px) of drawing area
       width: 800,
       // height
@@ -108,9 +115,9 @@ export default MComponent({
       // pixels per base
       ppb: 0.5,
       //
-
-      exonHeight: 16,
-      skipHeight: 6,
+      vertGapM: "16",
+      exonHeightM: "10",
+      intronGapM: "40",
       //
       showTranscriptGraphs: false,
       useFixedScale: false,
@@ -121,16 +128,18 @@ export default MComponent({
   mounted: function () {
     this.$root.$on('resize', () => this.forceRedraw())
   },
+  computed: {
+      vertGap:  function () { return parseFloat(this.vertGapM) },
+      exonHeight: function () { return parseFloat(this.exonHeightM) },
+      intronGap: function () { return parseFloat(this.intronGapM) }
+  },
   watch: {
-    genes: function () {
-      this.forceRedraw()
-    },
-    useFixedScale: function () {
-      this.forceRedraw()
-    },
-    showTranscriptGraphs: function () {
-      this.forceRedraw()
-    }
+    genes: function () { this.forceRedraw() },
+    useFixedScale: function () { this.forceRedraw() },
+    showTranscriptGraphs: function () { this.forceRedraw() },
+    exonHeight: function () { this.layout() },
+    intronGap: function () { this.layout() },
+    vertGap: function () { this.layout() }
   },
   methods: {
     forceRedraw () {
@@ -142,16 +151,16 @@ export default MComponent({
         return this.featureColorMap.getColor(f)
     },
     layout () {
-      const ppbs = this.myGenes.map(g => {
+      this.ppbs = this.myGenes.map(g => {
           const w = this.width - this.intronGap * (g.composite.exons.length - 1)
           const ppb = w / g.composite.length
           return ppb
       })
       this.connectorCache = []
       this.featurePackers = []
-      this.minPpb = Math.min.apply(null, ppbs)
+      this.minPpb = Math.min.apply(null, this.ppbs)
       this.myGenes.forEach((g,i) => {
-          this.ppb = this.useFixedScale ? this.minPpb : ppbs[i]
+          this.ppb = this.useFixedScale ? this.minPpb : this.ppbs[i]
           this.layoutGene(g, i)
       })
     },
@@ -178,7 +187,7 @@ export default MComponent({
       // transcript graph. First, the x dimension
       this.layoutExons(comp.dExons, comp.exons)
       // Now the y
-      const fp = this.featurePackers[i] = new FeaturePacker(6,1)
+      const fp = this.featurePackers[i] = new FeaturePacker(this.vertGap,1)
       let maxy = 0
       comp.dExons.forEach(de => {
           de.y = fp.add(null, de.start, de.end, this.exonHeight)
@@ -218,6 +227,7 @@ export default MComponent({
             this.connectorCache[i] = {} 
             const cExons = g.composite.exons
             const yAdjust = this.exonHeight / 2
+            const packer = this.featurePackers[i]
             g.transcripts.forEach(t => {
                 // for each transcript, map its exons to their counterparts
                 // in the distinct exons list. Connect successive pairs of
@@ -237,7 +247,6 @@ export default MComponent({
                         this.connectors[i].push(newConnector)
                         return
                     }
-
                     //
                     const pce = pde.composite   // composite exon for d.e. j-1
                     const cce = cde.composite   // composite exon for d.e. j
@@ -254,7 +263,7 @@ export default MComponent({
                         const start = fSkipped.start
                         const end = lSkipped.end
                         //
-                        const y = this.featurePackers[i].add(null, start, end, this.skipHeight)
+                        const y = packer.add(null, start, end, 1)
                         this.heights[i] = Math.max(this.heights[i], y + this.exonHeight)
                         //
                         pseg = segments[segments.length-1]
@@ -284,7 +293,7 @@ export default MComponent({
             this.connectors[i] = g.transcripts.map((t,j) => {
                 const e1 = t.exons[0]
                 const e2 = t.exons[t.exons.length - 1]
-                const y = j * 2 * this.exonHeight + this.exonHeight / 2 + 2
+                const y = j * (this.exonHeight+this.vertGap) + this.exonHeight / 2 + 2
                 return [['L', e1.x + 2, y, e2.x + e2.width - 2, y ]]
             })
             this.connectorCache[i] = {}
