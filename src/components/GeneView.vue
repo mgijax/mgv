@@ -146,7 +146,8 @@ export default MComponent({
       //
       overExon: null,
       selectedExons: [],
-      selectedColor: "#00ff00"
+      selectedColor: "#00ff00",
+      selectedColor2: "#ffff00"
     }
   },
   mounted: function () {
@@ -184,12 +185,13 @@ export default MComponent({
       }
   },
   watch: {
-    genes: function () { this.forceRedraw() },
-    useFixedScale: function () { this.forceRedraw() },
+    genes:                function () { this.forceRedraw() },
+    useFixedScale:        function () { this.forceRedraw() },
     showTranscriptGraphs: function () { this.forceRedraw() },
-    exonHeight: function () { this.layout() },
-    intronGap: function () { this.layout() },
-    vertGap: function () { this.layout() }
+    exonHeight:           function () { this.forceRedraw() },
+    intronGap:            function () { this.forceRedraw() },
+    vertGap:              function () { this.forceRedraw() },
+    selectedExons:        function () { this.forceRedraw() }
   },
   methods: {
     // given the div representing an exon, return that exon
@@ -217,14 +219,19 @@ export default MComponent({
         evt.stopPropagation()
         evt.preventDefault()
     },
+    //
+    exon2gene (e) {
+        const te = e.dExons ? e.dExons[0].tExons[0] : e.tExons ? e.tExons[0] : e
+        return te.transcript.gene
+    },
     // Returns true iff this exon is currently selected.
     isExonSelected (de) {
         return this.selectedExonSet.has(de)
     },
     // Returns true iff any transcript that includes
     // this exon is currently selected.
-    isTranscriptSelected (de) {
-        return de.tExons.reduce((v,te) => {
+    isTranscriptSelected (e) {
+        return (e.de || e).tExons.reduce((v,te) => {
             return v || this.selectedTranscriptSet.has(te.transcript)
         }, false)
     },
@@ -334,19 +341,29 @@ export default MComponent({
     exonColor (e) {
         let de = e.de || e
         if (this.isTranscriptSelected(de)) return this.selectedColor
-        //if (this.isExonSelected(de)) return this.selectedColor
         const te = de.dExons ? de.dExons[0].tExons[0] : (de.tExons ? de.tExons[0] : de)
         const f = te.transcript.gene
         return this.featureColor(f)
     },
     exonStyle (e) {
+      const bkndColor = this.exonColor(e)
+      const bdrColor = this.featureColor(this.exon2gene(e))
+      const revColors = !this.showTranscriptGraphs && !this.selectedTranscriptSet.has(e.transcript)
       return {
         left: e.x + 'px',
         top: e.y + 'px',
         width: e.width + 'px',
         height: this.exonHeight + 'px',
-        backgroundColor: this.exonColor(e)
+        backgroundColor: revColors ? bdrColor : bkndColor,
+        border: '1px solid ' + (revColors ? bkndColor : bdrColor)
       }
+    },
+    connectorColor (e1, e2) {
+        if (this.isTranscriptSelected(e1) && this.isTranscriptSelected(e2)) {
+            return this.selectedColor
+        } else {
+            return this.featureColor(this.exon2gene(e1))
+        }
     },
     layoutConnectors (g,i) {
         if (this.showTranscriptGraphs) {
@@ -382,12 +399,18 @@ export default MComponent({
                         //this.connectors[i].push(newConnector)
                         return
                     }
+                    // Determine color for connector.
+                    const cColor = this.connectorColor(pde, cde)
                     //
                     const pce = pde.composite   // composite exon for d.e. j-1
                     const cce = cde.composite   // composite exon for d.e. j
                     const segments = []
                     //
+                    // The first element of segments is the color to draw them
+                    segments.push(cColor)
+                    //
                     if (pce === cce) {
+                      // connecting two exons in the same contig. 
                       segments.push(['C', pde.x+pde.width, pde.y+yAdjust, cde.x, cde.y+yAdjust])
                       this.connectors[i].push(segments)
                       cc[cc_key] = segments
@@ -432,12 +455,14 @@ export default MComponent({
 
         } else {
             // one transcript per line - add one connector per transcript from first exon to last
-            this.connectors[i] = g.transcripts.map((t,j) => {
+            const segments = g.transcripts.map((t,j) => {
                 const e1 = t.exons[0]
                 const e2 = t.exons[t.exons.length - 1]
                 const y = j * (this.exonHeight+this.vertGap) + this.exonHeight / 2 + 2
-                return [['L', e1.x + 2, y, e2.x + e2.width - 2, y ]]
+                const cColor = this.selectedTranscriptSet.has(e1.transcript) ? this.selectedColor : this.featureColor (e1.transcript.gene)
+                return [cColor, ['L', e1.x + 2, y, e2.x + e2.width - 2, y ]]
             })
+            this.connectors[i] = segments
             this.connectorCache[i] = {}
         }
     },
@@ -447,10 +472,12 @@ export default MComponent({
         const ctors = this.connectors[i]
         cxt.clearRect(0, 0, canvas.width, canvas.height)
         cxt.lineWidth = 1
-        cxt.strokeStyle = this.featureColor(g)
-        ctors.forEach(seglist => {
+        ctors.forEach(segments => {
+            const cColor = segments.shift()
+            cxt.strokeStyle = cColor
+            cxt.strokeWidth = 2
             cxt.beginPath();
-            seglist.forEach(seg => {
+            segments.forEach(seg => {
                 const cmd = seg[0]
                 const x1 = seg[1]
                 const y1 = seg[2]
