@@ -1094,12 +1094,20 @@ svg {
     width: 100%;
 }
 
-/* Range slider styling. Lifted from https://www.cssportal.com/style-input-range/ */
+/* Class for making text unselectable.  See: 
+   https://stackoverflow.com/questions/6900124/how-to-make-certain-text-not-selectable-with-css
+*/
+.unselectable-text {
+    -webkit-user-select: none; /* Safari */
+    -moz-user-select: none; /* Firefox */
+    -ms-user-select: none; /* IE10+/Edge */
+    user-select: none; /* Standard */
+}
 
+/* Range slider styling. Lifted from https://www.cssportal.com/style-input-range/ */
 input[type=range] {
   height: 16px;
   -webkit-appearance: none;
-  margin: 10px 0;
   width: 100%;
   background: none;
 }
@@ -1108,48 +1116,51 @@ input[type=range]:focus {
 }
 input[type=range]::-webkit-slider-runnable-track {
   width: 100%;
-  height: 4px;
+  height: 10px;
+  background: none;
+  border: 1px solid #000000;
+  border-radius: 5px;
   cursor: pointer;
   animate: 0.2s;
-  background: #3071A9;
-  border-radius: 2px;
-  border: 1px solid #000000;
 }
 input[type=range]::-webkit-slider-thumb {
-  box-shadow: 1px 1px 1px #000000;
-  border: 1px solid #000000;
-  height: 10px;
-  width: 10px;
-  border-radius: 5px;
-  background: #FFFFFF;
+  box-shadow: none;
+  border: none;
+  height: 8px;
+  width: 8px;
+  border-radius: 4px;
+  background: #000000;
   cursor: pointer;
   -webkit-appearance: none;
-  margin-top: -5px;
+  margin-top: 0px;
 }
 input[type=range]:focus::-webkit-slider-runnable-track {
-  background: #3071A9;
+  box-shadow: 0px 0px 8px #555555;
 }
 input[type=range]::-moz-range-track {
   width: 100%;
-  height: 4px;
+  height: 10px;
   cursor: pointer;
   animate: 0.2s;
-  background: #3071A9;
-  border-radius: 2px;
+  background: none;
+  border-radius: 5px;
   border: 1px solid #000000;
 }
+input[type=range]:focus::-moz-range-track {
+  box-shadow: 0px 0px 8px #555555;
+}
 input[type=range]::-moz-range-thumb {
-  box-shadow: 1px 1px 1px #000000;
-  border: 1px solid #000000;
-  height: 10px;
-  width: 10px;
-  border-radius: 5px;
-  background: #FFFFFF;
+  box-shadow: none;
+  border: none;
+  height: 8px;
+  width: 8px;
+  border-radius: 4px;
+  background: #000000;
   cursor: pointer;
 }
 input[type=range]::-ms-track {
   width: 100%;
-  height: 4px;
+  height: 10px;
   cursor: pointer;
   animate: 0.2s;
   background: transparent;
@@ -1157,31 +1168,32 @@ input[type=range]::-ms-track {
   color: transparent;
 }
 input[type=range]::-ms-fill-lower {
-  background: #3071A9;
+  background: none;
   border: 1px solid #000000;
-  border-radius: 2px;
-  box-shadow: 1px 1px 1px #000000;
+  border-radius: 5px;
+  box-shadow: 0px 0px 6px #555555;
 }
 input[type=range]::-ms-fill-upper {
-  background: #3071A9;
+  background: none;
   border: 1px solid #000000;
-  border-radius: 2px;
-  box-shadow: 1px 1px 1px #000000;
+  border-radius: 5px;
+  box-shadow: 0px 0px 6px #555555;
 }
 input[type=range]::-ms-thumb {
   margin-top: 1px;
-  box-shadow: 1px 1px 1px #000000;
-  border: 1px solid #000000;
-  height: 10px;
-  width: 10px;
-  border-radius: 5px;
-  background: #FFFFFF;
+  box-shadow: none;
+  border: none;
+  height: 8px;
+  width: 8px;
+  border-radius: 4px;
+  background: #000000;
   cursor: pointer;
 }
 input[type=range]:focus::-ms-fill-lower {
-  background: #3071A9;
+  background: none;
 }
 input[type=range]:focus::-ms-fill-upper {
-  background: #3071A9;
+  background: none;
 }
 </style>
+}

@@ -190,13 +190,17 @@ class DataManager {
               // Ok, transfer the transcripts to the gene. Remember f is a frozen object, so we can't
               // just assign f.transcripts = trs.  We have push transcripts into the existing array.
               if (trs.length) ngenes += 1
-              trs.forEach(t => f.transcripts.push(t))
+              trs.forEach(t => {
+                  t.gene = f
+                  f.transcripts.push(t)
+              })
               nadded += f.transcripts.length
               // Now merge exons to create a composite transcript.
               const c = this._computedExons(f.transcripts)
               const cT = c.composite.length ? {
                   gID: f.ID,
                   ID: f.ID + "_composite",
+                  gene: f,
                   exons: c.composite,
                   dExons: c.distinct,
                   start: c.composite[0].start,
@@ -206,6 +210,7 @@ class DataManager {
               } : {
                   gID: f.ID,
                   ID: f.ID + "_composite",
+                  gene: f,
                   exons: [{start: f.start, end: f.end}],
                   dExons: [{start: f.start, end: f.end}],
                   start: f.start,
@@ -251,6 +256,8 @@ class DataManager {
                     length: tlen,
                     cds: cds
                   }
+                  // backrefs from exons to the transcript
+                  tt.exons.forEach(e => e.transcript = tt)
                   return tt
               })
               nts.sort((a,b) => {
@@ -265,7 +272,7 @@ class DataManager {
   }
   _condenseExons (t) {
     const exons = (t.children || []).filter(f => f[2] !== "CDS").sort(u.byChrStart)
-    return exons.map(e => { return { start: e[3], end: e[4] } })
+    return exons.map((e,i) => { return { start: e[3], end: e[4], eIndex:i } })
   }
 
   _condenseCds (t, exons) {

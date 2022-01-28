@@ -38,7 +38,7 @@ class FeaturePacker {
         this.id2feat = new Map()
         this.maxY = 0
     }
-    add (fId, fStart, fEnd, fHeight) {
+    add (fId, fStart, fEnd, fHeight, noPackY) {
         if (fId && this.id2feat.has(fId)) {
             return this.id2feat.get(fId).y
         }
@@ -47,17 +47,29 @@ class FeaturePacker {
             start: fStart,
             end: fEnd,
             height: fHeight,
-            y: undefined
+            y: 0
         }
         fId && this.id2feat.set(fId, f)
         // First, find everything in the current layout that overlaps the new feature in the x dimension.
-        // Along the way, find the insertion point for the new feature.
+        // Along the way, find the list insertion point for the new feature.
         const xOver = []
+        // Also keep track of current contig
+        let cContig = []
+        let cContigHwm = -1
+        //
         const minYgap = Math.max(1, fHeight) + 2 * this.yGap
         let i = 0
         let j = null
         for (i in this.features) {
             const f2 = this.features[i]
+            // Keep track of the feature contig
+            if (f2.start > cContigHwm) {
+                cContig = [f2]
+                cContigHwm = f2.end
+            } else {
+                cContig.push(f2)
+                cContigHwm = Math.max(cContigHwm, f2.end)
+            }
             if (f2.start > f.start && j === null) {
                 // record f's insert position
                 j = i
@@ -76,20 +88,26 @@ class FeaturePacker {
             this.features.splice(j, 0, f)
         }
 
-        // Sort the overlapping features by their assigned y coordinates
-        xOver.sort((a,b) => a.y - b.y)
+        if (noPackY) {
+            if (f.start > cContigHwm) cContig = []
+            f.y = cContig.length ? Math.max.apply(null, cContig.map(ff => ff.y + ff.height + this.yGap)) : 0
+        } else {
+            // Sort the overlapping features by their assigned y coordinates
+            xOver.sort((a,b) => a.y - b.y)
 
-        // Now find a y gap that's big enough to insert the new feature, or if none found,
-        // stack it on the last one.
-        let y = 0
-        for (i in xOver) {
-            let f2 = xOver[i]
-            if (f2.y - y >= minYgap) {
-                break
+            // Now find a y gap that's big enough to insert the new feature, or if none found,
+            // stack it on the last one.
+            let y = 0
+            for (i in xOver) {
+                let f2 = xOver[i]
+                if (f2.y - y >= minYgap) {
+                    break
+                }
+                y = f2.y + f2.height
             }
-            y = f2.y + f2.height
+            f.y = y + this.yGap
         }
-        f.y = y + this.yGap
+        //
         this.maxY = Math.max(this.maxY, f.y)
         return f.y
     }
