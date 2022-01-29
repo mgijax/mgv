@@ -50,67 +50,86 @@
 
       <span>{{g.genome.name}} :: {{g.symbol}}</span>
 
-      <!-- Transcript graphs -->
-      <div v-if="showTranscriptGraphs"
-          class="exon-graph"
-          :style="{ height: heights[i] + 'px'}"
-          style="position:relative;">
-
-          <!-- underlying canvas for drawing connectors -->
-          <canvas
-              :width="width"
-              :height="heights[i]"
-              :style="{
-                  position: 'absolute',
-                  top: '0px',
-                  left: '0px'
-                  }"
-          />    
-        <!-- Exons -->
-        <div
-          v-for="(de,jj) in g.composite.dExons"
-          :key="i + '.**.' + jj"
-          :name="de.dIndex"
-          class="exon"
-          :style="exonStyle(de, g.composite, g)"
-          @mouseover="mouseoverExon"
-          @mouseout="mouseoutExon"
-          @click="clickExon"
-          ><span class="exon-label unselectable-text">{{de.dIndex}}</span></div>  
-      </div>
-
-      <!-- Each transcript on its own line -->
-      <div v-else style="position:relative;">
-          <!-- underlying canvas for drawing connectors -->
-          <canvas
-              :width="width"
-              :height="heights[i]"
-              :style="{
-                  position: 'absolute',
-                  top: '0px',
-                  left: '0px'
-                  }"
-          />    
-        <!-- each transcript -->
-        <div
-          v-for="(t,j) in g.transcripts"
-          :key="i + '.' + j"
-          class="transcript"
-          :style="{ height: (exonHeight + vertGap) + 'px' }"
-          >
-          <!-- exons -->
-          <div
-            v-for="(te,k) in t.exons"
-            :key="i + '.' + j + '.' + k"
-            class="exon"
-            :name="te.de.dIndex"
-            :style="exonStyle(te, t, g)"
-            @mouseover="mouseoverExon"
-            @mouseout="mouseoutExon"
-            @click="clickExon"
-            ><span class="exon-label unselectable-text">{{te.de.dIndex}}</span></div>
-        </div>
-      </div> <!-- v-if -->
+      <svg :height="heights[i]+8">
+        <g transform="translate(0,8)">
+          <g v-if="showTranscriptGraphs">
+              <!-- connectors -->
+              <path
+                  v-for="(ctor,cti) in connectors[i]"
+                  :key="'ctor'+cti"
+                  class="connector"
+                  :stroke="ctor[0]"
+                  fill="none"
+                  stroke-width="2"
+                  :d="drawConnector(ctor)"
+                  />
+              <!-- exons -->
+              <rect v-for="(de, ri) in g.composite.dExons"
+                  :key="'exon'+ri"
+                  :name="de.dIndex"
+                  class="exon"
+                  :x="de.x"
+                  :y="de.y"
+                  :width="de.width"
+                  :height="exonHeight"
+                  :fill="exonColor(de)"
+                  :stroke="featureColor(g)"
+                  @click="clickExon"
+                  ><title>{{de.dIndex}}</title>
+              </rect>    
+              <!-- exon-labels -->
+              <text v-for="(de, dei) in g.composite.dExons"
+                  :key="'exon'+dei"
+                  class="exon-label unselectable-text"
+                  :name="de.dIndex"
+                  :x="de.x"
+                  :y="de.y - 1"
+                  font-size="10"
+                  font-weight="bold"
+                  @click="clickExon"
+                  >{{de.dIndex}}</text>
+          </g>
+          <g v-else>
+              <!-- connectors -->
+              <path v-for="(ctor, ci) in connectors[i]"
+                  :key="'path'+ci"
+                  class="connector"
+                  :stroke="ctor[0]"
+                  :d="drawConnector(ctor)"
+              />
+              <!-- exons + labels -->
+              <g v-for="(t, ti) in g.transcripts"
+                  :key="'transcript'+ti"
+                  >
+                  <!-- exons -->
+                  <rect v-for="(te, tei) in t.exons"
+                      :key="'exon'+ti+'.'+tei"
+                      class="exon"
+                      :name="te.de.dIndex"
+                      :x="te.x"
+                      :y="te.y + ti * (exonHeight+vertGap)"
+                      :width="te.width"
+                      :height="exonHeight"
+                      :fill="exonColor(te)"
+                      :stroke="featureColor(g)"
+                      @click="clickExon"
+                      ><title>{{te.de.dIndex}}</title>
+                  </rect>
+                  <!-- exon-labels -->
+                  <text v-for="(te, tei) in t.exons"
+                      :key="'exon'+ti+'.'+tei+'.2'"
+                      class="exon-label unselectable-text"
+                      :name="te.de.dIndex"
+                      :x="te.x"
+                      :y="te.y + ti * (exonHeight+vertGap) - 1"
+                      font-size="10"
+                      font-weight="bold"
+                      @click="clickExon"
+                      >{{te.de.dIndex}}</text>
+              </g>
+          </g>
+        </g>
+      </svg>
     </div> <!-- v-for -->
   </div>
 </template>
@@ -119,7 +138,7 @@
 import MComponent from '@/components/MComponent'
 import MButton from '@/components/MButton'
 import { FeaturePacker } from '@/lib/Layout'
-//import u from '@/lib/utils'
+// import u from '@/lib/utils'
 export default MComponent({
   name: 'GeneView',
   components: { MButton },
@@ -142,7 +161,7 @@ export default MComponent({
       showTranscriptGraphs: false,
       useFixedScale: false,
       //
-      connectors: [],  // List of {x1, y1, x2, y2}
+      connectors: [],
       //
       overExon: null,
       selectedExons: [],
@@ -194,12 +213,20 @@ export default MComponent({
     selectedExons:        function () { this.forceRedraw() }
   },
   methods: {
+    // Force the scene to be redrawn.
+    forceRedraw () {
+        this.$nextTick(() => {
+            this.width = this.$el.getBoundingClientRect().width - 12
+            this.myGenes = [].concat(this.genes)
+            this.layout()
+        })
+    },
     // given the div representing an exon, return that exon
-    div2exon (elt) {
-      const eDiv = elt.closest('.exon')
-      if (!eDiv) return null
-      const ei = parseInt(eDiv.getAttribute('name'))
-      const gDiv = eDiv.closest('.gene')
+    elt2exon (elt) {
+      const eElt = elt.closest('.exon,.exon-label')
+      if (!eElt) return null
+      const ei = parseInt(eElt.getAttribute('name'))
+      const gDiv = eElt.closest('.gene')
       if (!gDiv) return null
       const gi = parseInt(gDiv.getAttribute('name'))
       const g = this.genes[gi]
@@ -207,13 +234,13 @@ export default MComponent({
       return de
     },
     mouseoverExon (evt) {
-      this.overExon = this.div2exon(evt.target)
+      this.overExon = this.elt2exon(evt.target)
     },
     mouseoutExon () {
       this.overExon = null
     },
     clickExon (evt) {
-        const de = this.div2exon(evt.target)
+        const de = this.elt2exon(evt.target)
         if (!de) return
         this.selectExon(de, !evt.shiftKey)
         evt.stopPropagation()
@@ -250,18 +277,13 @@ export default MComponent({
     clearSelectedExons () {
         this.selectedExons = []
     },
-    // Force the scene to be redrawn.
-    forceRedraw () {
-        this.width = this.$el.getBoundingClientRect().width - 12
-        this.myGenes = [].concat(this.genes)
-        this.layout()
-    },
     // Returns the color for feature based on feature type.
     featureColor (f) {
         return this.featureColorMap.getColor(f)
     },
     // Assigns coordinates to exons and computes connector paths.
     layout () {
+      if (this.myGenes.length === 0) return
       const ps = this.myGenes.map(g => this.ensureModels(g))
       Promise.all(ps).then(() => {
           this.ppbs = this.myGenes.map(g => {
@@ -275,7 +297,6 @@ export default MComponent({
           this.myGenes.forEach((g,i) => {
               this.ppb = this.useFixedScale ? this.minPpb : this.ppbs[i]
               this.layoutGene(g, i)
-              this.$nextTick(() => this.drawConnectors(g, i))
           })
       })
     },
@@ -312,12 +333,32 @@ export default MComponent({
       // transcript graph. First, the x dimension
       this.layoutExons(comp.dExons, comp.exons)
       // Now the y
-      const fp = this.featurePackers[i] = new FeaturePacker(this.vertGap,1)
+      const fp = this.featurePackers[i] = new FeaturePacker(this.vertGap,10)
       let maxy = 0
       comp.dExons.forEach(de => {
           de.y = fp.add(null, de.start, de.end, this.exonHeight, true)
           maxy = Math.max(maxy, de.y)
       })
+      // At this point, we can re-shuffle the vertical positions of exons
+      // within each conting to try to lessen the line crossings in the final
+      // diagram. 
+      // One easy heuristic to try: resort according to number of transcripts
+      // that include the exon.
+      comp.exons.forEach(ce => {
+          // Create a list of the current y positions
+          const ys = ce.dExons.map(de => de.y).sort((a, b) => b - a)
+          // Resort the distinct exons by number of transcripts
+          const des = ce.dExons.sort((de1, de2) => {
+              const n1 = de1.tExons.length
+              const n2 = de2.tExons.length
+              return n1 - n2
+          })
+          // Assign the y positions
+          des.forEach((de, i) => {
+              de.y = ys[i]
+          })
+      })
+
       //
       if (this.showTranscriptGraphs) {
           this.heights[i] = maxy + this.exonHeight
@@ -375,7 +416,7 @@ export default MComponent({
             // Each connector is a list of segments.
             // Each segment is a list of the form [cmd, x1, y1, x2, y2]
             // cmd is either 'L' for line or 'C' for curve
-            this.connectors[i] = []
+            this.connectors.splice(i, 1, [])
             this.connectorCache[i] = {} 
             const cExons = g.composite.exons
             const yAdjust = this.exonHeight / 2
@@ -454,11 +495,12 @@ export default MComponent({
             })
 
         } else {
+            this.connectors.splice(i, 1, [])
             // one transcript per line - add one connector per transcript from first exon to last
             const segments = g.transcripts.map((t,j) => {
                 const e1 = t.exons[0]
                 const e2 = t.exons[t.exons.length - 1]
-                const y = j * (this.exonHeight+this.vertGap) + this.exonHeight / 2 + 2
+                const y = j * (this.exonHeight+this.vertGap) + this.exonHeight / 2
                 const cColor = this.selectedTranscriptSet.has(e1.transcript) ? this.selectedColor : this.featureColor (e1.transcript.gene)
                 return [cColor, ['L', e1.x + 2, y, e2.x + e2.width - 2, y ]]
             })
@@ -466,33 +508,26 @@ export default MComponent({
             this.connectorCache[i] = {}
         }
     },
-    drawConnectors (g, i) {
-        const canvas = this.$el.querySelectorAll('canvas')[i]
-        const cxt = canvas.getContext("2d")
-        const ctors = this.connectors[i]
-        cxt.clearRect(0, 0, canvas.width, canvas.height)
-        cxt.lineWidth = 1
-        ctors.forEach(segments => {
-            const cColor = segments.shift()
-            cxt.strokeStyle = cColor
-            cxt.strokeWidth = 2
-            cxt.beginPath();
-            segments.forEach(seg => {
-                const cmd = seg[0]
-                const x1 = seg[1]
-                const y1 = seg[2]
-                const x2 = seg[3]
-                const y2 = seg[4]
-                cxt.moveTo(x1, y1);
-                if (cmd === 'L') {
-                    cxt.lineTo(x2, y2)
-                } else if (cmd === 'C') {
-                    const m = (x2 - x1) * .67
-                    cxt.bezierCurveTo(x1 + m, y1, x2-m, y2, x2, y2)
-                }
-            })
-            cxt.stroke();
-        })
+    drawConnector (ctor) {
+        const path = ctor.reduce((p,seg) => {
+            if (typeof(seg) === 'string') return p
+            let pnew = [p]
+            const cmd = seg[0]
+            const x1 = seg[1]
+            const y1 = seg[2]
+            const x2 = seg[3]
+            const y2 = seg[4]
+
+            pnew.push(`M ${x1} ${y1}`)
+            if (cmd === 'L') {
+                pnew.push(`L ${x2} ${y2}`)
+            } else if (cmd === 'C') {
+                const m = (x2 - x1) * .67
+                pnew.push(`C ${x1 + m}, ${y1}, ${x2-m}, ${y2}, ${x2}, ${y2}`)
+            }
+            return pnew.join(' ')
+        }, '')
+        return path
     }
   }
 })
@@ -504,13 +539,8 @@ export default MComponent({
 }
 .transcript {
   height: 15px;
-  position: relative;
 }
 .exon {
-  position: absolute;
-}
-.exon-graph {
-  position: relative;
 }
 .exon-label {
   position: absolute;
@@ -519,6 +549,8 @@ export default MComponent({
   font-size: 10px;
   font-weight: bold;
   color: black;
+}
+.connector {
 }
 .small-label {
   font-size: 10px;
@@ -542,5 +574,8 @@ export default MComponent({
 .slider * {
     padding-top: 0px;
     padding-bottom: 0px;
+}
+.underlay {
+    pointer-events: none;
 }
 </style>

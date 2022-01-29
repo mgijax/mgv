@@ -271,7 +271,7 @@ class DataManager {
     })
   }
   _condenseExons (t) {
-    const exons = (t.children || []).filter(f => f[2] !== "CDS").sort(u.byChrStart)
+    const exons = (t.children || []).filter(f => f[2] === "exon").sort(u.byChrStart)
     return exons.map((e,i) => { return { start: e[3], end: e[4], eIndex:i } })
   }
 
