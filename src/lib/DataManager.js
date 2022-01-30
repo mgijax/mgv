@@ -150,9 +150,10 @@ class DataManager {
     // have their transcripts attached
     ensureModels (g, c, s, e, feats) {
         u.debug("Ensure models: nominal range:", g.name, c.name, s, e)
-        const gaps = this.genomePainter.paint(g, c, s, e)
+        const gaps = this.genomePainter.query(g, c, s, e)
         const ps = gaps.map(r => this.fillGap(g, c, r.start, r.end, feats.filter(f => gc.overlaps(f, r))))
         return Promise.all(ps).then(p => {
+            this.genomePainter.paint(g, c, s, e)
             const prs = this.genomePainter.getPaintedRegions(g,c)
             const prss = prs.map(pr => `(${pr.start} ${pr.end})`).join(' ')
             u.debug(`After: painted regions ${g.name}::${c.name}: ${prss}`)

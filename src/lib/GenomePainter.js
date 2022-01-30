@@ -27,13 +27,19 @@ class GenomePainter {
         return cregions
     }
 
+    // Returns the gaps in the specified region.
+    query (g, c, s, e) {
+        return this.paint(g, c, s, e, true)
+    }
+
     // Paint chromosome c of genome g from s to e.
     // Returns list of gaps that were painted over.
-    paint (g, c, s, e) {
+    paint (g, c, s, e, queryOnly) {
         const region = {start: Math.max(1,s), end: Math.min(c.length, e)}
         if (region.start > region.end) return []
         const cregions = this.getPaintedRegions(g, c)
         const gaps = gc.subtract(region, cregions)
+        if (queryOnly) return gaps
         // Compute the merge of the new region with overlapping painted regions.
         let mregion = region
         let mstart = -1
