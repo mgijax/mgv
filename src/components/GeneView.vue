@@ -2,7 +2,10 @@
   <div class="gene-view flexcolumn" >
     <div class="sticky-header flexcolumn">
         <!-- Controls -->
-        <div class="flexrow" style="justify-content: flex-start;">
+        <div class="controls flexrow" style="justify-content: flex-start;">
+
+            <div class="flexcolumn">
+            <span class="small-label">Layout</span>
             <div class="flexrow" style="justify-content: flex-start;">
                 <span class="small-label">Normal</span>
                 <m-button
@@ -10,27 +13,33 @@
                   :title="showTranscriptGraphs ? '' : ''"
                   @click="showTranscriptGraphs = !showTranscriptGraphs"
                   />
-                <span class="small-label">Transcript graphs</span>
+                <span class="small-label">Graphs</span>
             </div>
+            </div>
+
+            <div class="flexcolumn">
+            <span class="small-label">Width</span>
             <div class="flexrow" style="justify-content: flex-start;">
-                <span class="small-label">Fixed scale</span>
+                <span class="small-label">Proportional</span>
                 <m-button
                   :icon="useFixedScale ? 'toggle_off' : 'toggle_on'"
                   :title="useFixedScale ? 'Using fixed scale. Click for proportional scale.' : 'Using proportional scale. Click for fixed scale.'"
                   @click="useFixedScale = !useFixedScale"
                   />
-                <span class="small-label">Proportional</span>
+                <span class="small-label">Fill</span>
             </div>
+            </div>
+
             <div class="slider">
-                <span class="small-label">Exon thickness:</span>
+                <span class="small-label">Exon thickness</span>
                 <input type="range" min="1" max="24" v-model="exonHeightM" />
             </div>
             <div class="slider">
-                <span class="small-label">Intron gap:</span>
+                <span class="small-label">Intron gap</span>
                 <input type="range" min="1" max="100" v-model="intronGapM" />
             </div>
             <div class="slider">
-                <span class="small-label">Vertical space:</span>
+                <span class="small-label">Vertical space</span>
                 <input type="range" min="1" max="32" v-model="vertGapM" />
             </div>
         </div>
@@ -65,7 +74,7 @@
                   />
               <!-- exons -->
               <rect v-for="(de, ri) in g.composite.dExons"
-                  :key="'exon'+ri"
+                  :key="'exon.de.'+ri"
                   :name="de.dIndex"
                   class="exon"
                   :x="de.x"
@@ -534,6 +543,10 @@ export default MComponent({
 </script>
 
 <style scoped>
+.controls > * {
+    flex-grow: 0;
+    margin-right: 16px;
+}
 .gene {
   border-bottom: thin solid black;
 }
@@ -570,6 +583,7 @@ export default MComponent({
 .slider {
     padding-top: 0px;
     padding-bottom: 0px;
+    width: 80px;
 }
 .slider * {
     padding-top: 0px;
