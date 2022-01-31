@@ -1090,9 +1090,6 @@ button:hover {
   max-width: 0px;
   opacity: 0;
 }
-svg {
-    width: 100%;
-}
 
 /* Class for making text unselectable.  See: 
    https://stackoverflow.com/questions/6900124/how-to-make-certain-text-not-selectable-with-css
@@ -1113,6 +1110,12 @@ input[type=range] {
 }
 input[type=range]:focus {
   outline: none;
+}
+input[type=range]:disabled::-webkit-slider-thumb {
+  background-color: rgb(197,197,197);
+}
+input[type=range]:disabled::-webkit-slider-runnable-track {
+  border: 1px solid rgb(197,197,197);
 }
 input[type=range]::-webkit-slider-runnable-track {
   width: 100%;

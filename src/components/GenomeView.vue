@@ -351,6 +351,9 @@ export default MComponent({
 </script>
 
 <style scoped>
+svg {
+    width: 100%;
+}
 .rotate90 {
   transform: rotate(90deg)scale(1,-1);
 }

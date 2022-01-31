@@ -190,4 +190,7 @@ export default MComponent({
 </script>
 
 <style scoped>
+svg {
+    width: 100%;
+}
 </style>

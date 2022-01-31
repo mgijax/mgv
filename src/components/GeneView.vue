@@ -4,6 +4,7 @@
         <!-- Controls -->
         <div class="controls flexrow" style="justify-content: flex-start;">
 
+            <!-- Toggle: drawing style -->
             <div class="flexcolumn">
             <span class="small-label">Layout</span>
             <div class="flexrow" style="justify-content: flex-start;">
@@ -17,29 +18,52 @@
             </div>
             </div>
 
+            <!-- Toggle: Overall width  -->
             <div class="flexcolumn">
-            <span class="small-label">Width</span>
+            <span class="small-label">Overall width</span>
             <div class="flexrow" style="justify-content: flex-start;">
-                <span class="small-label">Proportional</span>
+                <span class="small-label">Overflow</span>
                 <m-button
-                  :icon="useFixedScale ? 'toggle_off' : 'toggle_on'"
-                  :title="useFixedScale ? 'Using fixed scale. Click for proportional scale.' : 'Using proportional scale. Click for fixed scale.'"
-                  @click="useFixedScale = !useFixedScale"
+                  :icon="fitToWindow ? 'toggle_off' : 'toggle_on'"
+                  :title="fitToWindow ? 'Using fixed scale. Click for proportional scale.' : 'Using proportional scale. Click for fixed scale.'"
+                  @click="fitToWindow = !fitToWindow"
                   />
-                <span class="small-label">Fill</span>
+                <span class="small-label">Fit</span>
             </div>
             </div>
 
-            <div class="slider">
-                <span class="small-label">Exon thickness</span>
-                <input type="range" min="1" max="24" v-model="exonHeightM" />
+            <!-- Toggle: exon width  -->
+            <div class="flexcolumn">
+            <span class="small-label">Exon scale</span>
+            <div class="flexrow" style="justify-content: flex-start;">
+                <span class="small-label">Fixed</span>
+                <m-button
+                  :icon="fixedExonWidths ? 'toggle_off' : 'toggle_on'"
+                  :title="fixedExonWidths ? 'Using fixed scale. Click for proportional scale.' : 'Using proportional scale. Click for fixed scale.'"
+                  @click="fixedExonWidths = !fixedExonWidths"
+                  />
+                <span class="small-label">Proportional</span>
             </div>
+            </div>
+
+            <!-- Slider: exon width  -->
+            <div class="slider" :class="{ disabled: !fixedExonWidths }">
+                <span class="small-label">Exon width</span>
+                <input :disabled="!fixedExonWidths" type="range" min="10" max="200" v-model="exonWidthM" />
+            </div>
+            <!-- Slider: Intron gap  -->
             <div class="slider">
                 <span class="small-label">Intron gap</span>
                 <input type="range" min="1" max="100" v-model="intronGapM" />
             </div>
+            <!-- Slider: Exon thickness  -->
             <div class="slider">
-                <span class="small-label">Vertical space</span>
+                <span class="small-label">Exon thickness</span>
+                <input type="range" min="1" max="24" v-model="exonHeightM" />
+            </div>
+            <!-- Slider: Vertical gap  -->
+            <div class="slider">
+                <span class="small-label">Vertical gap</span>
                 <input type="range" min="1" max="32" v-model="vertGapM" />
             </div>
         </div>
@@ -59,8 +83,9 @@
 
       <span>{{g.genome.name}} :: {{g.symbol}}</span>
 
-      <svg :height="heights[i]+8">
+      <svg :height="heights[i]+8" :width="maxGeneWidth">
         <g transform="translate(0,8)">
+          <!-- Graph view -->
           <g v-if="showTranscriptGraphs">
               <!-- connectors -->
               <path
@@ -81,8 +106,8 @@
                   :y="de.y"
                   :width="de.width"
                   :height="exonHeight"
-                  :fill="exonColor(de)"
-                  :stroke="featureColor(g)"
+                  :fill="exonFillColor(de)"
+                  :stroke="exonBorderColor(de)"
                   @click="clickExon"
                   ><title>{{de.dIndex}}</title>
               </rect>    
@@ -98,6 +123,7 @@
                   @click="clickExon"
                   >{{de.dIndex}}</text>
           </g>
+          <!-- Standard view: one transcript per line -->
           <g v-else>
               <!-- connectors -->
               <path v-for="(ctor, ci) in connectors[i]"
@@ -119,8 +145,8 @@
                       :y="te.y + ti * (exonHeight+vertGap)"
                       :width="te.width"
                       :height="exonHeight"
-                      :fill="exonColor(te)"
-                      :stroke="featureColor(g)"
+                      :fill="exonFillColor(te)"
+                      :stroke="exonBorderColor(te)"
                       @click="clickExon"
                       ><title>{{te.de.dIndex}}</title>
                   </rect>
@@ -158,6 +184,8 @@ export default MComponent({
       myGenes: [].concat(this.genes),
       // width (in px) of drawing area
       width: 800,
+      // calculated maximum display width of any gene
+      maxGeneWidth: 800,
       // height
       heights: this.genes.map(() => 100),
       // pixels per base
@@ -165,10 +193,12 @@ export default MComponent({
       //
       vertGapM: "16",
       exonHeightM: "10",
+      exonWidthM: "25",
       intronGapM: "40",
       //
       showTranscriptGraphs: false,
-      useFixedScale: false,
+      fitToWindow: false,
+      fixedExonWidths: false,
       //
       connectors: [],
       //
@@ -184,6 +214,7 @@ export default MComponent({
   computed: {
       vertGap:  function () { return parseFloat(this.vertGapM) },
       exonHeight: function () { return parseFloat(this.exonHeightM) },
+      exonWidth: function () { return parseFloat(this.exonWidthM) },
       intronGap: function () { return parseFloat(this.intronGapM) },
       overTranscripts: function () {
           if (!this.overExon) return []
@@ -214,9 +245,11 @@ export default MComponent({
   },
   watch: {
     genes:                function () { this.forceRedraw() },
-    useFixedScale:        function () { this.forceRedraw() },
+    fitToWindow:          function () { this.forceRedraw() },
+    fixedExonWidths:      function () { this.forceRedraw() },
     showTranscriptGraphs: function () { this.forceRedraw() },
     exonHeight:           function () { this.forceRedraw() },
+    exonWidth:            function () { this.forceRedraw() },
     intronGap:            function () { this.forceRedraw() },
     vertGap:              function () { this.forceRedraw() },
     selectedExons:        function () { this.forceRedraw() }
@@ -225,7 +258,6 @@ export default MComponent({
     // Force the scene to be redrawn.
     forceRedraw () {
         this.$nextTick(() => {
-            this.width = this.$el.getBoundingClientRect().width - 12
             this.myGenes = [].concat(this.genes)
             this.layout()
         })
@@ -264,12 +296,18 @@ export default MComponent({
     isExonSelected (de) {
         return this.selectedExonSet.has(de)
     },
-    // Returns true iff any transcript that includes
-    // this exon is currently selected.
+    // If e is a transcript exon, returns true iff e.transcript is selected.
+    // If e is a distinct exon, returns true iff te.transcipt is selected for any te in e.tExons.
     isTranscriptSelected (e) {
-        return (e.de || e).tExons.reduce((v,te) => {
-            return v || this.selectedTranscriptSet.has(te.transcript)
-        }, false)
+        if (e.transcript) {
+            // e is a transcript exon
+            return this.selectedTranscriptSet.has(e.transcript)
+        } else {
+            // e is a distinct exon
+            return e.tExons.reduce((v,te) => {
+                return v || this.selectedTranscriptSet.has(te.transcript)
+            }, false)
+        }
     },
     // Add exon to selected set. If unselectOthers is true,
     // also removes everything else from the set.
@@ -292,6 +330,7 @@ export default MComponent({
     },
     // Assigns coordinates to exons and computes connector paths.
     layout () {
+      this.width = this.$el.getBoundingClientRect().width - 12
       if (this.myGenes.length === 0) return
       const ps = this.myGenes.map(g => this.ensureModels(g))
       Promise.all(ps).then(() => {
@@ -300,44 +339,35 @@ export default MComponent({
               const ppb = w / g.composite.length
               return ppb
           })
-          this.minPpb = Math.min.apply(null, this.ppbs)
           this.connectorCache = []
           this.featurePackers = []
-          this.myGenes.forEach((g,i) => {
-              this.ppb = this.useFixedScale ? this.minPpb : this.ppbs[i]
-              this.layoutGene(g, i)
+          const geneWidths = this.myGenes.map((g,i) => {
+              this.ppb = this.ppbs[i]
+              return this.layoutGene(g, i)
           })
+          this.maxGeneWidth = geneWidths.length ? Math.max.apply(null, geneWidths) : 800
       })
-    },
-    // Returns a promise that resolves after the transcripts for the specified gene
-    // have been loaded. 
-    // Example scenario: user opens the browser on a large region (larger than the details threshold),
-    // and a gene is selected.
-    ensureModels (gene) {
-        if (gene.transcripts.length) return Promise.resolve(gene)
-        return this.dataManager().getGenes(gene.genome, gene.chr, gene.start-1, gene.end+1, true).then(() => {
-            return gene
-        })
     },
     // Compute coordinates for exons and calculate connector paths for this gene.
     layoutGene (gene, i) {
       // first layout the composite transcript's exons
-      this.layoutComposite(gene.composite, i)
+      const compWidth = this.layoutComposite(gene.composite, i)
       // then layout each transcript's exons, using the composite as a guide
       gene.transcripts.forEach(t => this.layoutExons(t.exons, gene.composite.exons))
       // then layout connectors
       this.layoutConnectors(gene, i)
+      return compWidth
     },
     layoutComposite (comp, i) {
-      // Part 1. Lay out the composite exons so they fill the space,
-      // with a fixed amount of space between exons
+      // Part 1. Lay out the composite exons
       let x = 0
       comp.exons.forEach(e => {
          e.x = x
          e.y = e.y || 0
-         e.width = this.ppb * (e.end - e.start + 1)
+         e.width = this.fixedExonWidths ? this.exonWidth : this.ppb * (e.end - e.start + 1)
          x += e.width + this.intronGap
       })
+      const compWidth = x
       // Part 2. Lay out the distinct exons, used for drawing the
       // transcript graph. First, the x dimension
       this.layoutExons(comp.dExons, comp.exons)
@@ -375,38 +405,48 @@ export default MComponent({
           const nts = this.myGenes[i].transcripts.length
           this.heights[i] = nts * this.exonHeight + (nts - 1) * this.vertGap
       }
+      //
+      return compWidth
     },
     // Lays out a list of exons (first arg) against a set of already
     // laid out composite exons (second arg)
-    layoutExons (exons, ces) {
-      let ci = 0
+    layoutExons (exons) {
       exons.forEach(e => {
-        while (e.start > ces[ci].end) ci++;
-        let de = (e.start - ces[ci].start) * this.ppb
-        e.x = ces[ci].x + de
-        e.y = 0
-        e.width = this.ppb * (e.end - e.start + 1)
+        const comp = e.composite || e.de.composite
+        if (!comp) throw "Internal error: no composite exon."
+        if (this.fixedExonWidths) {
+            e.x = comp.x
+            e.width = this.exonWidth
+            e.y = 0
+        } else {
+            let dx = (e.start - comp.start) * this.ppb
+            e.x = comp.x + dx
+            e.width = this.ppb * (e.end - e.start + 1)
+            e.y = 0
+        }  
       })
     },
-    exonColor (e) {
+    exonFillColor (e) {
         let de = e.de || e
-        if (this.isTranscriptSelected(de)) return this.selectedColor
         const te = de.dExons ? de.dExons[0].tExons[0] : (de.tExons ? de.tExons[0] : de)
         const f = te.transcript.gene
+        if (this.isTranscriptSelected(e)) {
+            return this.selectedColor
+            // return this.isExonSelected(de) ? this.selectedColor : this.featureColor(f)
+        }
         return this.featureColor(f)
     },
-    exonStyle (e) {
-      const bkndColor = this.exonColor(e)
-      const bdrColor = this.featureColor(this.exon2gene(e))
-      const revColors = !this.showTranscriptGraphs && !this.selectedTranscriptSet.has(e.transcript)
-      return {
-        left: e.x + 'px',
-        top: e.y + 'px',
-        width: e.width + 'px',
-        height: this.exonHeight + 'px',
-        backgroundColor: revColors ? bdrColor : bkndColor,
-        border: '1px solid ' + (revColors ? bkndColor : bdrColor)
-      }
+    exonBorderColor (e) {
+        let de = e.de || e
+        const te = de.dExons ? de.dExons[0].tExons[0] : (de.tExons ? de.tExons[0] : de)
+        const f = te.transcript.gene
+        if (this.isTranscriptSelected(de)) {
+            return this.featureColor(f)
+        } else if (this.isExonSelected(de)) {
+            return this.selectedColor
+        } else {
+            return this.featureColor(f)
+        }
     },
     connectorColor (e1, e2) {
         if (this.isTranscriptSelected(e1) && this.isTranscriptSelected(e2)) {
@@ -537,12 +577,25 @@ export default MComponent({
             return pnew.join(' ')
         }, '')
         return path
+    },
+    // Returns a promise that resolves after the transcripts for the specified gene
+    // have been loaded. 
+    // Example scenario: user opens the browser on a large region (larger than the details threshold),
+    // and a gene is selected.
+    ensureModels (gene) {
+        if (gene.transcripts.length) return Promise.resolve(gene)
+        return this.dataManager().getGenes(gene.genome, gene.chr, gene.start-1, gene.end+1, true).then(() => {
+            return gene
+        })
     }
   }
 })
 </script>
 
 <style scoped>
+.gene-view {
+    overflow: scroll;
+}
 .controls > * {
     flex-grow: 0;
     margin-right: 16px;
@@ -577,6 +630,7 @@ export default MComponent({
   border-bottom: thin solid black;
   position: sticky;
   top: 0;
+  left: 0;
   background-color: #e1e1e1;
   z-index: 10;
 }
@@ -590,6 +644,10 @@ export default MComponent({
     padding-bottom: 0px;
 }
 .underlay {
+    pointer-events: none;
+}
+.disabled, .disabled * {
+    color: gray;
     pointer-events: none;
 }
 </style>
