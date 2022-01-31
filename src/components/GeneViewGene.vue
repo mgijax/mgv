@@ -1,145 +1,164 @@
 <template>
-  <div class="gene-view flexcolumn" >
-    <div class="sticky-header flexcolumn">
-        <!-- Controls -->
-        <div class="controls flexrow" style="justify-content: flex-start;">
-
-            <!-- Toggle: drawing style -->
-            <div class="flexcolumn">
-            <span class="small-label">Layout</span>
-            <div class="flexrow" style="justify-content: flex-start;">
-                <span class="small-label">Normal</span>
-                <m-button
-                  :icon="showTranscriptGraphs ? 'toggle_on' : 'toggle_off'"
-                  :title="showTranscriptGraphs ? '' : ''"
-                  @click="showTranscriptGraphs = !showTranscriptGraphs"
-                  />
-                <span class="small-label">Graphs</span>
-            </div>
-            </div>
-
-            <!-- Toggle: Overall width  -->
-            <div class="flexcolumn">
-            <span class="small-label">Overall width</span>
-            <div class="flexrow" style="justify-content: flex-start;">
-                <span class="small-label">Overflow</span>
-                <m-button
-                  :icon="fitToWidth ? 'toggle_off' : 'toggle_on'"
-                  :title="fitToWidth ? 'Using fixed scale. Click for proportional scale.' : 'Using proportional scale. Click for fixed scale.'"
-                  @click="fitToWidth = !fitToWidth"
-                  />
-                <span class="small-label">Fit</span>
-            </div>
-            </div>
-
-            <!-- Toggle: exon width  -->
-            <div class="flexcolumn">
-            <span class="small-label">Exon scale</span>
-            <div class="flexrow" style="justify-content: flex-start;">
-                <span class="small-label">Fixed</span>
-                <m-button
-                  :icon="fixedExonWidths ? 'toggle_off' : 'toggle_on'"
-                  :title="fixedExonWidths ? 'Using fixed scale. Click for proportional scale.' : 'Using proportional scale. Click for fixed scale.'"
-                  @click="fixedExonWidths = !fixedExonWidths"
-                  />
-                <span class="small-label">Proportional</span>
-            </div>
-            </div>
-
-            <!-- Slider: exon width  -->
-            <div class="slider" :class="{ disabled: !fixedExonWidths }">
-                <span class="small-label">Exon width</span>
-                <input :disabled="!fixedExonWidths" type="range" min="10" max="200" v-model="exonWidthM" />
-            </div>
-            <!-- Slider: Intron gap  -->
-            <div class="slider">
-                <span class="small-label">Intron gap</span>
-                <input type="range" min="1" max="100" v-model="intronGapM" />
-            </div>
-            <!-- Slider: Exon thickness  -->
-            <div class="slider">
-                <span class="small-label">Exon thickness</span>
-                <input type="range" min="1" max="24" v-model="exonHeightM" />
-            </div>
-            <!-- Slider: Vertical gap  -->
-            <div class="slider">
-                <span class="small-label">Vertical gap</span>
-                <input type="range" min="1" max="32" v-model="vertGapM" />
-            </div>
-        </div>
-        <!-- Status/messages -->
-        <div class="flexrow status-area">
-            <span>{{statusText}}</span>
-        </div>
-    </div> <!-- end of sticky-header -->
-    <div>
-        <gene-view-gene
-            v-for="(g,i) in myGenes"
-            :key="'gvg.'+i"
-            ref="gvgs"
-            :gene="g"
-            :width="width"
-            :exonWidth="exonWidth"
-            :exonHeight="exonHeight"
-            :intronGap="intronGap"
-            :vertGap="vertGap"
-            :showTranscriptGraph="showTranscriptGraphs"
-            :fixedExonWidths="fixedExonWidths"
-            :fitToWidth="fitToWidth"
-            :selectedColor="selectedColor"
+  <div class="gene-view-gene gene flexcolumn">
+      <span>{{gene.genome.name}} :: {{gene.symbol}}</span>
+      <svg :height="height + 8" :width="geneWidth">
+        <rect
+            class="underlay"
+            x="0"
+            y="0"
+            :width="geneWidth"
+            :height="height+8"
+            fill="#ffffff"
+            opacity="0"
+            @click="clearSelectedExons"
             />
-    </div>
+        <g transform="translate(0,8)" >
+          <!-- Graph view -->
+          <g v-if="showTranscriptGraph">
+              <!-- connectors -->
+              <path
+                  v-for="(ctor,cti) in connectors"
+                  :key="'ctor'+cti"
+                  class="connector"
+                  :stroke="ctor[0]"
+                  fill="none"
+                  stroke-width="2"
+                  :d="drawConnector(ctor)"
+                  />
+              <!-- exons -->
+              <rect v-for="(de, ri) in gene.composite.dExons"
+                  :key="'exon.de.'+ri"
+                  :name="de.dIndex"
+                  class="exon"
+                  :x="de.x"
+                  :y="de.y"
+                  :width="de.width"
+                  :height="exonHeight"
+                  :fill="exonFillColor(de)"
+                  :stroke="exonBorderColor(de)"
+                  @click="clickExon"
+                  ><title>{{de.dIndex}}</title>
+              </rect>    
+              <!-- exon-labels -->
+              <text v-for="(de, dei) in gene.composite.dExons"
+                  :key="'exon'+dei"
+                  class="exon-label unselectable-text"
+                  :name="de.dIndex"
+                  :x="de.x"
+                  :y="de.y - 1"
+                  font-size="10"
+                  font-weight="bold"
+                  @click="clickExon"
+                  >{{de.dIndex}}</text>
+          </g>
+          <!-- Standard view: one transcript per line -->
+          <g v-else>
+              <!-- connectors -->
+              <path v-for="(ctor, ci) in connectors"
+                  :key="'path'+ci"
+                  class="connector"
+                  :stroke="ctor[0]"
+                  :d="drawConnector(ctor)"
+              />
+              <!-- exons + labels -->
+              <g v-for="(t, ti) in gene.transcripts"
+                  :key="'transcript'+ti"
+                  >
+                  <!-- exons -->
+                  <rect v-for="(te, tei) in t.exons"
+                      :key="'exon'+ti+'.'+tei"
+                      class="exon"
+                      :name="te.de.dIndex"
+                      :x="te.x"
+                      :y="te.y + ti * (exonHeight+vertGap)"
+                      :width="te.width"
+                      :height="exonHeight"
+                      :fill="exonFillColor(te)"
+                      :stroke="exonBorderColor(te)"
+                      @click="clickExon"
+                      ><title>{{te.de.dIndex}}</title>
+                  </rect>
+                  <!-- exon-labels -->
+                  <text v-for="(te, tei) in t.exons"
+                      :key="'exon'+ti+'.'+tei+'.2'"
+                      class="exon-label unselectable-text"
+                      :name="te.de.dIndex"
+                      :x="te.x"
+                      :y="te.y + ti * (exonHeight+vertGap) - 1"
+                      font-size="10"
+                      font-weight="bold"
+                      @click="clickExon"
+                      >{{te.de.dIndex}}</text>
+              </g>
+          </g>
+        </g>
+      </svg>
   </div>
 </template>
 
 <script>
 import MComponent from '@/components/MComponent'
-import GeneViewGene from '@/components/GeneViewGene'
-import MButton from '@/components/MButton'
 import { FeaturePacker } from '@/lib/Layout'
 // import u from '@/lib/utils'
 export default MComponent({
-  name: 'GeneView',
-  components: { MButton, GeneViewGene },
-  props: ['genes'],
+  name: 'GeneViewGene',
+  props: {
+      gene: {
+          type: Object
+      },
+      width: { // view area width in px
+          type: Number,
+          default: 800
+      }, 
+      exonWidth: {  // exon width in px (only appl. when fixedExonWidth is true
+          type: Number,
+          default: 25
+      },
+      intronGap: {  // gap betweeen exons in px
+          type: Number,
+          default: 40
+      },
+      exonHeight: { // height of an exon in px
+          type: Number,
+          default: 16
+      },
+      vertGap: { // spacing bewteen exons
+          type: Number,
+          default: 24
+      },
+      showTranscriptGraph: { // if true, draw graph, else draw transcripts one per line
+          type: Boolean,
+          default: false
+      },
+      fitToWidth: { // if true, scale horizontally so layout fills the given vidth
+          type: Boolean,
+          default: true
+      },
+      fixedExonWidths: { // if true, draw all exons the same width (see exonWidth),
+                       // else, make exon widths proportional to actual lengths
+          type: Boolean,
+          default: false
+      },
+      selectedColor: { // color to use to draw a selected exon
+          type: String,
+          default: "#00ff00"
+      }
+  },
   inject: ['featureColorMap', 'dataManager'],
   data: function () {
     return {
-      myGenes: [].concat(this.genes),
-      // width (in px) of drawing area
-      width: 800,
-      // calculated maximum display width of any gene
-      maxGeneWidth: 800,
-      // height
-      heights: this.genes.map(() => 100),
-      // pixels per base
+      height: 100,
       ppb: 0.5,
-      //
-      vertGapM: "16",
-      exonHeightM: "10",
-      exonWidthM: "25",
-      intronGapM: "40",
-      //
-      showTranscriptGraphs: false,
-      fitToWidth: false,
-      fixedExonWidths: false,
-      //
       connectors: [],
-      //
       overExon: null,
       selectedExons: [],
-      selectedColor: "#00ff00",
-      selectedColor2: "#ffff00"
+      geneWidth: 800
     }
   },
   mounted: function () {
-    this.$root.$on('resize', () => this.forceRedraw())
+      this.$watch('$props', () => this.layout(), {deep:true})
   },
   computed: {
-      vertGap:  function () { return parseFloat(this.vertGapM) },
-      exonHeight: function () { return parseFloat(this.exonHeightM) },
-      exonWidth: function () { return parseFloat(this.exonWidthM) },
-      intronGap: function () { return parseFloat(this.intronGapM) },
       overTranscripts: function () {
           if (!this.overExon) return []
           // mouse is over a distinct exon. Traverse from d.e. to 
@@ -165,37 +184,18 @@ export default MComponent({
       statusText: function () {
           const labels = this.selectedTranscripts.map(t => t.label)
           return labels.join(", ") || "."
+      },
+      featureColor () {
+        return this.featureColorMap.getColor(this.gene)
       }
   },
-  watch: {
-    genes:                function () { this.forceRedraw() },
-    fitToWidth:           function () { this.forceRedraw() },
-    fixedExonWidths:      function () { this.forceRedraw() },
-    showTranscriptGraphs: function () { this.forceRedraw() },
-    exonHeight:           function () { this.forceRedraw() },
-    exonWidth:            function () { this.forceRedraw() },
-    intronGap:            function () { this.forceRedraw() },
-    vertGap:              function () { this.forceRedraw() },
-    selectedExons:        function () { this.forceRedraw() }
-  },
   methods: {
-    // Force the scene to be redrawn.
-    forceRedraw () {
-        this.$nextTick(() => {
-            this.myGenes = [].concat(this.genes)
-            this.layout()
-        })
-    },
     // given the div representing an exon, return that exon
     elt2exon (elt) {
       const eElt = elt.closest('.exon,.exon-label')
       if (!eElt) return null
       const ei = parseInt(eElt.getAttribute('name'))
-      const gDiv = eElt.closest('.gene')
-      if (!gDiv) return null
-      const gi = parseInt(gDiv.getAttribute('name'))
-      const g = this.genes[gi]
-      const de = g.composite.dExons[ei]
+      const de = this.gene.composite.dExons[ei]
       return de
     },
     mouseoverExon (evt) {
@@ -212,10 +212,6 @@ export default MComponent({
         evt.preventDefault()
     },
     //
-    exon2gene (e) {
-        const te = e.dExons ? e.dExons[0].tExons[0] : e.tExons ? e.tExons[0] : e
-        return te.transcript.gene
-    },
     // Returns true iff this exon is currently selected.
     isExonSelected (de) {
         return this.selectedExonSet.has(de)
@@ -248,42 +244,25 @@ export default MComponent({
     clearSelectedExons () {
         this.selectedExons = []
     },
-    // Returns the color for feature based on feature type.
-    featureColor (f) {
-        return this.featureColorMap.getColor(f)
-    },
     // Assigns coordinates to exons and computes connector paths.
     layout () {
-      this.width = this.$el.getBoundingClientRect().width - 12
-      if (this.myGenes.length === 0) return
-      const ps = this.myGenes.map(g => this.ensureModels(g))
-      Promise.all(ps).then(() => {
-          this.ppbs = this.myGenes.map(g => {
-              const w = this.width - this.intronGap * (g.composite.exons.length - 1)
-              const ppb = w / g.composite.length
-              return ppb
-          })
+      this.ensureModels().then(() => {
+          const w = this.width - this.intronGap * (this.gene.composite.exons.length - 1)
+          this.ppb = w / this.gene.composite.length
           this.connectorCache = []
-          this.featurePackers = []
-          const geneWidths = this.myGenes.map((g,i) => {
-              this.ppb = this.ppbs[i]
-              return this.layoutGene(g, i)
-          })
-          this.maxGeneWidth = geneWidths.length ? Math.max.apply(null, geneWidths) : 800
+          this.featurePacker = null
+          // first layout the composite transcript's exons
+          this.geneWidth = this.layoutComposite()
+          // then layout each transcript's exons, using the composite as a guide
+          this.gene.transcripts.forEach(t => this.layoutExons(t.exons))
+          // then layout connectors
+          this.layoutConnectors()
+          return this.geneWidth
       })
     },
-    // Compute coordinates for exons and calculate connector paths for this gene.
-    layoutGene (gene, i) {
-      // first layout the composite transcript's exons
-      const compWidth = this.layoutComposite(gene.composite, i)
-      // then layout each transcript's exons, using the composite as a guide
-      gene.transcripts.forEach(t => this.layoutExons(t.exons, gene.composite.exons))
-      // then layout connectors
-      this.layoutConnectors(gene, i)
-      return compWidth
-    },
-    layoutComposite (comp, i) {
+    layoutComposite () {
       // Part 1. Lay out the composite exons
+      const comp = this.gene.composite
       let x = 0
       comp.exons.forEach(e => {
          e.x = x
@@ -294,9 +273,9 @@ export default MComponent({
       const compWidth = x
       // Part 2. Lay out the distinct exons, used for drawing the
       // transcript graph. First, the x dimension
-      this.layoutExons(comp.dExons, comp.exons)
+      this.layoutExons(comp.dExons)
       // Now the y
-      const fp = this.featurePackers[i] = new FeaturePacker(this.vertGap,10)
+      const fp = this.featurePacker = new FeaturePacker(this.vertGap,10)
       let maxy = 0
       comp.dExons.forEach(de => {
           de.y = fp.add(null, de.start, de.end, this.exonHeight, true)
@@ -323,11 +302,11 @@ export default MComponent({
       })
 
       //
-      if (this.showTranscriptGraphs) {
-          this.heights[i] = maxy + this.exonHeight
+      if (this.showTranscriptGraph) {
+          this.height = maxy + this.exonHeight
       } else {
-          const nts = this.myGenes[i].transcripts.length
-          this.heights[i] = nts * this.exonHeight + (nts - 1) * this.vertGap
+          const nts = this.gene.transcripts.length
+          this.height = nts * this.exonHeight + (nts - 1) * this.vertGap
       }
       //
       return compWidth
@@ -351,50 +330,43 @@ export default MComponent({
       })
     },
     exonFillColor (e) {
-        let de = e.de || e
-        const te = de.dExons ? de.dExons[0].tExons[0] : (de.tExons ? de.tExons[0] : de)
-        const f = te.transcript.gene
         if (this.isTranscriptSelected(e)) {
             return this.selectedColor
-            // return this.isExonSelected(de) ? this.selectedColor : this.featureColor(f)
         }
-        return this.featureColor(f)
+        return this.featureColor
     },
     exonBorderColor (e) {
         let de = e.de || e
-        const te = de.dExons ? de.dExons[0].tExons[0] : (de.tExons ? de.tExons[0] : de)
-        const f = te.transcript.gene
         if (this.isTranscriptSelected(de)) {
-            return this.featureColor(f)
+            return this.featureColor
         } else if (this.isExonSelected(de)) {
             return this.selectedColor
         } else {
-            return this.featureColor(f)
+            return this.featureColor
         }
     },
     connectorColor (e1, e2) {
         if (this.isTranscriptSelected(e1) && this.isTranscriptSelected(e2)) {
             return this.selectedColor
         } else {
-            return this.featureColor(this.exon2gene(e1))
+            return this.featureColor
         }
     },
-    layoutConnectors (g,i) {
-        if (this.showTranscriptGraphs) {
+    layoutConnectors () {
+        if (this.showTranscriptGraph) {
             // Showing transcript graph. 
             // Each connector is a list of segments. Each segment is either a horizontal line, or 
             // a Bezier curve.
             //
-            // connectors[i] is the list of connectors to draw for gene i
+            // this.connectors is the list of connectors to draw this.gene
             // Each connector is a list of segments.
             // Each segment is a list of the form [cmd, x1, y1, x2, y2]
             // cmd is either 'L' for line or 'C' for curve
-            this.connectors.splice(i, 1, [])
-            this.connectorCache[i] = {} 
-            const cExons = g.composite.exons
+            this.connectors = []
+            this.connectorCache = {} 
+            const cExons = this.gene.composite.exons
             const yAdjust = this.exonHeight / 2
-            const packer = this.featurePackers[i]
-            g.transcripts.forEach(t => {
+            this.gene.transcripts.forEach(t => {
                 // for each transcript, map its exons to their counterparts
                 // in the distinct exons list. Connect successive pairs of
                 // distinct exons.
@@ -406,11 +378,9 @@ export default MComponent({
                     // First see if we've aready generated a path between these exons.
                     // If so, we're done.
                     // Otherwise create (and cache) a new connector.
-                    const cc = this.connectorCache[i]
+                    const cc = this.connectorCache
                     const cc_key = `${pde.dIndex},${cde.dIndex}`
                     if (cc[cc_key]) {
-                        //const newConnector = [].concat(cc[cc_key])
-                        //this.connectors[i].push(newConnector)
                         return
                     }
                     // Determine color for connector.
@@ -426,7 +396,7 @@ export default MComponent({
                     if (pce === cce) {
                       // connecting two exons in the same contig. 
                       segments.push(['C', pde.x+pde.width, pde.y+yAdjust, cde.x, cde.y+yAdjust])
-                      this.connectors[i].push(segments)
+                      this.connectors.push(segments)
                       cc[cc_key] = segments
                       return
                     }
@@ -442,8 +412,8 @@ export default MComponent({
                         const start = fSkipped.start
                         const end = lSkipped.end
                         //
-                        const y = packer.add(null, start, end, 1)
-                        this.heights[i] = Math.max(this.heights[i], y + this.exonHeight)
+                        const y = this.featurePacker.add(null, start, end, 1)
+                        this.height = Math.max(this.height, y + this.exonHeight)
                         //
                         pseg = segments[segments.length-1]
                         segments.push(['C', pseg[3], pseg[4], fSkipped.x, y+yAdjust])
@@ -461,24 +431,24 @@ export default MComponent({
                     segments.push(['L', pseg[3], pseg[4], cde.x, cde.y+yAdjust])
 
                     // The list of segments is the new connector. Add it to the list.
-                    this.connectors[i].push(segments)
+                    this.connectors.push(segments)
                     // Cache it
                     cc[cc_key] = segments
                 })
             })
 
         } else {
-            this.connectors.splice(i, 1, [])
+            this.connectors = []
             // one transcript per line - add one connector per transcript from first exon to last
-            const segments = g.transcripts.map((t,j) => {
+            const segments = this.gene.transcripts.map((t,j) => {
                 const e1 = t.exons[0]
                 const e2 = t.exons[t.exons.length - 1]
                 const y = j * (this.exonHeight+this.vertGap) + this.exonHeight / 2
-                const cColor = this.selectedTranscriptSet.has(e1.transcript) ? this.selectedColor : this.featureColor (e1.transcript.gene)
+                const cColor = this.selectedTranscriptSet.has(e1.transcript) ? this.selectedColor : this.featureColor
                 return [cColor, ['L', e1.x + 2, y, e2.x + e2.width - 2, y ]]
             })
-            this.connectors[i] = segments
-            this.connectorCache[i] = {}
+            this.connectors = segments
+            this.connectorCache = {}
         }
     },
     drawConnector (ctor) {
@@ -506,10 +476,10 @@ export default MComponent({
     // have been loaded. 
     // Example scenario: user opens the browser on a large region (larger than the details threshold),
     // and a gene is selected.
-    ensureModels (gene) {
-        if (gene.transcripts.length) return Promise.resolve(gene)
-        return this.dataManager().getGenes(gene.genome, gene.chr, gene.start-1, gene.end+1, true).then(() => {
-            return gene
+    ensureModels () {
+        if (this.gene.transcripts.length) return Promise.resolve(this.gene)
+        return this.dataManager().getGenes(this.gene.genome, this.gene.chr, this.gene.start-1, this.gene.end+1, true).then(() => {
+            return this.gene
         })
     }
   }
@@ -568,7 +538,6 @@ export default MComponent({
     padding-bottom: 0px;
 }
 .underlay {
-    pointer-events: none;
 }
 .disabled, .disabled * {
     color: gray;
