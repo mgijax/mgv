@@ -273,7 +273,7 @@ class DataManager {
   }
   _condenseExons (t) {
     const exons = (t.children || []).filter(f => f[2] === "exon").sort(u.byChrStart)
-    return exons.map((e,i) => { return { start: e[3], end: e[4], eIndex:i } })
+    return exons.map((e,i) => { return { start: e[3], end: e[4], eIndex:i, length: e[4] - e[3] + 1 } })
   }
 
   _condenseCds (t, exons) {
@@ -307,6 +307,9 @@ class DataManager {
           a.push(cds)
           const dUTR = { start: Math.max(c.end + 1, x.start), end: x.end, type: DUTR }
           if (dUTR.start <= dUTR.end) a.push(dUTR)
+          //
+          if (c.start >= r.start && c.start <= r.end) r.cStart = c.start
+          if (c.end >= r.start && c.end <= r.end) r.cEnd = c.end
       }
       return a
     }, [])

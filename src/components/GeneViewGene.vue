@@ -1,6 +1,6 @@
 <template>
   <div class="gene-view-gene gene flexcolumn" v-if="myGene">
-      <span>{{myGene.genome.name}} :: {{myGene.symbol}}</span>
+      <span class="title">{{myGene.genome.name}} :: {{myGene.symbol}}</span>
       <svg :height="height + 16" :width="geneWidth">
         <rect
             class="underlay"
@@ -25,64 +25,106 @@
               />
           <g v-if="showTranscriptGraph">
               <!-- exons -->
-              <rect v-for="(de, ri) in myGene.composite.dExons"
+              <g v-for="(de, ri) in myGene.composite.dExons"
                   :key="'exon.de.'+ri"
-                  :name="de.dIndex"
-                  class="exon"
-                  :x="de.x"
-                  :y="de.y"
-                  :width="de.width"
-                  :height="exonHeight"
-                  :fill="exonFillColor(de)"
-                  :stroke="exonBorderColor(de)"
-                  @click="clickExon"
-                  ><title>{{de.dIndex}}</title>
-              </rect>    
-              <!-- exon-labels -->
-              <text v-for="(de, dei) in myGene.composite.dExons"
-                  :key="'exon'+dei"
-                  class="exon-label unselectable-text"
-                  :name="de.dIndex"
-                  :x="de.x"
-                  :y="de.y - 1"
-                  font-size="10"
-                  font-weight="bold"
-                  @click="clickExon"
-                  >{{de.dIndex}}</text>
-          </g>
-          <!-- Standard view: one transcript per line -->
-          <g v-else>
-              <!-- exons + labels -->
-              <g v-for="(t, ti) in myGene.transcripts"
-                  :key="'transcript'+ti"
                   >
-                  <!-- exons -->
-                  <rect v-for="(te, tei) in t.exons"
-                      :key="'exon'+ti+'.'+tei"
+                  <!-- the box -->
+                  <rect
+                      :name="de.dIndex"
                       class="exon"
-                      :name="te.de.dIndex"
-                      :x="te.x"
-                      :y="te.y + ti * (exonHeight+vertGap)"
-                      :width="te.width"
+                      :x="de.x"
+                      :y="de.y"
+                      :width="de.width"
                       :height="exonHeight"
-                      :fill="exonFillColor(te)"
-                      :stroke="exonBorderColor(te)"
+                      :fill="exonFillColor(de)"
+                      :stroke="exonBorderColor(de)"
                       @click="clickExon"
-                      ><title>{{te.de.dIndex}}</title>
-                  </rect>
+                      ><title>{{de.dIndex}}</title>
+                  </rect>    
+                  <!-- start/stop codon markers -->
+                  <g v-for="(te, ti) in de.tExons"
+                      :key="`cdss.${ri}.${ti}`"
+                      >
+                      <line v-if="te.cStartX"
+                          :x1="te.cStartX"
+                          :y1="de.y"
+                          :x2="te.cStartX"
+                          :y2="de.y + exonHeight"
+                          :stroke="myGene.strand==='-' ? 'red' : 'cyan'"
+                          stroke-width="2"
+                          />
+                      <line v-if="te.cEndX"
+                          :x1="te.cEndX"
+                          :y1="de.y"
+                          :x2="te.cEndX"
+                          :y2="de.y + exonHeight"
+                          :stroke="myGene.strand==='-' ? 'cyan' : 'red'"
+                          stroke-width="2"
+                          />
+                  </g> <!-- start/stop codons -->
                   <!-- exon-labels -->
-                  <text v-for="(te, tei) in t.exons"
-                      :key="'exon'+ti+'.'+tei+'.2'"
+                  <text
                       class="exon-label unselectable-text"
-                      :name="te.de.dIndex"
-                      :x="te.x"
-                      :y="te.y + ti * (exonHeight+vertGap) - 1"
+                      :name="de.dIndex"
+                      :x="de.x"
+                      :y="de.y - 1"
                       font-size="10"
                       font-weight="bold"
                       @click="clickExon"
-                      >{{te.de.dIndex}}</text>
-              </g>
+                      >{{de.dIndex}}</text>
+              </g> <!-- v-for -->
           </g>
+          <!-- Standard view: one transcript per line -->
+          <g v-else>
+              <!-- each transcript -->
+              <g v-for="(t, ti) in myGene.transcripts"
+                  :key="'transcript'+ti"
+                  >
+                  <g v-for="(te, tei) in t.exons"
+                    :key="'exon'+ti+'.'+tei"
+                    >
+                      <!-- exons -->
+                      <rect 
+                          class="exon"
+                          :name="te.de.dIndex"
+                          :x="te.x"
+                          :y="te.y + ti * (exonHeight+vertGap)"
+                          :width="te.width"
+                          :height="exonHeight"
+                          :fill="exonFillColor(te)"
+                          :stroke="exonBorderColor(te)"
+                          @click="clickExon"
+                          ><title>{{te.de.dIndex}}</title>
+                      </rect>
+                      <line v-if="te.cStartX"
+                          :x1="te.cStartX"
+                          :y1="te.y + ti * (exonHeight+vertGap)"
+                          :x2="te.cStartX"
+                          :y2="te.y + exonHeight + ti * (exonHeight+vertGap)"
+                          :stroke="myGene.strand==='-' ? 'red' : 'cyan'"
+                          stroke-width="2"
+                          />
+                      <line v-if="te.cEndX"
+                          :x1="te.cEndX"
+                          :y1="te.y + ti * (exonHeight+vertGap)"
+                          :x2="te.cEndX"
+                          :y2="te.y + exonHeight + ti * (exonHeight+vertGap)"
+                          :stroke="myGene.strand==='-' ? 'cyan' : 'red'"
+                          stroke-width="2"
+                          />
+                      <!-- exon-labels -->
+                      <text 
+                          class="exon-label unselectable-text"
+                          :name="te.de.dIndex"
+                          :x="te.x"
+                          :y="te.y + ti * (exonHeight+vertGap) - 1"
+                          font-size="10"
+                          font-weight="bold"
+                          @click="clickExon"
+                          >{{te.de.dIndex}}</text>
+                  </g> <!-- exon -->
+              </g> <!-- v-for -->
+          </g> <!-- v-else -->
         </g>
       </svg>
   </div>
@@ -160,11 +202,8 @@ export default MComponent({
   },
   watch: {
       // Watch for changes to the gene property.
-      gene: function () {
-          this.layout().then(() => {
-              this.myGene = this.gene
-          })
-      }
+      gene:          function () { this.forceRedraw() },
+      selectedExons: function () { this.forceRedraw() }
   },
   computed: {
       overTranscripts: function () {
@@ -198,6 +237,11 @@ export default MComponent({
       }
   },
   methods: {
+    forceRedraw () {
+        this.layout().then(() => {
+            this.myGene = this.gene
+        })
+    },
     // given the div representing an exon, return that exon
     elt2exon (elt) {
       const eElt = elt.closest('.exon,.exon-label')
@@ -255,12 +299,14 @@ export default MComponent({
     // Assigns coordinates to exons and computes connector paths.
     layout () {
       return this.ensureModel().then(() => {
+          // nominal scale factor (fits the composite transcript exactly)
           this.ppb = (this.width - this.gene.composite.exons.length + 1) / this.gene.composite.length
+          // avoid drawing the same connector twice
           this.connectorCache = []
-          this.featurePacker = null
+          // for laying out distinct exons in graph view
+          this.featurePacker = new FeaturePacker(this.vertGap,10)
           // first layout the composite transcript's exons
           this.geneWidth = this.layoutComposite()
-
           // then layout each transcript's exons, using the composite as a guide
           this.gene.transcripts.forEach(t => this.layoutExons(t.exons))
           // then layout connectors
@@ -274,7 +320,7 @@ export default MComponent({
       let x = 0
       // when drawing proportional exon widths, turn exonWidth slider value into a multiplier
       // ranging from 0 to 1 (left of slider center) and from 1 to 10 (right).
-      this.xmult = this.exonWidth <= 100 ? (this.exonWidth / 100) : (1 + (this.exonWidth - 100)/10)
+      this.xmult = this.exonWidth <= 100 ? (this.exonWidth / 100) : (1 + (this.exonWidth - 100)/20)
       comp.exons.forEach(e => {
          e.x = x
          e.y = e.y || 0
@@ -283,7 +329,7 @@ export default MComponent({
 
          if (isNaN(e.y)) throw ("NaN detected")
       })
-      let compWidth = x
+      let compWidth = x - this.intronGap
 
       // Part 2. If fitToWidth is true, scale the composite exon coordinates
       if (this.fitToWidth) {
@@ -299,10 +345,9 @@ export default MComponent({
       // transcript graph. First, the x dimension
       this.layoutExons(comp.dExons)
       // Now the y
-      const fp = this.featurePacker = new FeaturePacker(this.vertGap,10)
       let maxy = 0
       comp.dExons.forEach(de => {
-          de.y = fp.add(null, de.start, de.end, this.exonHeight, true)
+          de.y = this.featurePacker.add(null, de.start, de.end, this.exonHeight, true)
           if (isNaN(de.y)) throw ("NaN detected")
           maxy = Math.max(maxy, de.y)
       })
@@ -346,11 +391,16 @@ export default MComponent({
             e.x = comp.x
             e.width = this.exonWidth
             e.y = 0
+            if (e.cStart) e.cStartX = e.x + ((e.cStart - e.start) / e.length) * e.width
+            if (e.cEnd) e.cEndX = e.x + ((e.cEnd - e.start) / e.length) * e.width
         } else {
-            let dx = (e.start - comp.start) * this.ppb * this.xmult
+            let scale = this.ppb * this.xmult
+            let dx = scale * (e.start - comp.start)
             e.x = comp.x + dx
-            e.width = this.ppb * (e.end - e.start + 1) * this.xmult
+            e.width = scale * (e.end - e.start + 1)
             e.y = 0
+            if (e.cStart) e.cStartX = e.x + ((e.cStart - e.start) / e.length) * e.width
+            if (e.cEnd) e.cEndX = e.x + ((e.cEnd - e.start) / e.length) * e.width
         }  
       })
     },
@@ -568,5 +618,9 @@ export default MComponent({
 .disabled, .disabled * {
     color: gray;
     pointer-events: none;
+}
+.title {
+    text-align: left;
+    background-color: #bbb;
 }
 </style>

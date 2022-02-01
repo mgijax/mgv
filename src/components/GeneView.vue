@@ -18,19 +18,20 @@
             </div>
             </div>
 
-            <!-- Toggle: Overall width  -->
+            <!-- Toggle: Fit to width 
             <div class="flexcolumn">
-            <span class="small-label">Overall width</span>
+            <span class="small-label">Fit to view</span>
             <div class="flexrow" style="justify-content: flex-start;">
-                <span class="small-label">Overflow</span>
+                <span class="small-label">No</span>
                 <m-button
                   :icon="fitToWidth ? 'toggle_on' : 'toggle_off'"
                   :title="fitToWidth ? 'Using fixed scale. Click for proportional scale.' : 'Using proportional scale. Click for fixed scale.'"
                   @click="fitToWidth = !fitToWidth"
                   />
-                <span class="small-label">Fit</span>
+                <span class="small-label">Yes</span>
             </div>
             </div>
+            -->
 
             <!-- Toggle: exon width  -->
             <div class="flexcolumn">
@@ -69,6 +70,7 @@
         </div>
         <!-- Status/messages -->
         <div class="flexrow status-area">
+            <span>{{statusText}}</span>
         </div>
     </div> <!-- end of sticky-header -->
     <div>
@@ -116,8 +118,7 @@ export default MComponent({
       fitToWidth: false,
       fixedExonWidths: false,
       //
-      selectedColor: "#00ff00",
-      selectedColor2: "#ffff00"
+      selectedColor: "#ffff00"
     }
   },
   mounted: function () {
@@ -129,7 +130,11 @@ export default MComponent({
       vertGap:  function () { return parseFloat(this.vertGapM) },
       exonHeight: function () { return parseFloat(this.exonHeightM) },
       exonWidth: function () { return parseFloat(this.exonWidthM) },
-      intronGap: function () { return parseFloat(this.intronGapM) }
+      intronGap: function () { return parseFloat(this.intronGapM) },
+      statusText: function () {
+          if (!this.genes || this.genes.length === 0) return "No genes selected."
+          return ""
+      }
   }
 })
 </script>
