@@ -1,7 +1,7 @@
 <template>
-  <div class="gene-view-gene gene flexcolumn">
-      <span>{{gene.genome.name}} :: {{gene.symbol}}</span>
-      <svg :height="height + 8" :width="geneWidth">
+  <div class="gene-view-gene gene flexcolumn" v-if="myGene">
+      <span>{{myGene.genome.name}} :: {{myGene.symbol}}</span>
+      <svg :height="height + 16" :width="geneWidth">
         <rect
             class="underlay"
             x="0"
@@ -13,20 +13,19 @@
             @click="clearSelectedExons"
             />
         <g transform="translate(0,8)" >
-          <!-- Graph view -->
+          <!-- connectors -->
+          <path
+              v-for="(ctor,cti) in connectors"
+              :key="'ctor'+cti"
+              class="connector"
+              :stroke="ctor[0]"
+              fill="none"
+              stroke-width="2"
+              :d="drawConnector(ctor)"
+              />
           <g v-if="showTranscriptGraph">
-              <!-- connectors -->
-              <path
-                  v-for="(ctor,cti) in connectors"
-                  :key="'ctor'+cti"
-                  class="connector"
-                  :stroke="ctor[0]"
-                  fill="none"
-                  stroke-width="2"
-                  :d="drawConnector(ctor)"
-                  />
               <!-- exons -->
-              <rect v-for="(de, ri) in gene.composite.dExons"
+              <rect v-for="(de, ri) in myGene.composite.dExons"
                   :key="'exon.de.'+ri"
                   :name="de.dIndex"
                   class="exon"
@@ -40,7 +39,7 @@
                   ><title>{{de.dIndex}}</title>
               </rect>    
               <!-- exon-labels -->
-              <text v-for="(de, dei) in gene.composite.dExons"
+              <text v-for="(de, dei) in myGene.composite.dExons"
                   :key="'exon'+dei"
                   class="exon-label unselectable-text"
                   :name="de.dIndex"
@@ -53,15 +52,8 @@
           </g>
           <!-- Standard view: one transcript per line -->
           <g v-else>
-              <!-- connectors -->
-              <path v-for="(ctor, ci) in connectors"
-                  :key="'path'+ci"
-                  class="connector"
-                  :stroke="ctor[0]"
-                  :d="drawConnector(ctor)"
-              />
               <!-- exons + labels -->
-              <g v-for="(t, ti) in gene.transcripts"
+              <g v-for="(t, ti) in myGene.transcripts"
                   :key="'transcript'+ti"
                   >
                   <!-- exons -->
@@ -99,12 +91,11 @@
 <script>
 import MComponent from '@/components/MComponent'
 import { FeaturePacker } from '@/lib/Layout'
-// import u from '@/lib/utils'
 export default MComponent({
   name: 'GeneViewGene',
   props: {
       gene: {
-          type: Object
+          type: Object // the gene to draw. See note below with data() function.
       },
       width: { // view area width in px
           type: Number,
@@ -147,6 +138,14 @@ export default MComponent({
   inject: ['featureColorMap', 'dataManager'],
   data: function () {
     return {
+      // When the gene property changes, Vue fires reactive calls immediately.
+      // However, we need the layout to run first _before_ the gene is rendered.
+      // Therefore we have both a gene property and a myGene data object. 
+      // Drawing is based off myGene (see template above).
+      // When the gene property changes, layout() is called. When that finishes,
+      // myGene is assigned, which triggers the rendering.
+      myGene: null,
+      //
       height: 100,
       ppb: 0.5,
       connectors: [],
@@ -157,6 +156,15 @@ export default MComponent({
   },
   mounted: function () {
       this.$watch('$props', () => this.layout(), {deep:true})
+      if (this.gene) this.layout().then(() => { this.myGene = this.gene })
+  },
+  watch: {
+      // Watch for changes to the gene property.
+      gene: function () {
+          this.layout().then(() => {
+              this.myGene = this.gene
+          })
+      }
   },
   computed: {
       overTranscripts: function () {
@@ -246,13 +254,13 @@ export default MComponent({
     },
     // Assigns coordinates to exons and computes connector paths.
     layout () {
-      this.ensureModels().then(() => {
-          const w = this.width - this.intronGap * (this.gene.composite.exons.length - 1)
-          this.ppb = w / this.gene.composite.length
+      return this.ensureModel().then(() => {
+          this.ppb = (this.width - this.gene.composite.exons.length + 1) / this.gene.composite.length
           this.connectorCache = []
           this.featurePacker = null
           // first layout the composite transcript's exons
           this.geneWidth = this.layoutComposite()
+
           // then layout each transcript's exons, using the composite as a guide
           this.gene.transcripts.forEach(t => this.layoutExons(t.exons))
           // then layout connectors
@@ -264,14 +272,30 @@ export default MComponent({
       // Part 1. Lay out the composite exons
       const comp = this.gene.composite
       let x = 0
+      // when drawing proportional exon widths, turn exonWidth slider value into a multiplier
+      // ranging from 0 to 1 (left of slider center) and from 1 to 10 (right).
+      this.xmult = this.exonWidth <= 100 ? (this.exonWidth / 100) : (1 + (this.exonWidth - 100)/10)
       comp.exons.forEach(e => {
          e.x = x
          e.y = e.y || 0
-         e.width = this.fixedExonWidths ? this.exonWidth : this.ppb * (e.end - e.start + 1)
+         e.width = this.fixedExonWidths ? this.exonWidth : this.xmult * this.ppb * (e.end - e.start + 1)
          x += e.width + this.intronGap
+
+         if (isNaN(e.y)) throw ("NaN detected")
       })
-      const compWidth = x
-      // Part 2. Lay out the distinct exons, used for drawing the
+      let compWidth = x
+
+      // Part 2. If fitToWidth is true, scale the composite exon coordinates
+      if (this.fitToWidth) {
+          const sf = this.width / compWidth
+          comp.exons.forEach(ce => {
+              ce.x = sf * ce.x
+              ce.width = sf * ce.width
+          })
+          compWidth = this.width
+      }
+
+      // Part 3. Lay out the distinct exons, used for drawing the
       // transcript graph. First, the x dimension
       this.layoutExons(comp.dExons)
       // Now the y
@@ -279,6 +303,7 @@ export default MComponent({
       let maxy = 0
       comp.dExons.forEach(de => {
           de.y = fp.add(null, de.start, de.end, this.exonHeight, true)
+          if (isNaN(de.y)) throw ("NaN detected")
           maxy = Math.max(maxy, de.y)
       })
       // At this point, we can re-shuffle the vertical positions of exons
@@ -298,6 +323,7 @@ export default MComponent({
           // Assign the y positions
           des.forEach((de, i) => {
               de.y = ys[i]
+              if (isNaN(de.y)) throw ("NaN detected")
           })
       })
 
@@ -311,8 +337,7 @@ export default MComponent({
       //
       return compWidth
     },
-    // Lays out a list of exons (first arg) against a set of already
-    // laid out composite exons (second arg)
+    // Lays out a list of exons against already-laid-out composite exons
     layoutExons (exons) {
       exons.forEach(e => {
         const comp = e.composite || e.de.composite
@@ -322,9 +347,9 @@ export default MComponent({
             e.width = this.exonWidth
             e.y = 0
         } else {
-            let dx = (e.start - comp.start) * this.ppb
+            let dx = (e.start - comp.start) * this.ppb * this.xmult
             e.x = comp.x + dx
-            e.width = this.ppb * (e.end - e.start + 1)
+            e.width = this.ppb * (e.end - e.start + 1) * this.xmult
             e.y = 0
         }  
       })
@@ -476,10 +501,11 @@ export default MComponent({
     // have been loaded. 
     // Example scenario: user opens the browser on a large region (larger than the details threshold),
     // and a gene is selected.
-    ensureModels () {
-        if (this.gene.transcripts.length) return Promise.resolve(this.gene)
-        return this.dataManager().getGenes(this.gene.genome, this.gene.chr, this.gene.start-1, this.gene.end+1, true).then(() => {
-            return this.gene
+    ensureModel () {
+        const g = this.gene
+        if (g.transcripts.length) return Promise.resolve(g)
+        return this.dataManager().getGenes(g.genome, g.chr, g.start-1, g.end+1, true).then(() => {
+            return g
         })
     }
   }
