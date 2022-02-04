@@ -2,6 +2,7 @@
   <div class="gene-view-gene gene flexcolumn" v-if="myGene">
       <span class="title">{{myGene.genome.name}} :: {{myGene.symbol}}</span>
       <svg :height="height + 16" :width="geneWidth">
+        <!-- underlay -->
         <rect
             class="underlay"
             x="0"
@@ -12,6 +13,7 @@
             opacity="0"
             @click="clearSelectedExons"
             />
+        <!-- Drawing area. Transformed so to line of text is visible. -->
         <g transform="translate(0,8)" >
           <!-- connectors -->
           <path
@@ -23,6 +25,7 @@
               stroke-width="2"
               :d="drawConnector(ctor)"
               />
+          <!-- graph view -->
           <g v-if="showTranscriptGraph">
               <!-- exons -->
               <g v-for="(de, ri) in myGene.composite.dExons"
@@ -39,8 +42,7 @@
                       :fill="exonFillColor(de)"
                       :stroke="exonBorderColor(de)"
                       @click="clickExon"
-                      ><title>{{de.dIndex}}</title>
-                  </rect>    
+                      />
                   <!-- start/stop codon markers -->
                   <g v-for="(te, ti) in de.tExons"
                       :key="`cdss.${ri}.${ti}`"
@@ -74,7 +76,7 @@
                       >{{de.dIndex}}</text>
               </g> <!-- v-for -->
           </g>
-          <!-- Standard view: one transcript per line -->
+          <!-- "Normal" view: one transcript per line -->
           <g v-else>
               <!-- each transcript -->
               <g v-for="(t, ti) in myGene.transcripts"
@@ -94,8 +96,7 @@
                           :fill="exonFillColor(te)"
                           :stroke="exonBorderColor(te)"
                           @click="clickExon"
-                          ><title>{{te.de.dIndex}}</title>
-                      </rect>
+                          />
                       <line v-if="te.cStartX"
                           :x1="te.cStartX"
                           :y1="te.y + ti * (exonHeight+vertGap)"
@@ -358,12 +359,12 @@ export default MComponent({
       // that include the exon.
       comp.exons.forEach(ce => {
           // Create a list of the current y positions
-          const ys = ce.dExons.map(de => de.y).sort((a, b) => b - a)
+          const ys = ce.dExons.map(de => de.y).sort((a, b) => a - b)
           // Resort the distinct exons by number of transcripts
           const des = ce.dExons.sort((de1, de2) => {
               const n1 = de1.tExons.length
               const n2 = de2.tExons.length
-              return n1 - n2
+              return n1 !== n2 ? n2 - n1 : de1.dIndex - de2.dIndex
           })
           // Assign the y positions
           des.forEach((de, i) => {
@@ -587,6 +588,10 @@ export default MComponent({
   color: black;
 }
 .connector {
+}
+.connector:hover {
+    stroke-width: 3;
+    stroke: orange;
 }
 .small-label {
   font-size: 10px;

@@ -17,7 +17,7 @@
         -->
         <page-box
           label="Genomes"
-          icon="list"
+          icon="folder_copy"
           >
           <genome-selector
             :allGenomes="allGenomes"
@@ -47,7 +47,7 @@
         -->
         <page-box
           label="Filters"
-          icon="filter_list"
+          icon="filter_alt"
           >
           <facets
             title="Limit what features are displayed by different criteria."
@@ -1198,5 +1198,7 @@ input[type=range]:focus::-ms-fill-lower {
 input[type=range]:focus::-ms-fill-upper {
   background: none;
 }
+/* ********** */
+/* ********** */
+/* ********** */
 </style>
-}

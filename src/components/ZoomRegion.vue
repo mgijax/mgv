@@ -216,7 +216,8 @@
           <!-- ======= Exons ======= -->
           <rect v-for="e in t.cds ? t.cds.pieces : t.exons"
             :key="e.ID"
-            class="exon noevents"
+            class="exon"
+            :name="e.transcript ? e.eIndex : null"
             :x="featureX(e)"
             :y="isUTR(t,e) ? featureHeight / 4 : 0"
             :width="featureW(e)"
@@ -986,12 +987,18 @@ export default MComponent({
       }
       const fid = f.getAttribute('name')
       const feat = this.fIndex[fid]
+      //
       const t = e.target.closest('.transcript')
       const tid = t ? t.getAttribute('name') : null
       const transcr = tid ? feat.transcripts.filter(t => t.ID === tid)[0] : null
+      //
+      const ex = transcr ? e.target.closest('.exon') : null
+      const ei = ex ? parseInt(ex.getAttribute('name')) : -1
+      const exon = ei >= 0 ? transcr.exons[ei] : null
       return {
         feature: feat,
-        transcript: transcr
+        transcript: transcr,
+        exon: exon
       }
     },
     mousemove: function (e) {
