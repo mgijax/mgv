@@ -272,8 +272,14 @@ class DataManager {
     })
   }
   _condenseExons (t) {
-    const exons = (t.children || []).filter(f => f[2] === "exon").sort(u.byChrStart)
-    return exons.map((e,i) => { return { start: e[3], end: e[4], eIndex:i, length: e[4] - e[3] + 1 } })
+    const exons = (t.children || []).filter(f => {
+        return f[2] === "exon" || f[2] === "pseudogenic_exon" || f[2] === "match_part"
+    }).sort(u.byChrStart)
+    if (exons.length) {
+        return exons.map((e,i) => { return { start: e[3], end: e[4], eIndex:i, length: e[4] - e[3] + 1 } })
+    } else {
+        return [{ start: t.start, end: t.end, eIndex: 0, length: t.end - t.start + 1 }]
+    }
   }
 
   _condenseCds (t, exons) {
@@ -292,24 +298,22 @@ class DataManager {
     const PUTR = strand === "+" ? '5_prime_utr' : '3_prime_utr'
     const DUTR = strand === "+" ? '3_prime_utr' : '5_prime_utr'
     const CDS = 'cds'
-    c.pieces = exons.reduce((a,r) => {
-      // make a copy so we don't munge the exon object
-      const x = { start: r.start, end: r.end }
-      if (x.end < c.start) {
-          a.push({ start: x.start, end: x.end, type: PUTR })
+    c.pieces = exons.reduce((a,e) => {
+      if (e.end < c.start) {
+          a.push({ start: e.start, end: e.end, type: PUTR, eIndex: e.eIndex })
       }
-      else if (x.start > c.end) {
-          a.push({ start: x.start, end: x.end, type: DUTR })
+      else if (e.start > c.end) {
+          a.push({ start: e.start, end: e.end, type: DUTR, eIndex: e.eIndex })
       } else {
-          const pUTR = { start: x.start, end: Math.min(c.start - 1, x.end), type: PUTR }
+          const pUTR = { start: e.start, end: Math.min(c.start - 1, e.end), type: PUTR, eIndex: e.eIndex }
           if (pUTR.start <= pUTR.end) a.push(pUTR)
-          const cds = { start: Math.max(c.start, x.start), end: Math.min(c.end, x.end), type: CDS }
+          const cds = { start: Math.max(c.start, e.start), end: Math.min(c.end, e.end), type: CDS, eIndex: e.eIndex }
           a.push(cds)
-          const dUTR = { start: Math.max(c.end + 1, x.start), end: x.end, type: DUTR }
+          const dUTR = { start: Math.max(c.end + 1, e.start), end: e.end, type: DUTR, eIndex: e.eIndex }
           if (dUTR.start <= dUTR.end) a.push(dUTR)
           //
-          if (c.start >= r.start && c.start <= r.end) r.cStart = c.start
-          if (c.end >= r.start && c.end <= r.end) r.cEnd = c.end
+          if (c.start >= e.start && c.start <= e.end) e.cStart = c.start
+          if (c.end >= e.start && c.end <= e.end) e.cEnd = c.end
       }
       return a
     }, [])
