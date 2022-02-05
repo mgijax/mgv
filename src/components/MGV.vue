@@ -271,14 +271,20 @@ export default MComponent({
       // ----------------------------------------------------
       // is left drawer open
       drawerOpen: true,
-      // while mouse is over a feature, its ID. Otherwise null.
+      // while mouse is over a feature, the feature object. Otherwise null.
       currentMouseover: null,
-      // while mouse is over a transcript, its ID. Otherwise null.
+      // while mouse is over a transcript, the transcript object. Otherwise null.
       currentMouseoverT: null,
+      // while mouse is over an exon, the exon object. Otherwise null.
+      currentMouseoverE: null,
       // user lists
       lists: [],
       // currently selected features
       currentSelection: [],
+      // currently selected transcripts
+      currentSelectionT: [],
+      // currently selected exons
+      currentSelectionE: [],
       // currently displayed list
       currentList: null,
       // index into currently diaplayed list (for cycling through the features)
@@ -313,9 +319,17 @@ export default MComponent({
         const h = this.currentMouseover ? this.dataManager.getHomologs(this.currentMouseover) : []
         return new Set(h)
     },
-    // returns current selection as a Set of features
+    // returns current feature selection as a Set
     csSet: function () {
         return new Set(this.currentSelection)
+    },
+    // returns current transcript selection as a Set
+    csSetT: function () {
+        return new Set(this.currentSelectionT)
+    },
+    // returns current exon selection as a Set
+    csSetE: function () {
+        return new Set(this.currentSelectionE)
     },
     // returns current selection and all their homologs (for currently visible genomes) as a Set of features
     csSetH: function () {
@@ -640,37 +654,82 @@ export default MComponent({
       window.setTimeout(this.resize.bind(this), 500)
     },
     // FIXME All these handlers for features really belong somewhere else
-    featureOver: function (f, t) {
+    featureOver: function (f, t, e) {
       this.currentMouseover = f
       this.currentMouseoverT = t
+      this.currentMouseoverE = e
     },
     featureOff: function () {
       this.currentMouseover = null
       this.currentMouseoverT = null
+      this.currentMouseoverE = null
     },
-    featureClick: function (f, t, e) {
-      if (e.shiftKey) {
-        const cs = this.currentSelection.filter(ff => !(ff.curie && ff.curie === f.curie))
-        if (cs.length !== this.currentSelection.length) {
-          this.setCurrentSelection(cs)
-          this.currentMouseover = null
-        } else {
-          this.addToCurrentSelection(f)
-        }
+    featureClick: function (f, t, e, ev) {
+      if (ev.shiftKey) {
+        this.featureShiftClick(f, t, e)
       } else {
-        this.setCurrentSelection(f)
+        if (e && e.dIndex !== undefined) {
+            t = e.tExons.map(te => te.transcript)
+            e = [].concat(e.tExons)
+        }
+        this.setCurrentSelection(f, t, e)
       }
-      if (e.altKey) {
+      if (ev.altKey) {
         this.$root.$emit('region-change', {
           op : 'feature-align',
           region: this.currRegion,
           features: this.currentSelection,
-          event: e,
+          event: ev,
           //basePos: this.clientXtoBase(e.clientX)
         })
       }
       this.$root.$emit('selection-state-changed')
       this.$root.$emit('context-changed')
+    },
+    featureShiftClick: function (f, t, e) {
+        if (e) {
+            if (e.tExons) {
+                // shift-clicked on a distinct exon in graph-stype gene view.
+                // If any of its tExons is currently selected, remove them all
+                // If none are currently selected, add them all
+                const someSelected = e.tExons.reduce((v,te) => v || this.csSetE.has(te), false)
+                if (someSelected) {
+                    e.tExons.forEach(te => {
+                        this.removeFromCurrentSelection(null, null, te)
+                        if (this.currentSelectionE.filter(ee => ee.transcript === te.transcript).length === 0) {
+                            this.removeFromCurrentSelection(null, te.transcript)
+                        }
+                    })
+                } else {
+                    const ts = e.tExons.map(te => te.transcript)
+                    this.addToCurrentSelection(null, ts, e.tExons)
+                }
+            } else if (this.csSetE.has(e)) {
+                // remove e from current selection
+                this.removeFromCurrentSelection(null, null, e)
+                // if no other exons still selected t, remove t
+                if (this.currentSelectionE.filter(ee => ee.transcript === t).length === 0) {
+                    this.removeFromCurrentSelection(null, t, null)
+                }
+            } else {
+                this.addToCurrentSelection(f, t, e)
+            }
+        } else if (t) {
+            if (this.csSetT.has(t)) {
+                this.removeFromCurrentSelection(null, t, null)
+                t.exons.forEach(te => this.removeFromCurrentSelection(null, null, te))
+            } else {
+                this.addToCurrentSelection(f, t, null)
+            }
+        } else if (this.csSet.has(f)) {
+            this.removeFromCurrentSelection(f, null, null)
+            f.transcripts.forEach(tt => {
+                tt.exons.forEach(ee => this.removeFromCurrentSelection(null, null, ee))
+                this.removeFromCurrentSelection(null, tt, null)
+            })
+        } else {
+            this.addToCurrentSelection(f, null, null)
+        }
     },
     verifyCurrentSelection: function (quietly) {
       if (this.currentSelection.length === 0) {
@@ -679,25 +738,36 @@ export default MComponent({
       }
       return true
     },
-    setCurrentSelection: function (f) {
-        if (Array.isArray(f)) {
-            this.clearCurrentSelection()
-            f.forEach(ff => this.addToCurrentSelection(ff))
-        } else {
-            this.currentSelection = [f]
-        }
+    setCurrentSelection: function (f, t, e) {
+        this.currentSelection  = [].concat(u.arrayify(f))
+        this.currentSelectionT = [].concat(u.arrayify(t))
+        this.currentSelectionE = [].concat(u.arrayify(e))
     },
-    addToCurrentSelection: function (f) {
-        if (Array.isArray(f)){
-            f.forEach(ff => this.addToCurrentSelection(ff))
-            return
-        }
-        const cs = this.currentSelection.filter(c => !(c.curie && c.curie === f.curie))
-        cs.push(f)
-        this.currentSelection = cs
+    addToCurrentSelection: function (f, t, e) {
+        u.arrayify(f).forEach(ff => {
+            this.currentSelection.indexOf(ff)  === -1 && this.currentSelection.push(ff)
+        })
+        u.arrayify(t).forEach(tt => {
+            this.currentSelectionT.indexOf(tt)  === -1 && this.currentSelectionT.push(tt)
+        })
+        u.arrayify(e).forEach(ee => {
+            this.currentSelectionE.indexOf(ee)  === -1 && this.currentSelectionE.push(ee)
+        })
     },
-    clearCurrentSelection: function (){
-        this.currentSelection = []
+    removeFromCurrentSelection: function (f, t, e) {
+        const _remove = (elt, lst) => {
+            const i = lst.indexOf(elt)
+            if (i >= 0) lst.splice(i, 1)
+            return i
+        }
+        u.arrayify(f).forEach(ff => _remove(ff, this.currentSelection))
+        u.arrayify(t).forEach(tt => _remove(tt, this.currentSelectionT))
+        u.arrayify(e).forEach(ee => _remove(ee, this.currentSelectionE))
+    },
+    clearCurrentSelection: function (onlyTranscripts){
+        if (!onlyTranscripts) this.currentSelection = []
+        this.currentSelectionT = []
+        this.currentSelectionE = []
     },
     setCurrentList: function (lst) {
       this.currentList = lst
@@ -905,17 +975,17 @@ export default MComponent({
       }
     })
     //
-    this.$root.$on('clear-selection', () => {
-      this.clearCurrentSelection()
+    this.$root.$on('clear-selection', d => {
+      this.clearCurrentSelection(d)
       this.$root.$emit('selection-state-changed')
       this.$root.$emit('context-changed')
     })
     //
     this.app.$root.$on('region-current', r => { this.currRegion = r ? r.region : null })
     //
-    this.$root.$on('feature-over', arg => this.featureOver(arg.feature, arg.transcript, arg.event))
-    this.$root.$on('feature-out', arg => this.featureOff(arg.feature, arg.transcript, arg.event))
-    this.$root.$on('feature-click', arg => this.featureClick(arg.feature, arg.transcript, arg.event))
+    this.$root.$on('feature-over', arg => this.featureOver(arg.feature, arg.transcript, arg.exon, arg.event))
+    this.$root.$on('feature-out', arg => this.featureOff(arg.feature, arg.transcript, arg.exon, arg.event))
+    this.$root.$on('feature-click', arg => this.featureClick(arg.feature, arg.transcript, arg.exon, arg.event))
     //
     this.$root.$on('list-click', data => {
       let lst = data.list || data

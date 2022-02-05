@@ -217,14 +217,15 @@
           <rect v-for="e in t.cds ? t.cds.pieces : t.exons"
             :key="e.ID"
             class="exon"
-            :name="e.transcript ? e.eIndex : null"
+            :name="e.eIndex"
             :x="featureX(e)"
             :y="isUTR(t,e) ? featureHeight / 4 : 0"
             :width="featureW(e)"
             :height="featureHeight * (isUTR(t,e) ? 0.5 : 1)"
             :fill="featureColor(f)"
             fill-opacity="0.5"
-            stroke="none"
+            :stroke="exonHighlighted(e) ? 'white' : 'none'"
+            stroke-width="2"
             />
           <!-- ======= Transcript axis line, arrow ======= -->
           <polyline
@@ -787,7 +788,11 @@ export default MComponent({
       return this.app.currentMouseover === f || this.app.currentMouseoverSet.has(f.curie)
     },
     transcriptHighlighted: function (t) {
-      return t === this.context.currentMouseoverT
+      return t === this.context.currentMouseoverT || this.app.csSetT.has(t)
+    },
+    exonHighlighted: function (e) {
+      e = e.tExon || e
+      return e === this.context.currentMouseoverE || this.app.csSetE.has(e)
     },
     // Returns true iff feature f is in the current selection list (ie it was actually clicked on)
     featureDirectlySelected: function (f) {
@@ -1021,12 +1026,24 @@ export default MComponent({
     mouseover: function (e) {
       //console.log('over', e)
       let f = this.getEventObjects(e)
-      if (f) this.$root.$emit('feature-over', { region: this.region, feature: f.feature, transcript: f.transcript, event: e })
+      if (f) this.$root.$emit('feature-over', {
+          region: this.region,
+          feature: f.feature,
+          transcript: f.transcript,
+          exon: f.exon,
+          event: e
+      })
     },
     mouseout: function (e) {
       //console.log('out', e)
       let f = this.getEventObjects(e)
-      if (f) this.$root.$emit('feature-out', { region: this.region, feature: f.feature, transcript: f.transcript, event: e })
+      if (f) this.$root.$emit('feature-out', {
+          region: this.region,
+          feature: f.feature,
+          transcript: f.transcript,
+          exon: f.exon,
+          event: e
+      })
     },
     clicked: function (e) {
       this.$root.$emit('region-current', { region: this.region })
@@ -1037,7 +1054,12 @@ export default MComponent({
       }
       let f = this.getEventObjects(e)
       if (f) {
-        this.$root.$emit('feature-click', { region: this.region, feature: f.feature, transcript: f.transcript, event: e })
+        this.$root.$emit('feature-click', {
+            region: this.region,
+            feature: f.feature,
+            transcript: f.transcript,
+            exon: f.exon,
+            event: e })
         e.stopPropagation()
       } else if (e.altKey) {
         // alt clicked on region background

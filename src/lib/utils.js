@@ -362,6 +362,12 @@ function niceBounds(axis_start, axis_end, num_ticks){
     }
 }
 //--------------------------------------
+// Turns anything into an array
+function arrayify (x) {
+    return (x === null || x === undefined) ? [] : Array.isArray(x) ? x : [x]
+}
+
+//--------------------------------------
 // Merges array B into array A.
 // Calls mergeItems for each pair of items (a,b)
 // Truncates A if B is shorter.
@@ -494,6 +500,7 @@ const set = {
 // ---------------------------------------------
 export default {
   afterTicks,
+  arrayify,
   assert,
   byChrStart,
   cols2rows,

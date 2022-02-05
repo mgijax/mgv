@@ -191,8 +191,9 @@ class DataManager {
               // Ok, transfer the transcripts to the gene. Remember f is a frozen object, so we can't
               // just assign f.transcripts = trs.  We have push transcripts into the existing array.
               if (trs.length) ngenes += 1
-              trs.forEach(t => {
+              trs.forEach((t,ti) => {
                   t.gene = f
+                  t.tIndex = ti
                   f.transcripts.push(t)
               })
               nadded += f.transcripts.length
@@ -300,16 +301,16 @@ class DataManager {
     const CDS = 'cds'
     c.pieces = exons.reduce((a,e) => {
       if (e.end < c.start) {
-          a.push({ start: e.start, end: e.end, type: PUTR, eIndex: e.eIndex })
+          a.push({ start: e.start, end: e.end, type: PUTR, eIndex: e.eIndex, tExon: e })
       }
       else if (e.start > c.end) {
-          a.push({ start: e.start, end: e.end, type: DUTR, eIndex: e.eIndex })
+          a.push({ start: e.start, end: e.end, type: DUTR, eIndex: e.eIndex, tExon: e })
       } else {
-          const pUTR = { start: e.start, end: Math.min(c.start - 1, e.end), type: PUTR, eIndex: e.eIndex }
+          const pUTR = { start: e.start, end: Math.min(c.start - 1, e.end), type: PUTR, eIndex: e.eIndex, tExon: e }
           if (pUTR.start <= pUTR.end) a.push(pUTR)
-          const cds = { start: Math.max(c.start, e.start), end: Math.min(c.end, e.end), type: CDS, eIndex: e.eIndex }
+          const cds = { start: Math.max(c.start, e.start), end: Math.min(c.end, e.end), type: CDS, eIndex: e.eIndex, tExon: e }
           a.push(cds)
-          const dUTR = { start: Math.max(c.end + 1, e.start), end: e.end, type: DUTR, eIndex: e.eIndex }
+          const dUTR = { start: Math.max(c.end + 1, e.start), end: e.end, type: DUTR, eIndex: e.eIndex, tExon: e }
           if (dUTR.start <= dUTR.end) a.push(dUTR)
           //
           if (c.start >= e.start && c.start <= e.end) e.cStart = c.start

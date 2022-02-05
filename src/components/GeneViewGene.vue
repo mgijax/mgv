@@ -11,7 +11,7 @@
             :height="height+8"
             fill="#ffffff"
             opacity="0"
-            @click="clearSelectedExons"
+            @click="clearSelectedTranscripts"
             />
         <!-- Drawing area. Transformed so to line of text is visible. -->
         <g transform="translate(0,8)" >
@@ -33,7 +33,7 @@
                   >
                   <!-- the box -->
                   <rect
-                      :name="de.dIndex"
+                      :name="'*.' + de.dIndex"
                       class="exon"
                       :x="de.x"
                       :y="de.y"
@@ -41,6 +41,7 @@
                       :height="exonHeight"
                       :fill="exonFillColor(de)"
                       :stroke="exonBorderColor(de)"
+                      :stroke-width="exonBorderWidth(de)"
                       @click="clickExon"
                       />
                   <!-- start/stop codon markers -->
@@ -48,19 +49,21 @@
                       :key="`cdss.${ri}.${ti}`"
                       >
                       <line v-if="te.cStartX"
+                          :class="myGene.strand==='+' ? 'start-codon' : 'stop-codon'"
                           :x1="te.cStartX"
                           :y1="de.y"
                           :x2="te.cStartX"
                           :y2="de.y + exonHeight"
-                          :stroke="myGene.strand==='-' ? 'red' : 'cyan'"
+                          :stroke="myGene.strand==='+' ? 'cyan' : 'red'"
                           stroke-width="2"
                           />
                       <line v-if="te.cEndX"
+                          :class="myGene.strand==='+' ? 'stop-codon' : 'start-codon'"
                           :x1="te.cEndX"
                           :y1="de.y"
                           :x2="te.cEndX"
                           :y2="de.y + exonHeight"
-                          :stroke="myGene.strand==='-' ? 'cyan' : 'red'"
+                          :stroke="myGene.strand==='+' ? 'red' : 'cyan'"
                           stroke-width="2"
                           />
                   </g> <!-- start/stop codons -->
@@ -81,6 +84,8 @@
               <!-- each transcript -->
               <g v-for="(t, ti) in myGene.transcripts"
                   :key="'transcript'+ti"
+                  class="transcript"
+                  :name="t.ID"
                   >
                   <g v-for="(te, tei) in t.exons"
                     :key="'exon'+ti+'.'+tei"
@@ -88,16 +93,18 @@
                       <!-- exons -->
                       <rect 
                           class="exon"
-                          :name="te.de.dIndex"
+                          :name="t.tIndex + '.' + te.eIndex"
                           :x="te.x"
                           :y="te.y + ti * (exonHeight+vertGap)"
                           :width="te.width"
                           :height="exonHeight"
                           :fill="exonFillColor(te)"
                           :stroke="exonBorderColor(te)"
+                          :stroke-width="exonBorderWidth(te)"
                           @click="clickExon"
                           />
                       <line v-if="te.cStartX"
+                          :class="myGene.strand==='+' ? 'start-codon' : 'stop-codon'"
                           :x1="te.cStartX"
                           :y1="te.y + ti * (exonHeight+vertGap)"
                           :x2="te.cStartX"
@@ -106,6 +113,7 @@
                           stroke-width="2"
                           />
                       <line v-if="te.cEndX"
+                          :class="myGene.strand==='+' ? 'stop-codon' : 'start-codon'"
                           :x1="te.cEndX"
                           :y1="te.y + ti * (exonHeight+vertGap)"
                           :x2="te.cEndX"
@@ -191,46 +199,21 @@ export default MComponent({
       //
       height: 100,
       ppb: 0.5,
-      connectors: [],
-      overExon: null,
-      selectedExons: [],
-      geneWidth: 800
+      geneWidth: 800,
+      connectors: []
     }
   },
   mounted: function () {
-      this.$watch('$props', () => this.layout(), {deep:true})
-      if (this.gene) this.layout().then(() => { this.myGene = this.gene })
+      this.$watch('$props', () => this.forceRedraw(), {deep:true})
+      this.$root.$on('selection-state-changed', () => this.forceRedraw())
+      if (this.gene) this.forceRedraw()
   },
   watch: {
-      // Watch for changes to the gene property.
-      gene:          function () { this.forceRedraw() },
-      selectedExons: function () { this.forceRedraw() }
+      gene: function () { this.forceRedraw() }
   },
   computed: {
-      overTranscripts: function () {
-          if (!this.overExon) return []
-          // mouse is over a distinct exon. Traverse from d.e. to 
-          // transcript exons to transcripts
-          const tes = this.overExon.tExons
-          const ts = Array.from(new Set(tes.map(e => e.transcript)))
-          return ts
-      },
-      selectedExonSet: function () {
-          return new Set(this.selectedExons)
-      },
-      selectedTranscripts: function () {
-          return Array.from(this.selectedTranscriptSet)
-      },
-      selectedTranscriptSet: function () {
-          if (this.selectedExons.length === 0) return new Set()
-          const sts = this.selectedExons.reduce((s,de) => {
-              de.tExons.forEach(te => s.add(te.transcript))
-              return s
-          }, new Set())
-          return sts
-      },
       statusText: function () {
-          const labels = this.selectedTranscripts.map(t => t.label)
+          const labels = this.app.currentSelectionT.map(t => t.label)
           return labels.join(", ") || "."
       },
       featureColor () {
@@ -244,58 +227,74 @@ export default MComponent({
         })
     },
     // given the div representing an exon, return that exon
-    elt2exon (elt) {
-      const eElt = elt.closest('.exon,.exon-label')
-      if (!eElt) return null
-      const ei = parseInt(eElt.getAttribute('name'))
-      const de = this.gene.composite.dExons[ei]
-      return de
+    getEventObjects (e) {
+      const ex = e.target.closest('.exon')
+      let feature = this.myGene
+      let transcript = null
+      let exon = null
+      if (ex) {
+          const nparts = ex.getAttribute('name').split(".")
+          const ei = parseInt(nparts[1])
+          if (nparts[0] === "*") {
+              transcript = this.myGene.composite
+              exon = this.myGene.composite.dExons[ei]
+          } else {
+              const ti = parseInt(nparts[0])
+              transcript = this.myGene.transcripts[ti]
+              exon = transcript.exons[ei]
+          }
+      }
+      return {
+        feature,
+        transcript,
+        exon
+      }
     },
-    mouseoverExon (evt) {
-      this.overExon = this.elt2exon(evt.target)
+    mouseoverExon () {
     },
     mouseoutExon () {
-      this.overExon = null
     },
-    clickExon (evt) {
-        const de = this.elt2exon(evt.target)
-        if (!de) return
-        this.selectExon(de, !evt.shiftKey)
-        evt.stopPropagation()
-        evt.preventDefault()
+    clickExon (ev) {
+      const o = this.getEventObjects(ev)
+      this.$root.$emit('feature-click', {
+        region: null,
+        feature: o.feature,
+        transcript: o.transcript,
+        exon: o.exon,
+        event: ev })
     },
     //
     // Returns true iff this exon is currently selected.
-    isExonSelected (de) {
-        return this.selectedExonSet.has(de)
+    isExonSelected (e) {
+        if (e.tExons) {
+            // distinct exon. Return true if a transcript exon selected 
+            return e.tExons.reduce((v,ex) => v || this.app.csSetE.has(ex), false)
+        } else if (e.tExon) {
+            // CDS part. Return true iff its transcript exon selected
+            return this.app.csSetE.has(e.tExon)
+        } else {
+            // transcript exon
+            return this.app.csSetE.has(e)
+        }
     },
     // If e is a transcript exon, returns true iff e.transcript is selected.
     // If e is a distinct exon, returns true iff te.transcipt is selected for any te in e.tExons.
     isTranscriptSelected (e) {
         if (e.transcript) {
             // e is a transcript exon
-            return this.selectedTranscriptSet.has(e.transcript)
+            return this.app.csSetT.has(e.transcript)
+        } else if (e.tExon) {
+            // e is a CDS "piece" generated from an exon
+            return this.app.csSetT.has(e.tExon.transcript)
         } else {
             // e is a distinct exon
             return e.tExons.reduce((v,te) => {
-                return v || this.selectedTranscriptSet.has(te.transcript)
+                return v || this.app.csSetT.has(te.transcript)
             }, false)
         }
     },
-    // Add exon to selected set. If unselectOthers is true,
-    // also removes everything else from the set.
-    selectExon (de, unselectOthers) {
-        if (unselectOthers) this.clearSelectedExons()
-        this.selectedExons.push(de)
-    },
-    // Removes exon from the selected set.
-    unselectExon (de) {
-        const i = this.selectedExons.indexOf(de)
-        if (i >= 0) this.selectedExons.splice(i,1)
-    },
-    // Empties the selection set.
-    clearSelectedExons () {
-        this.selectedExons = []
+    clearSelectedTranscripts () {
+        this.$root.$emit('clear-selection', true)
     },
     // Assigns coordinates to exons and computes connector paths.
     layout () {
@@ -407,18 +406,26 @@ export default MComponent({
     },
     exonFillColor (e) {
         if (this.isTranscriptSelected(e)) {
-            return this.selectedColor
+            return this.featureColor
         }
         return this.featureColor
     },
     exonBorderColor (e) {
-        let de = e.de || e
-        if (this.isTranscriptSelected(de)) {
-            return this.featureColor
-        } else if (this.isExonSelected(de)) {
+        if (this.isExonSelected(e)) {
+            return this.selectedColor
+        } else if (this.isTranscriptSelected(e)) {
             return this.selectedColor
         } else {
             return this.featureColor
+        }
+    },
+    exonBorderWidth (e) {
+        if (this.isExonSelected(e)) {
+            return 3
+        } else if (this.isTranscriptSelected(e)) {
+            return 1
+        } else {
+            return 0
         }
     },
     connectorColor (e1, e2) {
@@ -520,7 +527,7 @@ export default MComponent({
                 const e1 = t.exons[0]
                 const e2 = t.exons[t.exons.length - 1]
                 const y = j * (this.exonHeight+this.vertGap) + this.exonHeight / 2
-                const cColor = this.selectedTranscriptSet.has(e1.transcript) ? this.selectedColor : this.featureColor
+                const cColor = this.connectorColor(e1, e2)
                 return [cColor, ['L', e1.x + 2, y, e2.x + e2.width - 2, y ]]
             })
             this.connectors = segments
@@ -627,5 +634,9 @@ export default MComponent({
 .title {
     text-align: left;
     background-color: #bbb;
+}
+.start-codon,
+.stop-codon {
+    pointer-events: none;
 }
 </style>

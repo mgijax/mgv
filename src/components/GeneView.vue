@@ -118,7 +118,7 @@ export default MComponent({
       fitToWidth: false,
       fixedExonWidths: false,
       //
-      selectedColor: "#ffff00"
+      selectedColor: "#ffffff"
     }
   },
   mounted: function () {
