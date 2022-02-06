@@ -13,7 +13,7 @@
             opacity="0"
             @click="clearSelectedTranscripts"
             />
-        <!-- Drawing area. Transformed so to line of text is visible. -->
+        <!-- Drawing area. Transformed so the line of text is visible. -->
         <g transform="translate(0,8)" >
           <!-- connectors -->
           <path
@@ -43,6 +43,8 @@
                       :stroke="exonBorderColor(de)"
                       :stroke-width="exonBorderWidth(de)"
                       @click="clickExon"
+                      @mouseover="mouseoverExon"
+                      @mouseout="mouseoutExon"
                       />
                   <!-- start/stop codon markers -->
                   <g v-for="(te, ti) in de.tExons"
@@ -102,6 +104,8 @@
                           :stroke="exonBorderColor(te)"
                           :stroke-width="exonBorderWidth(te)"
                           @click="clickExon"
+                          @mouseover="mouseoverExon"
+                          @mouseout="mouseoutExon"
                           />
                       <line v-if="te.cStartX"
                           :class="myGene.strand==='+' ? 'start-codon' : 'stop-codon'"
@@ -184,6 +188,10 @@ export default MComponent({
       selectedColor: { // color to use to draw a selected exon
           type: String,
           default: "#00ff00"
+      },
+      selectedColor2: { // color to use to draw a selected exon
+          type: String,
+          default: "rgb(52, 255, 154)"
       }
   },
   inject: ['featureColorMap', 'dataManager'],
@@ -250,9 +258,23 @@ export default MComponent({
         exon
       }
     },
-    mouseoverExon () {
+    mouseoverExon (ev) {
+      const o = this.getEventObjects(ev)
+      this.$root.$emit('feature-over', {
+        region: null,
+        feature: o.feature,
+        transcript: o.transcript,
+        exon: o.exon,
+        event: ev })
     },
-    mouseoutExon () {
+    mouseoutExon (ev) {
+      const o = this.getEventObjects(ev)
+      this.$root.$emit('feature-out', {
+        region: null,
+        feature: o.feature,
+        transcript: o.transcript,
+        exon: o.exon,
+        event: ev })
     },
     clickExon (ev) {
       const o = this.getEventObjects(ev)
@@ -261,7 +283,14 @@ export default MComponent({
         feature: o.feature,
         transcript: o.transcript,
         exon: o.exon,
-        event: ev })
+        event: ev,
+        preserve: true }) // extra parameter to prevent unselecting anything else
+    },
+    //
+    isOverExon (e) {
+        const cme = this.app.currentMouseoverE
+        if (!cme) return false
+        return cme === e || (cme.de && cme.de === e)
     },
     //
     // Returns true iff this exon is currently selected.
@@ -411,8 +440,8 @@ export default MComponent({
         return this.featureColor
     },
     exonBorderColor (e) {
-        if (this.isExonSelected(e)) {
-            return this.selectedColor
+        if (this.isExonSelected(e) || this.isOverExon(e)) {
+            return this.selectedColor2
         } else if (this.isTranscriptSelected(e)) {
             return this.selectedColor
         } else {
@@ -420,7 +449,7 @@ export default MComponent({
         }
     },
     exonBorderWidth (e) {
-        if (this.isExonSelected(e)) {
+        if (this.isExonSelected(e) || this.isOverExon(e)) {
             return 3
         } else if (this.isTranscriptSelected(e)) {
             return 1
@@ -572,7 +601,6 @@ export default MComponent({
 
 <style scoped>
 .gene-view {
-    overflow: scroll;
 }
 .controls > * {
     flex-grow: 0;

@@ -224,8 +224,8 @@
             :height="featureHeight * (isUTR(t,e) ? 0.5 : 1)"
             :fill="featureColor(f)"
             fill-opacity="0.5"
-            :stroke="exonHighlighted(e) ? 'white' : 'none'"
-            stroke-width="2"
+            :stroke="exonHighlighted(e) ? 'rgb(52, 255, 154)' : 'none'"
+            :stroke-width="exonHighlighted(e) ? 3 : 1"
             />
           <!-- ======= Transcript axis line, arrow ======= -->
           <polyline
@@ -792,7 +792,7 @@ export default MComponent({
     },
     exonHighlighted: function (e) {
       e = e.tExon || e
-      return e === this.context.currentMouseoverE || this.app.csSetE.has(e)
+      return e === this.context.currentMouseoverE || this.app.csSetE.has(e) || (e.de && e.de === this.context.currentMouseoverE)
     },
     // Returns true iff feature f is in the current selection list (ie it was actually clicked on)
     featureDirectlySelected: function (f) {
@@ -1159,13 +1159,9 @@ export default MComponent({
     this.cbListSelection = () => {
       this.getFeatures()
     }
-    this.cbSelectionState = () => {
-      // this.getFeatures()
-    }
     //
     this.$root.$on('facet-state', this.cbFacetState)
     this.$root.$on('list-selection', this.cbListSelection)
-    this.$root.$on('selection-state-changed', this.cbSelectionState)
   },
   updated: function () {
     this.$root.$emit('region-update', this)
@@ -1173,7 +1169,6 @@ export default MComponent({
   destroyed: function () {
     this.$root.$off('facet-state', this.cbFacetState)
     this.$root.$off('list-selection', this.cbListSelection)
-    this.$root.$off('selection-state-changed', this.cbSelectionState)
     this.$emit('region-delete')
   },
   mounted: function () {

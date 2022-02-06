@@ -267,7 +267,7 @@ export default MComponent({
     flex-wrap: wrap;
     position: -webkit-sticky; /* Safari */
     position: sticky;
-    top: 0;
+    top: 18px;
     background-color: #e1e1e1;
     border: thin solid #c8c8c8;
     margin-bottom: 8px;

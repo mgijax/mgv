@@ -270,6 +270,10 @@ export default MComponent({
 .pagebox > [name="label"] {
   font-weight: bold;
   text-align: start;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background-color: #e1e1e1;
 }
 .pagebox > [name="label"] .material-icons {
   font-size: 14px;
@@ -278,6 +282,7 @@ export default MComponent({
   position: absolute;
   top: 2px;
   right: 2px;
+  z-index: 150;
 }
 .pagebox [name="buttonBox"] .m-button {
   margin-right: 8px;

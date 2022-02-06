@@ -664,7 +664,8 @@ export default MComponent({
       this.currentMouseoverT = null
       this.currentMouseoverE = null
     },
-    featureClick: function (f, t, e, ev) {
+    featureClick: function (f, t, e, ev, preserve) {
+      // selection logic
       if (ev.shiftKey) {
         this.featureShiftClick(f, t, e)
       } else {
@@ -672,8 +673,14 @@ export default MComponent({
             t = e.tExons.map(te => te.transcript)
             e = [].concat(e.tExons)
         }
-        this.setCurrentSelection(f, t, e)
+        if (!preserve) {
+            this.setCurrentSelection(f, t, e)
+        } else {
+            f.transcripts.forEach(t =>  this.removeFromCurrentSelection(null, t, t.exons))
+            this.addToCurrentSelection(f, t, e)
+        }
       }
+      // align on gene
       if (ev.altKey) {
         this.$root.$emit('region-change', {
           op : 'feature-align',
@@ -731,6 +738,9 @@ export default MComponent({
             this.addToCurrentSelection(f, null, null)
         }
     },
+    //
+    // Current selection methods
+    //
     verifyCurrentSelection: function (quietly) {
       if (this.currentSelection.length === 0) {
           !quietly && alert("Nothing selected. Click on a feature to select it. Shift-click to select multiple.")
@@ -769,6 +779,9 @@ export default MComponent({
         this.currentSelectionT = []
         this.currentSelectionE = []
     },
+    //
+    // Current list methods
+    //
     setCurrentList: function (lst) {
       this.currentList = lst
       const listFeats = u.flatten(lst.items.map(id => this.dataManager.getHomologs(id)))
@@ -787,6 +800,9 @@ export default MComponent({
       this.currentListSet = null
       this.currentListItem = 0
     },
+    //
+    // Key bindings
+    //
     initKeyBindings () {
       // Align
       this.keyManager.register({
@@ -985,7 +1001,7 @@ export default MComponent({
     //
     this.$root.$on('feature-over', arg => this.featureOver(arg.feature, arg.transcript, arg.exon, arg.event))
     this.$root.$on('feature-out', arg => this.featureOff(arg.feature, arg.transcript, arg.exon, arg.event))
-    this.$root.$on('feature-click', arg => this.featureClick(arg.feature, arg.transcript, arg.exon, arg.event))
+    this.$root.$on('feature-click', arg => this.featureClick(arg.feature, arg.transcript, arg.exon, arg.event, arg.preserve))
     //
     this.$root.$on('list-click', data => {
       let lst = data.list || data

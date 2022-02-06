@@ -73,7 +73,7 @@
             <span>{{statusText}}</span>
         </div>
     </div> <!-- end of sticky-header -->
-    <div>
+    <div style="overflow:scroll;">
         <gene-view-gene
             v-for="(g,i) in genes"
             :key="'gvg.'+i"
@@ -88,6 +88,7 @@
             :fixedExonWidths="fixedExonWidths"
             :fitToWidth="fitToWidth"
             :selectedColor="selectedColor"
+            :selectedColor2="selectedColor2"
             />
     </div>
   </div>
@@ -118,7 +119,8 @@ export default MComponent({
       fitToWidth: false,
       fixedExonWidths: false,
       //
-      selectedColor: "#ffffff"
+      selectedColor: "rgb(255, 255, 255)",
+      selectedColor2: "rgb(52, 255, 154)"
     }
   },
   mounted: function () {
@@ -141,7 +143,6 @@ export default MComponent({
 
 <style scoped>
 .gene-view {
-    overflow: scroll;
 }
 .controls > * {
     flex-grow: 0;
@@ -176,7 +177,7 @@ export default MComponent({
 .sticky-header {
   border-bottom: thin solid black;
   position: sticky;
-  top: 0;
+  top: 18px;
   left: 0;
   background-color: #e1e1e1;
   z-index: 10;

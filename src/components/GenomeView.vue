@@ -3,7 +3,7 @@
  */
 <template>
   <div class="flexcolumn">
-    <div class="flexrow" >
+    <div class="flexrow controls" >
       <!-- Genome selector -->
       <div>
         <select
@@ -353,6 +353,11 @@ export default MComponent({
 <style scoped>
 svg {
     width: 100%;
+}
+.controls {
+    position: sticky;
+    top: 18px;
+    background-color: #e1e1e1;
 }
 .rotate90 {
   transform: rotate(90deg)scale(1,-1);
