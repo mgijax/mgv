@@ -722,12 +722,14 @@ export default MComponent({
                 this.addToCurrentSelection(f, t, e)
             }
         } else if (t) {
-            if (this.csSetT.has(t)) {
-                this.removeFromCurrentSelection(null, t, null)
-                t.exons.forEach(te => this.removeFromCurrentSelection(null, null, te))
-            } else {
-                this.addToCurrentSelection(f, t, null)
-            }
+            u.arrayify(t).forEach(tt => {
+                if (this.csSetT.has(tt)) {
+                    this.removeFromCurrentSelection(null, tt, null)
+                    tt.exons.forEach(te => this.removeFromCurrentSelection(null, null, te))
+                } else {
+                    this.addToCurrentSelection(f, tt, null)
+                }
+            })
         } else if (this.csSet.has(f)) {
             this.removeFromCurrentSelection(f, null, null)
             f.transcripts.forEach(tt => {

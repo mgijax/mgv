@@ -289,23 +289,37 @@ export default MComponent({
         event: ev,
         preserve: true }) // extra parameter to prevent unselecting anything else
     },
+    connectorToTranscripts (e1, e2) {
+      if (e1.tExons) {
+          const tes = e1.tExons.filter(te1 => {
+              const t = te1.transcript
+              let v= false
+              e2.tExons.forEach(te2 => {
+                  const t2 = te2.transcript
+                  v = v || (t === t2 && te2.eIndex === te1.eIndex + 1)
+              })
+              return v
+          })
+          const ts = Array.from(new Set(tes.map(te => te.transcript)))
+          return ts
+      } else {
+          if (e1.transcript === e2.transcript) {
+              return [e1.transcript]
+          } else {
+              return []
+          }
+      }
+    },
     clickConnector (ev) {
       const c = ev.target.closest(".connector")
-      const cn = c.getAttribute('name').split("_")
-      const ei1 = parseInt(cn[0])
-      const ei2 = parseInt(cn[1])
+      const cn = c.getAttribute('name').split(".")
+      const ti = cn[0] === "*" ? -1 : parseInt(cn[0])
+      const t = ti === -1 ? null : this.myGene.transcripts[ti]
+      const ei1 = parseInt(cn[1])
+      const ei2 = parseInt(cn[2])
       const de1 = this.myGene.composite.dExons[ei1]
       const de2 = this.myGene.composite.dExons[ei2]
-      const tes = de1.tExons.filter(te1 => {
-          const t = te1.transcript
-          let v= false
-          de2.tExons.forEach(te2 => {
-              const t2 = te2.transcript
-              v = v || (t === t2 && te2.eIndex === te1.eIndex + 1)
-          })
-          return v
-      })
-      const ts = Array.from(new Set(tes.map(te => te.transcript)))
+      const ts = t ? [t] : this.connectorToTranscripts(de1, de2)
       this.$root.$emit('feature-click', {
         region: null,
         feature: this.myGene,
@@ -489,11 +503,9 @@ export default MComponent({
         }
     },
     connectorColor (e1, e2) {
-        if (this.isTranscriptSelected(e1) && this.isTranscriptSelected(e2)) {
-            return this.selectedColor
-        } else {
-            return this.featureColor
-        }
+        const myTs = this.connectorToTranscripts(e1, e2)
+        const highlighted = myTs.reduce((v,t) => v || this.app.csSetT.has(t), false)
+        return highlighted ? this.selectedColor : this.featureColor
     },
     layoutConnectors () {
         if (this.showTranscriptGraph) {
@@ -522,7 +534,7 @@ export default MComponent({
                     // If so, we're done.
                     // Otherwise create (and cache) a new connector.
                     const cc = this.connectorCache
-                    const cc_key = `${pde.dIndex}_${cde.dIndex}`
+                    const cc_key = `*.${pde.dIndex}.${cde.dIndex}`
                     if (cc[cc_key]) {
                         return
                     }
@@ -586,7 +598,7 @@ export default MComponent({
             const segments = this.gene.transcripts.map((t,j) => {
                 const e1 = t.exons[0]
                 const e2 = t.exons[t.exons.length - 1]
-                const ckey = `${e1.eIndex}_${e2.eIndex}`
+                const ckey = `${j}.${e1.eIndex}.${e2.eIndex}`
                 const y = j * (this.exonHeight+this.vertGap) + this.exonHeight / 2
                 const cColor = this.connectorColor(e1, e2)
                 return [ckey, cColor, ['L', e1.x + 2, y, e2.x + e2.width - 2, y ]]
