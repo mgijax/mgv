@@ -774,10 +774,16 @@ export default MComponent({
         u.arrayify(t).forEach(tt => _remove(tt, this.currentSelectionT))
         u.arrayify(e).forEach(ee => _remove(ee, this.currentSelectionE))
     },
-    clearCurrentSelection: function (onlyTranscripts){
-        if (!onlyTranscripts) this.currentSelection = []
-        this.currentSelectionT = []
-        this.currentSelectionE = []
+    clearCurrentSelection: function (gene){
+        if (!gene) {
+            this.currentSelection = []
+            this.currentSelectionT = []
+            this.currentSelectionE = []
+        } else {
+            gene.transcripts.forEach(t => {
+                this.removeFromCurrentSelection(null, t, t.exons)
+            })
+        }
     },
     //
     // Current list methods

@@ -67,6 +67,7 @@ export default MComponent({
 .status {
   height: 25px;
   width: 100%;
+  z-index: 200;
   font-size: 12px;
   font-weight: bold;
   transition: height 0.5s, opacity 0.5s;

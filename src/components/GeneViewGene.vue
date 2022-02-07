@@ -18,12 +18,14 @@
           <!-- connectors -->
           <path
               v-for="(ctor,cti) in connectors"
-              :key="'ctor'+cti"
+              :key="'ctor.'+cti"
+              :name="ctor[0]"
               class="connector"
-              :stroke="ctor[0]"
+              :stroke="ctor[1]"
               fill="none"
               stroke-width="2"
               :d="drawConnector(ctor)"
+              @click="clickConnector"
               />
           <!-- graph view -->
           <g v-if="showTranscriptGraph">
@@ -145,6 +147,7 @@
 
 <script>
 import MComponent from '@/components/MComponent'
+import u from '@/lib/utils'
 import { FeaturePacker } from '@/lib/Layout'
 export default MComponent({
   name: 'GeneViewGene',
@@ -286,6 +289,32 @@ export default MComponent({
         event: ev,
         preserve: true }) // extra parameter to prevent unselecting anything else
     },
+    clickConnector (ev) {
+      const c = ev.target.closest(".connector")
+      const cn = c.getAttribute('name').split("_")
+      const ei1 = parseInt(cn[0])
+      const ei2 = parseInt(cn[1])
+      const de1 = this.myGene.composite.dExons[ei1]
+      const de2 = this.myGene.composite.dExons[ei2]
+      const tes = de1.tExons.filter(te1 => {
+          const t = te1.transcript
+          let v= false
+          de2.tExons.forEach(te2 => {
+              const t2 = te2.transcript
+              v = v || (t === t2 && te2.eIndex === te1.eIndex + 1)
+          })
+          return v
+      })
+      const ts = Array.from(new Set(tes.map(te => te.transcript)))
+      this.$root.$emit('feature-click', {
+        region: null,
+        feature: this.myGene,
+        transcript: ts,
+        exon: null,
+        event: ev,
+        preserve: true }) // extra parameter to prevent unselecting anything else
+      u.debug(ts)
+    },
     //
     isOverExon (e) {
         const cme = this.app.currentMouseoverE
@@ -322,8 +351,10 @@ export default MComponent({
             }, false)
         }
     },
-    clearSelectedTranscripts () {
-        this.$root.$emit('clear-selection', true)
+    clearSelectedTranscripts (ev) {
+        if (! ev.shiftKey) {
+            this.$root.$emit('clear-selection', this.myGene)
+        }
     },
     // Assigns coordinates to exons and computes connector paths.
     layout () {
@@ -491,7 +522,7 @@ export default MComponent({
                     // If so, we're done.
                     // Otherwise create (and cache) a new connector.
                     const cc = this.connectorCache
-                    const cc_key = `${pde.dIndex},${cde.dIndex}`
+                    const cc_key = `${pde.dIndex}_${cde.dIndex}`
                     if (cc[cc_key]) {
                         return
                     }
@@ -500,7 +531,7 @@ export default MComponent({
                     //
                     const pce = pde.composite   // composite exon for d.e. j-1
                     const cce = cde.composite   // composite exon for d.e. j
-                    const segments = []
+                    const segments = [cc_key]
                     //
                     // The first element of segments is the color to draw them
                     segments.push(cColor)
@@ -555,9 +586,10 @@ export default MComponent({
             const segments = this.gene.transcripts.map((t,j) => {
                 const e1 = t.exons[0]
                 const e2 = t.exons[t.exons.length - 1]
+                const ckey = `${e1.eIndex}_${e2.eIndex}`
                 const y = j * (this.exonHeight+this.vertGap) + this.exonHeight / 2
                 const cColor = this.connectorColor(e1, e2)
-                return [cColor, ['L', e1.x + 2, y, e2.x + e2.width - 2, y ]]
+                return [ckey, cColor, ['L', e1.x + 2, y, e2.x + e2.width - 2, y ]]
             })
             this.connectors = segments
             this.connectorCache = {}
