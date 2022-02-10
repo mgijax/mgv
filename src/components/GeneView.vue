@@ -133,11 +133,7 @@ export default MComponent({
       exonHeight: function () { return parseFloat(this.exonHeightM) },
       exonWidth: function () { return parseFloat(this.exonWidthM) },
       intronGap: function () { return parseFloat(this.intronGapM) },
-      statusText: function () {
-          if (!this.genes || this.genes.length === 0) return "No genes selected."
-          //return this.genes.map(g => g.label).join(", ")
-          return this.app.currentSelectionT.map(t => t.label).join(", ")
-      }
+      statusText: function () { return "" }
   }
 })
 </script>

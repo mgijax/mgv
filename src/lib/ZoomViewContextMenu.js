@@ -104,7 +104,7 @@ function getMenus(thisObj) {
           if (seqtype === 'dna') {
             return this.dataManager().makeSequenceDescriptor(seqtype, ff)
           } else if (seqtype === 'composite transcript') {
-            return this.dataManager().makeSequenceDescriptor('composite transcript', ff, ff.composite)
+            return this.dataManager().makeSequenceDescriptor(seqtype, ff, ff.composite)
           } else if (seqtype === 'transcript') {
             const txps = allT ? ff.transcripts : [t]
             return txps.map(tt => {

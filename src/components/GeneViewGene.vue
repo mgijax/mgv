@@ -1,6 +1,16 @@
 <template>
   <div class="gene-view-gene gene flexcolumn" v-if="myGene">
-      <span class="title">{{myGene.genome.name}} :: {{myGene.symbol}}</span>
+      <span class="title flexrow">
+          <span>
+              <span>{{myGene.genome.name}} :: {{myGene.symbol}} </span>
+              <span class="small-label">{{selectedText}}</span>
+          </span>
+          <m-button
+              icon="shopping_cart"
+              title="Click to add selected transcripts to sequence cart."
+              @click="clickCart"
+              />
+      </span>
       <svg :height="height + 16" :width="geneWidth">
         <!-- underlay -->
         <rect
@@ -19,13 +29,15 @@
           <path
               v-for="(ctor,cti) in connectors"
               :key="'ctor.'+cti"
-              :name="ctor[0]"
+              :name="cti"
               class="connector"
-              :stroke="ctor[1]"
+              :stroke="connectorColor(ctor)"
+              :stroke-width="connectorStrokeWidth(ctor)"
               fill="none"
-              stroke-width="2"
               :d="drawConnector(ctor)"
               @click="clickConnector"
+              @mouseover="mouseoverConnector"
+              @mouseout="mouseoutConnector"
               />
           <!-- graph view -->
           <g v-if="showTranscriptGraph">
@@ -147,10 +159,12 @@
 
 <script>
 import MComponent from '@/components/MComponent'
-import u from '@/lib/utils'
 import { FeaturePacker } from '@/lib/Layout'
+//import u from '@/lib/utils'
+import MButton from '@/components/MButton'
 export default MComponent({
   name: 'GeneViewGene',
+  components: { MButton },
   props: {
       gene: {
           type: Object // the gene to draw. See note below with data() function.
@@ -211,7 +225,8 @@ export default MComponent({
       height: 100,
       ppb: 0.5,
       geneWidth: 800,
-      connectors: []
+      connectors: [],
+      overConnector: null
     }
   },
   mounted: function () {
@@ -229,6 +244,20 @@ export default MComponent({
       },
       featureColor () {
         return this.featureColorMap.getColor(this.gene)
+      },
+      overTranscripts: function () {
+          const oc = this.overConnector
+          if (oc) {
+              return new Set(this.connectorToTranscripts(oc.e1, oc.e2))
+          } else {
+              return new Set()
+          }
+      },
+      selectedText: function () {
+          return this.app.currentSelectionT.
+              filter(t => t.gene === this.myGene).
+              map(t => t.label).
+              join(", ")
       }
   },
   methods: {
@@ -261,6 +290,7 @@ export default MComponent({
         exon
       }
     },
+    //
     mouseoverExon (ev) {
       const o = this.getEventObjects(ev)
       this.$root.$emit('feature-over', {
@@ -310,16 +340,28 @@ export default MComponent({
           }
       }
     },
-    clickConnector (ev) {
+    // given the div representing an exon, return that exon
+    getEventConnector (ev) {
       const c = ev.target.closest(".connector")
-      const cn = c.getAttribute('name').split(".")
-      const ti = cn[0] === "*" ? -1 : parseInt(cn[0])
-      const t = ti === -1 ? null : this.myGene.transcripts[ti]
-      const ei1 = parseInt(cn[1])
-      const ei2 = parseInt(cn[2])
-      const de1 = this.myGene.composite.dExons[ei1]
-      const de2 = this.myGene.composite.dExons[ei2]
-      const ts = t ? [t] : this.connectorToTranscripts(de1, de2)
+      const cn = c ? parseInt(c.getAttribute('name')) : -1
+      const ctor = cn >= 0 ? this.connectors[cn] : null
+      return ctor
+    },
+    mouseoverConnector (ev) {
+        this.overConnector = this.getEventConnector (ev)
+    },
+    mouseoutConnector () {
+        this.overConnector = null
+    },
+    clickConnector (ev) {
+      const c = this.getEventConnector(ev)
+      if (!c) return
+      let ts
+      if (c.e1.transcript) {
+          ts = [ c.e1.transcript ]
+      } else {
+          ts = this.connectorToTranscripts(c.e1, c.e2)
+      }
       this.$root.$emit('feature-click', {
         region: null,
         feature: this.myGene,
@@ -327,7 +369,6 @@ export default MComponent({
         exon: null,
         event: ev,
         preserve: true }) // extra parameter to prevent unselecting anything else
-      u.debug(ts)
     },
     //
     isOverExon (e) {
@@ -425,6 +466,7 @@ export default MComponent({
           if (isNaN(de.y)) throw ("NaN detected")
           maxy = Math.max(maxy, de.y)
       })
+      /*
       // At this point, we can re-shuffle the vertical positions of exons
       // within each conting to try to lessen the line crossings in the final
       // diagram. 
@@ -445,6 +487,7 @@ export default MComponent({
               if (isNaN(de.y)) throw ("NaN detected")
           })
       })
+      */
 
       //
       if (this.showTranscriptGraph) {
@@ -502,8 +545,15 @@ export default MComponent({
             return 0
         }
     },
-    connectorColor (e1, e2) {
-        const myTs = this.connectorToTranscripts(e1, e2)
+    connectorStrokeWidth (ctor) {
+        if (ctor === this.overConnector) return 4
+        return 2
+    },
+    connectorColor (ctor) {
+        if (ctor === this.overConnector) return this.selectedColor2
+        const oh = this.connectorToTranscripts(ctor.e1, ctor.e2).reduce((v, t) => v || this.overTranscripts.has(t), false)
+        if (oh) return this.selectedColor2
+        const myTs = this.connectorToTranscripts(ctor.e1, ctor.e2)
         const highlighted = myTs.reduce((v,t) => v || this.app.csSetT.has(t), false)
         return highlighted ? this.selectedColor : this.featureColor
     },
@@ -539,24 +589,27 @@ export default MComponent({
                         return
                     }
                     // Determine color for connector.
-                    const cColor = this.connectorColor(pde, cde)
+                    // const cColor = this.connectorColor(pde, cde)
                     //
                     const pce = pde.composite   // composite exon for d.e. j-1
                     const cce = cde.composite   // composite exon for d.e. j
-                    const segments = [cc_key]
-                    //
-                    // The first element of segments is the color to draw them
-                    segments.push(cColor)
+                    const ctor = {
+                        key: cc_key,
+                        e1: pde,
+                        e2: cde,
+                        // color: cColor,
+                        segments: []
+                        }
                     //
                     if (pce === cce) {
                       // connecting two exons in the same contig. 
-                      segments.push(['C', pde.x+pde.width, pde.y+yAdjust, cde.x, cde.y+yAdjust])
-                      this.connectors.push(segments)
-                      cc[cc_key] = segments
+                      ctor.segments.push(['C', pde.x+pde.width, pde.y+yAdjust, cde.x, cde.y+yAdjust])
+                      this.connectors.push(ctor)
+                      cc[cc_key] = ctor
                       return
                     }
                     // Initial horizontal segment from right right end of de to right end of its ce
-                    segments.push(['L', pde.x+pde.width, pde.y+yAdjust, pce.x+pce.width, pde.y+yAdjust])
+                    ctor.segments.push(['L', pde.x+pde.width, pde.y+yAdjust, pce.x+pce.width, pde.y+yAdjust])
 
                     // Skipped exon(s). 
                     let pseg
@@ -570,46 +623,49 @@ export default MComponent({
                         const y = this.featurePacker.add(null, start, end, 1)
                         this.height = Math.max(this.height, y + this.exonHeight)
                         //
-                        pseg = segments[segments.length-1]
-                        segments.push(['C', pseg[3], pseg[4], fSkipped.x, y+yAdjust])
+                        pseg = ctor.segments[ctor.segments.length-1]
+                        ctor.segments.push(['C', pseg[3], pseg[4], fSkipped.x, y+yAdjust])
                         //
-                        pseg = segments[segments.length-1]
-                        segments.push(['L', pseg[3], pseg[4], lSkipped.x + lSkipped.width, pseg[4]])
+                        pseg = ctor.segments[ctor.segments.length-1]
+                        ctor.segments.push(['L', pseg[3], pseg[4], lSkipped.x + lSkipped.width, pseg[4]])
                     }
 
                     // Curved segment
-                    pseg = segments[segments.length-1]
-                    segments.push(['C', pseg[3], pseg[4], cce.x, cde.y+yAdjust])
+                    pseg = ctor.segments[ctor.segments.length-1]
+                    ctor.segments.push(['C', pseg[3], pseg[4], cce.x, cde.y+yAdjust])
 
                     // Final horizontal segment
-                    pseg = segments[segments.length-1]
-                    segments.push(['L', pseg[3], pseg[4], cde.x, cde.y+yAdjust])
+                    pseg = ctor.segments[ctor.segments.length-1]
+                    ctor.segments.push(['L', pseg[3], pseg[4], cde.x, cde.y+yAdjust])
 
                     // The list of segments is the new connector. Add it to the list.
-                    this.connectors.push(segments)
+                    this.connectors.push(ctor)
                     // Cache it
-                    cc[cc_key] = segments
+                    cc[cc_key] = ctor
                 })
             })
 
         } else {
             this.connectors = []
             // one transcript per line - add one connector per transcript from first exon to last
-            const segments = this.gene.transcripts.map((t,j) => {
+            this.connectors = this.gene.transcripts.map((t,j) => {
                 const e1 = t.exons[0]
                 const e2 = t.exons[t.exons.length - 1]
                 const ckey = `${j}.${e1.eIndex}.${e2.eIndex}`
                 const y = j * (this.exonHeight+this.vertGap) + this.exonHeight / 2
-                const cColor = this.connectorColor(e1, e2)
-                return [ckey, cColor, ['L', e1.x + 2, y, e2.x + e2.width - 2, y ]]
+                // const cColor = this.connectorColor(e1, e2)
+                return {
+                    key:ckey,
+                    e1: e1,
+                    e2: e2,
+                    // color:cColor,
+                    segments: [['L', e1.x + 2, y, e2.x + e2.width - 2, y ]]}
             })
-            this.connectors = segments
             this.connectorCache = {}
         }
     },
     drawConnector (ctor) {
-        const path = ctor.reduce((p,seg) => {
-            if (typeof(seg) === 'string') return p
+        const path = ctor.segments.reduce((p,seg) => {
             let pnew = [p]
             const cmd = seg[0]
             const x1 = seg[1]
@@ -638,6 +694,13 @@ export default MComponent({
         return this.dataManager().getGenes(g.genome, g.chr, g.start-1, g.end+1, true).then(() => {
             return g
         })
+    },
+    clickCart () {
+        const descs = this.myGene.transcripts.map(t => {
+            if (! this.app.csSetT.has(t)) return null
+            return this.dataManager().makeSequenceDescriptor('transcript', this.myGene, t)
+        }).filter(x => x)
+        this.$root.$emit("sequence-selected", { sequences : descs, unselectAll : true })
     }
   }
 })
@@ -667,10 +730,6 @@ export default MComponent({
   color: black;
 }
 .connector {
-}
-.connector:hover {
-    stroke-width: 3;
-    stroke: orange;
 }
 .small-label {
   font-size: 10px;

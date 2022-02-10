@@ -19,7 +19,7 @@
             </th>
       </tr>
       <tr
-        v-for="(f,i) in features"
+        v-for="(f,i) in sortedFeatures"
         :key="i"
         class="featureRow"
         :class="{ current: isCurrent(f) }"

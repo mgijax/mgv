@@ -38,6 +38,14 @@ class FeaturePacker {
         this.id2feat = new Map()
         this.maxY = 0
     }
+    // Adds a "feature" to the layout.
+    // Args:
+    //    fId     - (string) the id of the feature (optional)
+    //    fStart  - (integer) start coordinate
+    //    eEnd    - (integer) end coordinate
+    //    fHeight - (integer) size in y dimension
+    //    noPackY - (boolean) if true, does not try to find gaps in the
+    //                  the y-dimension; new features stack on top.
     add (fId, fStart, fEnd, fHeight, noPackY) {
         if (fId && this.id2feat.has(fId)) {
             return this.id2feat.get(fId).y
