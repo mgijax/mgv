@@ -98,6 +98,7 @@
 import MComponent from '@/components/MComponent'
 import GeneViewGene from '@/components/GeneViewGene'
 import MButton from '@/components/MButton'
+//import u from '@/lib/utils'
 export default MComponent({
   name: 'GeneView',
   components: { MButton, GeneViewGene },
@@ -124,8 +125,13 @@ export default MComponent({
     }
   },
   mounted: function () {
+    const pw = () => this.$parent.$el.getBoundingClientRect().width
+    this.width = pw()
     this.$root.$on('resize', () => {
-        this.width = this.$el.getBoundingClientRect().width
+        this.width = pw()
+    })
+    this.$parent.$on('pagebox-open', () => {
+        this.width = pw()
     })
   },
   computed: {
