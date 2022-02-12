@@ -245,21 +245,23 @@ class DataManager {
                   const exons = this._condenseExons(t)
                   const tlen = t[4] - t[3] + 1
                   const cds = this._condenseCds(t, exons)
-                  const attrs = t[8]
-                  const tt= {
-                    gID: attrs['Parent'],
-                    ID: attrs['ID'],
-                    label: this.stripPrefix(attrs['Name'] || attrs['transcript_id'] || attrs['ID']),
-                    transcript_id: attrs['transcript_id'],
-                    exons: exons,
-                    start: t[3],
-                    end: t[4],
-                    strand: t[6],
-                    length: tlen,
-                    cds: cds
-                  }
+                  const tt = gff3.record2object(t)
+                  const attrs = tt.attributes
+                  tt.gID = attrs['Parent']
+                  tt.ID = attrs['ID']
+                  tt.label = this.stripPrefix(attrs['Name'] || attrs['transcript_id'] || attrs['ID'])
+                  tt.transcript_id = attrs['transcript_id']
+                  tt.exons = exons
+                  tt.length = tlen
+                  tt.cds = cds
+                  tt.genome = g
+                  tt.chr = c
                   // backrefs from exons to the transcript
-                  tt.exons.forEach(e => e.transcript = tt)
+                  tt.exons.forEach(e => {
+                      e.transcript = tt
+                      e.genome = tt.genome
+                      e.chr = tt.chr
+                  })
                   return tt
               })
               nts.sort((a,b) => {
@@ -277,9 +279,18 @@ class DataManager {
         return f[2] === "exon" || f[2] === "pseudogenic_exon" || f[2] === "match_part"
     }).sort(u.byChrStart)
     if (exons.length) {
-        return exons.map((e,i) => { return { start: e[3], end: e[4], eIndex:i, length: e[4] - e[3] + 1 } })
+        return exons.map((e,i) => {
+            const ee = gff3.record2object(e)
+            ee.eIndex = i
+            ee.length = ee.end - ee.start + 1
+            return ee
+        })
     } else {
-        return [{ start: t.start, end: t.end, eIndex: 0, length: t.end - t.start + 1 }]
+        // concoct an "exon" for drawing purposes
+        const ee = gff3.record2object([t.seqid, t.source, t.type, t.start, t.end, t.score, t.strand, '.', {} ])
+        ee.eIndex = 0
+        ee.length = ee.end - ee.start + 1
+        return [ ee ]
     }
   }
 

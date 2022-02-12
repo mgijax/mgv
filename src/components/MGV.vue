@@ -135,8 +135,9 @@
           <feature-details
             ref="featureDetails"
             title="Shows details of current selected features and their homologs."
-            :features="csListH"
-            :currentMouseover="currentMouseover"
+            :genes="csSetH"
+            :transcripts="currentSelectionT"
+            :exons="currentSelectionE"
             />
         </page-box>
       </page-box-container>

@@ -24,8 +24,9 @@ const attributes = 8
 
 // Turns a parsed GFF3 line (an array with 9 items, the last of which is an object) into
 // an object where:
-//    - columns 1-8 are assigned to named fields
-//    - all the attributes in column 9 are attributes of the returned object
+//    - columns 1-8 are assigned to named fields (defined by GFF3 standard)
+//    - column 9 data stored in a field named 'attributes'.
+// If second (optionl) argument is true, col 9 attributes are 'flattened' into main return obj.
 function record2object (r, flattenAttributes) {
   const o = {}
   o.seqid = r[seqid]
