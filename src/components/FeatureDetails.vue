@@ -23,52 +23,51 @@
     </div>
     <div class="feature-table-wrapper">
         <table class="feature-table">
-          <tr>
-            <th>Genome</th>
-            <th>Symbol</th>
-            <th>Seqid</th>
-            <th>Source</th>
-            <th>Type</th>
-            <th>Start</th>
-            <th>End</th>
-            <th style="width:40px;">Score</th>
-            <th style="width:40px;">Strand</th>
-            <th style="width:40px;">Phase</th>
-            <th style="width:50%;padding-left:16px;">
-                Attributes
-                <i title="Open all" @click="openAllAttributes" class="material-icons">add_circle</i>
-                <i title="Close all" @click="closeAllAttributes" class="material-icons">remove_circle</i>
-                </th>
+          <tr @click="toggleColumn">
+            <th v-for="(col, ci) in columns"
+                :key="'col.'+ci"
+                :style="col.thStyle"
+                :class="{ collapsed: isCollapsed(ci) }"
+                >
+                {{col.name}}
+                <i v-if="col.name==='Attributes'"
+                    title="Open all"
+                    @click="openAllAttributes"
+                    class="material-icons"
+                    >add_circle</i>
+                <i v-if="col.name==='Attributes'"
+                    title="Close all"
+                    @click="closeAllAttributes"
+                    class="material-icons"
+                    >remove_circle</i>
+            </th>
           </tr>
           <tr
             v-for="(f,i) in features"
             :key="i"
             class="featureRow"
             >
-            <td>{{f && f.genome.name || '.'}}</td>
-            <td>{{f && f.label || '.'}}</td>
-            <td>{{f && f.chr.name || '.'}}</td>
-            <td>{{f && f.source || '.'}}</td>
-            <td>{{f && f.type || '.'}}</td>
-            <td>{{f && f.start || '.'}}</td>
-            <td>{{f && f.end || '.'}}</td>
-            <td style="text-align:center;">{{f && f.score || '.'}}</td>
-            <td style="text-align:center;">{{f && f.strand || '.'}}</td>
-            <td style="text-align:center;">{{f && f.phase || '.'}}</td>
-            <td class="attributes closed">
-                <!-- when closed, shows this -->
-                <span class="closed-text">{{ attributesClosedText(f) }}</span>
-                <!-- when opened, list attributes one per line -->
-                <table>
-                    <tr v-for="(av,j) in attributesAsList(f)"
-                      :key= "`f${i}a${j}`"
-                      >
-                      <td>{{av[0]}}</td>
-                      <td><span class="crawling-text" @mouseover="startcrawl" @mouseout="stopcrawl" >{{av[1]}}</span></td>
-                    </tr>
-                </table>
-                <i @click="clicked" class="material-icons open">add_circle</i>
-                <i @click="clicked" class="material-icons close">remove_circle</i>
+            <td v-for="(col, ci) in columns"
+                :key="'col.td.'+ci"
+                :style="col.tdStyle"
+                :class="col.tdClass"
+                >
+                <span v-if="col.name !== 'Attributes'">{{getCellValue(f, col.value)}}</span>
+                <template v-else>
+                    <!-- when closed, shows this -->
+                    <span class="closed-text">{{ attributesClosedText(f) }}</span>
+                    <!-- when opened, list attributes one per line -->
+                    <table>
+                        <tr v-for="(av,j) in attributesAsList(f)"
+                          :key= "`f${i}a${j}`"
+                          >
+                          <td>{{av[0]}}</td>
+                          <td><span class="crawling-text" @mouseover="startcrawl" @mouseout="stopcrawl" >{{av[1]}}</span></td>
+                        </tr>
+                    </table>
+                    <i @click="clicked" class="material-icons open">add_circle</i>
+                    <i @click="clicked" class="material-icons close">remove_circle</i>
+                </template>
             </td>
           </tr>
         </table>
@@ -79,6 +78,7 @@
 <script>
 import MComponent from '@/components/MComponent'
 import MButton from '@/components/MButton'
+//import u from '@/lib/utils'
 export default MComponent({
   name: 'FeatureDetails',
   props: ['genes', 'transcripts', 'exons'],
@@ -86,7 +86,60 @@ export default MComponent({
   data: function () {
       return {
           showTranscripts: 'selected', // one of: all, selected, none
-          showExons: 'selected' // one of: all, selected, none
+          showExons: 'selected', // one of: all, selected, none
+          collapsed: new Set(), // cellIndex vals for columns to be drawn collapsed
+          columns: [{
+              name: "Genome",
+              value: "genome.name",
+              tdClass: { collapsed: false }
+          }, {
+              name: "Symbol",
+              value: "label",
+              tdClass: { collapsed: false }
+          }, {
+              name: "Seqid",
+              value: "seqid",
+              tdClass: { collapsed: false }
+          }, {
+              name: "Source",
+              value: "source",
+              tdClass: { collapsed: false }
+          }, {
+              name: "Type",
+              value: "type",
+              tdClass: { collapsed: false }
+          }, {
+              name: "Start",
+              value: "start",
+              tdClass: { collapsed: false }
+          }, {
+              name: "End",
+              value: "end",
+              tdClass: { collapsed: false }
+          }, {
+              name: "Score",
+              value: "score",
+              tdClass: { collapsed: false },
+              thStyle: "width:40px;",
+              tdStyle: "text-align:center;"
+          }, {
+              name: "Strand",
+              value: "strand",
+              tdClass: { collapsed: false },
+              thStyle: "width:40px;",
+              tdStyle: "text-align:center;"
+          }, {
+              name: "Phase",
+              value: "phase",
+              tdClass: { collapsed: false },
+              thStyle: "width:40px;",
+              tdStyle: "text-align:center;"
+          }, {
+              name: "Attributes",
+              value: "attributes",
+              tdClass: { collapsed: false, attributes: true, open: false, closed: true },
+              thStyle: "width:50%;padding-left:16px;"
+          }]
       }
   },
   computed: {
@@ -122,6 +175,12 @@ export default MComponent({
     }
   },
   methods: {
+    getCellValue: function (f, name) {
+        return name.split('.').reduce((v,n) => {
+            if (!v || v[n] === undefined) return '.'
+            return v[n]
+        }, f)
+    },
     featureSorter: function (a, b) {
         const ag = a.genome.name
         const bg = b.genome.name
@@ -132,29 +191,41 @@ export default MComponent({
         return a.start - b.start
     },
     clicked: function (e) {
-        const tbl = e.target.closest('td.attributes')
-        this.toggleAttributes(tbl)
+        const td = e.target.closest('td.attributes')
+        this.toggleAttributes(td)
     },
-    openAttributes  (tbl) {
-        tbl.classList.remove('closed')
-        tbl.classList.add('open')
+    toggleColumn (ev) {
+        const th = ev.target.closest('th')
+        if (!th) return
+        const ci = th.cellIndex
+        const tdc = this.columns[ci].tdClass
+        tdc.collapsed = !tdc.collapsed
     },
-    closeAttributes (tbl) {
-        tbl.classList.add('closed')
-        tbl.classList.remove('open')
+    isCollapsed (cellIndex) {
+        return this.columns[cellIndex].tdClass.collapsed
     },
-    toggleAttributes: function (tbl) {
-        if (tbl.classList.contains('closed')) {
-            this.openAttributes(tbl)
+    openAttributes  (td) {
+        td.classList.add('open')
+        td.classList.remove('closed')
+    },
+    closeAttributes (td) {
+        td.classList.add('closed')
+        td.classList.remove('open')
+    },
+    toggleAttributes: function (td) {
+        if (td.classList.contains('open')) {
+            this.closeAttributes(td)
         } else {
-            this.closeAttributes(tbl)
+            this.openAttributes(td)
         }
     },
-    openAllAttributes () {
+    openAllAttributes (ev) {
         this.$el.querySelectorAll('td.attributes').forEach(t => this.openAttributes(t))
+        ev.stopPropagation()
     },
-    closeAllAttributes () {
+    closeAllAttributes (ev) {
         this.$el.querySelectorAll('td.attributes').forEach(t => this.closeAttributes(t))
+        ev.stopPropagation()
     },
     attributesClosedText (f) {
         const p = f.gene || f.transcript
@@ -212,7 +283,14 @@ export default MComponent({
 <style scoped>
 .feature-details {
 }
-.feature-table {
+.feature-table th,
+.feature-table td {
+    padding-right: 10px;
+}
+.feature-table th.collapsed,
+.feature-table td.collapsed {
+    max-width: 4px;
+    margin-right: 8px;
 }
 .feature-table-wrapper {
     max-height: 400px;
@@ -225,15 +303,21 @@ export default MComponent({
     background: #e1e1e1;
     justify-content: flex-start;
 }
-table {
+.feature-table {
   font-size: 12px;
   white-space: nowrap;
   border-spacing: 0px;
 }
-table * {
+.feature-table * {
   vertical-align: top;
   text-align: left;
   overflow: hidden;
+}
+th > i.material-icons {
+  opacity: 0;
+}
+th:hover > i.material-icons {
+  opacity: 1;
 }
 td.attributes.closed tr:nth-child(1) {
   display: inherit;

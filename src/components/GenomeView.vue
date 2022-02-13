@@ -356,7 +356,7 @@ svg {
 }
 .controls {
     position: sticky;
-    top: 18px;
+    top: 20px;
     background-color: #e1e1e1;
 }
 .rotate90 {
