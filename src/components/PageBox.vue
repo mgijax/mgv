@@ -3,44 +3,46 @@
     :class="{dragging: isDragging, open: isOpen, closed: !isOpen, floating: floating, busy: isBusy}"
     :style="{top: y + ddData.dy + 'px', left: x + ddData.dx + 'px'}"
     >
-  <div name="buttonBox" class="flexrow">
-    <m-button
-      name="info"
-      :title="helpText"
-      :style="{ display: helpText ? 'default' : 'none' }"
-      icon="help_outline"
-      />
-    <m-button
-      name="close"
-      :title="openHelpText"
-      @click.native="toggleOpen"
-      :icon="closeBtnIcon"
-      />
-    <m-button
-      v-show="draggable"
-      name="dragHandle"
-      title="Drag up/down to reposition."
-      icon="drag_indicator"
-      draggable="true"
-      @dragstart="dragStart"
-      @dragend="dragEnd"
-      />
-  </div>
-  <div
-    name="label"
-    @click.prevent.stop="toggleOpen"
-    >
-    <i
-      v-if="icon"
-      class="material-icons"
-      >{{ icon }}</i>
-    {{label}}
-    <i
-      v-if="message"
-      class="material-icons message"
-      :title="message"
-      @click.stop="messageClickHandler ? messageClickHandler() : null"
-      >{{ messageIcon || 'warning'}}</i>
+    <div class="flexrow label-wrapper">
+      <div
+        name="label"
+        @click.prevent.stop="toggleOpen"
+        >
+        <i
+          v-if="icon"
+          class="material-icons"
+          >{{ icon }}</i>
+        {{label}}
+        <i
+          v-if="message"
+          class="material-icons message"
+          :title="message"
+          @click.stop="messageClickHandler ? messageClickHandler() : null"
+          >{{ messageIcon || 'warning'}}</i>
+      </div>
+      <div name="buttonBox" class="flexrow">
+        <m-button
+          name="info"
+          :title="helpText"
+          :style="{ display: helpText ? 'default' : 'none' }"
+          icon="help_outline"
+          />
+        <m-button
+          name="close"
+          :title="openHelpText"
+          @click.native="toggleOpen"
+          :icon="closeBtnIcon"
+          />
+        <m-button
+          v-show="draggable"
+          name="dragHandle"
+          title="Drag up/down to reposition."
+          icon="drag_indicator"
+          draggable="true"
+          @dragstart="dragStart"
+          @dragend="dragEnd"
+          />
+      </div>
   </div>
   <div name="content" v-show="isOpen">
     <slot></slot>
@@ -267,7 +269,17 @@ export default MComponent({
 .pagebox.floating.closed {
   display: none;
 }
-.pagebox > [name="label"] {
+.pagebox > .label-wrapper {
+    position: sticky;
+    top: 0px;
+    background-color: #e1e1e1;
+    justify-content: space-between;
+    z-index: 100;
+}
+.pagebox > .label-wrapper > * {
+    flex-grow: 0;
+}
+.pagebox > .label-wrapper > [name="label"] {
   font-weight: bold;
   text-align: start;
   position: sticky;
@@ -275,14 +287,10 @@ export default MComponent({
   z-index: 100;
   background-color: #e1e1e1;
 }
-.pagebox > [name="label"] .material-icons {
+.pagebox > .label-wrapper > [name="label"] .material-icons {
   font-size: 14px;
 }
 .pagebox [name="buttonBox"] {
-  position: absolute;
-  top: 2px;
-  right: 2px;
-  z-index: 150;
 }
 .pagebox [name="buttonBox"] .m-button {
   margin-right: 8px;
@@ -300,8 +308,6 @@ export default MComponent({
 .pagebox.dragging .m-button[name="dragHandle"] {
   cursor: grabbing;
   cursor: -webkit-grabbing;
-}
-.pagebox.closed > [name="content"] {
 }
 .pagebox i.message {
   font-size: 16px;
