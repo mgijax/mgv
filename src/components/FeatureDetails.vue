@@ -20,75 +20,82 @@
         </select>
         </span>
 
+        <m-paginator
+            :itemCount="features.length"
+            :defaultPageSize="50"
+            @m-paginator-changed="pageChange"/>
     </div>
-    <div class="feature-table-wrapper">
-        <table class="feature-table">
-          <tr @click="toggleColumn">
-            <th v-for="(col, ci) in columns"
-                :key="'col.'+ci"
-                :style="col.thStyle"
-                :class="{ collapsed: isCollapsed(ci) }"
-                >
-                {{col.name}}
-                <i v-if="col.name==='Attributes'"
-                    title="Open all"
-                    @click="openAllAttributes"
-                    class="material-icons"
-                    >add_circle</i>
-                <i v-if="col.name==='Attributes'"
-                    title="Close all"
-                    @click="closeAllAttributes"
-                    class="material-icons"
-                    >remove_circle</i>
-            </th>
-          </tr>
-          <tr
-            v-for="(f,i) in features"
-            :key="i"
-            class="featureRow"
+    <table class="feature-table">
+      <tr class="sticky-header" @click="toggleCollapsed">
+        <th v-for="(col, ci) in columns"
+            :key="'col.'+ci"
+            :style="col.thStyle"
+            :class="{ collapsed: isCollapsed(ci) }"
             >
-            <td v-for="(col, ci) in columns"
-                :key="'col.td.'+ci"
-                :style="col.tdStyle"
-                :class="col.tdClass"
-                >
-                <span v-if="col.name !== 'Attributes'">{{getCellValue(f, col.value)}}</span>
-                <template v-else>
-                    <!-- when closed, shows this -->
-                    <span class="closed-text">{{ attributesClosedText(f) }}</span>
-                    <!-- when opened, list attributes one per line -->
-                    <table>
-                        <tr v-for="(av,j) in attributesAsList(f)"
-                          :key= "`f${i}a${j}`"
-                          >
-                          <td>{{av[0]}}</td>
-                          <td><span class="crawling-text" @mouseover="startcrawl" @mouseout="stopcrawl" >{{av[1]}}</span></td>
-                        </tr>
-                    </table>
-                    <i @click="clicked" class="material-icons open">add_circle</i>
-                    <i @click="clicked" class="material-icons close">remove_circle</i>
-                </template>
-            </td>
-          </tr>
-        </table>
-      </div>
+            {{col.name}}
+            <i v-if="col.name==='Attributes'"
+                title="Open all"
+                @click="openAllAttributes"
+                class="material-icons"
+                >add_circle</i>
+            <i v-if="col.name==='Attributes'"
+                title="Close all"
+                @click="closeAllAttributes"
+                class="material-icons"
+                >remove_circle</i>
+        </th>
+      </tr>
+      <tr
+        v-for="(f,i) in featuresCurrentPage"
+        :key="i"
+        class="featureRow"
+        >
+        <td v-for="(col, ci) in columns"
+            :key="'col.td.'+ci"
+            :style="col.tdStyle"
+            :class="col.tdClass"
+            >
+            <span v-if="col.name !== 'Attributes'">{{getCellValue(startIndex + i + 1, f, col.value)}}</span>
+            <template v-else>
+                <!-- when closed, shows this -->
+                <span class="closed-text">{{ attributesClosedText(f) }}</span>
+                <!-- when opened, list attributes one per line -->
+                <table>
+                    <tr v-for="(av,j) in attributesAsList(f)"
+                      :key= "`f${i}a${j}`"
+                      >
+                      <td>{{av[0]}}</td>
+                      <td><span class="crawling-text" @mouseover="startcrawl" @mouseout="stopcrawl" >{{av[1]}}</span></td>
+                    </tr>
+                </table>
+                <i @click="clicked" class="material-icons open">add_circle</i>
+                <i @click="clicked" class="material-icons close">remove_circle</i>
+            </template>
+        </td>
+      </tr>
+    </table>
   </div>
 </template>
 
 <script>
 import MComponent from '@/components/MComponent'
 import MButton from '@/components/MButton'
-//import u from '@/lib/utils'
+import MPaginator from '@/components/MPaginator'
+import u from '@/lib/utils'
 export default MComponent({
   name: 'FeatureDetails',
   props: ['genes', 'transcripts', 'exons'],
-  components: { MButton },
+  components: { MButton, MPaginator },
   data: function () {
       return {
           showTranscripts: 'selected', // one of: all, selected, none
           showExons: 'selected', // one of: all, selected, none
           collapsed: new Set(), // cellIndex vals for columns to be drawn collapsed
           columns: [{
+              name: "#",
+              value: "#",
+              tdClass: { collapsed: false }
+          }, {
               name: "Genome",
               value: "genome.name",
               tdClass: { collapsed: false }
@@ -139,7 +146,9 @@ export default MComponent({
               value: "attributes",
               tdClass: { collapsed: false, attributes: true, open: false, closed: true },
               thStyle: "width:50%;padding-left:16px;"
-          }]
+          }],
+          startIndex: 0,
+          endIndex: 49
       }
   },
   computed: {
@@ -172,10 +181,19 @@ export default MComponent({
             return fs
         }, [])
         return feats
+    },
+    featuresCurrentPage: function () {
+        return this.features.slice(this.startIndex, this.endIndex + 1)
     }
   },
   methods: {
-    getCellValue: function (f, name) {
+    pageChange: function (d) {
+        u.debug('m-paginator-changed', d)
+        this.startIndex = d.startIndex
+        this.endIndex = d.endIndex
+    },
+    getCellValue: function (i, f, name) {
+        if (name === "#") return i
         return name.split('.').reduce((v,n) => {
             if (!v || v[n] === undefined) return '.'
             return v[n]
@@ -194,7 +212,7 @@ export default MComponent({
         const td = e.target.closest('td.attributes')
         this.toggleAttributes(td)
     },
-    toggleColumn (ev) {
+    toggleCollapsed (ev) {
         const th = ev.target.closest('th')
         if (!th) return
         const ci = th.cellIndex
@@ -301,7 +319,13 @@ export default MComponent({
     top: 18px;
     z-index: 10;
     background: #e1e1e1;
-    justify-content: flex-start;
+    justify-content: space-between;
+}
+.sticky-header {
+    position: sticky;
+    top: 56px;
+    background: #e1e1e1;
+    z-index: 100;
 }
 .feature-table {
   font-size: 12px;
