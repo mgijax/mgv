@@ -1,19 +1,28 @@
 <template>
-  <div class="m-paginator flexrow">
+  <div class="m-paginator flexcolumn">
       <div class="flexrow">
           <i class="material-icons button unselectable-text" @click="gotoFirst">first_page</i>
           <i class="material-icons button unselectable-text" @click="gotoPrev">chevron_left</i>
           <div class="flexrow">
               <span>Page</span>
-              <input name="pageNum" type="number" v-model="pageNum" min="1" />
+              <input name="pageNum" v-model.number.lazy="pageNum" min="1" />
               <span>of {{ numPages }}</span>
           </div>
           <i class="material-icons button unselectable-text" @click="gotoNext">chevron_right</i>
           <i class="material-icons button unselectable-text" @click="gotoLast">last_page</i>
       </div>
       <div class="flexrow">
-          <span>PageSize</span>
-          <input name="pageSize" type="number" v-model="pageSize" min="1" />
+          <span>Showing rows {{ currItemStart + 1 }} to {{ currItemEnd + 1 }} of {{ itemCount }}.</span>
+          <div class="flexrow">
+              <span>PageSize</span>
+              <!-- <input name="pageSize" type="number" v-model="pageSize" min="1" /> -->
+              <select name="pageSize" v-model.number="pageSize">
+                  <option v-for="(ps,psi) in pageSizes"
+                      :key="'ps.'+psi"
+                      :value="ps"
+                      >{{ ps }}</option>
+              </select>
+          </div>
       </div>
   </div>
 </template>
@@ -29,7 +38,8 @@ export default MComponent({
   data: function () {
       return {
           pageSize: this.defaultPageSize,
-          pageNum: 1
+          pageNum: 1,
+          pageSizes: [10, 50, 100, 250, 500]
       }
   },
   computed: {
@@ -41,7 +51,7 @@ export default MComponent({
           return (this.pageNum - 1) * this.pageSize
       },
       currItemEnd () {
-          return Math.min(this.pageNum * this.pageSize - 1, this.itemCount)
+          return Math.min(this.pageNum * this.pageSize - 1, this.itemCount - 1)
       },
       currState () {
           return `${this.itemCount}|${this.pageSize}|${this.pageNum}`
