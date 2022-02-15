@@ -133,7 +133,7 @@ export default MComponent({
 .m-menu {
   position: fixed;
   background-color: #eee;
-  z-index: 100;
+  z-index: 200;
   padding: 4px;
   border: thin solid #8c8c8c;
   border-radius: 4px;

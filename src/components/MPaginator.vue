@@ -64,7 +64,7 @@ export default MComponent({
           if (isNaN(this.pageNum)) this.pageNum = 1
       },
       itemCount () {
-          this.pageNum = Math.min(this.pageNum, this.numPages)
+          this.pageNum = Math.max(1, Math.min(this.pageNum, this.numPages))
       },
       currState () {
           this.announce()
