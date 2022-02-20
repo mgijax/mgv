@@ -19,17 +19,115 @@ class ContigAssigner {
   }
 }
 
+
 /*
  * FeaturePacker
  *
- * The main layout used by the ZoomView.
+ * The main layout used by the ZoomView and also by GeneViewGene.
+ * The caller iterates over a list of features (or whatever) calling add().
+ * Each call passes the next rectangle's dimensions (xmin, xmax, height). 
+ * The return value is the assigned y coordinate of the top
+ * of the rectangle in the layout.
+ * It is the caller's responsibility to adjust start/end to account for labels, glyphs, etc.
+ */
+class FeaturePacker {
+    constructor (yGap, minXgap) {
+        this.yGap = yGap || 0
+        this.minXgap = minXgap || 0
+        // each contig has { start, end, features }
+        // contigs sorted by start, features in contigs also sorted by start
+        this.contigs = []
+        this.id2feat = new Map()
+    }
+    newContig (f) {
+        return { start: f.start, end: f.end, features: [f] }
+    }
+    mergeContigs (contigs) {
+        const res = contigs.reduce((res, c) => {
+            res.start = Math.min(res.start, c.start)
+            res.end = Math.max(res.end, c.end)
+            res.features = res.features.concat(c.features)
+            return res
+        })
+        res.features.sort((a,b) => a.start - b.start)
+        return res
+    }
+
+    // Adds a "feature" to the layout.
+    // Args:
+    //    fId     - (string) the id of the feature (optional).
+    //    fStart  - (integer) start coordinate
+    //    eEnd    - (integer) end coordinate
+    //    fHeight - (integer) size in y dimension
+    //    noPackY - (boolean) if true, does not try to find gaps in the
+    //                  the y-dimension; new features stack on top.
+    add (fId, fStart, fEnd, fHeight, noPackY) {
+        if (fId && this.id2feat.has(fId)) {
+            return this.id2feat.get(fId).y
+        }
+        const f = {
+            ID: fId,
+            start: fStart - this.minXgap, // temporarily inflate f (deflated below)
+            end: fEnd + this.minXgap,
+            height: fHeight,
+            y: 0
+        }
+        fId && this.id2feat.set(fId, f)
+        // Find contigs that f overlaps. Also find insertion point.
+        const res = this.contigs.reduce((res, c, i) => {
+            if (f.start <= c.end && f.end >= c.start) {
+                res.merge.push(c)
+            } 
+            if (f.start > c.end) {
+                res.insertAt = i + 1
+            }
+            return res
+        }, { insertAt: 0, merge: [] })
+        // 
+        res.merge.push(this.newContig(f))
+        const merged = this.mergeContigs(res.merge)
+        this.contigs.splice(res.insertAt, res.merge.length - 1, merged)
+        const xOver = merged.features.filter(ff => ff !== f && ff.start <= f.end && ff.end >= f.start)
+        //
+        if (noPackY) {
+            // position f at the top of its contig
+            f.y = Math.max.apply(null, merged.features.map(ff => (ff === f ? 0 : ff.y + ff.height + this.yGap)))
+        } else {
+            // Find a y gap that's big enough to insert the new feature, or if none found,
+            // stack it on top of the last one.
+            const minYgap = Math.max(1, fHeight) + 2 * this.yGap
+            // Sort the overlapping features by their assigned y coordinates
+            xOver.sort((a,b) => a.y - b.y)
+            let y = 0
+            for (let i in xOver) {
+                let f2 = xOver[i]
+                if (f2.y - y >= minYgap) {
+                    break
+                }
+                y = f2.y + f2.height
+            }
+            f.y = y + this.yGap
+        }
+        // deflate f's x-coords
+        f.start += this.minXgap
+        f.end -= this.minXgap
+        // sanity check
+        if (isNaN(f.y)) throw ("NaN detected")
+        //
+        return f.y
+    }
+}
+
+/*
+ * FeaturePacker
+ *
+ * The main layout used by the ZoomView and also by GeneViewGene.
  * The caller iterates over a list of features (or whatever) sorted by increasing start position.
  * Each call to assignNext passes the next rectangle's dimensions (xmin, xmax, height). 
  * (Symbol is also passed but is unused.) The return value is the assigned y coordinate of the top
  * of the rectangle in the layout.
  * It is the caller's responsibility to adjust start/end to account for labels, glyphs, etc.
- */ 
-class FeaturePacker {
+class xFeaturePacker {
     constructor (yGap, minXgap) {
         this.yGap = yGap || 0
         this.minXgap = minXgap || 0
@@ -40,7 +138,7 @@ class FeaturePacker {
     }
     // Adds a "feature" to the layout.
     // Args:
-    //    fId     - (string) the id of the feature (optional)
+    //    fId     - (string) the id of the feature (optional).
     //    fStart  - (integer) start coordinate
     //    eEnd    - (integer) end coordinate
     //    fHeight - (integer) size in y dimension
@@ -120,6 +218,7 @@ class FeaturePacker {
         return f.y
     }
 }
+ */ 
 
 //
 // Spreads out one-dimensional segments to remove overlaps while
