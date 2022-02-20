@@ -33,7 +33,7 @@
             </div>
             -->
 
-            <!-- Toggle: exon width  -->
+            <!-- Toggle: exon width
             <div class="flexcolumn">
             <span class="small-label">Exon scale</span>
             <div class="flexrow" style="justify-content: flex-start;">
@@ -46,6 +46,7 @@
                 <span class="small-label">Proportional</span>
             </div>
             </div>
+            -->
 
             <!-- Slider: exon width  -->
             <div class="slider" >
