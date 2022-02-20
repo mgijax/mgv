@@ -460,34 +460,18 @@ export default MComponent({
       // transcript graph. First, the x dimension
       this.layoutExons(comp.dExons)
       // Now the y
+
       let maxy = 0
-      comp.dExons.forEach(de => {
-          de.y = this.featurePacker.add(null, de.start, de.end, this.exonHeight, true)
-          if (isNaN(de.y)) throw ("NaN detected")
-          maxy = Math.max(maxy, de.y)
-      })
-      /*
-      // At this point, we can re-shuffle the vertical positions of exons
-      // within each conting to try to lessen the line crossings in the final
-      // diagram. 
-      // One easy heuristic to try: resort according to number of transcripts
-      // that include the exon.
-      comp.exons.forEach(ce => {
-          // Create a list of the current y positions
-          const ys = ce.dExons.map(de => de.y).sort((a, b) => a - b)
-          // Resort the distinct exons by number of transcripts
-          const des = ce.dExons.sort((de1, de2) => {
-              const n1 = de1.tExons.length
-              const n2 = de2.tExons.length
-              return n1 !== n2 ? n2 - n1 : de1.dIndex - de2.dIndex
-          })
-          // Assign the y positions
-          des.forEach((de, i) => {
-              de.y = ys[i]
-              if (isNaN(de.y)) throw ("NaN detected")
+      const seen = new Set()
+      const ts = [].concat(this.gene.transcripts).sort((a,b) => b.exons.length - a.exons.length)
+      ts.forEach(t => {
+          t.exons.forEach(e => {
+              if (seen.has(e.de)) return
+              seen.add(e.de)
+              e.de.y = this.featurePacker.add(null, e.de.start, e.de.end, this.exonHeight)
+              maxy = Math.max(maxy, e.de.y)
           })
       })
-      */
 
       //
       if (this.showTranscriptGraph) {
