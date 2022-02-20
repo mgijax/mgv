@@ -1,5 +1,6 @@
 <template>
-  <div class="m-paginator flexcolumn">
+  <div class="m-paginator flexrow">
+      <span>Showing rows {{ currItemStart + 1 }} to {{ currItemEnd + 1 }} of {{ itemCount }}.</span>
       <div class="flexrow">
           <i class="material-icons button unselectable-text" @click="gotoFirst">first_page</i>
           <i class="material-icons button unselectable-text" @click="gotoPrev">chevron_left</i>
@@ -12,17 +13,14 @@
           <i class="material-icons button unselectable-text" @click="gotoLast">last_page</i>
       </div>
       <div class="flexrow">
-          <span>Showing rows {{ currItemStart + 1 }} to {{ currItemEnd + 1 }} of {{ itemCount }}.</span>
-          <div class="flexrow">
-              <span>PageSize</span>
-              <!-- <input name="pageSize" type="number" v-model="pageSize" min="1" /> -->
-              <select name="pageSize" v-model.number="pageSize">
-                  <option v-for="(ps,psi) in pageSizes"
-                      :key="'ps.'+psi"
-                      :value="ps"
-                      >{{ ps }}</option>
-              </select>
-          </div>
+          <span>PageSize</span>
+          <!-- <input name="pageSize" type="number" v-model="pageSize" min="1" /> -->
+          <select name="pageSize" v-model.number="pageSize">
+              <option v-for="(ps,psi) in pageSizes"
+                  :key="'ps.'+psi"
+                  :value="ps"
+                  >{{ ps }}</option>
+          </select>
       </div>
   </div>
 </template>
