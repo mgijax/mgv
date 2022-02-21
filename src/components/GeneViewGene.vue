@@ -292,17 +292,12 @@ export default MComponent({
         exon: o.exon,
         event: ev })
     },
-    mouseoutExon (ev) {
-      const o = this.getEventObjects(ev)
-      this.$root.$emit('feature-out', {
-        region: null,
-        feature: o.feature,
-        transcript: o.transcript,
-        exon: o.exon,
-        event: ev })
+    mouseoutExon () {
+      this.$root.$emit('feature-out')
     },
     clickExon (ev) {
       const o = this.getEventObjects(ev)
+      this.mouseoutExon(ev)
       this.$root.$emit('feature-click', {
         region: null,
         feature: o.feature,
