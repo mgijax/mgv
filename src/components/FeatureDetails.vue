@@ -229,10 +229,9 @@ export default MComponent({
     },
     featureHighlighted (f) {
         const a = this.app
-        const cm = a.currentMouseover === f || a.currentMouseoverT === f || a.currentMouseoverE === f
+        const cm = a.cmSet.has(f) || a.cmSetT.has(f) || a.cmSetE.has(f)
         const cs = a.csSetH.has(f) || a.csSetT.has(f) || a.csSetE.has(f) 
-        const cmde = f.de && (f.de === a.currentMouseoverE)
-        return cm || cs || cmde
+        return cm || cs
     },
     pageChange (d) {
         u.debug('m-paginator-changed', d)

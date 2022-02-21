@@ -788,11 +788,11 @@ export default MComponent({
       return this.app.currentMouseover === f || this.app.currentMouseoverSet.has(f.curie)
     },
     transcriptHighlighted: function (t) {
-      return t === this.context.currentMouseoverT || this.app.csSetT.has(t)
+      return this.app.cmSetT.has(t) || this.app.csSetT.has(t)
     },
     exonHighlighted: function (e) {
       e = e.tExon || e
-      return e === this.context.currentMouseoverE || this.app.csSetE.has(e) || (e.de && e.de === this.context.currentMouseoverE)
+      return this.app.cmSetE.has(e) || this.app.csSetE.has(e)
     },
     // Returns true iff feature f is in the current selection list (ie it was actually clicked on)
     featureDirectlySelected: function (f) {

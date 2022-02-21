@@ -320,6 +320,29 @@ export default MComponent({
         const h = this.currentMouseover ? this.dataManager.getHomologs(this.currentMouseover) : []
         return new Set(h)
     },
+    // Returns current mouseover exons as a Set. 
+    cmSetE () {
+        const cme = this.currentMouseoverE
+        if (!cme) return new Set()
+        if (cme.de) return new Set([cme, cme.de])
+        if (cme.tExons) return new Set([cme].concat(cme.tExons))
+        // should never get here
+        throw "Bad currentMouseoverE."
+    },
+    // Returns current mouseover transcripts as a set
+    cmSetT () {
+        const cme = this.currentMouseoverE
+        const cmt = u.arrayify(this.currentMouseoverT)
+        if (cme) {
+            if (cme.transcript) {
+                return new Set([cme.transcript])
+            } else {
+                return new Set(cme.tExons.map(te => te.transcript))
+            }
+        } else {
+            return new Set(cmt)
+        }
+    },
     // returns current feature selection as a Set
     csSet: function () {
         return new Set(this.currentSelection)
@@ -1009,7 +1032,7 @@ export default MComponent({
     this.app.$root.$on('region-current', r => { this.currRegion = r ? r.region : null })
     //
     this.$root.$on('feature-over', arg => this.featureOver(arg.feature, arg.transcript, arg.exon, arg.event))
-    this.$root.$on('feature-out', arg => this.featureOff(arg.feature, arg.transcript, arg.exon, arg.event))
+    this.$root.$on('feature-out', () => this.featureOff())
     this.$root.$on('feature-click', arg => this.featureClick(arg.feature, arg.transcript, arg.exon, arg.event, arg.preserve))
     //
     this.$root.$on('list-click', data => {

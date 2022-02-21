@@ -245,14 +245,6 @@ export default MComponent({
       featureColor () {
         return this.featureColorMap.getColor(this.gene)
       },
-      overTranscripts: function () {
-          const oc = this.overConnector
-          if (oc) {
-              return new Set(this.connectorToTranscripts(oc.e1, oc.e2))
-          } else {
-              return new Set()
-          }
-      },
       selectedText: function () {
           return this.app.currentSelectionT.
               filter(t => t.gene === this.myGene).
@@ -266,7 +258,7 @@ export default MComponent({
             this.myGene = this.gene
         })
     },
-    // given the div representing an exon, return that exon
+    //
     getEventObjects (e) {
       const ex = e.target.closest('.exon')
       let feature = this.myGene
@@ -348,10 +340,18 @@ export default MComponent({
       return ctor
     },
     mouseoverConnector (ev) {
-        this.overConnector = this.getEventConnector (ev)
+        const oc = this.overConnector = this.getEventConnector (ev)
+        const overTs = this.connectorToTranscripts(oc.e1, oc.e2)
+        this.$root.$emit('feature-over', {
+            region: null,
+            feature: this.myGene,
+            transcript: overTs,
+            exon: null,
+            event: ev })
     },
     mouseoutConnector () {
         this.overConnector = null
+        this.$root.$emit('feature-out', {})
     },
     clickConnector (ev) {
       const c = this.getEventConnector(ev)
@@ -362,6 +362,7 @@ export default MComponent({
       } else {
           ts = this.connectorToTranscripts(c.e1, c.e2)
       }
+      this.mouseoutConnector()
       this.$root.$emit('feature-click', {
         region: null,
         feature: this.myGene,
@@ -372,9 +373,7 @@ export default MComponent({
     },
     //
     isOverExon (e) {
-        const cme = this.app.currentMouseoverE
-        if (!cme) return false
-        return cme === e || (cme.de && cme.de === e)
+        return this.app.cmSetE.has(e)
     },
     //
     // Returns true iff this exon is currently selected.
@@ -389,6 +388,12 @@ export default MComponent({
             // transcript exon
             return this.app.csSetE.has(e)
         }
+    },
+    // Returns true if e's transcript(s) are in the mouseover set
+    isOverTranscript (e) {
+        if (e.transcript) return this.app.cmSetT.has(e.transcript)
+        if (e.tExons) return e.tExons.reduce((v, te) => v || this.app.cmSetT.has(te.transcript), false)
+        return false
     },
     // If e is a transcript exon, returns true iff e.transcript is selected.
     // If e is a distinct exon, returns true iff te.transcipt is selected for any te in e.tExons.
@@ -512,7 +517,7 @@ export default MComponent({
         return this.featureColor
     },
     exonBorderColor (e) {
-        if (this.isExonSelected(e) || this.isOverExon(e)) {
+        if (this.isExonSelected(e) || this.isOverTranscript(e)) {
             return this.selectedColor2
         } else if (this.isTranscriptSelected(e)) {
             return this.selectedColor
@@ -523,7 +528,7 @@ export default MComponent({
     exonBorderWidth (e) {
         if (this.isExonSelected(e) || this.isOverExon(e)) {
             return 3
-        } else if (this.isTranscriptSelected(e)) {
+        } else if (this.isTranscriptSelected(e) || this.isOverTranscript(e)) {
             return 1
         } else {
             return 0
@@ -535,9 +540,9 @@ export default MComponent({
     },
     connectorColor (ctor) {
         if (ctor === this.overConnector) return this.selectedColor2
-        const oh = this.connectorToTranscripts(ctor.e1, ctor.e2).reduce((v, t) => v || this.overTranscripts.has(t), false)
-        if (oh) return this.selectedColor2
         const myTs = this.connectorToTranscripts(ctor.e1, ctor.e2)
+        const oh = myTs.reduce((v, t) => v || this.app.cmSetT.has(t), false)
+        if (oh) return this.selectedColor2
         const highlighted = myTs.reduce((v,t) => v || this.app.csSetT.has(t), false)
         return highlighted ? this.selectedColor : this.featureColor
     },
