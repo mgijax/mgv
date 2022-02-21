@@ -14,16 +14,7 @@
           <td><label>Color</label></td>
           <td>
             <div class="flexcolumn">
-              <div class="swatch"
-                :style="{ backgroundColor: color }"
-                @click="togglePicker"
-                :title="`Click to ${pickerOpen ? 'close' : 'open'} the color picker.`"
-                />
-              <color-picker
-                v-show="pickerOpen"
-                v-model="pickerColor"
-                style="max-width: 200px;"
-                />
+              <input type="color" class="swatch" name="list-color" value="#e1a1a1" v-model="pickerColor"/>
             </div>
           </td>
         </tr>
@@ -124,12 +115,10 @@ Shift-CLICK to remove selection and homologs."
 <script>
 import MComponent from '@/components/MComponent'
 import MButton from '@/components/MButton'
-import { Chrome } from 'vue-color'
 export default MComponent({
   name: 'ListEditor',
   components: {
-    MButton,
-    ColorPicker: Chrome
+    MButton
   },
   props: {
     list: Object
@@ -299,8 +288,9 @@ export default MComponent({
 .date {
   font-size: 12px;
 }
-.swatch {
-  height: 20px;
+input.swatch {
+  width: 40px !important;
+  padding: 2px;
   cursor: pointer;
 }
 table {
