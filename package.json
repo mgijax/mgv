@@ -9,8 +9,7 @@
   },
   "dependencies": {
     "idb-keyval": "^3.2.0",
-    "vue": "^2.6.12",
-    "vue-color": "^2.7.1"
+    "vue": "^2.6.12"
   },
   "devDependencies": {
     "@vue/cli-plugin-babel": "^3.12.1",
