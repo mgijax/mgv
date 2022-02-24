@@ -249,6 +249,7 @@ export default MComponent({
 </script>
 
 <style scoped>
-.someoneActive {
+.facets .pagebox .label-wrapper {
+    top: 24px;
 }
 </style>

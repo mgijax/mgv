@@ -356,13 +356,13 @@ export default MComponent({
     position: sticky;
     top: 18px;
     z-index: 10;
-    background: #e1e1e1;
+    background: var(--main-bg-color);
     justify-content: space-between;
 }
 .sticky-header {
     position: sticky;
     top: 56px;
-    background: #e1e1e1;
+    background: var(--main-bg-color);
     z-index: 100;
 }
 .feature-table {

@@ -357,7 +357,7 @@ svg {
 .controls {
     position: sticky;
     top: 20px;
-    background-color: #e1e1e1;
+    background-color: var(--main-bg-color);
 }
 .rotate90 {
   transform: rotate(90deg)scale(1,-1);

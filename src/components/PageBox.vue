@@ -252,9 +252,9 @@ export default MComponent({
   position: relative;
   padding: 6px;
   margin: 3px;
-  background-color: #e1e1e1;
+  background-color: var(--main-bg-color);
   border-radius: 3px;
-  border: thin solid #e1e1e1;
+  border: thin solid var(--main-bg-color);
 }
 .pagebox:hover {
   border-color: black;
@@ -272,7 +272,7 @@ export default MComponent({
 .pagebox > .label-wrapper {
     position: sticky;
     top: 0px;
-    background-color: #e1e1e1;
+    background-color: var(--main-bg-color);
     justify-content: space-between;
     z-index: 100;
 }
@@ -285,7 +285,7 @@ export default MComponent({
   position: sticky;
   top: 0;
   z-index: 100;
-  background-color: #e1e1e1;
+  background-color: var(--main-bg-color);
 }
 .pagebox > .label-wrapper > [name="label"] .material-icons {
   font-size: 14px;

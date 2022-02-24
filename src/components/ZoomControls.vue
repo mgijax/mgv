@@ -268,7 +268,7 @@ export default MComponent({
     position: -webkit-sticky; /* Safari */
     position: sticky;
     top: 18px;
-    background-color: #e1e1e1;
+    background-color: var(--main-bg-color);
     border: thin solid #c8c8c8;
     margin-bottom: 8px;
 }

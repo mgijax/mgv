@@ -183,7 +183,7 @@ export default MComponent({
   position: sticky;
   top: 18px;
   left: 0;
-  background-color: #e1e1e1;
+  background-color: var(--main-bg-color);
   z-index: 10;
 }
 .slider {

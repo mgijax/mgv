@@ -410,4 +410,7 @@ export default MComponent({
 input {
   max-width: 165px;
 }
+input[type="range"] {
+  width: 100px;
+}
 </style>

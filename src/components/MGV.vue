@@ -1108,6 +1108,10 @@ export default MComponent({
 </script>
 
 <style>
+:root {
+    --main-bg-color: #e1e1e1;
+    --main-banner-color: rgb(85, 127, 158);
+}
 html, body {
   height: 100%;
   margin: 0px;
@@ -1316,6 +1320,36 @@ input[type=range]:focus::-ms-fill-lower {
 input[type=range]:focus::-ms-fill-upper {
   background: none;
 }
+/* checkbox styling. See: https://moderncss.dev/pure-css-custom-checkbox-style/  */
+input[type="checkbox"] {
+  appearance: none;
+  background-color: var(--main-bg-color);
+  margin: 0;
+  font: inherit;
+  color: currentColor;
+  width: 1em;
+  height: 1em;
+  border: 0.15em solid currentColor;
+  border-radius: 0.15em;
+  transform: translateY(-0.075em);
+  display: grid;
+  place-content: center;
+  cursor: pointer;
+}
+input[type="checkbox"]::before {
+  content: "";
+  width: 0.6em;
+  height: 0.6em;
+  transform: scale(0);
+  transition: 120ms transform ease-in-out;
+  box-shadow: inset 1em 1em black;
+  transform-origin: bottom left;
+  clip-path: polygon(14% 44%, 0 65%, 50% 100%, 100% 16%, 80% 0%, 43% 62%);
+}
+input[type="checkbox"]:checked::before {
+  transform: scale(1);
+}
+
 /* ********** */
 /* ********** */
 /* ********** */
