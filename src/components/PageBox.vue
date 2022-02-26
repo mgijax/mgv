@@ -4,45 +4,29 @@
     :style="{top: y + ddData.dy + 'px', left: x + ddData.dx + 'px'}"
     >
     <div class="flexrow label-wrapper">
-      <div
-        name="label"
-        @click.prevent.stop="toggleOpen"
-        >
-        <i
-          v-if="icon"
-          class="material-icons"
-          >{{ icon }}</i>
-        {{label}}
-        <i
-          v-if="message"
-          class="material-icons message"
-          :title="message"
-          @click.stop="messageClickHandler ? messageClickHandler() : null"
-          >{{ messageIcon || 'warning'}}</i>
+      <div name="label" >
+            <i
+              v-if="icon"
+              class="material-icons"
+              >{{ icon }}</i>
+            {{label}}
+            <i
+              v-if="message"
+              class="material-icons message"
+              :title="message"
+              @click.stop="messageClickHandler ? messageClickHandler() : null"
+              >{{ messageIcon || 'warning'}}</i>
       </div>
-      <div name="buttonBox" class="flexrow">
-        <m-button
-          name="info"
-          :title="helpText"
-          :style="{ display: helpText ? 'default' : 'none' }"
-          icon="help_outline"
-          />
-        <m-button
-          name="close"
-          :title="openHelpText"
-          @click.native="toggleOpen"
-          :icon="closeBtnIcon"
-          />
-        <m-button
-          v-show="draggable"
-          name="dragHandle"
-          title="Drag up/down to reposition."
-          icon="drag_indicator"
+      <div class="header-bar flexrow"
+          title="Click to open/close. Drag to reposition."
+          @click="toggleOpen"
           draggable="true"
           @dragstart="dragStart"
           @dragend="dragEnd"
-          />
-      </div>
+          >
+          <i class="material-icons close">close</i>
+          <i class="material-icons add">add</i>
+          </div>
   </div>
   <div name="content" v-show="isOpen">
     <slot></slot>
@@ -234,7 +218,7 @@ export default MComponent({
     Vue.nextTick(() => {
       // At mount time, contained components have already been rendered.
       // Find the content component, which is the last.
-      let lc = this.$refs.content = this.$children[3]
+      let lc = this.$refs.content = this.$children[this.$children.length - 1]
       if (!lc) throw 'Cannot find last child.'
       let htext = lc ? lc.$el.title : ''
       // move help text from component to this box's info button
@@ -256,7 +240,8 @@ export default MComponent({
   border-radius: 3px;
   border: thin solid var(--main-bg-color);
 }
-.pagebox:hover {
+.pagebox:hover,
+.pagebox.dragging {
   border-color: black;
 }
 .pagebox.floating {
@@ -290,6 +275,26 @@ export default MComponent({
 .pagebox > .label-wrapper > [name="label"] .material-icons {
   font-size: 14px;
 }
+.pagebox > .label-wrapper > .header-bar {
+    flex-grow: 1;
+    justify-content: flex-end;
+    cursor: pointer;
+    height: 1em;
+}
+.pagebox .header-bar .material-icons {
+    font-size: 18px;
+}
+.pagebox.open .header-bar .add {
+    display: none;
+}
+.pagebox.closed .header-bar .close {
+    display: none;
+}
+
+.pagebox.dragging > .label-wrapper > .header-bar {
+  cursor: grabbing !important;
+  cursor: -webkit-grabbing !important;
+}
 .pagebox [name="buttonBox"] {
 }
 .pagebox [name="buttonBox"] .m-button {
@@ -303,11 +308,7 @@ export default MComponent({
   cursor: -webkit-grab;
 }
 .pagebox.dragging {
-    z-index: 100;
-}
-.pagebox.dragging .m-button[name="dragHandle"] {
-  cursor: grabbing;
-  cursor: -webkit-grabbing;
+    z-index: 500;
 }
 .pagebox i.message {
   font-size: 16px;
@@ -318,11 +319,6 @@ export default MComponent({
 }
 .pagebox [name="buttonBox"] {
   display: none;
-}
-.pagebox:hover [name="buttonBox"],
-.pagebox.dragging [name="buttonBox"]
-{
-  display: inherit;
 }
 .busybox {
   position: absolute;

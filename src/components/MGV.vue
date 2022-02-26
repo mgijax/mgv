@@ -24,7 +24,6 @@
             :strips="strips"
             :genomeSets="genomeSets"
             :rGenome="rGenome"
-            title="Specify which genome(s) to display."
             ref="genomes"
             />
         </page-box>
@@ -36,7 +35,6 @@
           icon="list"
           >
           <my-lists
-            title="Create, display, and save lists of genes. A list simply contains identifiers. Create lists via searches, pasting identifiers, or combining other lists.  Click on a list to show its items in the genome view; click again to hide them. Click on the 'x' to delete a list. Click on the pencil to edit the list."
             ref="myLists"
             :lists="lists"
             :currentList="currentList"
@@ -50,7 +48,6 @@
           icon="filter_alt"
           >
           <facets
-            title="Limit what features are displayed by different criteria."
             ref="facets"
             />
         </page-box>
@@ -62,7 +59,6 @@
           icon="settings"
           >
           <settings
-            title="Provides options for customizing the display. Settings are remembered between sessions."
             ref="settings"
             />
         </page-box>
@@ -74,7 +70,6 @@
           icon="shopping_cart"
           >
           <sequence-cart
-            title="Contains sequence (descriptors) that you select while browsing. Download sequences as FASTA, with options to reverse complement genomic sequences or translate CDSs."
             ref="sequenceCart"
             />
         </page-box>
@@ -96,7 +91,6 @@
           <zoom-view
             :context="$data"
             ref="zoomView"
-            title="The main view. Shows features in selected regions of selected genomes. You can zoom, scroll, find genes, download sequences and more. These operations can affect regions independently or in synch using the lock icon. Most things can be undone using the browser's Back button."
             />
         </page-box>
         <!--
@@ -109,7 +103,6 @@
           <gene-view
             :genes="csListH"
             ref="geneView"
-            title="GeneView shows the details of a single gene."
             />
         </page-box>
         <!--
@@ -122,7 +115,6 @@
           <genome-view
             :context="$data"
             ref="genomeView"
-            title="Shows a whole genome view. Colored tabs indicate any regions currently displayed in the ZoomView. Lollipop glyphs indicate current list items (if any). Drag tab to change the viewed region. Click or drag on a chromosome to open a new region."
             />
         </page-box>
         <!--
@@ -134,7 +126,6 @@
           >
           <feature-details
             ref="featureDetails"
-            title="Shows details of current selected features and their homologs."
             :genes="csSetH"
             :transcripts="currentSelectionT"
             :exons="currentSelectionE"
@@ -155,7 +146,6 @@
         :initiallyOpen="false"
         iconClose="close"
         ><list-editor
-          title="Examine/modify the contents of a list. Create a new list. Combine lists with intersection, union, and difference."
           :list="currentEditList"
           ref="listEditor"
           />
