@@ -94,18 +94,6 @@
             />
         </page-box>
         <!--
-        ============== Gene View ==============
-        -->
-        <page-box
-          label="Gene View"
-          icon="view_agenda"
-          >
-          <gene-view
-            :genes="csListH"
-            ref="geneView"
-            />
-        </page-box>
-        <!--
         ============ Genome View ==============
         -->
         <page-box
@@ -177,7 +165,6 @@ import Facets from '@/components/Facets'
 import FeatureColorMap from '@/lib/FeatureColorMap'
 import FeatureDetails from '@/components/FeatureDetails'
 import FindGenes from '@/components/FindGenes'
-import GeneView from '@/components/GeneView'
 import GenomeSelector from '@/components/GenomeSelector'
 import GenomeView from '@/components/GenomeView'
 import HelpBox from '@/components/HelpBox'
@@ -209,7 +196,6 @@ export default MComponent({
     Facets,
     FeatureDetails,
     FindGenes,
-    GeneView,
     GenomeView,
     GenomeSelector,
     HelpBox,
