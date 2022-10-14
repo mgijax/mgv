@@ -11,7 +11,7 @@ class FastaReader {
   read (descrs, filename) {
     const fparam = filename ? `&filename=${filename}` : ''
     const params = `datatype=fasta&descriptors=${encodeURI(JSON.stringify(descrs))}${fparam}`
-    return this.fetcher.fetch(this.fetchUrl + '?' + params, 'text')
+    return this.fetcher.fetch(this.fetchUrl, 'text', params)
   }
   readAll () {
     throw "Not implemented. FastaReader cannot readAll()."
