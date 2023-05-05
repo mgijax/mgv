@@ -38,7 +38,7 @@
           />
         <m-button
           icon="shopping_cart"
-          title="Add all currently displayed regions to the SequenceCart. To add a single reagion, click the cart icon in that region's control panel (right click to open)."
+          title="Add all currently displayed regions to the SequenceCart. To add a single region, click the cart icon in that region's control panel (right click to open)."
           @click="addAllToCart()"
           />
         </div>
