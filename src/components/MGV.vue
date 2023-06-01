@@ -463,7 +463,7 @@ export default MComponent({
 
 
     */
-    logEvent: function (action, label, value) {
+    logEvent: function () { // action, label, value
       // Disabled.
       // ga.ga_logEvent("MGV", action, label, value)
     },
