@@ -717,7 +717,8 @@ class RegionManager {
   //
   regionChange (d) {
     //
-    this.app.logEvent("Navigate", d.op)
+    // Disabled.
+    //    this.app.logEvent("Navigate", d.op)
     //
     const r = d.region ||
       this.currRegion ||

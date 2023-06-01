@@ -159,8 +159,6 @@
 
 <script>
 //
-import ga from '@/lib/mgi_ga'
-//
 import Facets from '@/components/Facets'
 import FeatureColorMap from '@/lib/FeatureColorMap'
 import FeatureDetails from '@/components/FeatureDetails'
@@ -466,7 +464,8 @@ export default MComponent({
 
     */
     logEvent: function (action, label, value) {
-      ga.ga_logEvent("MGV", action, label, value)
+      // Disabled.
+      // ga.ga_logEvent("MGV", action, label, value)
     },
     // Toggle whether we are showing all feature labels or not.
     toggleShowAllLabels: function () {
