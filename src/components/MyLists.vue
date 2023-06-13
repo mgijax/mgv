@@ -50,9 +50,9 @@
 </template>
 
 <script>
-import MComponent from '@/components/MComponent'
-import MyListItem from '@/components/MyListItem'
-import FindGenes from '@/components/FindGenes'
+import MComponent from './MComponent.js'
+import MyListItem from './MyListItem.vue'
+import FindGenes  from './FindGenes.vue'
 export default MComponent({
   name: 'MyLists',
   props: ['lists', 'currentList'],

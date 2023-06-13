@@ -1,5 +1,5 @@
-import u from '@/lib/utils'
-import KeyStore from '@/lib/KeyStore'
+import u from './utils.js'
+import KeyStore from './KeyStore.js'
 
 class CachingFetcher {
   // Args:

@@ -250,10 +250,10 @@
 </template>
 
 <script>
-import MComponent from '@/components/MComponent'
-import MButton from '@/components/MButton'
-import KeyStore from '@/lib/KeyStore'
-import config from '@/config'
+import MComponent from './MComponent.js'
+import MButton    from './MButton.vue'
+import KeyStore   from '../lib/KeyStore.js'
+import config     from '../config.js'
 export default MComponent({
   name: 'Settings',
   components: { MButton },

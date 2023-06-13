@@ -89,10 +89,10 @@
 </template>
 
 <script>
-import MComponent from '@/components/MComponent'
-import MButton from '@/components/MButton'
-import MPaginator from '@/components/MPaginator'
-import u from '@/lib/utils'
+import MComponent from './MComponent.js'
+import MButton from './MButton.vue'
+import MPaginator from './MPaginator.vue'
+import u from '../lib/utils.js'
 export default MComponent({
   name: 'FeatureDetails',
   props: ['genes', 'transcripts', 'exons'],

@@ -43,10 +43,9 @@
 </template>
 
 <script>
-import MComponent from '@/components/MComponent'
-import MButton from '@/components/MButton'
-// Because MMenu and MMenuItem are mutually recursive, we cannot import the usual way
-// import MMenuItem from '@/components/MMenuItem'
+import MComponent from './MComponent.js'
+import MButton    from './MButton.vue'
+//import MMenuItem  from './MMenuItem.vue'
 export default MComponent({
   name: 'MMenu',
   props: {
@@ -79,7 +78,7 @@ export default MComponent({
   },
   components: {
     // Because MMenu and MMenuItem are mutually recursive, we cannot import the usual way
-    MMenuItem: () => import('@/components/MMenuItem'),
+    MMenuItem: () => import('./MMenuItem.vue'),
     MButton
   },
   data: function () {

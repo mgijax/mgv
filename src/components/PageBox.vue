@@ -41,10 +41,10 @@
 </template>
 
 <script>
-import MComponent from '@/components/MComponent'
-import MButton from '@/components/MButton'
-import u from '@/lib/utils'
-import Vue from 'vue'
+import MComponent from './MComponent.js'
+import MButton    from './MButton.vue'
+import u          from '../lib/utils.js'
+import { nextTick } from 'vue'
 export default MComponent({
   name: 'PageBox',
   components: { MButton },
@@ -215,7 +215,7 @@ export default MComponent({
   },
   mounted: function () {
     this.$root.$on('pagebox-open-exclusive', pb => this.onExclusiveOpen(pb))
-    Vue.nextTick(() => {
+    nextTick(() => {
       // At mount time, contained components have already been rendered.
       // Find the content component, which is the last.
       let lc = this.$refs.content = this.$children[this.$children.length - 1]

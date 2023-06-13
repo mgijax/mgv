@@ -1,6 +1,6 @@
-import u from '@/lib/utils'
-import config from '@/config'
-import CachingFetcher from '@/lib/CachingFetcher'
+import u from './utils.js'
+import config from '../config.js'
+import CachingFetcher from './CachingFetcher.js'
 //
 class HomologyManager {
   //

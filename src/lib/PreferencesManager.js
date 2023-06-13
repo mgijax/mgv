@@ -1,5 +1,5 @@
-import KeyStore from '@/lib/KeyStore'
-import config from '@/config'
+import KeyStore from './KeyStore.js'
+import config from '../config.js'
 
 class PreferencesManager {
   constructor (app) {

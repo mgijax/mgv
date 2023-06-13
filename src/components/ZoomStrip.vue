@@ -125,9 +125,9 @@
 </template>
 
 <script>
-import MComponent from '@/components/MComponent'
-import ZoomRegion from '@/components/ZoomRegion'
-import u from '@/lib/utils'
+import MComponent from './MComponent.js'
+import ZoomRegion from './ZoomRegion.vue'
+import u          from '../lib/utils.js'
 //
 export default MComponent({
   name: 'ZoomStrip',

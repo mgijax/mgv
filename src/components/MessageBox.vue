@@ -54,8 +54,7 @@
 </template>
 
 <script>
-import MComponent from '@/components/MComponent'
-//import u from '@/lib/utils'
+import MComponent from './MComponent.js'
 export default MComponent({
   name: 'MessageBox',
   props: [

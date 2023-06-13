@@ -344,10 +344,10 @@
 </template>
 
 <script>
-import MComponent from '@/components/MComponent'
-import u from '@/lib/utils'
-import { complement } from '@/lib/genetic_code'
-import { FeaturePacker } from '@/lib/Layout'
+import MComponent        from './MComponent.js'
+import u                 from '../lib/utils.js'
+import { complement }    from '../lib/genetic_code.js'
+import { FeaturePacker } from '../lib/Layout.js'
 //
 export default MComponent({
   name: 'ZoomRegion',

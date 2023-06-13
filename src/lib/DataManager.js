@@ -9,14 +9,14 @@
  * Should adopt a naming convention so that caller knows which, eg, getFoo vs getFooP
  * or getPfFoo (get promise for foo)
  */
-import gc from '@/lib/GenomeCoordinates'
-import { GenomePainter } from '@/lib/GenomePainter'
-import u from '@/lib/utils'
-import config from '@/config'
-import { GenomeRegistrar } from '@/lib/GenomeRegistrar'
-import { FastaReader } from '@/lib/FastaReader'
-import HomologyManager from '@/lib/HomologyManager'
-import gff3 from '@/lib/gff3lite'
+import gc                  from './GenomeCoordinates.js'
+import { GenomePainter }   from './GenomePainter.js'
+import u                   from './utils.js'
+import config              from '../config.js'
+import { GenomeRegistrar } from './GenomeRegistrar.js'
+import { FastaReader }     from './FastaReader.js'
+import HomologyManager     from './HomologyManager.js'
+import gff3                from './gff3lite.js'
 
 class DataManager {
   constructor (app) {

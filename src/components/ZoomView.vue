@@ -29,13 +29,13 @@
 </template>
 
 <script>
-import MComponent from '@/components/MComponent'
-import ZoomControls from '@/components/ZoomControls'
-import ZoomRegionControls from '@/components/ZoomRegionControls'
-import ZoomMain from '@/components/ZoomMain'
-import VariantInfo from '@/components/VariantInfo'
-import MMenu from '@/components/MMenu'
-import getFeatureMenus from '@/lib/ZoomViewContextMenu'
+import MComponent         from './MComponent.js'
+import ZoomControls       from './ZoomControls.vue'
+import ZoomRegionControls from './ZoomRegionControls.vue'
+import ZoomMain           from './ZoomMain.vue'
+import VariantInfo        from './VariantInfo.vue'
+import MMenu              from './MMenu.vue'
+import getFeatureMenus    from '../lib/ZoomViewContextMenu.js'
 export default MComponent({
   name: 'ZoomView',
   props: ['context'],

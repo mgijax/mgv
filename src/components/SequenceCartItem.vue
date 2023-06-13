@@ -50,9 +50,9 @@
 //   { genome, type, ID, header }
 //   { genome, chr, start, end, header }
 // Header is an optional string to display with the item
-import MComponent from '@/components/MComponent'
-import MButton from '@/components/MButton'
-import u from '@/lib/utils'
+import MComponent from './MComponent.js'
+import MButton    from './MButton.vue'
+import u          from '../lib/utils.js'
 export default MComponent({
   name: 'SequenceCartItem',
   props: ['item'],

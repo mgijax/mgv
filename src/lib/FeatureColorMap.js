@@ -1,4 +1,4 @@
-import config from '@/config'
+import config from '../config.js'
 class FeatureColorMap {
   constructor () {
     this.cmap = config.FeatureColorMap.colors.reduce(

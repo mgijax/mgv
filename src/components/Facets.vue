@@ -30,10 +30,9 @@
 </template>
 
 <script>
-// import u from '@/lib/utils'
-import MComponent from '@/components/MComponent'
-import Facet from '@/components/Facet'
-import PageBox from '@/components/PageBox'
+import MComponent from './MComponent.js'
+import Facet from './Facet.vue'
+import PageBox from './PageBox.vue'
 export default MComponent({
   name: 'Facets',
   components: { Facet, PageBox },

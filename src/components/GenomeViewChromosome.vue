@@ -123,10 +123,10 @@
 </template>
 
 <script>
-import MComponent from '@/components/MComponent'
-import u from '@/lib/utils'
-import { SegmentLayout } from '@/lib/Layout'
-import MBrush from '@/components/MBrush'
+import MComponent from './MComponent.js'
+import u from '../lib/utils.js'
+import { SegmentLayout } from '../lib/Layout.js'
+import MBrush from './MBrush.vue'
 
 export default MComponent({
   name: 'GenomeViewChromosome',

@@ -150,12 +150,12 @@
 </template>
 
 <script>
-import MComponent from '@/components/MComponent'
-import MButton from '@/components/MButton'
-import MMenuItem from '@/components/MMenuItem'
-import GenomeSelector from '@/components/GenomeSelector'
-import gc from '@/lib/GenomeCoordinates'
-import u from '@/lib/utils'
+import MComponent     from './MComponent.js'
+import MButton        from './MButton.vue'
+import MMenuItem      from './MMenuItem.vue'
+import GenomeSelector from './GenomeSelector.vue'
+import gc             from '../lib/GenomeCoordinates.js'
+import u              from '../lib/utils.js'
 export default MComponent({
   name: 'ZoomControls',
   components: { MButton, MMenuItem, GenomeSelector },

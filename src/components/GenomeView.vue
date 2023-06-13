@@ -144,10 +144,10 @@
 </template>
 
 <script>
-import MComponent from '@/components/MComponent'
-import GenomeViewChromosome from '@/components/GenomeViewChromosome'
-import MButton from '@/components/MButton'
-import { svg2png, svg2file } from '@/lib/SvgDownload'
+import MComponent from './MComponent.js'
+import GenomeViewChromosome from './GenomeViewChromosome.vue'
+import MButton from './MButton.vue'
+import { svg2png, svg2file } from '../lib/SvgDownload.js'
 export default MComponent({
   name: 'GenomeView',
   components: { GenomeViewChromosome, MButton },

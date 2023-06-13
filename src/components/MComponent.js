@@ -4,8 +4,8 @@
  * Usage:
  *    new Vue(MComponent({ options })
  */
-import config from '@/config'
-import Vue from 'vue'
+import config from '../config.js'
+import { nextTick } from 'vue'
 
 //let dm = new DataManager(config.DataManager.runtimeConfigFile)
 
@@ -17,6 +17,6 @@ export default function (cfg) {
   }
   cfg.computed.app = function () { return this.$root.$children[0].$children[0] }
   cfg.methods = cfg.methods || {}
-  cfg.methods.nextTick = Vue.nextTick
+  cfg.methods.nextTick = nextTick
   return cfg
 }

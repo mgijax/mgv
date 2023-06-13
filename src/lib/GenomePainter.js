@@ -1,5 +1,5 @@
 //
-import gc from '@/lib/GenomeCoordinates'
+import gc from './GenomeCoordinates.js'
 
 // ---------------------------------------------------------------------
 //

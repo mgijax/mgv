@@ -131,10 +131,10 @@
 </template>
 
 <script>
-import MComponent from '@/components/MComponent'
-import MButton from '@/components/MButton'
-import gc from '@/lib/GenomeCoordinates'
-import u from '@/lib/utils'
+import MComponent from './MComponent.js'
+import MButton    from './MButton.vue'
+import gc         from '../lib/GenomeCoordinates.js'
+import u          from '../lib/utils.js'
 export default MComponent({
   name: 'ZoomRegionControls',
   components: { MButton },

@@ -47,7 +47,7 @@
 </template>
 
 <script>
-import MComponent from '@/components/MComponent'
+import MComponent from './MComponent.js'
 export default MComponent({
   name: 'FormParameter',
   props: ['tool', 'parameter', 'labelXtra', 'sequence', 'asequence', 'bsequence'],

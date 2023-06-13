@@ -2,9 +2,9 @@
 // RegionManager - central point of control for creating/updating the model data that
 // drives the main display.
 //
-import u from '@/lib/utils'
-import gc from '@/lib/GenomeCoordinates'
-import config from '@/config'
+import u from './utils.js'
+import gc from './GenomeCoordinates.js'
+import config from '../config.js'
 
 // The RegionManager maintains the set of genomic regions that specify what to display in the ZoomView.
 class RegionManager {

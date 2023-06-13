@@ -1,6 +1,6 @@
-import KeyStore from '@/lib/KeyStore'
-import config from '@/config'
-import u from '@/lib/utils'
+import KeyStore from './KeyStore.js'
+import config from '../config.js'
+import u from './utils.js'
 
 class ListManager {
   constructor (app, lists) {

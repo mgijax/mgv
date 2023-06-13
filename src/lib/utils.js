@@ -1,6 +1,6 @@
-import Vue from 'vue'
-import gff from '@/lib/gff3lite'
-import vcf from '@/lib/vcflite'
+import { nextTick } from 'vue'
+import gff from './gff3lite.js'
+import vcf from './vcflite.js'
 
 //
 function debug () {
@@ -162,7 +162,7 @@ function randomColor () {
 function afterTicks (nTicks, fcn, thisObj, ...args) {
   if (nTicks > 0) {
     let f = () => afterTicks(nTicks - 1, fcn, thisObj, ...args)
-    Vue.nextTick(f)
+    nextTick(f)
   } else {
     fcn.call(thisObj, ...args)
   }
@@ -174,7 +174,7 @@ function eachTick (nTicks, fcn, thisObj, ...args) {
       fcn.call(thisObj, ...args)
       afterTicks(nTicks - 1, fcn, thisObj, ...args)
     }
-    Vue.nextTick(f)
+    nextTick(f)
   }
 }
 //

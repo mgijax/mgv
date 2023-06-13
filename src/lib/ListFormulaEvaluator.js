@@ -1,4 +1,4 @@
-import ListFormulaParser from './ListFormulaParser'
+import ListFormulaParser from './ListFormulaParser.js'
 
 // ---------------------------------------------
 // Knows how to parse and evaluate a list formula (aka list expression).

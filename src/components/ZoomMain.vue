@@ -40,12 +40,12 @@
 </template>
 
 <script>
-import MComponent from '@/components/MComponent'
-import ZoomStrip from '@/components/ZoomStrip'
-import ZoomFiducials from '@/components/ZoomFiducials'
-import RangeBoxes from '@/components/RangeBoxes'
-import { svg2png, svg2file } from '@/lib/SvgDownload'
-import u from '@/lib/utils'
+import MComponent            from './MComponent.js'
+import ZoomStrip             from './ZoomStrip.vue'
+import ZoomFiducials         from './ZoomFiducials.vue'
+import RangeBoxes            from './RangeBoxes.vue'
+import { svg2png, svg2file } from '../lib/SvgDownload.js'
+import u                     from '../lib/utils.js'
 export default MComponent({
   name: 'ZoomMain',
   inject: ['regionManager'],

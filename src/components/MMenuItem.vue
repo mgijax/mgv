@@ -25,9 +25,9 @@
 </template>
 
 <script>
-import MComponent from '@/components/MComponent'
-import MButton from '@/components/MButton'
-import MMenu from '@/components/MMenu'
+import MComponent from './MComponent.js'
+import MButton    from './MButton.vue'
+import MMenu      from './MMenu.vue'
 export default MComponent({
   name: 'MMenuItem',
   props: {

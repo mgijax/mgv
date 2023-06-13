@@ -48,9 +48,9 @@
 </template>
 
 <script>
-import MComponent from '@/components/MComponent'
-import Vue from 'vue'
-import u from '@/lib/utils'
+import MComponent   from './MComponent.js'
+import { nextTick } from 'vue'
+import u            from '../lib/utils.js'
 export default MComponent({
   name: 'MBrush',
   props: [
@@ -92,7 +92,7 @@ export default MComponent({
     }
   },
   mounted: function () {
-    Vue.nextTick(() => this.initDrag())
+    nextTick(() => this.initDrag())
   },
   watch: {
     trigger: function () { this.reset() }

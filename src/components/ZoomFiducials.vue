@@ -82,10 +82,9 @@
 </template>
 
 <script>
-import MComponent from '@/components/MComponent'
-import MessageBox from '@/components/MessageBox'
-import config from '@/config'
-//import u from '@/lib/utils'
+import MComponent from './MComponent.js'
+import MessageBox from './MessageBox.vue'
+import config     from '../config.js'
 export default MComponent({
   name: 'ZoomFiducials',
   props: ['height', 'width'],

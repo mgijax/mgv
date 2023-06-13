@@ -16,8 +16,8 @@
 </template>
 
 <script>
-import MComponent from '@/components/MComponent'
-import config from '@/config'
+import MComponent from './MComponent.js'
+import config from '../config.js'
 export default MComponent({
   name: 'MFooter',
   props: ['version'],

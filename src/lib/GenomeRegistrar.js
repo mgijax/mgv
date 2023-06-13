@@ -1,10 +1,10 @@
 //
-import u from '@/lib/utils'
-import config from '@/config'
-import KeyStore from '@/lib/KeyStore'
-import CachingFetcher from '@/lib/CachingFetcher'
-import { GffReader } from '@/lib/GffReader'
-import { FastaReader } from '@/lib/FastaReader'
+import u from './utils.js'
+import config from '../config.js'
+import KeyStore from './KeyStore.js'
+import CachingFetcher from './CachingFetcher.js'
+import { GffReader } from './GffReader.js'
+import { FastaReader } from './FastaReader.js'
 //
 // -------------------------------------------------------------------------------
 // Container for track readers for a genome

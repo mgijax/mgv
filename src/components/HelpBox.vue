@@ -38,10 +38,10 @@
 </template>
 
 <script>
-import MComponent from '@/components/MComponent'
-import MButton from '@/components/MButton'
-import helpData from '@/components/HelpBoxData'
-import u from "@/lib/utils"
+import MComponent from './MComponent.js'
+import MButton    from './MButton.vue'
+import helpData   from './HelpBoxData.js'
+import u          from "../lib/utils.js"
 export default MComponent({
     name: 'HelpBox',
     inject: ['preferencesManager'],

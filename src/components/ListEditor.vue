@@ -14,7 +14,7 @@
           <td><label>Color</label></td>
           <td>
             <div class="flexcolumn">
-              <input type="color" class="swatch" name="list-color" value="#e1a1a1" v-model="pickerColor"/>
+              <input type="color" class="swatch" name="list-color" v-model="pickerColor"/>
             </div>
           </td>
         </tr>
@@ -113,8 +113,8 @@ Shift-CLICK to remove selection and homologs."
 </template>
 
 <script>
-import MComponent from '@/components/MComponent'
-import MButton from '@/components/MButton'
+import MComponent from './MComponent.js'
+import MButton from './MButton.vue'
 export default MComponent({
   name: 'ListEditor',
   components: {

@@ -120,11 +120,11 @@
 </template>
 
 <script>
-import u from '@/lib/utils'
-import MComponent from '@/components/MComponent'
-import MButton from '@/components/MButton'
-import SequenceCartItem from '@/components/SequenceCartItem'
-import KeyStore from '@/lib/KeyStore'
+import u                from '../lib/utils.js'
+import MComponent       from './MComponent.js'
+import MButton          from './MButton.vue'
+import SequenceCartItem from './SequenceCartItem.vue'
+import KeyStore         from '../lib/KeyStore.js'
 export default MComponent({
   name: 'SequenceCart',
   components: { SequenceCartItem, MButton },

@@ -23,8 +23,8 @@
 </template>
 
 <script>
-import MComponent from '@/components/MComponent'
-import MouseMineQueries from '@/lib/MouseMineQueries'
+import MComponent from './MComponent.js'
+import MouseMineQueries from '../lib/MouseMineQueries.js'
 
 export default MComponent({
   name: 'FindGenes',

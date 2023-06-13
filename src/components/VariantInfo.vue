@@ -95,8 +95,8 @@
 </template>
 
 <script>
-import MComponent from '@/components/MComponent'
-import MButton from '@/components/MButton'
+import MComponent from './MComponent.js'
+import MButton    from './MButton.vue'
 export default MComponent({
   name: 'VariantInfo',
   components: { MButton },

@@ -1,4 +1,4 @@
-import u from '@/lib/utils'
+import u from './utils.js'
 
 class MouseMineQueries {
   constructor () {

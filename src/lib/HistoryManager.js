@@ -1,5 +1,5 @@
-import u from '@/lib/utils'
-import config from '@/config'
+import u from './utils.js'
+import config from '../config.js'
 //
 class HistoryManager {
   //
