@@ -156,7 +156,7 @@ export default MComponent({
     }
   },
   mounted: function () {
-    this.app.$root.$on('list-delete', d => {
+    this.app.$root.ebus.on('list-delete', d => {
       if (this.list === d) {
         this.cancel()
       }
@@ -229,20 +229,20 @@ export default MComponent({
     save: function () {
       let tv = this.$refs.textarea.value
       this.items = tv.split(/\s+/).filter(x => x)
-      this.$root.$emit('list-edit-save', this.$data)
+      this.$root.ebus.emit('list-edit-save', this.$data)
       this.$parent.close()
     },
     create: function () {
       let tv = this.$refs.textarea.value
       this.items = tv.split(/\s+/).filter(x => x)
-      this.$root.$emit('list-edit-new', this.$data)
+      this.$root.ebus.emit('list-edit-new', this.$data)
       this.$parent.close()
     },
     clear: function () {
-      this.$root.$emit('list-edit-cancel')
+      this.$root.ebus.emit('list-edit-cancel')
     },
     cancel: function () {
-      this.$root.$emit('list-edit-cancel')
+      this.$root.ebus.emit('list-edit-cancel')
       this.$parent.close()
     },
     replace: function (lst) {

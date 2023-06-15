@@ -204,7 +204,7 @@ export default MComponent({
       if (!d.dragged || Math.abs(d.deltaX) < 3) {
         // this was actually just a click. If it was on the background, clear current selection
         if (!e.target.closest('.feature')) {
-          // this.$root.$emit('clear-selection')
+          // this.$root.ebus.emit('clear-selection')
         }
         this.dragData = null
         this.dragging = false
@@ -233,10 +233,10 @@ export default MComponent({
             totalLength: end - start + 1
           }
         })
-        this.$root.$emit('sequence-selected', { sequences : seqs, unselectAll: true })
+        this.$root.ebus.emit('sequence-selected', { sequences : seqs, unselectAll: true })
       } else if (d.shiftDrag || d.metaDrag) {
         // zoom in/out of dragged region === composition of centered zoom plus a scroll
-        this.$root.$emit('region-change', {
+        this.$root.ebus.emit('region-change', {
           region: d.vm.region,
           op: 'zoomscroll',
           pstart: d.startp,
@@ -245,7 +245,7 @@ export default MComponent({
         })
       } else {
         // scroll
-        this.$root.$emit('region-change', { region: d.vm.region, op: 'scroll', amt: d.deltaX })
+        this.$root.ebus.emit('region-change', { region: d.vm.region, op: 'scroll', amt: d.deltaX })
       }
 
       d.vms.forEach(vm => vm.regionScrollDelta = 0)
@@ -263,20 +263,20 @@ export default MComponent({
       this.boxes = []
     }
     //
-    this.$root.$on('region-mousemove',  this.cbRegionMouseMove)
-    this.$root.$on('region-mouseleave', this.cbRegionMouseLeave)
-    this.$root.$on('region-dragstart',  this.cbRegionDragstart)
-    this.$root.$on('region-drag',       this.cbRegionDrag)
-    this.$root.$on('region-dragend',    this.cbRegionDragend)
-    this.$root.$on('escape-pressed',    this.cbEscapePressed)
+    this.$root.ebus.on('region-mousemove',  this.cbRegionMouseMove)
+    this.$root.ebus.on('region-mouseleave', this.cbRegionMouseLeave)
+    this.$root.ebus.on('region-dragstart',  this.cbRegionDragstart)
+    this.$root.ebus.on('region-drag',       this.cbRegionDrag)
+    this.$root.ebus.on('region-dragend',    this.cbRegionDragend)
+    this.$root.ebus.on('escape-pressed',    this.cbEscapePressed)
   },
   destroyed: function () {
-    this.$root.$off('region-mousemove',  this.cbRegionMouseMove)
-    this.$root.$off('region-mouseleave', this.cbRegionMouseLeave)
-    this.$root.$off('region-dragstart',  this.cbRegionDragstart)
-    this.$root.$off('region-drag',       this.cbRegionDrag)
-    this.$root.$off('region-dragend',    this.cbRegionDragend)
-    this.$root.$off('escape-pressed',    this.cbEscapePressed)
+    this.$root.ebus.off('region-mousemove',  this.cbRegionMouseMove)
+    this.$root.ebus.off('region-mouseleave', this.cbRegionMouseLeave)
+    this.$root.ebus.off('region-dragstart',  this.cbRegionDragstart)
+    this.$root.ebus.off('region-drag',       this.cbRegionDrag)
+    this.$root.ebus.off('region-dragend',    this.cbRegionDragend)
+    this.$root.ebus.off('escape-pressed',    this.cbEscapePressed)
   }
 })
 </script>

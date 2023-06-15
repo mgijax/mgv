@@ -10,7 +10,7 @@ function getMenus(thisObj) {
       helpText: 'Aligns the displayed genomes around this feature.',
       handler: (function (cxt) {
         cxt.op = 'feature-align'
-        this.$root.$emit('region-change', cxt)
+        this.$root.ebus.emit('region-change', cxt)
       }).bind(thisObj)
     }
   }
@@ -119,7 +119,7 @@ function getMenus(thisObj) {
             u.fail('Unknown sequence type: ' + seqtype)
           }
         }))
-        this.$root.$emit('sequence-selected', { sequences : seqs, unselectAll : true })
+        this.$root.ebus.emit('sequence-selected', { sequences : seqs, unselectAll : true })
       }).bind(thisObj)
     }
   }

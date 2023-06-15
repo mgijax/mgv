@@ -95,16 +95,16 @@ export default MComponent({
       parentDiv.scrollTop = item.$el.offsetTop
     },
     newEmpty () {
-      this.$root.$emit('list-edit-new')
+      this.$root.ebus.emit('list-edit-new')
     },
     newFromSel () {
       if (this.app.verifyCurrentSelection()) {
-        this.$root.$emit('list-edit-newfromselected', { includeHomologs: false })
+        this.$root.ebus.emit('list-edit-newfromselected', { includeHomologs: false })
       }
     },
     newFromSelWithHom () {
       if (this.app.verifyCurrentSelection()) {
-        this.$root.$emit('list-edit-newfromselected', { includeHomologs: true })
+        this.$root.ebus.emit('list-edit-newfromselected', { includeHomologs: true })
       }
     },
     newFromQuery () {

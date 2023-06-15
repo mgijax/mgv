@@ -15,11 +15,11 @@ class RegionManager {
     this.rCount = 0
     this.lastOp = null
     //
-    this.app.$root.$on('region-current', r => {
+    this.app.$root.ebus.on('region-current', r => {
       if (r) this.currRegion = r.region
     })
     //
-    this.app.$root.$on('region-change', d => {
+    this.app.$root.ebus.on('region-change', d => {
       this.regionChange(d)
     })
   }
@@ -798,7 +798,7 @@ class RegionManager {
   //--------------------------------------
   //
   announce () {
-    this.app.$root.$emit('context-changed')
+    this.app.$root.ebus.emit('context-changed')
   }
   //
   getParameterString () {

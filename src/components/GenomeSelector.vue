@@ -50,7 +50,7 @@ export default MComponent({
   },
   mounted: function () {
     this.reset()
-    this.$root.$on('context-changed', () => this.reset())
+    this.$root.ebus.on('context-changed', () => this.reset())
   },
   methods: {
     genomeTitleText: function (g) {
@@ -98,7 +98,7 @@ export default MComponent({
           this.vGs.push(this.rG)
         }
       }
-      this.$root.$emit('region-change', { op : 'set-genomes', rGenome: this.rG, vGenomes: this.vGs })
+      this.$root.ebus.emit('region-change', { op : 'set-genomes', rGenome: this.rG, vGenomes: this.vGs })
     },
     // Checkbox clicked. This event is always received, and is followed immediately by a change event.
     // Here we need to record whenther shift key is down because we don't get that in the change event.

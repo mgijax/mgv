@@ -17,9 +17,9 @@ class HomologyManager {
     this.taxonid2promise = {}
     this.promises = []
     //
-    this.app.$root.$on('taxons-changed', () => {
+    this.app.$root.ebus.on('taxons-changed', () => {
       if (this.app.vTaxons.length > 1) {
-        this.app.$root.$emit('message', { message: 'Computing inferred paralogs...' })
+        this.app.$root.ebus.emit('message', { message: 'Computing inferred paralogs...' })
       }
       this.computeAllInferredParalogs()
     })
@@ -29,7 +29,7 @@ class HomologyManager {
     if (this.taxonid2promise[taxonid]) {
       return this.taxonid2promise[taxonid]
     }
-    this.app.$root.$emit('message', { message: `Fetching orthology data for taxon ${taxonid}...` })
+    this.app.$root.ebus.emit('message', { message: `Fetching orthology data for taxon ${taxonid}...` })
     const p = this.fetcher.fetch(`${this.fetchUrl}?datatype=homology&taxonid=${taxonid}`, 'tsv').then(data => {
       this.registerData(data)
       return true

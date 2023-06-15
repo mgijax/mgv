@@ -113,7 +113,7 @@ export default MComponent({
                this.app.addToCurrentSelection(f)
             }
         }
-        this.$root.$emit('region-change', { op : 'feature-align', features: this.app.currentSelection })
+        this.$root.ebus.emit('region-change', { op : 'feature-align', features: this.app.currentSelection })
     },
     translate () {
       if (!this.$parent.$el) return ''
@@ -308,22 +308,22 @@ export default MComponent({
             this.build2()
         }
     }
-    this.$root.$on('region-update', this.build2)
-    this.$root.$on('strip-move', this.build2)
-    this.$root.$on('zoom-main-updated', this.build2)
-    this.$root.$on('region-dragstart', this.rds)
-    this.$root.$on('region-dragend', this.rde)
-    this.$root.$on('strip-dragstart', this.rds)
-    this.$root.$on('strip-dragend', this.rde)
+    this.$root.ebus.on('region-update', this.build2)
+    this.$root.ebus.on('strip-move', this.build2)
+    this.$root.ebus.on('zoom-main-updated', this.build2)
+    this.$root.ebus.on('region-dragstart', this.rds)
+    this.$root.ebus.on('region-dragend', this.rde)
+    this.$root.ebus.on('strip-dragstart', this.rds)
+    this.$root.ebus.on('strip-dragend', this.rde)
   },
   destroyed: function () {
-    this.$root.$off('region-update', this.build2)
-    this.$root.$off('strip-move', this.build2)
-    this.$root.$off('zoom-main-updated', this.build2)
-    this.$root.$off('region-dragstart', this.rds)
-    this.$root.$off('region-dragend', this.rde)
-    this.$root.$off('strip-dragstart', this.rds)
-    this.$root.$off('strip-dragend', this.rde)
+    this.$root.ebus.off('region-update', this.build2)
+    this.$root.ebus.off('strip-move', this.build2)
+    this.$root.ebus.off('zoom-main-updated', this.build2)
+    this.$root.ebus.off('region-dragstart', this.rds)
+    this.$root.ebus.off('region-dragend', this.rde)
+    this.$root.ebus.off('strip-dragstart', this.rds)
+    this.$root.ebus.off('strip-dragend', this.rde)
   }
 })
 </script>

@@ -58,7 +58,7 @@ export default MComponent({
     }
   },
   mounted: function () {
-    this.$root.$on('message', d => this.addMessage(d.message))
+    this.$root.ebus.on('message', d => this.addMessage(d.message))
   }
 })
 </script>

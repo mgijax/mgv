@@ -219,13 +219,13 @@ export default MComponent({
         return d
     },
     overFeature (f, ev) {
-        this.$root.$emit('feature-over', this.getEventObjects(f, ev))
+        this.$root.ebus.emit('feature-over', this.getEventObjects(f, ev))
     },
     outFeature (f, ev) {
-        this.$root.$emit('feature-out', this.getEventObjects(f, ev))
+        this.$root.ebus.emit('feature-out', this.getEventObjects(f, ev))
     },
     clickFeature(f, ev) {
-        this.$root.$emit('feature-click', this.getEventObjects(f, ev))
+        this.$root.ebus.emit('feature-click', this.getEventObjects(f, ev))
     },
     featureHighlighted (f) {
         const a = this.app

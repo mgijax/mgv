@@ -1,7 +1,7 @@
 {
-  "name": "test-mgv",
+  "name": "mgv",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -10,7 +10,8 @@
   },
   "dependencies": {
     "idb-keyval": "^3.2.0",
-    "vue": "^3.2.47"
+    "vue": "^3.2.47",
+    "tiny-emitter" : "^2.1.0"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^4.1.0",

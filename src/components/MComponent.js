@@ -7,8 +7,6 @@
 import config from '../config.js'
 import { nextTick } from 'vue'
 
-//let dm = new DataManager(config.DataManager.runtimeConfigFile)
-
 export default function (cfg) {
   cfg.computed = cfg.computed || {}
   cfg.computed.cfg = function () {

@@ -8,10 +8,10 @@ class ListManager {
     this.listStore = new KeyStore(config.ListManager.dbName)
     this.lists = lists
     this.listByName = {}
-    this.app.$root.$on('list-delete', d => {
+    this.app.$root.ebus.on('list-delete', d => {
       this.deleteList(d.name)
     })
-    this.app.$root.$on('query-returned', d => {
+    this.app.$root.ebus.on('query-returned', d => {
       this.newList(`${d.queryType.name} = ${d.query}`, d.results)
     })
     this.initFromStore()
@@ -42,7 +42,7 @@ class ListManager {
     this.lists.push(list)
     this.listByName[uname] = list
     this.saveToStore()
-    this.app.$nextTick(() => this.app.$root.$emit('list-click', { list: list, event: { shiftKey: true }}))
+    this.app.$nextTick(() => this.app.$root.ebus.emit('list-click', { list: list, event: { shiftKey: true }}))
     return list
   }
   // Returns a mapping from list (name) to (names of) lists that reference it in their formulas

@@ -1,16 +1,25 @@
 <template>
   <div id="app">
-    <MGV />
+    <MGV ref="mgv"/>
   </div>
 </template>
 
 <script>
 import MGV from './components/MGV.vue'
+import u   from './lib/utils'
+
 
 export default {
   name: 'app',
   components: {
     MGV
+  },
+  props: {
+    runtimeConfig: "object", // contents of runtimeConfig.json file
+    ebus: "object"  // the event bus
+  },
+  mounted: function () {
+      console.log(this)
   }
 }
 </script>

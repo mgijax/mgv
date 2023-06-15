@@ -10,7 +10,7 @@ class HistoryManager {
     // when user hits back button, tell the app
     window.addEventListener('popstate', () => this.setAppContext())
     // when app context changes, tell the window
-    this.app.$root.$on('context-changed', () => this.setHash())
+    this.app.$root.ebus.on('context-changed', () => this.setHash())
     // tell the app about the initial state
     let qstring = window.location.hash.substring(1) || config.MGV.defaultHash
     this.initialHash = this.pqstring(qstring)

@@ -102,7 +102,7 @@
         <m-button
           :icon="'sort'"
           :title="'Sort genomes by name'"
-          @click="$root.$emit('sort-strips', 'name')"
+          @click="$root.ebus.emit('sort-strips', 'name')"
           />
         <!-- camera button -->
         <m-button
@@ -205,38 +205,38 @@ export default MComponent({
   },
   methods: {
     clearList: function () {
-      this.$root.$emit('list-click', { list: this.context.currentList })
+      this.$root.ebus.emit('list-click', { list: this.context.currentList })
     },
     clearSelection: function () {
-      this.$root.$emit('clear-selection')
+      this.$root.ebus.emit('clear-selection')
     },
     selectOnFocus (e) {
       e.target.select()
     },
     clearFacets: function () {
-      this.$root.$emit('clear-facets')
+      this.$root.ebus.emit('clear-facets')
     },
     submitOnEnter (e) {
       if (e.keyCode === 13) this.findLandmark(e.target.value, e.shiftKey)
     },
     scroll (amt) {
-      this.$root.$emit('region-change', { op: 'scroll', amt: amt, sType: "%" })
+      this.$root.ebus.emit('region-change', { op: 'scroll', amt: amt, sType: "%" })
     },
     zoom (amt) {
-      this.$root.$emit('region-change', { op: 'zoom', amt: amt })
+      this.$root.ebus.emit('region-change', { op: 'zoom', amt: amt })
     },
     lockClicked () {
-      this.$root.$emit('region-change', { op : this.context.scrollLock ? 'clear-lock-mode' : 'set-lock-mode'})
+      this.$root.ebus.emit('region-change', { op : this.context.scrollLock ? 'clear-lock-mode' : 'set-lock-mode'})
     },
     alignFeatures (fs, shift) {
         fs = fs || this.app.currentSelection
-        this.$root.$emit('region-change', { op : 'feature-align', features: fs, shift: shift })
+        this.$root.ebus.emit('region-change', { op : 'feature-align', features: fs, shift: shift })
     },
     addAllToCart () {
       const strips = this.$parent.$refs.main.$refs.strips
       const regions = u.flatten(strips.map(s => s.$children))
       const descs = regions.map(r => r.getSequenceDescriptor())
-      this.$root.$emit('sequence-selected', { sequences : descs, unselectAll: true })
+      this.$root.ebus.emit('sequence-selected', { sequences : descs, unselectAll: true })
     },
     findLandmark (n, shift) {
       if (!n) return
@@ -251,7 +251,7 @@ export default MComponent({
         const c = gc.parse(n)
         if (c) {
           // valid coords. 
-          this.$root.$emit('region-change', { op: 'jump-to', coords: c })
+          this.$root.ebus.emit('region-change', { op: 'jump-to', coords: c })
         } else {
           // No luck. Complain...
           alert('Landmark not found: ' + n)

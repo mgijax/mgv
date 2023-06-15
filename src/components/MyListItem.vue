@@ -25,14 +25,14 @@ export default MComponent({
   },
   methods: {
     deleteClicked: function () {
-      this.$root.$emit('list-delete', this.item)
+      this.$root.ebus.emit('list-delete', this.item)
       this.app.logEvent('ListOp', 'delete')
     },
     clicked: function (evt) {
-      this.$root.$emit('list-click', { event: evt, list: this.item })
+      this.$root.ebus.emit('list-click', { event: evt, list: this.item })
     },
     editClicked: function (evt) {
-      this.$root.$emit('list-edit-open', { event: evt, list: this.item })
+      this.$root.ebus.emit('list-edit-open', { event: evt, list: this.item })
       this.app.logEvent('ListOp', 'edit')
     },
     dragStart: function (evt) {

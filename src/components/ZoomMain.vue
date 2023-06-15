@@ -88,7 +88,7 @@ export default MComponent({
         e.preventDefault()
     },
     clicked: function (e) {
-      if (!e.shiftKey && e.target.classList.contains('underlay')) this.$root.$emit('clear-selection')
+      if (!e.shiftKey && e.target.classList.contains('underlay')) this.$root.ebus.emit('clear-selection')
     },
     downloadImage: function (e) {
       if (e.shiftKey) {
@@ -155,36 +155,36 @@ export default MComponent({
     zDrag (d) {
       d.data.vm.dragY = d.data.deltaY
       this.setYs('y')
-      this.$root.$emit('strip-move', d.vm)
+      this.$root.ebus.emit('strip-move', d.vm)
     },
     zDragEnd (d) {
       d.data.vm.dragY = 0
       this.dragging = null
       this.setYs('y')
-      this.$root.$emit('context-changed')
-      this.$root.$emit('strip-move', d.vm)
+      this.$root.ebus.emit('context-changed')
+      this.$root.ebus.emit('strip-move', d.vm)
     },
     sortStrips (sortBy) {
       this.setYs(sortBy)
-      this.$root.$emit('context-changed')
+      this.$root.ebus.emit('context-changed')
     }
   },
   updated: function () {
-    this.$root.$emit('zoom-main-updated')
+    this.$root.ebus.emit('zoom-main-updated')
   },
   created: function () {
     //
-    this.$root.$on('resize', () => this.resize())
+    this.$root.ebus.on('resize', () => this.resize())
     this.nextTick(() => this.resize())
     this.$parent.$parent.$on('pagebox-open', () => this.nextTick(() => this.resize()))
     //
-    this.$root.$on('region-change', d => {
+    this.$root.ebus.on('region-change', d => {
       if (d.op === 'delete-strip') {
         window.setTimeout(() => this.setYs(), 250)
       }
     })
     //
-    this.$root.$on('sort-strips', d => this.sortStrips(d))
+    this.$root.ebus.on('sort-strips', d => this.sortStrips(d))
   }
 })
 </script>

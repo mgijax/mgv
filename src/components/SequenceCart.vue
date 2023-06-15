@@ -302,17 +302,17 @@ export default MComponent({
 
   },
   created: function () {
-    this.$root.$on('sequence-selected', rs => {
+    this.$root.ebus.on('sequence-selected', rs => {
       rs.unselectAll && this.unselectAll()
       rs.sequences.forEach(r => this.add(r))
       this.app.openDrawer()
       this.$parent.open()
       this.$el.scrollIntoView()
       if (rs.sequences.length) {
-        this.$root.$emit('message', { message: `Added ${rs.sequences.length} sequences to cart` })
+        this.$root.ebus.emit('message', { message: `Added ${rs.sequences.length} sequences to cart` })
       }
     })
-    this.$root.$once('mgv-initialized', () => {
+    this.$root.ebus.once('mgv-initialized', () => {
         // have to wait til MGV is initialized before restoring sequences because we
         // need to be able to resolve genome names.
         this.kstore = new KeyStore(this.cfg.dbName)

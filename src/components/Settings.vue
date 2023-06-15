@@ -229,7 +229,7 @@
     <label>Clear cache and reload</label>
     <m-button
       icon="refresh"
-      @click="$root.$emit('clear-cache-and-reload')"
+      @click="$root.ebus.emit('clear-cache-and-reload')"
       color="#3a99fc"
       />
   </div>
@@ -241,7 +241,7 @@
     <label>Purge and exit</label>
     <m-button
       icon="eject"
-      @click="$root.$emit('purge-and-exit')"
+      @click="$root.ebus.emit('purge-and-exit')"
       color="#fc3a3a"
       />
   </div>
@@ -262,7 +262,7 @@ export default MComponent({
   },
   methods: {
     announce: function () {
-      this.$root.$emit("context-changed")
+      this.$root.ebus.emit("context-changed")
     },
     // saves current settings to database
     save: function () {
@@ -346,7 +346,7 @@ export default MComponent({
       zr.sequenceFontSize = zr.featureFontSize - 1
     })
     this.$watch('ZoomFiducials.showAllConnectors', () => {
-      this.$root.$emit('zoom-main-updated')
+      this.$root.ebus.emit('zoom-main-updated')
     })
   },
   computed: {

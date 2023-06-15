@@ -164,34 +164,34 @@ export default MComponent({
     },
     zoom: function (amt) {
       this.app.scrollLock = false
-      this.$root.$emit('region-change', { region: this.region, vm: this, op: 'zoom', amt: amt })
+      this.$root.ebus.emit('region-change', { region: this.region, vm: this, op: 'zoom', amt: amt })
     },
     scroll: function (amt) {
       this.app.scrollLock = false
-      this.$root.$emit('region-change', { region: this.region, vm: this, op: 'scroll', amt: amt, sType: '%' })
+      this.$root.ebus.emit('region-change', { region: this.region, vm: this, op: 'scroll', amt: amt, sType: '%' })
     },
     reverse: function () {
-      this.$root.$emit('region-change', { region: this.region, vm: this, op: 'reverse' })
+      this.$root.ebus.emit('region-change', { region: this.region, vm: this, op: 'reverse' })
     },
     split: function () {
       this.app.scrollLock = false
-      this.$root.$emit('region-change', { region: this.region, vm: this, op: 'split', pos: 0.5 })
+      this.$root.ebus.emit('region-change', { region: this.region, vm: this, op: 'split', pos: 0.5 })
       this.close()
     },
     makeRef: function () {
-      this.$root.$emit('region-change', { region: this.region, vm: this, op: 'make-reference' })
+      this.$root.ebus.emit('region-change', { region: this.region, vm: this, op: 'make-reference' })
       this.close()
     },
     addToCart: function () {
       const desc = this.vm.getSequenceDescriptor()
-      this.$root.$emit('sequence-selected', { sequences : [desc], unselectAll: true })
+      this.$root.ebus.emit('sequence-selected', { sequences : [desc], unselectAll: true })
     },
     remove: function () {
-      this.$root.$emit('region-change', { region: this.region, vm: this, op: 'remove' })
+      this.$root.ebus.emit('region-change', { region: this.region, vm: this, op: 'remove' })
       this.close()
     },
     removeAllBut: function () {
-      this.$root.$emit('region-change', { region: this.region, vm: this, op: 'remove-all-but' })
+      this.$root.ebus.emit('region-change', { region: this.region, vm: this, op: 'remove-all-but' })
       this.close()
     },
     setCoords: function () {
@@ -208,7 +208,7 @@ export default MComponent({
             start: f.start - l,
             end: f.end + l
           }
-          this.$root.$emit('region-change', { region: this.region, vm: this, op: 'set', coords: rr })
+          this.$root.ebus.emit('region-change', { region: this.region, vm: this, op: 'set', coords: rr })
           this.close()
         } else {
           alert("Could not resolve coordinates.")
@@ -216,7 +216,7 @@ export default MComponent({
         }
       } else {
         const rr = gc.validate(r, this.region.genome, true)
-        this.$root.$emit('region-change', { region: this.region, vm: this, op: 'set', coords: rr })
+        this.$root.ebus.emit('region-change', { region: this.region, vm: this, op: 'set', coords: rr })
         this.close()
       }
     },

@@ -307,17 +307,17 @@ export default MComponent({
     }
   },
   mounted: function () {
-    this.$root.$on('resize', () => this.resize())
+    this.$root.ebus.on('resize', () => this.resize())
     this.$parent.$on('pagebox-open', () => this.nextTick(() => this.resize()))
     this.nextTick(() => { this.resize() })
-    this.$root.$on('set-genomes', d=> {
+    this.$root.ebus.on('set-genomes', d=> {
       if (d.rGenome) {
         this.genome = this.app.dataManager.lookupGenome(d.rGenome)
       } else if (d.vGenomes.indexOf(this.genome.name) === -1) {
         this.genome = this.app.dataManager.lookupGenome(d.vGenomes[0])
       }
     })
-    this.$root.$on('facet-state', facets => {
+    this.$root.ebus.on('facet-state', facets => {
       this.currentFacets = facets
       this.computeCurrentListHomologs()
     })
@@ -337,12 +337,12 @@ export default MComponent({
       'context.currentList',
       () => this.computeCurrentListHomologs(),
       { deep: true })
-    this.$root.$on('region-current', d => {
+    this.$root.ebus.on('region-current', d => {
       if (d) {
         this.genome = d.region.genome
       }
     })
-    this.$root.$on('region-change', d => {
+    this.$root.ebus.on('region-change', d => {
       const r = d.region
       if (r && r.genome) this.genome = r.genome
     })

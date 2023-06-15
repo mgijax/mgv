@@ -238,10 +238,10 @@ export default MComponent({
       }
     },
     brushenter: function (r) {
-      this.$root.$emit('region-current', { region : r })
+      this.$root.ebus.emit('region-current', { region : r })
     },
     brushleave: function () {
-      this.$root.$emit('region-current', null)
+      this.$root.ebus.emit('region-current', null)
     },
     brushed: function (data, rr) {
       if (!rr) return
@@ -255,7 +255,7 @@ export default MComponent({
         this.app.rGenome = this.genome
         this.app.scrollLock = false
       }
-      this.$root.$emit('region-change', {
+      this.$root.ebus.emit('region-change', {
         op: 'set',
         region: rr,
         coords: {
@@ -266,7 +266,7 @@ export default MComponent({
       })
     },
     clickedGlyph: function (f) {
-      this.$root.$emit('region-change', { op : 'feature-align', feature: f })
+      this.$root.ebus.emit('region-change', { op : 'feature-align', feature: f })
     },
     glyphX: function (f) {
       return (this.width/2 + this.glyphRadius) * (f.strand === '-' ? -1 : 1)
@@ -337,7 +337,7 @@ export default MComponent({
           this.app.rGenome = this.genome
           this.app.scrollLock = false
         }
-        this.$root.$emit('region-change', { vm: this, op: 'new', region: r, only: !d.shiftDrag })
+        this.$root.ebus.emit('region-change', { vm: this, op: 'new', region: r, only: !d.shiftDrag })
       }
     }, this.$parent.$el, this)
   }

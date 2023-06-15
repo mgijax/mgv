@@ -226,21 +226,21 @@ export default MComponent({
       fd.message = facet.active ? "Active. Click to turn off." : ""
       let state = this.getFacetState()
       this.someoneActive = state.length > 0
-      this.$root.$emit('facet-state', state)
+      this.$root.ebus.emit('facet-state', state)
     },
     resetAll () {
       this.$refs.facets.forEach(f => f.inactivate())
     }
   },
   created: function () {
-    this.$root.$on('clear-facets', () => {
+    this.$root.ebus.on('clear-facets', () => {
         this.resetAll()
     })
-    this.$root.$on('selection-state-changed', () => {
+    this.$root.ebus.on('selection-state-changed', () => {
       const icsi = this.facetData.map(fd => fd.name).indexOf('Feature is selected')
       const ics = this.$refs.facets[icsi]
       if (ics.active) {
-        this.$root.$emit('facet-state', this.getFacetState())
+        this.$root.ebus.emit('facet-state', this.getFacetState())
       }
     })
   }

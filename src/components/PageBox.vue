@@ -104,7 +104,7 @@ export default MComponent({
       if (e && e.shiftKey) {
         this.isOpen = true
         this.$emit('pagebox-open', this)
-        this.$root.$emit('pagebox-open-exclusive', this)
+        this.$root.ebus.emit('pagebox-open-exclusive', this)
         u.unselectAllText()
       } else {
         this.isOpen = !this.isOpen
@@ -214,7 +214,7 @@ export default MComponent({
     }
   },
   mounted: function () {
-    this.$root.$on('pagebox-open-exclusive', pb => this.onExclusiveOpen(pb))
+    this.$root.ebus.on('pagebox-open-exclusive', pb => this.onExclusiveOpen(pb))
     nextTick(() => {
       // At mount time, contained components have already been rendered.
       // Find the content component, which is the last.

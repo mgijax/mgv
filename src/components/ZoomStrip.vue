@@ -197,7 +197,7 @@ export default MComponent({
       })
       this.strip.regions.sort((a,b) => a.sortKey - b.sortKey)
       this.app.regionManager.layout()
-      this.$root.$emit('context-changed')
+      this.$root.ebus.emit('context-changed')
     },
     activateHandle: function (e) {
       const handle = e.target
@@ -219,7 +219,7 @@ export default MComponent({
           if (!d.dragged && e.altKey) {
             this.regionManager().joinRegion(d.region)
           }
-          this.$root.$emit('context-changed')
+          this.$root.ebus.emit('context-changed')
         }
       }, this.$el, this)
       handle.setAttribute('active','true')
@@ -245,11 +245,11 @@ export default MComponent({
       this.$emit('height-changed', this)
     },
     deleteClicked () {
-      this.$root.$emit('region-change', { region: { genome: this.genome }, op: 'delete-strip' })
+      this.$root.ebus.emit('region-change', { region: { genome: this.genome }, op: 'delete-strip' })
     },
     reverseClicked (e) {
       const sir = this.someoneIsReversed()
-      this.regions.forEach(r => this.$root.$emit('region-change', {
+      this.regions.forEach(r => this.$root.ebus.emit('region-change', {
         region: r,
         op: 'reverse',
         value: e.shiftKey ? undefined : !sir 
@@ -257,9 +257,9 @@ export default MComponent({
     },
     rGenomeClicked () {
       if (this.genome === this.app.rGenome) {
-        this.$root.$emit('region-change', { op : 'clear-ref-genome' })
+        this.$root.ebus.emit('region-change', { op : 'clear-ref-genome' })
       } else {
-        this.$root.$emit('region-change', { op : 'set-ref-genome', genome : this.genome })
+        this.$root.ebus.emit('region-change', { op : 'set-ref-genome', genome : this.genome })
       }
     }
   },
@@ -275,16 +275,16 @@ export default MComponent({
         data.vm = self
         data.genome = self.genome
         self.$emit('dragstart', { evt, data })
-        self.$root.$emit('strip-dragstart', { evt, data })
+        self.$root.ebus.emit('strip-dragstart', { evt, data })
       },
       drag: function (evt, data) {
         self.$emit('drag', { evt, data })
-        self.$root.$emit('strip-drag', { evt, data })
+        self.$root.ebus.emit('strip-drag', { evt, data })
       },
       dragend: function (evt, data) {
         self.dragging = false
         self.$emit('dragend', { evt, data })
-        self.$root.$emit('strip-dragend', { evt, data })
+        self.$root.ebus.emit('strip-dragend', { evt, data })
       }
     }, this.$root.$el)
   }

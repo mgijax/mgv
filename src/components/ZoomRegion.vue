@@ -674,7 +674,7 @@ export default MComponent({
       return pos
     },
     remove: function () {
-      this.$root.$emit('region-change', { region: this.region, op: 'remove' })
+      this.$root.ebus.emit('region-change', { region: this.region, op: 'remove' })
     },
     baseColor: function (b) {
       return this.cfg.baseColors[b] || 'black'
@@ -1011,22 +1011,22 @@ export default MComponent({
       // let bb = this.$refs.underlay.getBoundingClientRect()
       // let px = e.clientX - bb.x
       // this.currRange = [px, px]
-      this.$root.$emit('region-mousemove', { region: this.region, vm: this, evt: e })
+      this.$root.ebus.emit('region-mousemove', { region: this.region, vm: this, evt: e })
     },
     mouseenter: function (e) {
       document.body.focus()
-      this.$root.$emit('region-mouseenter', { region: this.region, vm: this, evt: e })
-      this.$root.$emit('region-current', { region: this.region })
+      this.$root.ebus.emit('region-mouseenter', { region: this.region, vm: this, evt: e })
+      this.$root.ebus.emit('region-current', { region: this.region })
     },
     mouseleave: function (e) {
       if (this.dragging) return
       //this.currRange = null
-      this.$root.$emit('region-mouseleave', { region: this.region, vm: this, evt: e })
+      this.$root.ebus.emit('region-mouseleave', { region: this.region, vm: this, evt: e })
     },
     mouseover: function (e) {
       //console.log('over', e)
       let f = this.getEventObjects(e)
-      if (f) this.$root.$emit('feature-over', {
+      if (f) this.$root.ebus.emit('feature-over', {
           region: this.region,
           feature: f.feature,
           transcript: f.transcript,
@@ -1037,7 +1037,7 @@ export default MComponent({
     mouseout: function (e) {
       //console.log('out', e)
       let f = this.getEventObjects(e)
-      if (f) this.$root.$emit('feature-out', {
+      if (f) this.$root.ebus.emit('feature-out', {
           region: this.region,
           feature: f.feature,
           transcript: f.transcript,
@@ -1046,7 +1046,7 @@ export default MComponent({
       })
     },
     clicked: function (e) {
-      this.$root.$emit('region-current', { region: this.region })
+      this.$root.ebus.emit('region-current', { region: this.region })
       if (this.absorbNextClick) {
         e.stopPropagation()
         this.absorbNextClick = false
@@ -1054,7 +1054,7 @@ export default MComponent({
       }
       let f = this.getEventObjects(e)
       if (f) {
-        this.$root.$emit('feature-click', {
+        this.$root.ebus.emit('feature-click', {
             region: this.region,
             feature: f.feature,
             transcript: f.transcript,
@@ -1066,7 +1066,7 @@ export default MComponent({
         // split region at that point
         const regionRect = this.$refs.underlay.getBoundingClientRect()
         const px = e.clientX - regionRect.left
-        this.$root.$emit('region-change', { region: this.region, op: 'split', pos: px / regionRect.width })
+        this.$root.ebus.emit('region-change', { region: this.region, op: 'split', pos: px / regionRect.width })
         e.stopPropagation()
       }
     },
@@ -1094,18 +1094,18 @@ export default MComponent({
             deltaY: 0,
             wheeled: true
           }
-          this.$root.$emit("region-dragstart", { region: this.region, vm: this, evt: e, data: this.wheelData })
+          this.$root.ebus.emit("region-dragstart", { region: this.region, vm: this, evt: e, data: this.wheelData })
       } else {
         window.clearTimeout(this.wheelTimer)
       }
       // DRAG
       this.wheelData.deltaX -= e.deltaX
-      this.$root.$emit("region-drag", { region: this.region, vm: this, evt: e, data: this.wheelData })
+      this.$root.ebus.emit("region-drag", { region: this.region, vm: this, evt: e, data: this.wheelData })
       // this.regionScrollDelta -= e.deltaX
       this.wheelTimer = window.setTimeout(() => {
         // END
         this.wheelTimer = null
-        this.$root.$emit("region-dragend", { region: this.region, vm: this, evt: e, data: this.wheelData })
+        this.$root.ebus.emit("region-dragend", { region: this.region, vm: this, evt: e, data: this.wheelData })
       }, this.cfg.wheelTimeout)
     },
     // Initialize all drag behaviors for this region
@@ -1139,13 +1139,13 @@ export default MComponent({
         dragstart: function (e, d) {
           this.dragging = true
           this.dragData = d
-          this.$root.$emit("region-dragstart", { region: this.region, vm: this, evt: e, data: d })
+          this.$root.ebus.emit("region-dragstart", { region: this.region, vm: this, evt: e, data: d })
         },
         drag: function (e, d) {
-          this.$root.$emit("region-drag", { region: this.region, vm: this, evt: e, data: d })
+          this.$root.ebus.emit("region-drag", { region: this.region, vm: this, evt: e, data: d })
         },
         dragend: function (e, d) {
-          this.$root.$emit("region-dragend", { region: this.region, vm: this, evt: e, data: d })
+          this.$root.ebus.emit("region-dragend", { region: this.region, vm: this, evt: e, data: d })
           this.dragData = null
           this.dragging = false
         }
@@ -1160,15 +1160,15 @@ export default MComponent({
       this.getFeatures()
     }
     //
-    this.$root.$on('facet-state', this.cbFacetState)
-    this.$root.$on('list-selection', this.cbListSelection)
+    this.$root.ebus.on('facet-state', this.cbFacetState)
+    this.$root.ebus.on('list-selection', this.cbListSelection)
   },
   updated: function () {
-    this.$root.$emit('region-update', this)
+    this.$root.ebus.emit('region-update', this)
   },
   destroyed: function () {
-    this.$root.$off('facet-state', this.cbFacetState)
-    this.$root.$off('list-selection', this.cbListSelection)
+    this.$root.ebus.off('facet-state', this.cbFacetState)
+    this.$root.ebus.off('list-selection', this.cbListSelection)
     this.$emit('region-delete')
   },
   mounted: function () {

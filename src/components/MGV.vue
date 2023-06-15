@@ -438,7 +438,7 @@ export default MComponent({
   },
   watch: {
     vTaxons: function () {
-      this.$root.$emit('taxons-changed')
+      this.$root.ebus.emit('taxons-changed')
     },
     vGenomes: function () {
       // if genomes change, force recalc of current list sets
@@ -478,12 +478,12 @@ export default MComponent({
     toggleIncludeParalogs: function () {
       this.includeParalogs = !this.includeParalogs
       this.currentList && this.setCurrentList(this.currentList)
-      this.$root.$emit('context-changed')
+      this.$root.ebus.emit('context-changed')
     },
     resize: function () {
       const sz = {width: u.wWidth(), height: u.wHeight()}
       this.visHeight = sz.height - 80
-      this.$root.$emit('resize', sz)
+      this.$root.ebus.emit('resize', sz)
     },
     initialize: function () {
       //
@@ -503,7 +503,7 @@ export default MComponent({
         ih.width = u.wWidth()
         // console.log('MGV: setting initial context', ih)
         this.setContext(ih, true).then(() => {
-            this.$root.$emit('mgv-initialized')
+            this.$root.ebus.emit('mgv-initialized')
         })
       })
     },
@@ -622,7 +622,7 @@ export default MComponent({
                 // force a recalculation of selected sets
                 window.setTimeout( () => this.currentSelection.splice(0,0), 1000)
             })
-            if (!quietly) this.$root.$emit('context-changed')
+            if (!quietly) this.$root.ebus.emit('context-changed')
         })
       })
     },
@@ -681,7 +681,7 @@ export default MComponent({
       }
       // align on gene
       if (ev.altKey) {
-        this.$root.$emit('region-change', {
+        this.$root.ebus.emit('region-change', {
           op : 'feature-align',
           region: this.currRegion,
           features: this.currentSelection,
@@ -689,8 +689,8 @@ export default MComponent({
           //basePos: this.clientXtoBase(e.clientX)
         })
       }
-      this.$root.$emit('selection-state-changed')
-      this.$root.$emit('context-changed')
+      this.$root.ebus.emit('selection-state-changed')
+      this.$root.ebus.emit('context-changed')
     },
     featureShiftClick: function (f, t, e) {
         if (e) {
@@ -815,7 +815,7 @@ export default MComponent({
       this.keyManager.register({
        key: 'a',
        handler: () => {
-         this.verifyCurrentSelection() && this.$root.$emit('region-change', { 'op' : 'feature-align' })
+         this.verifyCurrentSelection() && this.$root.ebus.emit('region-change', { 'op' : 'feature-align' })
        },
        thisObj: this
       })
@@ -830,7 +830,7 @@ export default MComponent({
       // Create  list from selection
       this.keyManager.register({
        key: 's',
-       handler: e => this.verifyCurrentSelection() && this.$root.$emit('list-edit-newfromselected', {includeHomologs:e.shiftKey}),
+       handler: e => this.verifyCurrentSelection() && this.$root.ebus.emit('list-edit-newfromselected', {includeHomologs:e.shiftKey}),
        thisObj: this
       })
       // Expand/collapse
@@ -861,7 +861,7 @@ export default MComponent({
       this.keyManager.register({
        key: 'l',
        handler: () => {
-         this.$root.$emit('region-change', { op : this.scrollLock ? 'clear-lock-mode' : 'set-lock-mode'})
+         this.$root.ebus.emit('region-change', { op : this.scrollLock ? 'clear-lock-mode' : 'set-lock-mode'})
        },
        thisObj: this
       })
@@ -869,7 +869,7 @@ export default MComponent({
       this.keyManager.register({
        key: 'Escape',
        handler: () => {
-         this.$root.$emit('escape-pressed')
+         this.$root.ebus.emit('escape-pressed')
        },
        thisObj: this
       })
@@ -878,10 +878,10 @@ export default MComponent({
        key: 'r',
        handler: () => {
          if (this.rGenome) {
-           this.$root.$emit('region-change', { op: 'clear-ref-genome' })
+           this.$root.ebus.emit('region-change', { op: 'clear-ref-genome' })
          } else {
            const s = this.$refs.zoomView.getTopStrip()
-           s && this.$root.$emit('region-change', { op: 'set-ref-genome', genome: s.genome })
+           s && this.$root.ebus.emit('region-change', { op: 'set-ref-genome', genome: s.genome })
          }
        },
        thisObj: this
@@ -890,7 +890,7 @@ export default MComponent({
       this.keyManager.register({
        key: 'ArrowUp',
        handler: (e) => {
-         this.$root.$emit('region-change', {
+         this.$root.ebus.emit('region-change', {
            op: 'zoom',
            amt: e.shiftKey ? 0.1 : 0.5
          })
@@ -901,7 +901,7 @@ export default MComponent({
       this.keyManager.register({
        key: 'ArrowDown',
        handler: (e) => {
-         this.$root.$emit('region-change', {
+         this.$root.ebus.emit('region-change', {
            op: 'zoom',
            amt: e.shiftKey ? 10 : 2
          })
@@ -912,7 +912,7 @@ export default MComponent({
       this.keyManager.register({
        key: 'ArrowRight',
        handler: (e) => {
-         this.$root.$emit('region-change', {
+         this.$root.ebus.emit('region-change', {
            op: 'scroll',
            amt: e.shiftKey ? 0.8 : 0.2,
            sType: '%'
@@ -924,7 +924,7 @@ export default MComponent({
       this.keyManager.register({
        key: 'ArrowLeft',
        handler: (e) => {
-         this.$root.$emit('region-change', {
+         this.$root.ebus.emit('region-change', {
            op: 'scroll',
            amt: e.shiftKey ? -0.8 : -0.2,
            sType: '%'
@@ -962,7 +962,7 @@ export default MComponent({
     this.preferencesManager = new PreferencesManager(this)
   },
   created: function () {
-    this.runtimeConfig = this.$root.config
+    this.runtimeConfig = this.$root.$props.runtimeConfig
     //
     this.dataManager = new DataManager(this)
     //
@@ -986,31 +986,31 @@ export default MComponent({
     this.$nextTick(() => this.resize())
 
     //
-    this.$root.$on('clear-cache-and-reload', () => {
+    this.$root.ebus.on('clear-cache-and-reload', () => {
       if (confirm('Clear data cache and reload this page. Are you sure?')) {
         this.clearCacheAndReload()
       }
     })
     //
-    this.$root.$on('purge-and-exit', () => {
+    this.$root.ebus.on('purge-and-exit', () => {
       if (confirm('Delete all data associated with this MGV instance. Includes lists, sequence cart items, preferences and cached data. Are you sure?')) {
         this.purgeAndExit()
       }
     })
     //
-    this.$root.$on('clear-selection', d => {
+    this.$root.ebus.on('clear-selection', d => {
       this.clearCurrentSelection(d)
-      this.$root.$emit('selection-state-changed')
-      this.$root.$emit('context-changed')
+      this.$root.ebus.emit('selection-state-changed')
+      this.$root.ebus.emit('context-changed')
     })
     //
-    this.app.$root.$on('region-current', r => { this.currRegion = r ? r.region : null })
+    this.app.$root.ebus.on('region-current', r => { this.currRegion = r ? r.region : null })
     //
-    this.$root.$on('feature-over', arg => this.featureOver(arg.feature, arg.transcript, arg.exon, arg.event))
-    this.$root.$on('feature-out', () => this.featureOff())
-    this.$root.$on('feature-click', arg => this.featureClick(arg.feature, arg.transcript, arg.exon, arg.event, arg.preserve))
+    this.$root.ebus.on('feature-over', arg => this.featureOver(arg.feature, arg.transcript, arg.exon, arg.event))
+    this.$root.ebus.on('feature-out', () => this.featureOff())
+    this.$root.ebus.on('feature-click', arg => this.featureClick(arg.feature, arg.transcript, arg.exon, arg.event, arg.preserve))
     //
-    this.$root.$on('list-click', data => {
+    this.$root.ebus.on('list-click', data => {
       let lst = data.list || data
       let shift = data.event ? data.event.shiftKey : false
       if (lst.items.length === 0) {
@@ -1023,27 +1023,27 @@ export default MComponent({
           this.stepCurrentList()
         } else {
           this.clearCurrentList()
-          this.$root.$emit('list-selection', null)
+          this.$root.ebus.emit('list-selection', null)
           return
         }
       } else {
         this.logEvent('ListOp', 'display')
         this.setCurrentList(lst)
-        this.$root.$emit('list-selection', this.currentList)
+        this.$root.ebus.emit('list-selection', this.currentList)
         if (!shift) return
       }
       let lm = lst.items[this.currentListItem]
       let lmf = this.dataManager.getFeaturesBy(lm)[0]
-      if (lmf) this.$root.$emit('region-change', { op : 'feature-align', feature: lmf })
+      if (lmf) this.$root.ebus.emit('region-change', { op : 'feature-align', feature: lmf })
     })
     //
-    this.$root.$on('list-delete', data => {
+    this.$root.ebus.on('list-delete', data => {
       if (this.currentList === data) {
         this.clearCurrentList()
       }
     })
     //
-    this.$root.$on('list-edit-new', data => {
+    this.$root.ebus.on('list-edit-new', data => {
       if (data) {
         this.listManager.newList(data.name, data.items, data.color)
       } else {
@@ -1052,7 +1052,7 @@ export default MComponent({
       }
     })
     //
-    this.$root.$on('list-edit-newfromselected', d => {
+    this.$root.ebus.on('list-edit-newfromselected', d => {
       if (d && d.includeHomologs) {
         this.listManager.newList("selected", this.currentSelectionToListWithHoms)
       } else {
@@ -1060,20 +1060,20 @@ export default MComponent({
       }
     })
     //
-    this.$root.$on('list-edit-open', data => {
+    this.$root.ebus.on('list-edit-open', data => {
       this.currentEditList = data.list
       this.$refs.listEditor.open()
     })
     //
-    this.$root.$on('list-edit-cancel', () => {
+    this.$root.ebus.on('list-edit-cancel', () => {
       this.currentEditList = null
     })
     //
-    this.$root.$on('list-edit-save', data => {
+    this.$root.ebus.on('list-edit-save', data => {
       this.listManager.updateList(this.currentEditList, data)
     })
     //
-    this.$root.$on('facet-state', data => {
+    this.$root.ebus.on('facet-state', data => {
       this.activeFacets = data
     })
     // Here we go...
