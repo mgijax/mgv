@@ -276,7 +276,7 @@ export default MComponent({
   },
   mounted: function () {
     // close me if user clicks on background
-    this.$root.$el.addEventListener('click', () => this.close())
+    document.body.addEventListener('click', () => this.close())
     this.$watch('region', () => this.reset(), {'deep' : true})
     u.dragify(this.$refs.dragHandle, {
       dragstart: function (e, d) {

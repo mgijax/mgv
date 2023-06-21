@@ -145,7 +145,7 @@ export default MComponent({
         d.sibs = []
         d.myIndex = -1
       } else {
-        d.sibs = u.getBBoxes(this.$parent.$children, 'y')
+        d.sibs = u.getBBoxes(this.$parent.children, 'y')
         d.myIndex = d.sibs.map(s => s.component).indexOf(this)
       }
       //
@@ -215,18 +215,19 @@ export default MComponent({
   },
   mounted: function () {
     this.$root.ebus.on('pagebox-open-exclusive', pb => this.onExclusiveOpen(pb))
+    /*
     nextTick(() => {
       // At mount time, contained components have already been rendered.
       // Find the content component, which is the last.
-      let lc = this.$refs.content = this.$children[this.$children.length - 1]
+      let lc = this.$refs.content = this.children[this.children.length - 1]
       if (!lc) throw 'Cannot find last child.'
       let htext = lc ? lc.$el.title : ''
       // move help text from component to this box's info button
       this.helpText = htext
       lc.$el.title = ''
       //
-      this.$parent.$refs[this.label] = this
     })
+    */
   }
 })
 </script>

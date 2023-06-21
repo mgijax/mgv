@@ -308,7 +308,7 @@ export default MComponent({
   },
   mounted: function () {
     this.$root.ebus.on('resize', () => this.resize())
-    this.$parent.$on('pagebox-open', () => this.nextTick(() => this.resize()))
+    this.$parent.$parent.ebus.on('pagebox-open', () => this.nextTick(() => this.resize()))
     this.nextTick(() => { this.resize() })
     this.$root.ebus.on('set-genomes', d=> {
       if (d.rGenome) {

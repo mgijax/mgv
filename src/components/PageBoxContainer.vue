@@ -10,8 +10,11 @@
 </template>
 
 <script>
+
 import MComponent from './MComponent.js'
 import u          from '../lib/utils.js'
+import Emitter    from 'tiny-emitter'
+
 export default MComponent({
   name: 'PageBoxContainer',
   inject: ['preferencesManager'],
@@ -22,6 +25,12 @@ export default MComponent({
   computed: {
     storeName: function () {
       return this.name + '.pageBoxes'
+    },
+    children: function () {
+      if (!this.$el) return []
+      const pbes = this.$el.querySelectorAll('.pagebox')
+      const pbcs = Array.from(pbes).filter(pbe => pbe.parentNode === this.$el).map(pbe => u.getVueComponent(pbe))
+      return pbcs
     }
   },
   methods: {
@@ -40,7 +49,7 @@ export default MComponent({
     // Returns:
     //   A list of the form: [{ label, isOpen }]
     getChildState: function () {
-      let cbs = u.getBBoxes(this.$children, 'y')
+      let cbs = u.getBBoxes(this.children, 'y')
       return cbs.map(cb => {
         return { label: cb.component.label, isOpen: cb.component.isOpen, floating: cb.component.floating }
       })
@@ -53,7 +62,7 @@ export default MComponent({
     setChildState: function (state) {
       let p = this.$el
       state.forEach(cs => {
-        let child = this.$refs[cs.label]
+        let child = this.children.filter(c => c.label === cs.label)[0]
         if (child) {
           child[cs.isOpen ? 'open' : 'close']()
           p.appendChild(child.$el)
@@ -81,18 +90,20 @@ export default MComponent({
       this.preferencesManager().setPrefs(this.storeName, this.getChildState())
     }
   },
+  created: function () {
+      this.ebus = new Emitter()
+  },
   mounted: function () {
     //
-    this.$children.forEach(c => { 
-      c.$on('pagebox-open', pb => {
-        if (this.layout === "accordian" && !pb.floating) {
-          this.accordianOpen(pb.label)
-        } else {
-          this.saveChildState()
-        }
-      })
-      c.$on('pagebox-close', () => this.saveChildState())
+    this.ebus.on('pagebox-open', pb => {
+      if (this.layout === "accordian" && !pb.floating) {
+        this.accordianOpen(pb.label)
+      } else {
+        this.saveChildState()
+      }
     })
+    this.ebus.on('pagebox-close', () => this.saveChildState())
+    
     this.preferencesManager().getPrefs(this.storeName).then(prefs => {
       if (prefs) {
         this.setChildState(prefs)

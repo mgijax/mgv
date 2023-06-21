@@ -5,6 +5,7 @@
 </template>
 
 <script>
+//import MGV from './components/MGV2.vue'
 import MGV from './components/MGV.vue'
 import u   from './lib/utils'
 

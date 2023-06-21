@@ -2,7 +2,7 @@
   <i
     class="m-button"
     :class="{ 'material-icons' : isMaterialIcon, 'other-icon' : !isMaterialIcon }"
-    v-on="$listeners"
+    v-bind="$attrs"
     :style="style"
     @mouseover="hover=true"
     @mouseout="hover=false"

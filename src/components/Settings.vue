@@ -254,6 +254,7 @@ import MComponent from './MComponent.js'
 import MButton    from './MButton.vue'
 import KeyStore   from '../lib/KeyStore.js'
 import config     from '../config.js'
+import u          from '../lib/utils.js'
 export default MComponent({
   name: 'Settings',
   components: { MButton },
@@ -266,7 +267,7 @@ export default MComponent({
     },
     // saves current settings to database
     save: function () {
-      return this.kstore.set('settings', this.$data)
+      return this.kstore.set('settings', u.deepCopy(this.$data))
     },
     // restores current settings after a page load
     // checks timestamps and either restores setting from cache,

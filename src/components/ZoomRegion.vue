@@ -1149,7 +1149,7 @@ export default MComponent({
           this.dragData = null
           this.dragging = false
         }
-      }, this.$root.$el, this)
+      }, document.body, this)
     },
   },
   created: function () {

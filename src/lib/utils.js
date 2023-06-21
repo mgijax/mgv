@@ -362,6 +362,12 @@ function niceBounds(axis_start, axis_end, num_ticks){
     }
 }
 //--------------------------------------
+function getVueComponent (elt) {
+    if (elt.__vnode) return elt.__vnode.ctx.proxy
+    return null
+}
+
+//--------------------------------------
 // Turns anything into an array
 function arrayify (x) {
     return (x === null || x === undefined) ? [] : Array.isArray(x) ? x : [x]
@@ -407,7 +413,7 @@ function flatten (lst) {
 // 
 function getBBoxes(components, sortedBy) {
   const kids = components.map(c => {
-    const r = c.$el.getBoundingClientRect()
+    const r = (c.$el || c.el).getBoundingClientRect()
     r.component = c
     return r
   })
@@ -513,6 +519,7 @@ export default {
   fetch,
   flatten,
   getBBoxes,
+  getVueComponent,
   index,
   mergeArrays,
   niceBounds,

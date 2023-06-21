@@ -469,7 +469,7 @@ export default MComponent({
     },
     // Toggle whether we are showing all feature labels or not.
     toggleShowAllLabels: function () {
-      const cfg = config.ZoomRegion
+      const cfg = this.config.ZoomRegion
       cfg.showFeatureLabels = !cfg.showFeatureLabels
     },
     toggleShowAllTranscripts: function () {
@@ -962,6 +962,7 @@ export default MComponent({
     this.preferencesManager = new PreferencesManager(this)
   },
   created: function () {
+    window.app = this
     this.runtimeConfig = this.$root.$props.runtimeConfig
     //
     this.dataManager = new DataManager(this)

@@ -172,11 +172,11 @@ export default MComponent({
   updated: function () {
     this.$root.ebus.emit('zoom-main-updated')
   },
-  created: function () {
+  mounted: function () {
     //
     this.$root.ebus.on('resize', () => this.resize())
     this.nextTick(() => this.resize())
-    this.$parent.$parent.$on('pagebox-open', () => this.nextTick(() => this.resize()))
+    this.$parent.$parent.$parent.ebus.on('pagebox-open', () => this.nextTick(() => this.resize()))
     //
     this.$root.ebus.on('region-change', d => {
       if (d.op === 'delete-strip') {

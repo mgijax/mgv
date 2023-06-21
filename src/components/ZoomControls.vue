@@ -5,7 +5,6 @@
     <div
       class="flexrow"
       >
-      <!-- scroll lock button -->
       <div class="flexrow">
         <m-button
           :icon="context.activeFacets.length ? 'filter_alt' : 'filter_alt_off'"
@@ -234,7 +233,7 @@ export default MComponent({
     },
     addAllToCart () {
       const strips = this.$parent.$refs.main.$refs.strips
-      const regions = u.flatten(strips.map(s => s.$children))
+      const regions = u.flatten(strips.map(s => s.$refs.regions))
       const descs = regions.map(r => r.getSequenceDescriptor())
       this.$root.ebus.emit('sequence-selected', { sequences : descs, unselectAll: true })
     },

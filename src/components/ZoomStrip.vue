@@ -19,6 +19,7 @@
     <zoom-region
       v-for="zr in regions"
       :key="zr.id"
+      ref="regions"
       :context="context"
       :region="zr"
       :allMinY="allMinY"
@@ -178,7 +179,7 @@ export default MComponent({
     regionRdrag: function (d) {
       const drs = d.region.deltaX + d.deltaX
       let dir = 1
-      this.$children.forEach(zr => {
+      this.$refs.regions.forEach(zr => {
         const r = zr.region
         dir = d.region.deltaX > zr.region.deltaX ? 1 : -1
         if (r === d.region) {
@@ -191,7 +192,7 @@ export default MComponent({
     },
     regionRdragend: function () {
       this.rDragging = false
-      this.$children.forEach(zr => {
+      this.$refs.regions.forEach(zr => {
         zr.regionDragDelta = 0
         zr.region.sortKey = zr.$refs.underlay.getBoundingClientRect().x
       })
@@ -231,16 +232,16 @@ export default MComponent({
       this.busyCount -= 1
     },
     setHeight () {
-      if (this.$children.length === 0) {
+      if (this.$refs.regions.length === 0) {
           this.allMinY = 0
           this.allMaxY = 60
           this.height = 60
           this.allBelowThreshold = false
       } else {
-          this.allMinY = Math.min(0, Math.min.apply(null, this.$children.map(r => r.minY))) - 10
-          this.allMaxY = Math.max(0, Math.max.apply(null, this.$children.map(r => r.maxY))) + 10
-          this.height = Math.max.apply(null, this.$children.map(r => r.height))
-          this.allBelowThreshold = this.$children.map(r => r.belowThreshold).reduce((a,v) => a && v, true)
+          this.allMinY = Math.min(0, Math.min.apply(null, this.$refs.regions.map(r => r.minY))) - 10
+          this.allMaxY = Math.max(0, Math.max.apply(null, this.$refs.regions.map(r => r.maxY))) + 10
+          this.height = Math.max.apply(null, this.$refs.regions.map(r => r.height))
+          this.allBelowThreshold = this.$refs.regions.map(r => r.belowThreshold).reduce((a,v) => a && v, true)
       }
       this.$emit('height-changed', this)
     },
@@ -286,7 +287,7 @@ export default MComponent({
         self.$emit('dragend', { evt, data })
         self.$root.ebus.emit('strip-dragend', { evt, data })
       }
-    }, this.$root.$el)
+    }, document.body)
   }
 })
 </script>

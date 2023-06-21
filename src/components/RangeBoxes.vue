@@ -43,6 +43,7 @@
 
 <script>
 import MComponent from './MComponent.js'
+import u from '../lib/utils.js'
 export default MComponent({
   name: 'RangeBoxes',
   props: [
@@ -78,7 +79,7 @@ export default MComponent({
     getRegionVms: function (vm) {
       if (!vm || this.app.scrollLock) {
         const regionElts = this.$parent.$el.querySelectorAll('.zoom-region')
-        return Array.from(regionElts).map(r => r.__vue__)
+        return Array.from(regionElts).map(r => u.getVueComponent(r))
       } else {
         return [vm]
       }

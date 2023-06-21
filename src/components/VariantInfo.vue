@@ -121,7 +121,7 @@ export default MComponent({
   },
   mounted: function () {
     // close me if user clicks on background
-    this.$root.$el.addEventListener('click', () => this.close())
+    document.body.addEventListener('click', () => this.close())
   },
   updated: function () {
     const bb = this.$el.getBoundingClientRect()

@@ -13,7 +13,7 @@ export default function (cfg) {
     let c = Object.assign({}, config['all'], config[cfg.name])
     return c
   }
-  cfg.computed.app = function () { return this.$root.$children[0].$children[0] }
+  cfg.computed.app = function () { return window.app }
   cfg.methods = cfg.methods || {}
   cfg.methods.nextTick = nextTick
   return cfg
