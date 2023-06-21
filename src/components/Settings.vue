@@ -11,7 +11,7 @@
     <label>Genome gap</label>
     <input
         type="range"
-        v-model="ZoomMain.stripGap"
+        v-model="app.config.ZoomMain.stripGap"
         min="25"
         max="125"
         @mouseup="announce"
@@ -25,7 +25,7 @@
     <label>Transcript gap</label>
     <input
         type="range"
-        v-model="ZoomRegion.laneGap"
+        v-model="app.config.ZoomRegion.laneGap"
         min="1"
         max="24"
         @mouseup="announce"
@@ -39,7 +39,7 @@
     <label>Font size</label>
     <input
         type="range"
-        v-model="ZoomRegion.featureFontSize"
+        v-model="app.config.ZoomRegion.featureFontSize"
         min="1"
         max="24"
         @mouseup="announce"
@@ -53,7 +53,7 @@
     <label>Exon thickness</label>
     <input
         type="range"
-        v-model="ZoomRegion.featureHeight"
+        v-model="app.config.ZoomRegion.featureHeight"
         min="1"
         max="24"
         @mouseup="announce"
@@ -69,7 +69,7 @@
     <label>Show all feature labels</label>
     <input
         type="checkbox"
-        v-model="ZoomRegion.showFeatureLabels"
+        v-model="app.config.ZoomRegion.showFeatureLabels"
         @change="announce"
         />
   </div>
@@ -84,7 +84,7 @@
         max=10
         step=1
         type="number"
-        v-model="ZoomRegion.detailThreshold"
+        v-model="app.config.ZoomRegion.detailThreshold"
         @change="announce"
         />
   </div>
@@ -95,7 +95,7 @@
     >
     <label>Expand to show transcripts</label>
     <select
-      v-model="ZoomRegion.showWhichTranscripts"
+      v-model="app.config.ZoomRegion.showWhichTranscripts"
       @change="announce"
       >
       <option :value="2">All</option>
@@ -111,7 +111,7 @@
     <label>Show protein labels</label>
     <input
         type="checkbox"
-        v-model="ZoomRegion.showProteinLabels"
+        v-model="app.config.ZoomRegion.showProteinLabels"
         @change="announce"
         />
   </div>
@@ -123,7 +123,7 @@
     <label>Show start/stop codons</label>
     <input
         type="checkbox"
-        v-model="ZoomRegion.showStartStopCodons"
+        v-model="app.config.ZoomRegion.showStartStopCodons"
         @change="announce"
         />
   </div>
@@ -135,7 +135,7 @@
     <label>Contrast</label>
     <input
         type="range"
-        v-model="ZoomRegion.contrast"
+        v-model="app.config.ZoomRegion.contrast"
         min="0"
         max=".9"
         step=".1"
@@ -153,7 +153,7 @@
     <label>Infer paralogs</label>
     <input
         type="checkbox"
-        v-model="MGV.includeParalogs"
+        v-model="app.config.MGV.includeParalogs"
         @change="announce"
         />
   </div>
@@ -165,7 +165,7 @@
     <label>Show connectors</label>
     <input
         type="checkbox"
-        v-model="ZoomFiducials.showConnectors"
+        v-model="app.config.ZoomFiducials.showConnectors"
         @change="announce"
         />
   </div>
@@ -177,7 +177,7 @@
     <label>Show warnings</label>
     <input
         type="checkbox"
-        v-model="ZoomFiducials.showWarnings"
+        v-model="app.config.ZoomFiducials.showWarnings"
         @change="announce"
         />
   </div>
@@ -189,7 +189,7 @@
     <label>Highlight inversions</label>
     <input
         type="checkbox"
-        v-model="ZoomFiducials.showInversions"
+        v-model="app.config.ZoomFiducials.showInversions"
         @change="announce"
         />
   </div>
@@ -201,7 +201,7 @@
     <label>Fill opacity</label>
     <input
         type="range"
-        v-model="ZoomFiducials.fillOpacity"
+        v-model="app.config.ZoomFiducials.fillOpacity"
         min="0"
         max="0.2"
         step="0.01"
@@ -218,7 +218,7 @@
     <label>Track mouse</label>
     <input
         type="checkbox"
-        v-model="RangeBoxes.trackMouse"
+        v-model="app.config.RangeBoxes.trackMouse"
         />
   </div>
   <!-- =================== -->
@@ -253,13 +253,12 @@
 import MComponent from './MComponent.js'
 import MButton    from './MButton.vue'
 import KeyStore   from '../lib/KeyStore.js'
-import config     from '../config.js'
 import u          from '../lib/utils.js'
 export default MComponent({
   name: 'Settings',
   components: { MButton },
   data: function () {
-    return config
+    return app.config
   },
   methods: {
     announce: function () {
@@ -280,6 +279,7 @@ export default MComponent({
         } else {
           // restore settings from cache
           Object.assign(this.$data, settings)
+          console.log(this.$data)
         }
       })
     },
@@ -305,20 +305,22 @@ export default MComponent({
             return param
         }
     },
-    getSettingVal: function (obj, path) {
-        return path.split(".").reduce((a,v) => a[v], obj)
+    getSettingVal: function (path) {
+        const cfg = this.app.config
+        return path.split(".").reduce((a,v) => a[v], cfg)
     },
-    setSettingVal: function(obj, path, val) {
+    setSettingVal: function(path, val) {
+        let cfg = this.app.config
         const parts = path.split(".")
         for(let i = 0 ; i < parts.length - 1 ; i++){
-            obj = obj[parts[i]]
+            cfg = cfg[parts[i]]
         }
-        obj[parts[parts.length - 1]] = val
+        cfg[parts[parts.length - 1]] = val
     },
     getContextString: function () {
         const parms = this.settingsInfo.map(si => {
             const pname = si[1]
-            const v = this.getSettingVal(this, si[0])
+            const v = this.getSettingVal(si[0])
             const pval = this.valToParam(v, si[2])
             return `${pname}:${pval}`
         })
@@ -331,13 +333,13 @@ export default MComponent({
             const n = nv[0]
             const v = nv[1]
             const si = this.settingsIndex[n]
-            if (si) this.setSettingVal(this, si[0], this.paramToVal(v, si[2]))
+            if (si) this.setSettingVal(si[0], this.paramToVal(v, si[2]))
         })
     }
   },
   created: function() {
-    this.kstore = new KeyStore(config.PreferencesManager.dbName)
-    this.restore(config.TIMESTAMP)
+    this.kstore = new KeyStore(this.app.config.PreferencesManager.dbName)
+    this.restore(this.app.config.TIMESTAMP)
   },
   mounted: function () {
     this.$watch('$data', () => this.save(), {deep: true})

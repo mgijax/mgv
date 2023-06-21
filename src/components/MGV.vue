@@ -429,10 +429,10 @@ export default MComponent({
     },
     includeParalogs: {
       get: function () {
-        return config.MGV.includeParalogs
+        return this.config.MGV.includeParalogs
       },
       set: function (v) {
-        config.MGV.includeParalogs = Boolean(v)
+        this.config.MGV.includeParalogs = Boolean(v)
       }
     }
   },
@@ -473,7 +473,7 @@ export default MComponent({
       cfg.showFeatureLabels = !cfg.showFeatureLabels
     },
     toggleShowAllTranscripts: function () {
-        config.ZoomRegion.showWhichTranscripts = (config.ZoomRegion.showWhichTranscripts + 1) % 3
+        this.config.ZoomRegion.showWhichTranscripts = (this.config.ZoomRegion.showWhichTranscripts + 1) % 3
     },
     toggleIncludeParalogs: function () {
       this.includeParalogs = !this.includeParalogs
@@ -935,9 +935,9 @@ export default MComponent({
     },
     //
     clearCacheAndReload () {
-      const kstore = new KeyStore(config.CachingFetcher.dbName)
+      const kstore = new KeyStore(this.config.CachingFetcher.dbName)
       kstore.clear().then(() => {
-        const kstore2 = new KeyStore(config.PreferencesManager.dbName)
+        const kstore2 = new KeyStore(this.config.PreferencesManager.dbName)
         return kstore2.clear()
       }).then(() => {
         window.location.reload()
@@ -945,10 +945,10 @@ export default MComponent({
     },
     purgeAndExit () {
       const allKstores = [
-        config.CachingFetcher.dbName,
-        config.PreferencesManager.dbName,
-        config.ListManager.dbName,
-        config.SequenceCart.dbName,
+        this.config.CachingFetcher.dbName,
+        this.config.PreferencesManager.dbName,
+        this.config.ListManager.dbName,
+        this.config.SequenceCart.dbName,
       ]
       Promise.all(allKstores.map(ks => (new KeyStore(ks)).clear())).then(() => {
         window.location = this.runtimeConfig.exitUrl

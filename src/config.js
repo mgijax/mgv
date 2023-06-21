@@ -19,7 +19,7 @@ export default {
   //
   // global config settings, applied to every class
   //
-  all: {
+  MFooter: {
     VERSION: '2.0.0', // code version.
   },
   MHeader: {

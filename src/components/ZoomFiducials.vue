@@ -84,7 +84,6 @@
 <script>
 import MComponent from './MComponent.js'
 import MessageBox from './MessageBox.vue'
-import config     from '../config.js'
 import u          from '../lib/utils.js'
 export default MComponent({
   name: 'ZoomFiducials',
@@ -104,7 +103,7 @@ export default MComponent({
   },
   computed: {
     selectedColor () {
-      return config.ZoomRegion.selectedFeature.stroke
+      return this.app.config.ZoomRegion.selectedFeature.stroke
     }
   },
   methods: {

@@ -20,19 +20,20 @@
 
 <script>
 import MComponent from './MComponent.js'
-import config     from '../config.js'
 export default MComponent({
   name: 'MStatus',
   props: ['version'],
   data: function () {
     return {
-      style: config.MStatus.style,
       status: '',
       queue: [],
       timeout: null,
-      displayTime: config.MStatus.displayTime,
       intervalTotal: 0
     }
+  },
+  computed: {
+      style: function() { return this.cfg.style },
+      displayTime: function () { return this.cfg.displayStyle }
   },
   methods: {
     addMessage: function (m) {

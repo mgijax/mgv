@@ -23,10 +23,10 @@ export default MComponent({
   props: ['version'],
   data: function () {
     return {
-      style: config.MHeader.style
     }
   },
   computed: {
+    style: function () { return this.app.config.MHeader.style },
     usageString: function () {
         // window.performance.memory only implemented on Chrome
         const wpm = window.performance.memory
