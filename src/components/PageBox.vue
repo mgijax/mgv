@@ -103,12 +103,12 @@ export default MComponent({
     toggleOpen: function (e) {
       if (e && e.shiftKey) {
         this.isOpen = true
-        this.$emit('pagebox-open', this)
+        this.$parent.ebus.emit('pagebox-open', this)
         this.$root.ebus.emit('pagebox-open-exclusive', this)
         u.unselectAllText()
       } else {
         this.isOpen = !this.isOpen
-        this.$emit('pagebox-' + (this.isOpen ? 'open' : 'close'), this)
+        this.$parent.ebus.emit('pagebox-' + (this.isOpen ? 'open' : 'close'), this)
       }
     },
     open: function () {

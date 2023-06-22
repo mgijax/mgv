@@ -50,9 +50,10 @@ export default MComponent({
     //   A list of the form: [{ label, isOpen }]
     getChildState: function () {
       let cbs = u.getBBoxes(this.children, 'y')
-      return cbs.map(cb => {
+      let state = cbs.map(cb => {
         return { label: cb.component.label, isOpen: cb.component.isOpen, floating: cb.component.floating }
       })
+      return state
     },
     // Sets the Y order and open/closed state of my children.
     // Args:
@@ -91,6 +92,7 @@ export default MComponent({
     }
   },
   created: function () {
+      // create the bus for event traffic with kids
       this.ebus = new Emitter()
   },
   mounted: function () {
