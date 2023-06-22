@@ -361,11 +361,6 @@ function niceBounds(axis_start, axis_end, num_ticks){
         "steps": nice_tick
     }
 }
-//--------------------------------------
-function getVueComponent (elt) {
-    if (elt.__vnode) return elt.__vnode.ctx.proxy
-    return null
-}
 
 //--------------------------------------
 // Turns anything into an array
@@ -519,7 +514,6 @@ export default {
   fetch,
   flatten,
   getBBoxes,
-  getVueComponent,
   index,
   mergeArrays,
   niceBounds,

@@ -1172,8 +1172,12 @@ export default MComponent({
     this.$emit('region-delete')
   },
   mounted: function () {
+    this.app.allZoomRegions.set(this.$el, this)
     this.initDrag()
     this.getFeatures()
+  },
+  beforeUnmount: function () {
+    this.app.allZoomRegions.delete(this.$el)
   }
 })
 </script>

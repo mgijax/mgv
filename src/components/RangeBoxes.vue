@@ -78,8 +78,7 @@ export default MComponent({
     },
     getRegionVms: function (vm) {
       if (!vm || this.app.scrollLock) {
-        const regionElts = this.$parent.$el.querySelectorAll('.zoom-region')
-        return Array.from(regionElts).map(r => u.getVueComponent(r))
+        return Array.from(this.app.allZoomRegions.values())
       } else {
         return [vm]
       }

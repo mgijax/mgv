@@ -25,12 +25,6 @@ export default MComponent({
   computed: {
     storeName: function () {
       return this.name + '.pageBoxes'
-    },
-    children: function () {
-      if (!this.$el) return []
-      const pbes = this.$el.querySelectorAll('.pagebox')
-      const pbcs = Array.from(pbes).filter(pbe => pbe.parentNode === this.$el).map(pbe => u.getVueComponent(pbe))
-      return pbcs
     }
   },
   methods: {
@@ -94,6 +88,8 @@ export default MComponent({
   created: function () {
       // create the bus for event traffic with kids
       this.ebus = new Emitter()
+      //
+      this.children = []
   },
   mounted: function () {
     //

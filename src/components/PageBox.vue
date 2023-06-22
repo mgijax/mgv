@@ -97,7 +97,7 @@ export default MComponent({
     }
   },
   created: function () {
-    // console.log("PageBox.created:", this.label)
+      if (this.$parent.children) this.$parent.children.push(this)
   },
   methods: {
     toggleOpen: function (e) {

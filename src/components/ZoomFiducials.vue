@@ -140,7 +140,7 @@ export default MComponent({
     //
     clipBoxAtRegionBoundary (fel, rel) {
         const box = fel.getBoundingClientRect()
-        const cbox = u.getVueComponent(rel).$refs.underlay.getBoundingClientRect()
+        const cbox = rel.querySelector(".underlay").getBoundingClientRect()
         const x = Math.max(box.x, cbox.x)
         const y = Math.max(box.y, cbox.y)
         const right = Math.min(box.x + box.width, cbox.x + cbox.width)

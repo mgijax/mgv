@@ -976,6 +976,8 @@ export default MComponent({
     this.regionManager = new RegionManager(this)
     //
     this.initKeyBindings()
+    //
+    this.allZoomRegions = new Map()
   },
   mounted: function () {
     //
