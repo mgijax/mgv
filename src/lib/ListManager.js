@@ -30,7 +30,7 @@ class ListManager {
 
   getTimeStampString () {
     const d = new Date()
-    return `${d.toLocaleDateString()} ${d.toLocaleTimeString()}`
+    return d.toISOString()
   }
 
   newList (name, items, color, formula, description) {
