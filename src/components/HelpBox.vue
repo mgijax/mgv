@@ -31,7 +31,7 @@
       </table>
     </div>
     <div class="footer">
-      <!-- <input type="checkbox" v-model="app.$refs.settings.HelpBox.showOnStartup" />Show Help on startup. -->
+      <input type="checkbox" v-model="app.config.HelpBox.showOnStartup" />Show Help on startup.
     </div>
 
   </div>
