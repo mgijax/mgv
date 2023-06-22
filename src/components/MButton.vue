@@ -1,12 +1,12 @@
 <template>
-  <i
-    class="m-button"
-    :class="{ 'material-icons' : isMaterialIcon, 'other-icon' : !isMaterialIcon }"
-    v-bind="$attrs"
-    :style="style"
-    @mouseover="hover=true"
-    @mouseout="hover=false"
-    >{{icon}}</i>
+    <i
+      class="m-button"
+      :class="{ 'material-icons' : isMaterialIcon, 'other-icon' : !isMaterialIcon }"
+      v-bind="$attrs"
+      :style="style"
+      @mouseover="hover=true"
+      @mouseout="hover=false"
+      >{{icon}}</i>
 </template>
 
 <script>
@@ -60,6 +60,7 @@ export default MComponent({
 .m-button[disabled] {
   cursor: default;
   opacity: 0.5;
+  pointer-events: none;
 }
 .other-icon {
   font-style: normal;

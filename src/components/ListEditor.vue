@@ -207,11 +207,12 @@ export default MComponent({
     reset: function () {
       if (this.list) {
         let l = this.list
+        let tstamp = this.listManager().getTimeStampString()
         this.name = l.name
         this.description = l.description
         this.color = l.color
-        this.created = l.created.toDateString() + ' ' + l.created.toLocaleTimeString()
-        this.modified = l.modified.toDateString() + ' ' + l.modified.toLocaleTimeString()
+        this.created = l.created
+        this.modified = l.modified
         this.items = JSON.parse(JSON.stringify(l.items))
         this.pickerOpen = false
         this.pickerColor = this.color

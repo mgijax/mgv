@@ -8,7 +8,7 @@
     <m-button @click.stop="editClicked" title="Edit this list." :backgroundColor="item.color" icon="mode_edit" />
     <span style="width: 40%;">{{item.name}}</span>
     <span style="width: 20%;">{{item.items.length}}</span>
-    <span style="font-size: smaller; width: 30%;">{{item.modified.toLocaleDateString()}} {{item.modified.toLocaleTimeString()}}</span>
+    <span style="font-size: smaller; width: 30%;">{{item.modified}}</span>
     <m-button title="Delete this list." icon="highlight_off" color="red" hoverBackgroundColor="red" @click.stop="deleteClicked"/>
   </div>
 </template>

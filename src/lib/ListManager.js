@@ -27,8 +27,14 @@ class ListManager {
     }
     return nn
   }
+
+  getTimeStampString () {
+    const d = new Date()
+    return `${d.toLocaleDateString()} ${d.toLocaleTimeString()}`
+  }
+
   newList (name, items, color, formula, description) {
-    let now = new Date()
+    const timestamp = this.getTimeStampString()
     let uname = this.uniqify(name)
     let list = {
       name: uname,
@@ -36,8 +42,8 @@ class ListManager {
       formula: formula || "",
       description: description || "",
       color: color || u.randomColor(),
-      created: now,
-      modified: now
+      created: timestamp,
+      modified: timestamp
     }
     this.lists.push(list)
     this.listByName[uname] = list
@@ -70,7 +76,7 @@ class ListManager {
     Object.assign(list, updates)
     list.created = cdate
     // update modification date
-    list.modified = new Date()
+    list.modified = this.getTimeStampString()
     //
     this.saveToStore()
     return list
@@ -104,7 +110,7 @@ class ListManager {
   }
   saveToStore () {
     // console.log(`ListManager: saving ${this.lists.length} lists to store`)
-    return this.listStore.set('all', this.lists)
+    return this.listStore.set('all', u.deepCopy(this.lists))
   }
   recoverVersion1Lists () {
     const name = 'mgv-datacache-user-lists'

@@ -19,7 +19,7 @@
          icon="check_box"
          title="Select all items in the cart."
          @click="selectAll"
-         :disabled="cartEmpty"
+         :disabled="cartEmpty || null"
          />
 
        <!-- Unselect all button -->
@@ -27,7 +27,7 @@
          icon="check_box_outline_blank"
          title="Un-select all items in the cart."
          @click="unselectAll"
-         :disabled="cartEmpty"
+         :disabled="cartEmpty || null"
          />
 
        <!-- Selected count and length  -->
@@ -42,7 +42,7 @@
          color="red"
          title="Remove selected items from the cart."
          @click="clearSelected"
-         :disabled="cartEmpty"
+         :disabled="cartEmpty || nothingSelected || null"
          />
 
      </div>
@@ -63,14 +63,14 @@
                  icon="cloud_download"
                  title="Download selected sequences to a file. Enter file name."
                  @click="downloadTo('file')"
-                 :disabled="nothingSelected || noFileName"
+                 :disabled="nothingSelected || noFileName || null"
                  />
                <label>File</label>
                <input
                  v-model="filename"
                  name="filename"
                  type="text"
-                 :disabled="cartEmpty"
+                 :disabled="cartEmpty || null"
                  @keypress="filenameKeypress"
                  placeholder="Enter file name." />
              </div>
@@ -80,7 +80,7 @@
                  icon="cloud_download"
                  title="Download selected sequences to a new browser tab."
                  @click="downloadTo('browser')"
-                 :disabled="nothingSelected"
+                 :disabled="nothingSelected || null"
                  />
                <label>Browser</label>
              </div>
@@ -90,7 +90,7 @@
                  icon="cloud_download"
                  title="Copy selected sequences to the clipboard."
                  @click="downloadTo('clipboard')"
-                 :disabled="nothingSelected"
+                 :disabled="nothingSelected || null"
                  v-show="!cbText"
                  />
                <label v-show="!cbText">Clipboard</label>
