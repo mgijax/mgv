@@ -109,21 +109,21 @@
           icon="SNPs"
           title="See SNPs at MGI in this region of B6 vs displayed mouse genomes."
           @click="mgiSNPquery"
-          :disabled="region && region.genome.name !== 'C57BL/6J'"
+          :disabled="region && region.genome.name !== 'C57BL/6J' || null"
           />
         <!-- QTL linkout -->
         <m-button
           icon="QTL"
           title="See QTL at MGI in this region."
           @click="mgiQTLquery"
-          :disabled="region && region.genome.name !== 'C57BL/6J'"
+          :disabled="region && region.genome.name !== 'C57BL/6J' || null"
           />
         <!-- JBrowse linkout -->
         <m-button
           icon="JBrowse"
           title="See the full details of this region in the MGI JBrowse genome browser."
           @click="mgiJBquery"
-          :disabled="region && region.genome.name !== 'C57BL/6J'"
+          :disabled="region && region.genome.name !== 'C57BL/6J' || null"
           />
       </div>
 

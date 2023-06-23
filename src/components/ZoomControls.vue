@@ -30,7 +30,7 @@
           title="Show transcripts for all genes, selected genes, or no genes."
           />
         <m-button
-          :disabled="app.currentSelection.length === 0"
+          :disabled="app.currentSelection.length === 0 || null"
           icon="align_horizontal_left"
           @click="alignFeatures()"
           :title="(app.currentSelection.length === 0 ? 'Align disabled because no features are currently selected.' : 'Align the view around the currently selected feature(s).')"

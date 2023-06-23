@@ -1,7 +1,7 @@
 <template>
   <div
     class="menu-item flexrow"
-    :class="{ topLevel: topLevel, disabled: getValue('disabled'), separator: isSeparator }"
+    :class="{ topLevel: topLevel, disabled: getValue('disabled') || null, separator: isSeparator }"
     @click.stop="clicked"
     @mouseenter="mouseenter"
     @mouseleave="mouseleave"
@@ -64,7 +64,7 @@ export default MComponent({
     },
     disabled: {
       type: [Boolean, Function],
-      default: false
+      default: null
     }
   },
   components: { MButton, MMenu },

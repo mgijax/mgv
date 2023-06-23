@@ -77,7 +77,8 @@ export default MComponent({
       const rnode = evt.target.closest('.zoom-region')
       const fnode = evt.target.closest('.feature')
       const vnode = evt.target.closest('.variant')
-      const vm = rnode ? rnode.__vue__ : null
+      //const vm = rnode ? rnode.__vue__ : null
+      const vm = rnode ? this.app.allZoomRegions.get(rnode) : null
       if (!vm) return
       const y = evt.clientY // - cbb.y
       const x = evt.clientX // - cbb.x

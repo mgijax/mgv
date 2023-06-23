@@ -36,7 +36,7 @@
         :contextObject="contextObject"
         :extraArgs="mi.extraArgs"
         :menuItems="mi.menuItems"
-        :disabled="mi.disabled"
+        :disabled="mi.disabled || null"
         @menu-item-selected="menuItemSelected"
         />
     </div>
@@ -46,6 +46,7 @@
 import MComponent from './MComponent.js'
 import MButton    from './MButton.vue'
 //import MMenuItem  from './MMenuItem.vue'
+import { defineAsyncComponent } from 'vue'
 export default MComponent({
   name: 'MMenu',
   props: {
@@ -78,7 +79,7 @@ export default MComponent({
   },
   components: {
     // Because MMenu and MMenuItem are mutually recursive, we cannot import the usual way
-    MMenuItem: () => import('./MMenuItem.vue'),
+    MMenuItem: defineAsyncComponent(() => import('./MMenuItem.vue')),
     MButton
   },
   data: function () {
