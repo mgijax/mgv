@@ -33,9 +33,6 @@ class DataManager {
     this.homologyManager = new HomologyManager(this, this.fetchUrl)
     this.genomePainter = new GenomePainter()
   }
-  getGenomeByName (n) {
-    return this.greg.lookupGenome(n)
-  }
   getFeatureById (g, id) {
     const gids = this.id2feat[g.name]
     return gids ? gids[id] : undefined
@@ -61,7 +58,11 @@ class DataManager {
   }
   //
   lookupGenome (n) {
-    return this.greg.lookupGenome(n)
+    // In Vue 3, the reactive object is NOT the same as the original data object. 
+    // The GenomeRegistrar has the original genome (json) data objects. But we really need the
+    // reactive genome object. So... lookup the genome in the MGV app object, not in the registrar.
+    //          return this.greg.lookupGenome(n)
+    return this.app.agIndex[n]
   }
   // Returns a promise for all the genomes we know about.
   getGenomes () {

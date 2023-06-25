@@ -162,7 +162,7 @@ export default MComponent({
       // For each genome / ZoomStrip
       pel.querySelectorAll('.zoom-strip').forEach(zel => {
         // Get the genome model object and get the reference bounding box for positioning warning messages
-        const sgenome = this.dataManager().getGenomeByName(zel.getAttribute('name'))
+        const sgenome = this.dataManager().lookupGenome(zel.getAttribute('name'))
         const sbox = zel.querySelector(':scope > text[name="label"]').getBoundingClientRect()
         sboxes.push({ rect: sbox, elt: zel, genome: sgenome })
         // Keep track of the bounding boxes of highlighted features, per genome
