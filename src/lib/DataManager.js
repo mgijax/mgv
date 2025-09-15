@@ -423,7 +423,7 @@ class DataManager {
       type: stype,
       totalLength: len,
       selected: true,
-      reverse: f.strand === '-',
+      reverse: f.strand === '-' && stype !== 'dna',
       translate: stype === 'cds'
     }
     return d
