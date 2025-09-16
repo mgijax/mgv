@@ -77,7 +77,7 @@ export default MComponent({
          this.$parent.open()
        }
      })
-     this.addSection('Data provenance', this.app.runtimeConfig.dataUrl + '/info.html')
+     this.addSection('Data provenance', this.app.runtimeConfig.dataUrl + '/fetch.cgi?datatype=infotext')
    }
 })
 </script>
