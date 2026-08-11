@@ -750,7 +750,10 @@ class FeatureRegistrar {
     // Index feature by ID. ID should be unique within a genome.
     if (!this.id2feat[f.genome.name]) this.id2feat[f.genome.name] = {}
     if (f.ID) {
-        if (this.id2feat[f.genome.name][f.ID]) throw `Non unique feature ID detected. ${f.ID}`
+        if (this.id2feat[f.genome.name][f.ID]) {
+	    u.debug(`Non unique feature ID detected. ${f.ID}`)
+	    return;
+	}
         this.id2feat[f.genome.name][f.ID] = f
     }
 
