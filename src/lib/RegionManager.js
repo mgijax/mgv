@@ -582,7 +582,9 @@ class RegionManager {
     return this.app.dataManager.ensureFeatures(genomes).then(() => {
         this.app.strips = genomes.map(g => { return { genome: g, regions: [] } })
         const genes = lcoords.landmark.reduce((a,v) => {
-            return a.concat(this.app.dataManager.getFeaturesByCid(v))
+            let feats = this.app.dataManager.getFeaturesByCid(v);
+            if (feats.length === 0) feats = this.app.dataManager.getFeaturesBy(v);
+            return a.concat(feats);
         },[])
         const args = { features: genes, flank: lcoords.flank, flankIsMultiplier: lcoords.flankIsMultiplier }
         return this.featureAlign(args)
